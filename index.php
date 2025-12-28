@@ -137,6 +137,18 @@ $router->get('/logout', function () {
     $auth->logout();
 });
 
+// Google OAuth
+$router->get('/auth/google', function () {
+    require_once __DIR__ . '/src/Auth/GoogleAuthService.php';
+    $google = new GoogleAuthService();
+    header('Location: ' . $google->getAuthUrl());
+    exit;
+});
+
+$router->get('/auth/google/callback', function () {
+    require_once __DIR__ . '/src/Auth/google-callback.php';
+});
+
 // ===================
 // ADMIN ROUTES
 // ===================

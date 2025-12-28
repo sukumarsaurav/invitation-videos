@@ -93,6 +93,14 @@ define('RAZORPAY_KEY_SECRET', env('RAZORPAY_KEY_SECRET', ''));
 define('RAZORPAY_WEBHOOK_SECRET', env('RAZORPAY_WEBHOOK_SECRET', ''));
 
 // =============================================================================
+// Google OAuth Configuration
+// =============================================================================
+
+define('GOOGLE_CLIENT_ID', env('GOOGLE_CLIENT_ID', ''));
+define('GOOGLE_CLIENT_SECRET', env('GOOGLE_CLIENT_SECRET', ''));
+define('GOOGLE_REDIRECT_URI', env('GOOGLE_REDIRECT_URI', APP_URL . '/auth/google/callback'));
+
+// =============================================================================
 // File Upload Settings
 // =============================================================================
 
