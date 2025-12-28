@@ -64,11 +64,13 @@
 
         /* Mobile menu transitions */
         #mobileMenu {
-            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            overflow: hidden;
+            max-height: 500px;
         }
 
         #mobileMenu.closed {
-            transform: translateY(-10px);
+            max-height: 0;
             opacity: 0;
             pointer-events: none;
         }
