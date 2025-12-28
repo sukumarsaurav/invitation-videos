@@ -111,6 +111,15 @@ $router->post('/api/template/{id}/customize', function ($id) {
 // AUTH ROUTES
 // ===================
 
+// Profile page
+$router->get('/profile', function () {
+    include __DIR__ . '/templates/pages/profile.php';
+});
+
+$router->post('/profile', function () {
+    include __DIR__ . '/templates/pages/profile.php';
+});
+
 $router->get('/login', function () {
     include __DIR__ . '/templates/pages/login.php';
 });
