@@ -77,9 +77,9 @@ function createStripePaymentIntent(array $input): void
         return;
     }
 
-    // Get order
+    // Get order (check both old and new status columns for migration compatibility)
     $order = Database::fetchOne(
-        "SELECT * FROM orders WHERE id = ? AND status = 'pending'",
+        "SELECT * FROM orders WHERE id = ? AND (status = 'pending' OR payment_status = 'pending')",
         [$orderId]
     );
 
@@ -133,12 +133,12 @@ function createRazorpayOrder(array $input): void
         return;
     }
 
-    // Get order
+    // Get order (check both old and new status columns for migration compatibility)
     $order = Database::fetchOne(
         "SELECT o.*, u.name as customer_name, u.email as customer_email, u.phone as customer_phone
          FROM orders o
          LEFT JOIN users u ON o.user_id = u.id
-         WHERE o.id = ? AND o.status = 'pending'",
+         WHERE o.id = ? AND (o.status = 'pending' OR o.payment_status = 'pending')",
         [$orderId]
     );
 
@@ -215,14 +215,16 @@ function verifyRazorpayPayment(array $input): void
         return;
     }
 
-    // Update order status
+    // Update order status (update both old and new columns for compatibility)
     Database::query(
         "UPDATE orders SET 
             status = 'paid',
+            payment_status = 'paid',
+            order_status = 'queued',
             payment_id = ?,
             payment_gateway = 'razorpay',
             paid_at = NOW()
-         WHERE id = ? AND status = 'pending'",
+         WHERE id = ? AND (status = 'pending' OR payment_status = 'pending')",
         [$razorpayPaymentId, $orderId]
     );
 

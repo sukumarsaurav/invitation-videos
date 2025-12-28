@@ -5,8 +5,96 @@
 
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../src/Core/Security.php';
+require_once __DIR__ . '/auth.php';
 
-// Filters
+// Handle video upload
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_video'])) {
+    $orderId = intval($_POST['order_id']);
+
+    if (isset($_FILES['video_file']) && $_FILES['video_file']['error'] === UPLOAD_ERR_OK) {
+        $uploadDir = __DIR__ . '/../uploads/videos/' . $orderId . '/';
+
+        if (!file_exists($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        $fileName = 'invitation_' . time() . '.mp4';
+        $filePath = $uploadDir . $fileName;
+
+        if (move_uploaded_file($_FILES['video_file']['tmp_name'], $filePath)) {
+            $videoUrl = '/uploads/videos/' . $orderId . '/' . $fileName;
+            $expiresAt = date('Y-m-d H:i:s', strtotime('+7 days'));
+
+            Database::query(
+                "UPDATE orders SET output_video_url = ?, video_uploaded_at = NOW(), video_expires_at = ?, 
+                 payment_status = 'paid', order_status = 'completed', completed_at = NOW() WHERE id = ?",
+                [$videoUrl, $expiresAt, $orderId]
+            );
+
+            header('Location: /admin/orders.php?action=view&id=' . $orderId . '&success=video_uploaded');
+            exit;
+        }
+    }
+
+    header('Location: /admin/orders.php?action=view&id=' . $orderId . '&error=upload_failed');
+    exit;
+}
+
+// Handle status update
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
+    $orderId = intval($_POST['order_id']);
+    $paymentStatus = $_POST['payment_status'] ?? null;
+    $orderStatus = $_POST['order_status'] ?? null;
+
+    $updates = [];
+    $params = [];
+
+    if ($paymentStatus && in_array($paymentStatus, ['pending', 'paid', 'failed', 'refunded'])) {
+        $updates[] = "payment_status = ?";
+        $params[] = $paymentStatus;
+    }
+
+    if ($orderStatus && in_array($orderStatus, ['awaiting_payment', 'queued', 'processing', 'completed', 'cancelled'])) {
+        $updates[] = "order_status = ?";
+        $params[] = $orderStatus;
+
+        if ($orderStatus === 'completed') {
+            $updates[] = "completed_at = NOW()";
+        }
+    }
+
+    if (!empty($updates)) {
+        $params[] = $orderId;
+        Database::query("UPDATE orders SET " . implode(', ', $updates) . " WHERE id = ?", $params);
+    }
+
+    header('Location: /admin/orders.php?success=updated');
+    exit;
+}
+
+// Check if viewing single order
+$viewOrder = null;
+$orderUploads = [];
+if (isset($_GET['action']) && $_GET['action'] === 'view' && isset($_GET['id'])) {
+    $orderId = intval($_GET['id']);
+    $viewOrder = Database::fetchOne(
+        "SELECT o.*, t.title as template_title, t.thumbnail_url, u.name as customer_name, u.email as customer_email, u.phone as customer_phone
+         FROM orders o
+         LEFT JOIN templates t ON o.template_id = t.id
+         LEFT JOIN users u ON o.user_id = u.id
+         WHERE o.id = ?",
+        [$orderId]
+    );
+
+    if ($viewOrder) {
+        $orderUploads = Database::fetchAll(
+            "SELECT * FROM order_uploads WHERE order_id = ?",
+            [$orderId]
+        );
+    }
+}
+
+// Filters for list view
 $status = $_GET['status'] ?? '';
 $search = $_GET['search'] ?? '';
 $page = max(1, intval($_GET['page'] ?? 1));
@@ -18,7 +106,11 @@ $whereConditions = [];
 $params = [];
 
 if ($status) {
-    $whereConditions[] = "o.status = ?";
+    if (in_array($status, ['pending', 'paid', 'failed', 'refunded'])) {
+        $whereConditions[] = "o.payment_status = ?";
+    } else {
+        $whereConditions[] = "o.order_status = ?";
+    }
     $params[] = $status;
 }
 
@@ -49,265 +141,551 @@ $orders = Database::fetchAll($sql, $params);
 
 // Get stats
 $stats = [
-    'new' => Database::fetchOne("SELECT COUNT(*) as c FROM orders WHERE status = 'pending' AND created_at > DATE_SUB(NOW(), INTERVAL 24 HOUR)")['c'] ?? 0,
-    'processing' => Database::fetchOne("SELECT COUNT(*) as c FROM orders WHERE status = 'processing'")['c'] ?? 0,
-    'completed' => Database::fetchOne("SELECT COUNT(*) as c FROM orders WHERE status = 'completed'")['c'] ?? 0,
-    'revenue_today' => Database::fetchOne("SELECT COALESCE(SUM(amount), 0) as r FROM orders WHERE status IN ('paid','completed') AND DATE(created_at) = CURDATE()")['r'] ?? 0,
+    'new' => Database::fetchOne("SELECT COUNT(*) as c FROM orders WHERE order_status = 'awaiting_payment' AND created_at > DATE_SUB(NOW(), INTERVAL 24 HOUR)")['c'] ?? 0,
+    'queued' => Database::fetchOne("SELECT COUNT(*) as c FROM orders WHERE order_status = 'queued'")['c'] ?? 0,
+    'processing' => Database::fetchOne("SELECT COUNT(*) as c FROM orders WHERE order_status = 'processing'")['c'] ?? 0,
+    'completed' => Database::fetchOne("SELECT COUNT(*) as c FROM orders WHERE order_status = 'completed'")['c'] ?? 0,
+    'revenue_today' => Database::fetchOne("SELECT COALESCE(SUM(amount), 0) as r FROM orders WHERE payment_status = 'paid' AND DATE(created_at) = CURDATE()")['r'] ?? 0,
 ];
 
-// Handle status update
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
-    $orderId = intval($_POST['order_id']);
-    $newStatus = $_POST['new_status'];
-
-    if (in_array($newStatus, ['pending', 'paid', 'processing', 'completed', 'failed', 'refunded'])) {
-        Database::query("UPDATE orders SET status = ? WHERE id = ?", [$newStatus, $orderId]);
-        header('Location: /admin/orders.php?success=updated');
-        exit;
-    }
-}
-
 $pendingTickets = 0;
-$pageTitle = 'Orders';
+$pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
 ?>
 
 <?php ob_start(); ?>
 
-<!-- Header -->
-<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-    <div>
-        <h2 class="text-2xl font-bold">Order Management</h2>
-        <p class="text-slate-500 mt-1">View and manage customer orders</p>
+<?php if ($viewOrder): ?>
+    <!-- Order Detail View -->
+    <div class="mb-6">
+        <a href="/admin/orders.php"
+            class="inline-flex items-center gap-2 text-slate-600 hover:text-primary transition-colors">
+            <span class="material-symbols-outlined">arrow_back</span>
+            Back to Orders
+        </a>
     </div>
 
-    <div class="flex items-center gap-3">
-        <button
-            class="flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors text-sm font-medium">
-            <span class="material-symbols-outlined text-lg">download</span>
-            Export
-        </button>
-    </div>
-</div>
-
-<?php if (isset($_GET['success'])): ?>
-    <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6 flex items-center gap-2">
-        <span class="material-symbols-outlined">check_circle</span>
-        Order <?= $_GET['success'] ?> successfully!
-    </div>
-<?php endif; ?>
-
-<!-- Stats -->
-<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-    <div class="bg-white dark:bg-surface-dark p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-        <p class="text-slate-500 text-xs font-medium uppercase">New Orders (24h)</p>
-        <p class="text-2xl font-bold mt-1"><?= $stats['new'] ?></p>
-    </div>
-    <div class="bg-white dark:bg-surface-dark p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-        <p class="text-slate-500 text-xs font-medium uppercase">Processing</p>
-        <p class="text-2xl font-bold mt-1"><?= $stats['processing'] ?></p>
-    </div>
-    <div class="bg-white dark:bg-surface-dark p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-        <p class="text-slate-500 text-xs font-medium uppercase">Completed</p>
-        <p class="text-2xl font-bold mt-1"><?= $stats['completed'] ?></p>
-    </div>
-    <div class="bg-white dark:bg-surface-dark p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-        <p class="text-slate-500 text-xs font-medium uppercase">Revenue Today</p>
-        <p class="text-2xl font-bold mt-1 text-green-600">$<?= number_format($stats['revenue_today'], 2) ?></p>
-    </div>
-</div>
-
-<!-- Filters -->
-<div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-4 mb-6">
-    <form method="GET" class="flex flex-wrap items-center gap-4">
-        <div class="flex-1 min-w-[200px]">
-            <div class="relative">
-                <span
-                    class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 material-symbols-outlined text-lg">search</span>
-                <input type="text" name="search" value="<?= Security::escape($search) ?>"
-                    class="w-full h-10 pl-10 pr-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
-                    placeholder="Search by order ID, customer name or email...">
-            </div>
-        </div>
-
-        <select name="status"
-            class="h-10 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-            <option value="">All Status</option>
-            <option value="pending" <?= $status === 'pending' ? 'selected' : '' ?>>Pending</option>
-            <option value="paid" <?= $status === 'paid' ? 'selected' : '' ?>>Paid</option>
-            <option value="processing" <?= $status === 'processing' ? 'selected' : '' ?>>Processing</option>
-            <option value="completed" <?= $status === 'completed' ? 'selected' : '' ?>>Completed</option>
-            <option value="failed" <?= $status === 'failed' ? 'selected' : '' ?>>Failed</option>
-        </select>
-
-        <button type="submit"
-            class="h-10 px-6 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 transition-colors">
-            Filter
-        </button>
-
-        <?php if ($search || $status): ?>
-            <a href="/admin/orders.php" class="text-sm text-slate-500 hover:text-primary">Clear filters</a>
-        <?php endif; ?>
-    </form>
-</div>
-
-<!-- Orders Table -->
-<div
-    class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-    <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm">
-            <thead class="bg-slate-50 dark:bg-white/5 text-slate-500 font-semibold uppercase text-xs">
-                <tr>
-                    <th class="px-6 py-4 w-10">
-                        <input type="checkbox" class="rounded border-slate-300 text-primary focus:ring-primary">
-                    </th>
-                    <th class="px-6 py-4">Order ID</th>
-                    <th class="px-6 py-4">Customer</th>
-                    <th class="px-6 py-4">Template</th>
-                    <th class="px-6 py-4">Date</th>
-                    <th class="px-6 py-4">Amount</th>
-                    <th class="px-6 py-4">Status</th>
-                    <th class="px-6 py-4 text-right">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                <?php foreach ($orders as $order):
-                    $statusColors = [
-                        'pending' => 'bg-yellow-100 text-yellow-800',
-                        'paid' => 'bg-green-100 text-green-800',
-                        'processing' => 'bg-blue-100 text-blue-800',
-                        'completed' => 'bg-green-100 text-green-800',
-                        'failed' => 'bg-red-100 text-red-800',
-                        'refunded' => 'bg-slate-100 text-slate-800',
-                    ];
-                    $statusColor = $statusColors[$order['status']] ?? 'bg-slate-100 text-slate-800';
-                    ?>
-                    <tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
-                        <td class="px-6 py-4">
-                            <input type="checkbox" class="rounded border-slate-300 text-primary focus:ring-primary">
-                        </td>
-                        <td class="px-6 py-4">
-                            <span
-                                class="font-bold text-slate-900 dark:text-white">#<?= Security::escape($order['order_number']) ?></span>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="flex items-center gap-3">
-                                <div
-                                    class="size-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs font-bold shrink-0">
-                                    <?= strtoupper(substr($order['customer_name'] ?? 'U', 0, 1)) ?>
-                                </div>
-                                <div>
-                                    <p class="font-medium text-slate-900 dark:text-white">
-                                        <?= Security::escape($order['customer_name'] ?? 'Unknown') ?></p>
-                                    <p class="text-xs text-slate-500">
-                                        <?= Security::escape($order['customer_email'] ?? '') ?></p>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="flex items-center gap-2">
-                                <?php if ($order['thumbnail_url']): ?>
-                                    <div class="size-8 rounded bg-slate-100 bg-cover bg-center shrink-0"
-                                        style="background-image: url('<?= Security::escape($order['thumbnail_url']) ?>');">
-                                    </div>
-                                <?php endif; ?>
-                                <span><?= Security::escape($order['template_title'] ?? '-') ?></span>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 text-slate-500">
-                            <?= date('M j, Y', strtotime($order['created_at'])) ?>
-                            <br><span class="text-xs"><?= date('g:i A', strtotime($order['created_at'])) ?></span>
-                        </td>
-                        <td class="px-6 py-4">
-                            <span class="font-bold text-slate-900 dark:text-white">
-                                <?= $order['currency'] === 'INR' ? '₹' : '$' ?>    <?= number_format($order['amount'], 2) ?>
-                            </span>
-                            <br><span class="text-xs text-slate-500"><?= $order['payment_gateway'] ?? '-' ?></span>
-                        </td>
-                        <td class="px-6 py-4">
-                            <span
-                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?= $statusColor ?>">
-                                <?= ucfirst($order['status']) ?>
-                            </span>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="flex items-center justify-end gap-1">
-                                <a href="/admin/orders.php?action=view&id=<?= $order['id'] ?>"
-                                    class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-500 hover:text-primary transition-colors"
-                                    title="View Details">
-                                    <span class="material-symbols-outlined text-lg">visibility</span>
-                                </a>
-
-                                <div class="relative group">
-                                    <button
-                                        class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-500 transition-colors">
-                                        <span class="material-symbols-outlined text-lg">more_vert</span>
-                                    </button>
-                                    <div
-                                        class="absolute right-0 top-full mt-1 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-1 w-40 hidden group-hover:block z-10">
-                                        <form method="POST" class="contents">
-                                            <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
-                                            <input type="hidden" name="update_status" value="1">
-                                            <button type="submit" name="new_status" value="processing"
-                                                class="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 dark:hover:bg-white/5">Mark
-                                                Processing</button>
-                                            <button type="submit" name="new_status" value="completed"
-                                                class="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 dark:hover:bg-white/5">Mark
-                                                Completed</button>
-                                            <button type="submit" name="new_status" value="refunded"
-                                                class="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 dark:hover:bg-white/5 text-red-600">Refund</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-
-                <?php if (empty($orders)): ?>
-                    <tr>
-                        <td colspan="8" class="px-6 py-12 text-center text-slate-500">
-                            <span class="material-symbols-outlined text-5xl text-slate-300 mb-2">shopping_bag</span>
-                            <p class="text-lg font-medium">No orders found</p>
-                            <p class="text-sm">Orders will appear here once customers make purchases</p>
-                        </td>
-                    </tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Pagination -->
-    <?php if ($totalPages > 1): ?>
-        <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
-            <p class="text-sm text-slate-500">
-                Showing <?= $offset + 1 ?> to <?= min($offset + $perPage, $totalOrders) ?> of <?= $totalOrders ?> orders
-            </p>
-
-            <div class="flex items-center gap-1">
-                <?php if ($page > 1): ?>
-                    <a href="?page=<?= $page - 1 ?>&status=<?= $status ?>&search=<?= urlencode($search) ?>"
-                        class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-500">
-                        <span class="material-symbols-outlined">chevron_left</span>
-                    </a>
-                <?php endif; ?>
-
-                <?php for ($i = max(1, $page - 2); $i <= min($totalPages, $page + 2); $i++): ?>
-                    <a href="?page=<?= $i ?>&status=<?= $status ?>&search=<?= urlencode($search) ?>"
-                        class="w-10 h-10 flex items-center justify-center rounded-lg <?= $i === $page ? 'bg-primary text-white' : 'hover:bg-slate-100 dark:hover:bg-white/10 text-slate-600' ?> font-medium text-sm">
-                        <?= $i ?>
-                    </a>
-                <?php endfor; ?>
-
-                <?php if ($page < $totalPages): ?>
-                    <a href="?page=<?= $page + 1 ?>&status=<?= $status ?>&search=<?= urlencode($search) ?>"
-                        class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-500">
-                        <span class="material-symbols-outlined">chevron_right</span>
-                    </a>
-                <?php endif; ?>
-            </div>
+    <?php if (isset($_GET['success'])): ?>
+        <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6 flex items-center gap-2">
+            <span class="material-symbols-outlined">check_circle</span>
+            <?= $_GET['success'] === 'video_uploaded' ? 'Video uploaded successfully!' : 'Order updated!' ?>
         </div>
     <?php endif; ?>
-</div>
+
+    <?php if (isset($_GET['error'])): ?>
+        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center gap-2">
+            <span class="material-symbols-outlined">error</span>
+            Failed to upload video. Please try again.
+        </div>
+    <?php endif; ?>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Content -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Order Header -->
+            <div
+                class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                <div class="flex items-start justify-between mb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold">Order #<?= Security::escape($viewOrder['order_number']) ?></h2>
+                        <p class="text-slate-500 mt-1">Placed on
+                            <?= date('F j, Y \a\t g:i A', strtotime($viewOrder['created_at'])) ?></p>
+                    </div>
+                    <div class="flex gap-2">
+                        <?php
+                        $paymentColors = ['pending' => 'bg-yellow-100 text-yellow-800', 'paid' => 'bg-green-100 text-green-800', 'failed' => 'bg-red-100 text-red-800', 'refunded' => 'bg-slate-100 text-slate-800'];
+                        $orderColors = ['awaiting_payment' => 'bg-yellow-100 text-yellow-800', 'queued' => 'bg-blue-100 text-blue-800', 'processing' => 'bg-purple-100 text-purple-800', 'completed' => 'bg-green-100 text-green-800', 'cancelled' => 'bg-red-100 text-red-800'];
+                        ?>
+                        <span
+                            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold <?= $paymentColors[$viewOrder['payment_status'] ?? 'pending'] ?? 'bg-slate-100' ?>">
+                            💳 <?= ucfirst($viewOrder['payment_status'] ?? 'pending') ?>
+                        </span>
+                        <span
+                            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold <?= $orderColors[$viewOrder['order_status'] ?? 'awaiting_payment'] ?? 'bg-slate-100' ?>">
+                            📦 <?= ucwords(str_replace('_', ' ', $viewOrder['order_status'] ?? 'awaiting_payment')) ?>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                    <div>
+                        <span class="text-xs text-slate-500 uppercase">Amount</span>
+                        <p class="font-bold text-lg">
+                            <?= $viewOrder['currency'] === 'INR' ? '₹' : '$' ?>    <?= number_format($viewOrder['amount'], 2) ?>
+                        </p>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-500 uppercase">Gateway</span>
+                        <p class="font-medium capitalize"><?= $viewOrder['payment_gateway'] ?? '—' ?></p>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-500 uppercase">Payment ID</span>
+                        <p class="font-mono text-xs break-all"><?= $viewOrder['payment_id'] ?? '—' ?></p>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-500 uppercase">Promo Code</span>
+                        <p class="font-medium"><?= $viewOrder['promo_code'] ?? '—' ?></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customization Data -->
+            <div
+                class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-white/5">
+                    <h3 class="font-bold flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">edit_note</span>
+                        Customization Details
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <?php
+                    $customData = json_decode($viewOrder['customization_data'] ?? '{}', true);
+                    if (!empty($customData)):
+                        ?>
+                        <div class="space-y-4">
+                            <?php foreach ($customData as $key => $value): ?>
+                                <?php if (!empty($value) && !is_array($value)): ?>
+                                    <div
+                                        class="flex flex-col sm:flex-row sm:items-center gap-2 pb-3 border-b border-slate-100 dark:border-slate-800 last:border-0">
+                                        <span
+                                            class="text-sm text-slate-500 min-w-[140px] capitalize"><?= str_replace('_', ' ', $key) ?></span>
+                                        <span class="font-medium text-slate-900 dark:text-white"><?= Security::escape($value) ?></span>
+                                    </div>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php else: ?>
+                        <p class="text-slate-500 text-center py-4">No customization data available</p>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Uploaded Images -->
+            <?php if (!empty($orderUploads)): ?>
+                <div
+                    class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-white/5">
+                        <h3 class="font-bold flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">image</span>
+                            Uploaded Files (<?= count($orderUploads) ?>)
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                            <?php foreach ($orderUploads as $upload): ?>
+                                <div class="group relative">
+                                    <?php if ($upload['file_type'] === 'image'): ?>
+                                        <div class="aspect-square rounded-lg overflow-hidden bg-slate-100 border border-slate-200">
+                                            <img src="<?= Security::escape($upload['file_path']) ?>"
+                                                alt="<?= Security::escape($upload['field_name']) ?>" class="w-full h-full object-cover">
+                                        </div>
+                                    <?php else: ?>
+                                        <div
+                                            class="aspect-square rounded-lg overflow-hidden bg-slate-100 border border-slate-200 flex items-center justify-center">
+                                            <span class="material-symbols-outlined text-4xl text-slate-400">audio_file</span>
+                                        </div>
+                                    <?php endif; ?>
+                                    <p class="text-xs text-slate-500 mt-2 truncate capitalize">
+                                        <?= str_replace('_', ' ', $upload['field_name']) ?></p>
+                                    <a href="<?= Security::escape($upload['file_path']) ?>" download
+                                        class="absolute top-2 right-2 p-1.5 bg-white/90 rounded-lg shadow opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <span class="material-symbols-outlined text-sm">download</span>
+                                    </a>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <!-- Video Upload / Status -->
+            <div
+                class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-white/5">
+                    <h3 class="font-bold flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">video_library</span>
+                        Video Delivery
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <?php if ($viewOrder['output_video_url']): ?>
+                        <!-- Video already uploaded -->
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-green-600 text-3xl">check_circle</span>
+                                <div>
+                                    <p class="font-bold text-green-800">Video Delivered</p>
+                                    <p class="text-sm text-green-700">Uploaded on
+                                        <?= date('M j, Y', strtotime($viewOrder['video_uploaded_at'])) ?></p>
+                                    <?php if ($viewOrder['video_expires_at']): ?>
+                                        <p class="text-xs text-green-600 mt-1">
+                                            Expires: <?= date('M j, Y', strtotime($viewOrder['video_expires_at'])) ?>
+                                            <?php
+                                            $daysLeft = ceil((strtotime($viewOrder['video_expires_at']) - time()) / 86400);
+                                            if ($daysLeft > 0): ?>
+                                                (<?= $daysLeft ?> days left)
+                                            <?php else: ?>
+                                                <span class="text-red-600 font-bold">(Expired)</span>
+                                            <?php endif; ?>
+                                        </p>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <a href="<?= Security::escape($viewOrder['output_video_url']) ?>" target="_blank"
+                                class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg font-bold text-sm hover:bg-primary/90">
+                                <span class="material-symbols-outlined text-lg">play_circle</span>
+                                Preview Video
+                            </a>
+                            <a href="<?= Security::escape($viewOrder['output_video_url']) ?>" download
+                                class="inline-flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg font-medium text-sm hover:bg-slate-50">
+                                <span class="material-symbols-outlined text-lg">download</span>
+                                Download
+                            </a>
+                        </div>
+                    <?php else: ?>
+                        <!-- Upload form -->
+                        <form method="POST" enctype="multipart/form-data" class="space-y-4">
+                            <input type="hidden" name="order_id" value="<?= $viewOrder['id'] ?>">
+                            <input type="hidden" name="upload_video" value="1">
+
+                            <div
+                                class="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center hover:border-primary/50 transition-colors">
+                                <span class="material-symbols-outlined text-5xl text-slate-300 mb-3">cloud_upload</span>
+                                <p class="font-medium text-slate-700 mb-2">Upload Completed Video</p>
+                                <p class="text-sm text-slate-500 mb-4">MP4 format, max 100MB</p>
+                                <input type="file" name="video_file" accept="video/mp4,video/*" required
+                                    class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-primary file:text-white hover:file:bg-primary/90">
+                            </div>
+
+                            <div class="flex items-center gap-2 text-sm text-slate-500">
+                                <span class="material-symbols-outlined text-lg">info</span>
+                                Video will be available for customer download for 7 days after upload.
+                            </div>
+
+                            <button type="submit"
+                                class="w-full py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined">upload</span>
+                                Upload & Mark Complete
+                            </button>
+                        </form>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Customer Info -->
+            <div
+                class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                <h3 class="font-bold mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">person</span>
+                    Customer
+                </h3>
+                <div class="flex items-center gap-3 mb-4">
+                    <div
+                        class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-lg">
+                        <?= strtoupper(substr($viewOrder['customer_name'] ?? 'U', 0, 1)) ?>
+                    </div>
+                    <div>
+                        <p class="font-bold"><?= Security::escape($viewOrder['customer_name'] ?? 'Unknown') ?></p>
+                        <p class="text-sm text-slate-500"><?= Security::escape($viewOrder['customer_email'] ?? '') ?></p>
+                    </div>
+                </div>
+                <?php if ($viewOrder['customer_phone']): ?>
+                    <div class="flex items-center gap-2 text-sm text-slate-600">
+                        <span class="material-symbols-outlined text-lg">phone</span>
+                        <?= Security::escape($viewOrder['customer_phone']) ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- Template Info -->
+            <div
+                class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                <h3 class="font-bold mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">movie</span>
+                    Template
+                </h3>
+                <?php if ($viewOrder['thumbnail_url']): ?>
+                    <div class="aspect-video rounded-lg overflow-hidden bg-slate-100 mb-3">
+                        <img src="<?= Security::escape($viewOrder['thumbnail_url']) ?>" alt=""
+                            class="w-full h-full object-cover">
+                    </div>
+                <?php endif; ?>
+                <p class="font-bold"><?= Security::escape($viewOrder['template_title'] ?? 'Unknown Template') ?></p>
+            </div>
+
+            <!-- Update Status -->
+            <div
+                class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                <h3 class="font-bold mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">sync</span>
+                    Update Status
+                </h3>
+                <form method="POST" class="space-y-4">
+                    <input type="hidden" name="order_id" value="<?= $viewOrder['id'] ?>">
+                    <input type="hidden" name="update_status" value="1">
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Payment Status</label>
+                        <select name="payment_status"
+                            class="w-full h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
+                            <option value="pending" <?= ($viewOrder['payment_status'] ?? 'pending') === 'pending' ? 'selected' : '' ?>>Pending</option>
+                            <option value="paid" <?= ($viewOrder['payment_status'] ?? '') === 'paid' ? 'selected' : '' ?>>Paid
+                            </option>
+                            <option value="failed" <?= ($viewOrder['payment_status'] ?? '') === 'failed' ? 'selected' : '' ?>>
+                                Failed</option>
+                            <option value="refunded" <?= ($viewOrder['payment_status'] ?? '') === 'refunded' ? 'selected' : '' ?>>Refunded</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Order Status</label>
+                        <select name="order_status"
+                            class="w-full h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
+                            <option value="awaiting_payment" <?= ($viewOrder['order_status'] ?? 'awaiting_payment') === 'awaiting_payment' ? 'selected' : '' ?>>Awaiting Payment</option>
+                            <option value="queued" <?= ($viewOrder['order_status'] ?? '') === 'queued' ? 'selected' : '' ?>>
+                                Queued</option>
+                            <option value="processing" <?= ($viewOrder['order_status'] ?? '') === 'processing' ? 'selected' : '' ?>>Processing</option>
+                            <option value="completed" <?= ($viewOrder['order_status'] ?? '') === 'completed' ? 'selected' : '' ?>>Completed</option>
+                            <option value="cancelled" <?= ($viewOrder['order_status'] ?? '') === 'cancelled' ? 'selected' : '' ?>>Cancelled</option>
+                        </select>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full py-2.5 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 transition-colors">
+                        Update Status
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+<?php else: ?>
+    <!-- Orders List View -->
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div>
+            <h2 class="text-2xl font-bold">Order Management</h2>
+            <p class="text-slate-500 mt-1">View and manage customer orders</p>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <button
+                class="flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors text-sm font-medium">
+                <span class="material-symbols-outlined text-lg">download</span>
+                Export
+            </button>
+        </div>
+    </div>
+
+    <?php if (isset($_GET['success'])): ?>
+        <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6 flex items-center gap-2">
+            <span class="material-symbols-outlined">check_circle</span>
+            Order <?= $_GET['success'] ?> successfully!
+        </div>
+    <?php endif; ?>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+        <div class="bg-white dark:bg-surface-dark p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+            <p class="text-slate-500 text-xs font-medium uppercase">New (24h)</p>
+            <p class="text-2xl font-bold mt-1"><?= $stats['new'] ?></p>
+        </div>
+        <div class="bg-white dark:bg-surface-dark p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+            <p class="text-slate-500 text-xs font-medium uppercase">Queued</p>
+            <p class="text-2xl font-bold mt-1 text-blue-600"><?= $stats['queued'] ?></p>
+        </div>
+        <div class="bg-white dark:bg-surface-dark p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+            <p class="text-slate-500 text-xs font-medium uppercase">Processing</p>
+            <p class="text-2xl font-bold mt-1 text-purple-600"><?= $stats['processing'] ?></p>
+        </div>
+        <div class="bg-white dark:bg-surface-dark p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+            <p class="text-slate-500 text-xs font-medium uppercase">Completed</p>
+            <p class="text-2xl font-bold mt-1 text-green-600"><?= $stats['completed'] ?></p>
+        </div>
+        <div class="bg-white dark:bg-surface-dark p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+            <p class="text-slate-500 text-xs font-medium uppercase">Revenue Today</p>
+            <p class="text-2xl font-bold mt-1 text-green-600">$<?= number_format($stats['revenue_today'], 2) ?></p>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-4 mb-6">
+        <form method="GET" class="flex flex-wrap items-center gap-4">
+            <div class="flex-1 min-w-[200px]">
+                <div class="relative">
+                    <span
+                        class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 material-symbols-outlined text-lg">search</span>
+                    <input type="text" name="search" value="<?= Security::escape($search) ?>"
+                        class="w-full h-10 pl-10 pr-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+                        placeholder="Search by order ID, customer name or email...">
+                </div>
+            </div>
+
+            <select name="status"
+                class="h-10 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
+                <option value="">All Status</option>
+                <optgroup label="Payment">
+                    <option value="pending" <?= $status === 'pending' ? 'selected' : '' ?>>💳 Pending</option>
+                    <option value="paid" <?= $status === 'paid' ? 'selected' : '' ?>>💳 Paid</option>
+                    <option value="failed" <?= $status === 'failed' ? 'selected' : '' ?>>💳 Failed</option>
+                </optgroup>
+                <optgroup label="Order">
+                    <option value="queued" <?= $status === 'queued' ? 'selected' : '' ?>>📦 Queued</option>
+                    <option value="processing" <?= $status === 'processing' ? 'selected' : '' ?>>📦 Processing</option>
+                    <option value="completed" <?= $status === 'completed' ? 'selected' : '' ?>>📦 Completed</option>
+                </optgroup>
+            </select>
+
+            <button type="submit"
+                class="h-10 px-6 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 transition-colors">
+                Filter
+            </button>
+
+            <?php if ($search || $status): ?>
+                <a href="/admin/orders.php" class="text-sm text-slate-500 hover:text-primary">Clear filters</a>
+            <?php endif; ?>
+        </form>
+    </div>
+
+    <!-- Orders Table -->
+    <div
+        class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 dark:bg-white/5 text-slate-500 font-semibold uppercase text-xs">
+                    <tr>
+                        <th class="px-6 py-4">Order ID</th>
+                        <th class="px-6 py-4">Customer</th>
+                        <th class="px-6 py-4">Template</th>
+                        <th class="px-6 py-4">Date</th>
+                        <th class="px-6 py-4">Amount</th>
+                        <th class="px-6 py-4">Payment</th>
+                        <th class="px-6 py-4">Order</th>
+                        <th class="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                    <?php foreach ($orders as $order):
+                        $paymentColors = ['pending' => 'bg-yellow-100 text-yellow-800', 'paid' => 'bg-green-100 text-green-800', 'failed' => 'bg-red-100 text-red-800', 'refunded' => 'bg-slate-100 text-slate-800'];
+                        $orderColors = ['awaiting_payment' => 'bg-yellow-100 text-yellow-800', 'queued' => 'bg-blue-100 text-blue-800', 'processing' => 'bg-purple-100 text-purple-800', 'completed' => 'bg-green-100 text-green-800', 'cancelled' => 'bg-red-100 text-red-800'];
+                        $paymentColor = $paymentColors[$order['payment_status'] ?? 'pending'] ?? 'bg-slate-100 text-slate-800';
+                        $orderColor = $orderColors[$order['order_status'] ?? 'awaiting_payment'] ?? 'bg-slate-100 text-slate-800';
+                        ?>
+                        <tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                            <td class="px-6 py-4">
+                                <span
+                                    class="font-bold text-slate-900 dark:text-white">#<?= Security::escape($order['order_number']) ?></span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="size-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs font-bold shrink-0">
+                                        <?= strtoupper(substr($order['customer_name'] ?? 'U', 0, 1)) ?>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-slate-900 dark:text-white">
+                                            <?= Security::escape($order['customer_name'] ?? 'Unknown') ?></p>
+                                        <p class="text-xs text-slate-500">
+                                            <?= Security::escape($order['customer_email'] ?? '') ?></p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-2">
+                                    <?php if ($order['thumbnail_url']): ?>
+                                        <div class="size-8 rounded bg-slate-100 bg-cover bg-center shrink-0"
+                                            style="background-image: url('<?= Security::escape($order['thumbnail_url']) ?>');">
+                                        </div>
+                                    <?php endif; ?>
+                                    <span
+                                        class="truncate max-w-[120px]"><?= Security::escape($order['template_title'] ?? '-') ?></span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-slate-500">
+                                <?= date('M j, Y', strtotime($order['created_at'])) ?>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="font-bold text-slate-900 dark:text-white">
+                                    <?= $order['currency'] === 'INR' ? '₹' : '$' ?>        <?= number_format($order['amount'], 2) ?>
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span
+                                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <?= $paymentColor ?>">
+                                    <?= ucfirst($order['payment_status'] ?? 'pending') ?>
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span
+                                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <?= $orderColor ?>">
+                                    <?= ucwords(str_replace('_', ' ', $order['order_status'] ?? 'awaiting')) ?>
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center justify-end gap-1">
+                                    <a href="/admin/orders.php?action=view&id=<?= $order['id'] ?>"
+                                        class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-500 hover:text-primary transition-colors"
+                                        title="View Details">
+                                        <span class="material-symbols-outlined text-lg">visibility</span>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+
+                    <?php if (empty($orders)): ?>
+                        <tr>
+                            <td colspan="8" class="px-6 py-12 text-center text-slate-500">
+                                <span class="material-symbols-outlined text-5xl text-slate-300 mb-2">shopping_bag</span>
+                                <p class="text-lg font-medium">No orders found</p>
+                                <p class="text-sm">Orders will appear here once customers make purchases</p>
+                            </td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <?php if ($totalPages > 1): ?>
+            <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <p class="text-sm text-slate-500">
+                    Showing <?= $offset + 1 ?> to <?= min($offset + $perPage, $totalOrders) ?> of <?= $totalOrders ?> orders
+                </p>
+
+                <div class="flex items-center gap-1">
+                    <?php if ($page > 1): ?>
+                        <a href="?page=<?= $page - 1 ?>&status=<?= $status ?>&search=<?= urlencode($search) ?>"
+                            class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-500">
+                            <span class="material-symbols-outlined">chevron_left</span>
+                        </a>
+                    <?php endif; ?>
+
+                    <?php for ($i = max(1, $page - 2); $i <= min($totalPages, $page + 2); $i++): ?>
+                        <a href="?page=<?= $i ?>&status=<?= $status ?>&search=<?= urlencode($search) ?>"
+                            class="w-10 h-10 flex items-center justify-center rounded-lg <?= $i === $page ? 'bg-primary text-white' : 'hover:bg-slate-100 dark:hover:bg-white/10 text-slate-600' ?> font-medium text-sm">
+                            <?= $i ?>
+                        </a>
+                    <?php endfor; ?>
+
+                    <?php if ($page < $totalPages): ?>
+                        <a href="?page=<?= $page + 1 ?>&status=<?= $status ?>&search=<?= urlencode($search) ?>"
+                            class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-500">
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </a>
+                    <?php endif; ?>
+                </div>
+            </div>
+        <?php endif; ?>
+    </div>
+
+<?php endif; ?>
 
 <?php
 $content = ob_get_clean();

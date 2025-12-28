@@ -109,10 +109,12 @@ function handlePaymentCaptured(array $payment): void
         Database::query(
             "UPDATE orders SET 
                 status = 'paid',
+                payment_status = 'paid',
+                order_status = 'queued',
                 payment_id = ?,
                 payment_gateway = 'razorpay',
                 paid_at = NOW()
-             WHERE id = ? AND status IN ('pending', 'processing')",
+             WHERE id = ? AND (status IN ('pending', 'processing') OR payment_status = 'pending')",
             [$razorpayPaymentId, $order['id']]
         );
 
@@ -170,7 +172,9 @@ function handlePaymentFailed(array $payment): void
         Database::query(
             "UPDATE orders SET 
                 status = 'failed',
-                payment_notes = ?
+                payment_status = 'failed',
+                order_status = 'awaiting_payment',
+                notes = ?
              WHERE id = ?",
             ["$errorCode: $errorDescription", $order['id']]
         );
@@ -202,8 +206,9 @@ function handleRefundCreated(array $refund): void
         Database::query(
             "UPDATE orders SET 
                 status = 'refunded',
-                refund_amount = ?,
-                refunded_at = NOW()
+                payment_status = 'refunded',
+                order_status = 'cancelled',
+                discount_amount = ?
              WHERE id = ?",
             [$refundAmount, $order['id']]
         );

@@ -53,15 +53,29 @@ $pageTitle = 'My Orders';
         <!-- Orders List -->
         <div class="space-y-4">
             <?php foreach ($orders as $order):
-                $statusColors = [
+                $paymentColors = [
                     'pending' => 'bg-yellow-100 text-yellow-700',
-                    'paid' => 'bg-blue-100 text-blue-700',
-                    'processing' => 'bg-purple-100 text-purple-700',
-                    'completed' => 'bg-green-100 text-green-700',
+                    'paid' => 'bg-green-100 text-green-700',
                     'failed' => 'bg-red-100 text-red-700',
                     'refunded' => 'bg-slate-100 text-slate-700'
                 ];
-                $statusColor = $statusColors[$order['status']] ?? 'bg-slate-100 text-slate-700';
+                $orderColors = [
+                    'awaiting_payment' => 'bg-yellow-100 text-yellow-700',
+                    'queued' => 'bg-blue-100 text-blue-700',
+                    'processing' => 'bg-purple-100 text-purple-700',
+                    'completed' => 'bg-green-100 text-green-700',
+                    'cancelled' => 'bg-red-100 text-red-700'
+                ];
+                $paymentColor = $paymentColors[$order['payment_status'] ?? 'pending'] ?? 'bg-slate-100 text-slate-700';
+                $orderColor = $orderColors[$order['order_status'] ?? 'awaiting_payment'] ?? 'bg-slate-100 text-slate-700';
+
+                // Calculate video expiry
+                $videoExpired = false;
+                $daysLeft = 0;
+                if ($order['video_expires_at']) {
+                    $daysLeft = ceil((strtotime($order['video_expires_at']) - time()) / 86400);
+                    $videoExpired = $daysLeft <= 0;
+                }
                 ?>
                 <div
                     class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden hover:shadow-lg transition-shadow">
@@ -84,10 +98,17 @@ $pageTitle = 'My Orders';
                                         <p class="text-sm text-slate-500 mt-1">Order
                                             #<?= Security::escape($order['order_number']) ?></p>
                                     </div>
-                                    <span
-                                        class="inline-flex self-start px-3 py-1 rounded-full text-xs font-bold <?= $statusColor ?> capitalize">
-                                        <?= $order['status'] ?>
-                                    </span>
+                                    <div class="flex gap-2">
+                                        <span
+                                            class="inline-flex self-start px-3 py-1 rounded-full text-xs font-bold <?= $paymentColor ?>">
+                                            💳 <?= ucfirst($order['payment_status'] ?? 'pending') ?>
+                                        </span>
+                                        <span
+                                            class="inline-flex self-start px-3 py-1 rounded-full text-xs font-bold <?= $orderColor ?>">
+                                            📦
+                                            <?= ucwords(str_replace('_', ' ', $order['order_status'] ?? 'awaiting_payment')) ?>
+                                        </span>
+                                    </div>
                                 </div>
 
                                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4 text-sm">
@@ -112,10 +133,12 @@ $pageTitle = 'My Orders';
                                     <div>
                                         <span class="text-slate-500">Delivery</span>
                                         <p class="font-medium text-slate-900 dark:text-white">
-                                            <?php if ($order['status'] === 'completed'): ?>
+                                            <?php if (($order['order_status'] ?? '') === 'completed'): ?>
                                                 <span class="text-green-600">Ready</span>
-                                            <?php elseif ($order['status'] === 'processing'): ?>
-                                                <span class="text-blue-600">In Progress</span>
+                                            <?php elseif (($order['order_status'] ?? '') === 'processing'): ?>
+                                                <span class="text-purple-600">In Progress</span>
+                                            <?php elseif (($order['order_status'] ?? '') === 'queued'): ?>
+                                                <span class="text-blue-600">In Queue</span>
                                             <?php else: ?>
                                                 <span class="text-slate-400">—</span>
                                             <?php endif; ?>
@@ -123,9 +146,48 @@ $pageTitle = 'My Orders';
                                     </div>
                                 </div>
 
+                                <!-- Video Download Section -->
+                                <?php if ($order['output_video_url'] && ($order['order_status'] ?? '') === 'completed'): ?>
+                                    <div
+                                        class="mt-4 p-3 rounded-lg <?= $videoExpired ? 'bg-red-50 border border-red-200' : 'bg-green-50 border border-green-200' ?>">
+                                        <?php if ($videoExpired): ?>
+                                            <div class="flex items-center gap-2 text-red-700">
+                                                <span class="material-symbols-outlined">error</span>
+                                                <p class="font-medium">Video download has expired. Please contact support if you need
+                                                    access.</p>
+                                            </div>
+                                        <?php else: ?>
+                                            <div class="flex items-center justify-between flex-wrap gap-3">
+                                                <div class="flex items-center gap-2 text-green-700">
+                                                    <span class="material-symbols-outlined">check_circle</span>
+                                                    <div>
+                                                        <p class="font-medium">Your video is ready!</p>
+                                                        <p class="text-sm">Download available for <?= $daysLeft ?> more
+                                                            day<?= $daysLeft !== 1 ? 's' : '' ?></p>
+                                                    </div>
+                                                </div>
+                                                <div class="flex gap-2">
+                                                    <a href="<?= Security::escape($order['output_video_url']) ?>"
+                                                        class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white font-bold text-sm rounded-lg hover:bg-green-700 transition-colors"
+                                                        download>
+                                                        <span class="material-symbols-outlined text-lg">download</span>
+                                                        Download
+                                                    </a>
+                                                    <a href="<?= Security::escape($order['output_video_url']) ?>"
+                                                        class="inline-flex items-center gap-2 px-4 py-2 border border-green-300 text-green-700 font-medium text-sm rounded-lg hover:bg-green-100 transition-colors"
+                                                        target="_blank">
+                                                        <span class="material-symbols-outlined text-lg">play_circle</span>
+                                                        Preview
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                <?php endif; ?>
+
                                 <!-- Actions -->
                                 <div class="flex flex-wrap gap-3 mt-5 pt-4 border-t border-slate-100 dark:border-slate-800">
-                                    <?php if ($order['status'] === 'pending'): ?>
+                                    <?php if (($order['payment_status'] ?? 'pending') === 'pending'): ?>
                                         <a href="/checkout/<?= $order['id'] ?>"
                                             class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white font-bold text-sm rounded-lg hover:bg-primary/90 transition-colors">
                                             <span class="material-symbols-outlined text-lg">payment</span>
@@ -133,28 +195,7 @@ $pageTitle = 'My Orders';
                                         </a>
                                     <?php endif; ?>
 
-                                    <?php if ($order['status'] === 'completed' && $order['video_url']): ?>
-                                        <a href="<?= Security::escape($order['video_url']) ?>"
-                                            class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white font-bold text-sm rounded-lg hover:bg-green-700 transition-colors"
-                                            download>
-                                            <span class="material-symbols-outlined text-lg">download</span>
-                                            Download Video
-                                        </a>
-                                        <a href="<?= Security::escape($order['video_url']) ?>"
-                                            class="inline-flex items-center gap-2 px-4 py-2 border border-slate-300 text-slate-700 font-medium text-sm rounded-lg hover:bg-slate-50 transition-colors"
-                                            target="_blank">
-                                            <span class="material-symbols-outlined text-lg">play_circle</span>
-                                            Preview
-                                        </a>
-                                    <?php endif; ?>
-
-                                    <a href="/order/<?= $order['id'] ?>/details"
-                                        class="inline-flex items-center gap-2 px-4 py-2 text-slate-600 font-medium text-sm rounded-lg hover:bg-slate-100 transition-colors">
-                                        <span class="material-symbols-outlined text-lg">visibility</span>
-                                        View Details
-                                    </a>
-
-                                    <?php if (in_array($order['status'], ['pending', 'paid', 'processing'])): ?>
+                                    <?php if (in_array($order['order_status'] ?? '', ['awaiting_payment', 'queued', 'processing'])): ?>
                                         <a href="/support?order=<?= $order['order_number'] ?>"
                                             class="inline-flex items-center gap-2 px-4 py-2 text-slate-600 font-medium text-sm rounded-lg hover:bg-slate-100 transition-colors">
                                             <span class="material-symbols-outlined text-lg">help</span>
@@ -168,8 +209,6 @@ $pageTitle = 'My Orders';
                 </div>
             <?php endforeach; ?>
         </div>
-
-        <!-- Pagination would go here -->
 
     <?php endif; ?>
 </div>

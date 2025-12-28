@@ -85,14 +85,16 @@ function handlePaymentSuccess(array $paymentIntent): void
         return;
     }
 
-    // Update order status
+    // Update order status (both old and new columns)
     Database::query(
         "UPDATE orders SET 
             status = 'paid',
+            payment_status = 'paid',
+            order_status = 'queued',
             payment_id = ?,
             payment_gateway = 'stripe',
             paid_at = NOW()
-         WHERE id = ? AND status = 'pending'",
+         WHERE id = ? AND (status = 'pending' OR payment_status = 'pending')",
         [$paymentIntent['id'], $orderId]
     );
 
@@ -129,8 +131,10 @@ function handlePaymentFailed(array $paymentIntent): void
     Database::query(
         "UPDATE orders SET 
             status = 'failed',
-            payment_notes = ?
-         WHERE id = ? AND status = 'pending'",
+            payment_status = 'failed',
+            order_status = 'awaiting_payment',
+            notes = ?
+         WHERE id = ? AND (status = 'pending' OR payment_status = 'pending')",
         [$failureMessage, $orderId]
     );
 
@@ -160,8 +164,9 @@ function handleRefund(array $charge): void
         Database::query(
             "UPDATE orders SET 
                 status = 'refunded',
-                refund_amount = ?,
-                refunded_at = NOW()
+                payment_status = 'refunded',
+                order_status = 'cancelled',
+                discount_amount = ?
              WHERE id = ?",
             [$refundAmount, $order['id']]
         );
