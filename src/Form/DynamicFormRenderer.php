@@ -67,6 +67,38 @@ class DynamicFormRenderer
     }
 
     /**
+     * Render HTML form for specific field groups only
+     * Used for multi-step forms
+     */
+    public function renderByGroups(int $templateId, array $allowedGroups, array $values = []): string
+    {
+        $groupedFields = $this->getFields($templateId);
+        $html = '';
+
+        foreach ($groupedFields as $groupName => $fields) {
+            if (in_array($groupName, $allowedGroups)) {
+                $html .= $this->renderGroup($groupName, $fields, $values);
+            }
+        }
+
+        return $html;
+    }
+
+    /**
+     * Check if template has fields in specific groups
+     */
+    public function hasFieldsInGroups(int $templateId, array $groups): bool
+    {
+        $groupedFields = $this->getFields($templateId);
+        foreach ($groups as $group) {
+            if (!empty($groupedFields[$group])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Render a field group section
      */
     private function renderGroup(string $groupName, array $fields, array $values): string
