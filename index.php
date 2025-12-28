@@ -41,6 +41,11 @@ $router->get('/', function () {
     include __DIR__ . '/templates/pages/home.php';
 });
 
+// My Orders (user order history)
+$router->get('/my-orders', function () {
+    include __DIR__ . '/templates/pages/my-orders.php';
+});
+
 // Template gallery
 $router->get('/templates', function () {
     include __DIR__ . '/templates/pages/gallery.php';
