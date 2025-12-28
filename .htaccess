@@ -16,8 +16,13 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_URI} (.+)/$
 RewriteRule ^ %1 [R=301,L]
 
-# Block access to sensitive directories
-RewriteRule ^(config|src|templates|admin|api|database|vendor)/ index.php [L]
+# Block access to sensitive directories (NOT admin - admin has direct PHP files)
+RewriteRule ^(config|src|database|vendor)/ - [F,L]
+
+# Allow direct access to admin PHP files
+RewriteCond %{REQUEST_URI} ^/admin/.*\.php$
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
 
 # If request is for a file that exists, serve it
 RewriteCond %{REQUEST_FILENAME} -f
