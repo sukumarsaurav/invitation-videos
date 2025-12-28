@@ -98,17 +98,14 @@
                         <span class="material-symbols-outlined text-2xl sm:text-3xl">movie_filter</span>
                     </div>
                     <h2 class="text-lg sm:text-xl font-bold leading-tight tracking-tight">
-                        <?= APP_NAME ?? 'VideoInvites' ?></h2>
+                        <?= APP_NAME ?? 'VideoInvites' ?>
+                    </h2>
                 </a>
 
                 <!-- Desktop Navigation -->
                 <nav class="hidden md:flex items-center gap-6">
                     <a href="/templates"
                         class="text-sm font-medium text-slate-600 hover:text-primary transition-colors">Templates</a>
-                    <a href="/pricing"
-                        class="text-sm font-medium text-slate-600 hover:text-primary transition-colors">Pricing</a>
-                    <a href="/support"
-                        class="text-sm font-medium text-slate-600 hover:text-primary transition-colors">Support</a>
                 </nav>
 
                 <!-- Desktop Auth -->
@@ -141,16 +138,6 @@
                     class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-100 font-medium">
                     <span class="material-symbols-outlined">video_library</span>
                     Templates
-                </a>
-                <a href="/pricing"
-                    class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-100 font-medium">
-                    <span class="material-symbols-outlined">sell</span>
-                    Pricing
-                </a>
-                <a href="/support"
-                    class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-100 font-medium">
-                    <span class="material-symbols-outlined">help</span>
-                    Support
                 </a>
 
                 <div class="border-t border-slate-200 my-3"></div>
