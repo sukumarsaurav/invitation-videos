@@ -316,7 +316,7 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
 
                         <!-- Play Button Overlay -->
                         <?php if (!empty($template['preview_video_url'])): ?>
-                            <div
+                            <div onclick="openVideoModal('<?= Security::escape($template['preview_video_url']) ?>')"
                                 class="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-colors cursor-pointer group">
                                 <div
                                     class="size-20 rounded-full bg-white/30 backdrop-blur-md flex items-center justify-center text-white border border-white/50 shadow-lg group-hover:scale-110 transition-transform">
@@ -368,9 +368,11 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                                 </div>
                                 <div>
                                     <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Step
-                                        <?= $currentStepIndex + 1 ?> of <?= $totalSteps ?></p>
+                                        <?= $currentStepIndex + 1 ?> of <?= $totalSteps ?>
+                                    </p>
                                     <h2 class="font-bold text-slate-900 dark:text-white">
-                                        <?= $stepTitles[$step] ?? 'Details' ?></h2>
+                                        <?= $stepTitles[$step] ?? 'Details' ?>
+                                    </h2>
                                 </div>
                             </div>
                             <span class="text-primary font-bold"><?= $progressPercent ?>%</span>
@@ -491,12 +493,89 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
 
 <script>
     // Capture user timezone for country detection
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', functi on() {
         const tzField = document.getElementById('user_timezone');
         if (tzField) {
             tzField.value = Intl.DateTimeFormat().resolvedOptions().timeZone;
         }
     });
+
+  // Video Modal Functions
+    function getYouTubeEmbedUrl(url) {
+        // Handle various YouTube URL formats
+        let videoId = null;
+        
+        // youtube.com/watch?v=VIDEO_ID
+        const watchMatch = url.match(/[?&]v=([^&]+)/);
+        if (watchMatch) videoId = watchMatch[1];
+        
+        // youtu.be/VIDEO_ID
+        const shortMatch = url.match(/youtu\.be\/([^?&]+)/);
+        if (shortMatch) videoId = shortMatch[1];
+        
+        // youtube.com/embed/VIDEO_ID
+        const embedMatch = url.match(/youtube\.com\/embed\/([^?&]+)/);
+        if (embedMatch) videoId = embedMatch[1];
+        
+        // youtube.com/shorts/VIDEO_ID
+        const shortsMatch = url.match(/youtube\.com\/shorts\/([^?&]+)/);
+        if (shortsMatch) videoId = shortsMatch[1];
+        
+        if (videoId) {
+            return `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+        }
+        
+        // Return original URL if not YouTube
+        return url;
+    }
+
+    function openVideoModal(videoUrl) {
+        const embedUrl = getYouTubeEmbedUrl(videoUrl);
+        
+        // Create modal
+        const modal = document.createElement('div');
+        modal.id = 'video-modal';
+        modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm';
+        modal.innerHTML = `
+            <div class="relative w-full max-w-4xl aspect-[9/16] sm:aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl">
+                <iframe 
+                    src="${embedUrl}" 
+                    class="w-full h-full" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    allowfullscreen>
+                </iframe>
+                <button onclick="closeVideoModal()" 
+                    class="absolute top-4 right-4 size-10 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+        `;
+        
+        // Close on backdrop click
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) closeVideoModal();
+        });
+        
+        // Close on Escape key
+        document.addEventListener('keydown', function escHandler(e) {
+            if (e.key === 'Escape') {
+                closeVideoModal();
+                document.removeEventListener('keydown', escHandler);
+            }
+        });
+        
+        document.body.appendChild(modal);
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeVideoModal() {
+        const modal = document.getElementById('video-modal');
+        if (modal) {
+            modal.remove();
+            document.body.style.overflow = '';
+        }
+    }
 </script>
 
 <?php
