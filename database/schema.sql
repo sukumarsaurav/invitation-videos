@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS `templates` (
     `title` VARCHAR(255) NOT NULL,
     `slug` VARCHAR(255) NOT NULL,
     `description` TEXT DEFAULT NULL,
-    `category` ENUM('wedding', 'birthday', 'corporate', 'baby_shower', 'anniversary', 'other') NOT NULL,
+    `category` VARCHAR(50) NOT NULL DEFAULT 'other' COMMENT 'References categories.slug',
     `subcategory` VARCHAR(100) DEFAULT NULL,
     `cultural_tradition` VARCHAR(50) DEFAULT NULL,
     `price_usd` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
