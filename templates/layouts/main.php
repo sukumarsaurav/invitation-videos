@@ -136,9 +136,61 @@
 
                 <!-- Desktop Auth (Right) -->
                 <div class="hidden lg:flex items-center gap-4">
-                    <?php if (isset($_SESSION['user_id'])): ?>
-                        <a href="/my-orders" class="text-sm font-medium text-slate-600 hover:text-primary">My Orders</a>
-                        <a href="/logout" class="text-sm font-medium text-slate-600 hover:text-primary">Logout</a>
+                    <?php if (isset($_SESSION['user_id'])):
+                        $userAvatar = $_SESSION['user_avatar'] ?? '';
+                        $userName = $_SESSION['user_name'] ?? 'User';
+                        $userInitial = strtoupper(substr($userName, 0, 1));
+                        ?>
+                        <!-- Profile Dropdown -->
+                        <div class="relative group">
+                            <button
+                                class="flex items-center gap-2 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                <?php if ($userAvatar): ?>
+                                    <img src="<?= Security::escape($userAvatar) ?>" alt="Profile"
+                                        class="w-9 h-9 rounded-full object-cover border-2 border-primary/20">
+                                <?php else: ?>
+                                    <div
+                                        class="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">
+                                        <?= $userInitial ?>
+                                    </div>
+                                <?php endif; ?>
+                                <span class="material-symbols-outlined text-slate-400 text-lg">expand_more</span>
+                            </button>
+
+                            <!-- Dropdown Menu -->
+                            <div
+                                class="absolute right-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                                <div
+                                    class="bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 py-2 min-w-[200px]">
+                                    <!-- User Info -->
+                                    <div class="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+                                        <p class="font-medium text-slate-900 dark:text-white">
+                                            <?= Security::escape($userName) ?></p>
+                                        <p class="text-xs text-slate-500 truncate">
+                                            <?= Security::escape($_SESSION['user_email'] ?? '') ?></p>
+                                    </div>
+
+                                    <a href="/profile"
+                                        class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                                        <span class="material-symbols-outlined text-lg">person</span>
+                                        Profile
+                                    </a>
+                                    <a href="/my-orders"
+                                        class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                                        <span class="material-symbols-outlined text-lg">shopping_bag</span>
+                                        My Orders
+                                    </a>
+
+                                    <div class="border-t border-slate-100 dark:border-slate-800 my-1"></div>
+
+                                    <a href="/logout"
+                                        class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                                        <span class="material-symbols-outlined text-lg">logout</span>
+                                        Sign Out
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                     <?php else: ?>
                         <a href="/login" class="text-sm font-medium text-slate-600 hover:text-primary">Login</a>
                         <a href="/register"
