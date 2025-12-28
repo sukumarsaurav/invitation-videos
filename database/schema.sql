@@ -10,17 +10,21 @@ SET FOREIGN_KEY_CHECKS = 0;
 CREATE TABLE IF NOT EXISTS `users` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
     `email` VARCHAR(255) NOT NULL,
-    `password_hash` VARCHAR(255) NOT NULL,
+    `google_id` VARCHAR(255) DEFAULT NULL COMMENT 'Google OAuth user ID',
+    `password_hash` VARCHAR(255) DEFAULT NULL COMMENT 'NULL for Google-only users',
     `name` VARCHAR(255) DEFAULT NULL,
+    `avatar_url` VARCHAR(500) DEFAULT NULL COMMENT 'Profile picture URL from Google',
     `phone` VARCHAR(20) DEFAULT NULL,
     `country_code` VARCHAR(5) DEFAULT 'US',
     `role` ENUM('customer', 'admin', 'editor') NOT NULL DEFAULT 'customer',
     `status` ENUM('active', 'inactive', 'suspended') NOT NULL DEFAULT 'active',
     `email_verified_at` TIMESTAMP NULL DEFAULT NULL,
+    `last_login` TIMESTAMP NULL DEFAULT NULL,
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_users_email` (`email`),
+    INDEX `idx_users_google_id` (`google_id`),
     INDEX `idx_users_status` (`status`),
     INDEX `idx_users_role` (`role`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
