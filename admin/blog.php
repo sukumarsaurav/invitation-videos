@@ -173,12 +173,96 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
             <!-- Content Editor -->
             <div
                 class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-                <div class="px-6 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-white/5">
-                    <span class="text-xs text-slate-500 uppercase font-bold">Content</span>
+                <div
+                    class="px-4 py-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-white/5 flex flex-wrap items-center gap-1">
+                    <span class="text-xs text-slate-500 uppercase font-bold mr-2">Content</span>
+
+                    <!-- Formatting Toolbar -->
+                    <div class="flex items-center gap-1 border-r border-slate-200 pr-2 mr-2">
+                        <button type="button" onclick="execCmd('bold')" class="toolbar-btn" title="Bold">
+                            <span class="material-symbols-outlined text-lg">format_bold</span>
+                        </button>
+                        <button type="button" onclick="execCmd('italic')" class="toolbar-btn" title="Italic">
+                            <span class="material-symbols-outlined text-lg">format_italic</span>
+                        </button>
+                        <button type="button" onclick="execCmd('underline')" class="toolbar-btn" title="Underline">
+                            <span class="material-symbols-outlined text-lg">format_underlined</span>
+                        </button>
+                        <button type="button" onclick="execCmd('strikeThrough')" class="toolbar-btn" title="Strikethrough">
+                            <span class="material-symbols-outlined text-lg">format_strikethrough</span>
+                        </button>
+                    </div>
+
+                    <div class="flex items-center gap-1 border-r border-slate-200 pr-2 mr-2">
+                        <button type="button" onclick="execCmd('formatBlock', '<h2>')" class="toolbar-btn"
+                            title="Heading 2">
+                            <span class="font-bold text-sm">H2</span>
+                        </button>
+                        <button type="button" onclick="execCmd('formatBlock', '<h3>')" class="toolbar-btn"
+                            title="Heading 3">
+                            <span class="font-bold text-sm">H3</span>
+                        </button>
+                        <button type="button" onclick="execCmd('formatBlock', '<p>')" class="toolbar-btn" title="Paragraph">
+                            <span class="material-symbols-outlined text-lg">format_paragraph</span>
+                        </button>
+                    </div>
+
+                    <div class="flex items-center gap-1 border-r border-slate-200 pr-2 mr-2">
+                        <button type="button" onclick="execCmd('insertUnorderedList')" class="toolbar-btn"
+                            title="Bullet List">
+                            <span class="material-symbols-outlined text-lg">format_list_bulleted</span>
+                        </button>
+                        <button type="button" onclick="execCmd('insertOrderedList')" class="toolbar-btn"
+                            title="Numbered List">
+                            <span class="material-symbols-outlined text-lg">format_list_numbered</span>
+                        </button>
+                    </div>
+
+                    <div class="flex items-center gap-1 border-r border-slate-200 pr-2 mr-2">
+                        <button type="button" onclick="execCmd('justifyLeft')" class="toolbar-btn" title="Align Left">
+                            <span class="material-symbols-outlined text-lg">format_align_left</span>
+                        </button>
+                        <button type="button" onclick="execCmd('justifyCenter')" class="toolbar-btn" title="Align Center">
+                            <span class="material-symbols-outlined text-lg">format_align_center</span>
+                        </button>
+                        <button type="button" onclick="execCmd('justifyRight')" class="toolbar-btn" title="Align Right">
+                            <span class="material-symbols-outlined text-lg">format_align_right</span>
+                        </button>
+                    </div>
+
+                    <div class="flex items-center gap-1 border-r border-slate-200 pr-2 mr-2">
+                        <button type="button" onclick="insertLink()" class="toolbar-btn" title="Insert Link">
+                            <span class="material-symbols-outlined text-lg">link</span>
+                        </button>
+                        <button type="button" onclick="insertImage()" class="toolbar-btn" title="Insert Image">
+                            <span class="material-symbols-outlined text-lg">image</span>
+                        </button>
+                        <button type="button" onclick="execCmd('formatBlock', '<blockquote>')" class="toolbar-btn"
+                            title="Blockquote">
+                            <span class="material-symbols-outlined text-lg">format_quote</span>
+                        </button>
+                    </div>
+
+                    <div class="flex items-center gap-1">
+                        <button type="button" onclick="execCmd('removeFormat')" class="toolbar-btn"
+                            title="Clear Formatting">
+                            <span class="material-symbols-outlined text-lg">format_clear</span>
+                        </button>
+                        <button type="button" onclick="toggleSource()" class="toolbar-btn" title="View HTML Source">
+                            <span class="material-symbols-outlined text-lg">code</span>
+                        </button>
+                    </div>
                 </div>
-                <div class="p-6">
-                    <textarea name="content" id="content-editor" rows="20"
-                        class="w-full border border-slate-200 rounded-lg p-4 text-sm focus:ring-2 focus:ring-primary focus:border-primary"><?= Security::escape($post['content'] ?? '') ?></textarea>
+                <div class="p-4">
+                    <!-- Visual Editor -->
+                    <div id="visual-editor" contenteditable="true"
+                        class="min-h-[400px] p-4 border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary prose prose-sm max-w-none"
+                        oninput="syncContent()"><?= $post['content'] ?? '' ?></div>
+
+                    <!-- Source Editor (hidden by default) -->
+                    <textarea id="source-editor" name="content"
+                        class="hidden w-full min-h-[400px] p-4 border border-slate-200 rounded-lg bg-slate-50 font-mono text-sm focus:ring-2 focus:ring-primary"
+                        oninput="syncFromSource()"><?= Security::escape($post['content'] ?? '') ?></textarea>
                 </div>
             </div>
         </div>
@@ -285,17 +369,93 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
         </div>
     </form>
 
-    <!-- TinyMCE Editor -->
-    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <!-- Custom Editor Styles & Scripts -->
+    <style>
+        .toolbar-btn {
+            padding: 6px;
+            border-radius: 6px;
+            color: #64748b;
+            transition: all 0.15s;
+        }
+        .toolbar-btn:hover {
+            background: #e2e8f0;
+            color: #7f13ec;
+        }
+        #visual-editor h2 { font-size: 1.5em; font-weight: bold; margin: 1em 0 0.5em; }
+        #visual-editor h3 { font-size: 1.25em; font-weight: bold; margin: 1em 0 0.5em; }
+        #visual-editor p { margin-bottom: 1em; }
+        #visual-editor ul, #visual-editor ol { margin: 1em 0; padding-left: 2em; }
+        #visual-editor blockquote { 
+            border-left: 4px solid #7f13ec; 
+            padding-left: 1em; 
+            margin: 1em 0;
+            color: #64748b;
+            font-style: italic;
+        }
+        #visual-editor a { color: #7f13ec; text-decoration: underline; }
+        #visual-editor img { max-width: 100%; border-radius: 8px; margin: 1em 0; }
+    </style>
     <script>
-        tinymce.init({
-            selector: '#content-editor',
-            height: 500,
-            menubar: false,
-            plugins: 'lists link image code table wordcount',
-            toolbar: 'undo redo | blocks | bold italic | alignleft aligncenter alignright | bullist numlist | link image | code',
-            content_style: 'body { font-family: Plus Jakarta Sans, sans-serif; font-size: 14px; }'
+        const visualEditor = document.getElementById('visual-editor');
+        const sourceEditor = document.getElementById('source-editor');
+        let isSourceMode = false;
+        
+        // Sync visual editor content to hidden textarea
+        function syncContent() {
+            sourceEditor.value = visualEditor.innerHTML;
+        }
+        
+        // Sync source editor to visual editor
+        function syncFromSource() {
+            visualEditor.innerHTML = sourceEditor.value;
+        }
+        
+        // Execute formatting command
+        function execCmd(command, value = null) {
+            document.execCommand(command, false, value);
+            visualEditor.focus();
+            syncContent();
+        }
+        
+        // Insert link
+        function insertLink() {
+            const url = prompt('Enter URL:', 'https://');
+            if (url) {
+                execCmd('createLink', url);
+            }
+        }
+        
+        // Insert image
+        function insertImage() {
+            const url = prompt('Enter image URL:', 'https://');
+            if (url) {
+                execCmd('insertImage', url);
+            }
+        }
+        
+        // Toggle between visual and source mode
+        function toggleSource() {
+            isSourceMode = !isSourceMode;
+            if (isSourceMode) {
+                sourceEditor.value = visualEditor.innerHTML;
+                visualEditor.classList.add('hidden');
+                sourceEditor.classList.remove('hidden');
+            } else {
+                visualEditor.innerHTML = sourceEditor.value;
+                sourceEditor.classList.add('hidden');
+                visualEditor.classList.remove('hidden');
+            }
+        }
+        
+        // Sync content on form submit
+        document.querySelector('form').addEventListener('submit', function() {
+            if (!isSourceMode) {
+                syncContent();
+            }
         });
+        
+        // Initialize - sync content on load
+        syncContent();
     </script>
 
 <?php else: ?>
