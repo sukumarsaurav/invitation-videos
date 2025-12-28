@@ -182,6 +182,11 @@
                                         <span class="material-symbols-outlined text-lg">shopping_bag</span>
                                         My Orders
                                     </a>
+                                    <a href="/my-tickets"
+                                        class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                                        <span class="material-symbols-outlined text-lg">support_agent</span>
+                                        My Tickets
+                                    </a>
 
                                     <div class="border-t border-slate-100 dark:border-slate-800 my-1"></div>
 
@@ -248,6 +253,11 @@
                         class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-100 font-medium">
                         <span class="material-symbols-outlined">shopping_bag</span>
                         My Orders
+                    </a>
+                    <a href="/my-tickets"
+                        class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-100 font-medium">
+                        <span class="material-symbols-outlined">support_agent</span>
+                        My Tickets
                     </a>
                     <a href="/logout"
                         class="flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 font-medium">

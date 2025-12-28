@@ -46,6 +46,15 @@ $router->get('/my-orders', function () {
     include __DIR__ . '/templates/pages/my-orders.php';
 });
 
+// My Support Tickets
+$router->get('/my-tickets', function () {
+    include __DIR__ . '/templates/pages/my-tickets.php';
+});
+
+$router->post('/my-tickets', function () {
+    include __DIR__ . '/templates/pages/my-tickets.php';
+});
+
 // Template gallery
 $router->get('/templates', function () {
     include __DIR__ . '/templates/pages/gallery.php';
