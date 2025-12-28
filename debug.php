@@ -22,11 +22,11 @@ echo "Is writable: " . (is_writable(__DIR__) ? 'Yes' : 'No') . "\n\n";
 
 echo "=== Check Critical Files ===\n";
 $files = [
-    '../config/config.php',
-    '../config/database.php',
-    '../.env',
-    '../.env.example',
-    '../vendor/autoload.php',
+    'config/config.php',
+    'config/database.php',
+    '.env',
+    '.env.example',
+    'vendor/autoload.php',
     'index.php',
     '.htaccess'
 ];
@@ -59,8 +59,8 @@ echo "APP_DEBUG: " . (defined('APP_DEBUG') ? (APP_DEBUG ? 'true' : 'false') : 'N
 
 echo "\n=== Test Config Load ===\n";
 try {
-    if (file_exists(__DIR__ . '/../config/config.php')) {
-        require_once __DIR__ . '/../config/config.php';
+    if (file_exists(__DIR__ . '/config/config.php')) {
+        require_once __DIR__ . '/config/config.php';
         echo "✅ Config loaded successfully\n";
         echo "APP_NAME: " . (defined('APP_NAME') ? APP_NAME : 'Not defined') . "\n";
         echo "APP_URL: " . (defined('APP_URL') ? APP_URL : 'Not defined') . "\n";

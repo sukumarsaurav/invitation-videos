@@ -1,6 +1,6 @@
 <?php
 /**
- * VideoInvites - Application Entry Point
+ * InvitationVideos - Application Entry Point
  * 
  * All requests are routed through this file
  */
@@ -10,12 +10,12 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // Load configuration
-require_once __DIR__ . '/../config/config.php';
-require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/config/config.php';
+require_once __DIR__ . '/config/database.php';
 
 // Load core classes
-require_once __DIR__ . '/../src/Core/Security.php';
-require_once __DIR__ . '/../src/Core/Router.php';
+require_once __DIR__ . '/src/Core/Security.php';
+require_once __DIR__ . '/src/Core/Router.php';
 
 // Set security headers
 Security::setSecurityHeaders();
@@ -38,30 +38,30 @@ $router->setBasePath('');
 
 // Home page
 $router->get('/', function () {
-    include __DIR__ . '/../templates/pages/home.php';
+    include __DIR__ . '/templates/pages/home.php';
 });
 
 // Template gallery
 $router->get('/templates', function () {
-    include __DIR__ . '/../templates/pages/gallery.php';
+    include __DIR__ . '/templates/pages/gallery.php';
 });
 
 // Template detail & customization
 $router->get('/template/{id}', function ($id) {
     $_GET['template_id'] = $id;
-    include __DIR__ . '/../templates/pages/customize.php';
+    include __DIR__ . '/templates/pages/customize.php';
 });
 
 // Checkout page
 $router->get('/checkout/{orderId}', function ($orderId) {
     $_GET['order_id'] = $orderId;
-    include __DIR__ . '/../templates/pages/checkout.php';
+    include __DIR__ . '/templates/pages/checkout.php';
 });
 
 // Order confirmation
 $router->get('/order/{orderId}/confirmation', function ($orderId) {
     $_GET['order_id'] = $orderId;
-    include __DIR__ . '/../templates/pages/confirmation.php';
+    include __DIR__ . '/templates/pages/confirmation.php';
 });
 
 // ===================
@@ -70,34 +70,34 @@ $router->get('/order/{orderId}/confirmation', function ($orderId) {
 
 // Create payment intent (Stripe)
 $router->post('/api/create-payment-intent', function () {
-    require_once __DIR__ . '/api/create-payment-intent.php';
+    require_once __DIR__ . '/api/payments/index.php';
 });
 
 // Create order (Razorpay)
 $router->post('/api/create-razorpay-order', function () {
-    require_once __DIR__ . '/api/create-razorpay-order.php';
+    require_once __DIR__ . '/api/payments/index.php';
 });
 
 // Stripe webhook
 $router->post('/api/webhook/stripe', function () {
-    require_once __DIR__ . '/api/webhook-stripe.php';
+    require_once __DIR__ . '/api/webhooks/stripe.php';
 });
 
 // Razorpay webhook
 $router->post('/api/webhook/razorpay', function () {
-    require_once __DIR__ . '/api/webhook-razorpay.php';
+    require_once __DIR__ . '/api/webhooks/razorpay.php';
 });
 
 // Get template fields (for dynamic forms)
 $router->get('/api/template/{id}/fields', function ($id) {
-    require_once __DIR__ . '/../src/Controllers/TemplateController.php';
+    require_once __DIR__ . '/src/Controllers/TemplateController.php';
     $controller = new TemplateController();
     $controller->getFields($id);
 });
 
 // Submit customization form
 $router->post('/api/template/{id}/customize', function ($id) {
-    require_once __DIR__ . '/../src/Controllers/TemplateController.php';
+    require_once __DIR__ . '/src/Controllers/TemplateController.php';
     $controller = new TemplateController();
     $controller->submitCustomization($id);
 });
@@ -107,29 +107,38 @@ $router->post('/api/template/{id}/customize', function ($id) {
 // ===================
 
 $router->get('/login', function () {
-    include __DIR__ . '/../templates/pages/login.php';
+    include __DIR__ . '/templates/pages/login.php';
 });
 
 $router->post('/login', function () {
-    require_once __DIR__ . '/../src/Auth/AuthController.php';
+    require_once __DIR__ . '/src/Auth/AuthController.php';
     $auth = new AuthController();
     $auth->login();
 });
 
 $router->get('/register', function () {
-    include __DIR__ . '/../templates/pages/register.php';
+    include __DIR__ . '/templates/pages/register.php';
 });
 
 $router->post('/register', function () {
-    require_once __DIR__ . '/../src/Auth/AuthController.php';
+    require_once __DIR__ . '/src/Auth/AuthController.php';
     $auth = new AuthController();
     $auth->register();
 });
 
 $router->get('/logout', function () {
-    require_once __DIR__ . '/../src/Auth/AuthController.php';
+    require_once __DIR__ . '/src/Auth/AuthController.php';
     $auth = new AuthController();
     $auth->logout();
+});
+
+// ===================
+// ADMIN ROUTES
+// ===================
+
+$router->get('/admin', function () {
+    header('Location: /admin/dashboard.php');
+    exit;
 });
 
 // ===================
