@@ -355,6 +355,20 @@ CREATE TABLE IF NOT EXISTS `competitors` (
     UNIQUE KEY `uk_competitors_domain` (`domain`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- =====================
+-- SETTINGS TABLE (Application Configuration)
+-- =====================
+CREATE TABLE IF NOT EXISTS `settings` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `setting_key` VARCHAR(100) NOT NULL,
+    `setting_value` TEXT DEFAULT NULL,
+    `setting_type` ENUM('string', 'number', 'boolean', 'json') NOT NULL DEFAULT 'string',
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_settings_key` (`setting_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- =====================
