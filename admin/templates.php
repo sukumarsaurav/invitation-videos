@@ -451,6 +451,41 @@ function getYouTubeEmbedUrl($url) {
             </div>
         </div>
         
+        <?php if ($action === 'new'): ?>
+        <!-- Template Fields Placeholder for New Template -->
+        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800 shadow-sm p-6">
+            <div class="flex items-start gap-4">
+                <div class="p-3 bg-blue-100 dark:bg-blue-900/50 rounded-lg text-blue-600">
+                    <span class="material-symbols-outlined text-2xl">playlist_add</span>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-lg font-bold text-blue-900 dark:text-blue-100">Customization Fields</h3>
+                    <p class="text-sm text-blue-700 dark:text-blue-300 mt-1 mb-4">
+                        After saving this template, you can add custom fields like:
+                    </p>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+                        <span class="inline-flex items-center gap-1 px-3 py-1.5 bg-white/60 dark:bg-white/10 rounded-full text-xs font-medium text-blue-800 dark:text-blue-200">
+                            <span class="material-symbols-outlined text-sm">text_fields</span> Text Fields
+                        </span>
+                        <span class="inline-flex items-center gap-1 px-3 py-1.5 bg-white/60 dark:bg-white/10 rounded-full text-xs font-medium text-blue-800 dark:text-blue-200">
+                            <span class="material-symbols-outlined text-sm">calendar_month</span> Date Fields
+                        </span>
+                        <span class="inline-flex items-center gap-1 px-3 py-1.5 bg-white/60 dark:bg-white/10 rounded-full text-xs font-medium text-blue-800 dark:text-blue-200">
+                            <span class="material-symbols-outlined text-sm">image</span> Photo Upload
+                        </span>
+                        <span class="inline-flex items-center gap-1 px-3 py-1.5 bg-white/60 dark:bg-white/10 rounded-full text-xs font-medium text-blue-800 dark:text-blue-200">
+                            <span class="material-symbols-outlined text-sm">music_note</span> Music Upload
+                        </span>
+                    </div>
+                    <p class="text-xs text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">info</span>
+                        Click "Create Template" to save first, then add your customization fields.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+        
         <?php if ($action === 'edit' && $templateId): ?>
         <!-- Template Fields Editor -->
         <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
