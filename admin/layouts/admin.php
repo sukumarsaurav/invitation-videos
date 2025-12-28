@@ -135,6 +135,7 @@ require_once __DIR__ . '/../auth.php';
                         ['href' => '/admin/templates.php', 'icon' => 'video_library', 'label' => 'Templates', 'page' => 'templates'],
                         ['href' => '/admin/promo-codes.php', 'icon' => 'confirmation_number', 'label' => 'Promo Codes', 'page' => 'promo-codes'],
                         ['href' => '/admin/users.php', 'icon' => 'group', 'label' => 'Users', 'page' => 'users'],
+                        ['href' => '/admin/blog.php', 'icon' => 'article', 'label' => 'Blog', 'page' => 'blog'],
                         ['href' => '/admin/support.php', 'icon' => 'contact_support', 'label' => 'Support', 'page' => 'support', 'badge' => $pendingTickets ?? null],
                     ];
 

@@ -1,0 +1,466 @@
+<?php
+/**
+ * Admin - Blog Management
+ */
+
+require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../src/Core/Security.php';
+require_once __DIR__ . '/auth.php';
+
+// Handle form submissions
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $action = $_POST['action'] ?? '';
+
+    if ($action === 'save_post') {
+        $id = intval($_POST['id'] ?? 0);
+        $title = trim($_POST['title'] ?? '');
+        $slug = trim($_POST['slug'] ?? '');
+        $excerpt = trim($_POST['excerpt'] ?? '');
+        $content = $_POST['content'] ?? '';
+        $category = trim($_POST['category'] ?? '');
+        $status = $_POST['status'] ?? 'draft';
+        $metaTitle = trim($_POST['meta_title'] ?? '');
+        $metaDescription = trim($_POST['meta_description'] ?? '');
+        $featuredImage = trim($_POST['featured_image'] ?? '');
+
+        // Generate slug if empty
+        if (empty($slug)) {
+            $slug = strtolower(preg_replace('/[^a-zA-Z0-9]+/', '-', $title));
+            $slug = trim($slug, '-');
+        }
+
+        // Set published_at if publishing
+        $publishedAt = null;
+        if ($status === 'published') {
+            $publishedAt = date('Y-m-d H:i:s');
+        }
+
+        if ($id > 0) {
+            // Update existing post
+            if ($status === 'published') {
+                Database::query(
+                    "UPDATE blog_posts SET title = ?, slug = ?, excerpt = ?, content = ?, category = ?, 
+                     status = ?, meta_title = ?, meta_description = ?, featured_image = ?,
+                     published_at = COALESCE(published_at, NOW())
+                     WHERE id = ?",
+                    [$title, $slug, $excerpt, $content, $category, $status, $metaTitle, $metaDescription, $featuredImage, $id]
+                );
+            } else {
+                Database::query(
+                    "UPDATE blog_posts SET title = ?, slug = ?, excerpt = ?, content = ?, category = ?, 
+                     status = ?, meta_title = ?, meta_description = ?, featured_image = ?
+                     WHERE id = ?",
+                    [$title, $slug, $excerpt, $content, $category, $status, $metaTitle, $metaDescription, $featuredImage, $id]
+                );
+            }
+            header('Location: /admin/blog.php?success=updated');
+        } else {
+            // Create new post
+            Database::query(
+                "INSERT INTO blog_posts (title, slug, excerpt, content, category, status, meta_title, meta_description, featured_image, author_id, published_at)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                [$title, $slug, $excerpt, $content, $category, $status, $metaTitle, $metaDescription, $featuredImage, $_SESSION['user_id'], $status === 'published' ? date('Y-m-d H:i:s') : null]
+            );
+            header('Location: /admin/blog.php?success=created');
+        }
+        exit;
+    }
+
+    if ($action === 'delete_post') {
+        $id = intval($_POST['id'] ?? 0);
+        Database::query("DELETE FROM blog_posts WHERE id = ?", [$id]);
+        header('Location: /admin/blog.php?success=deleted');
+        exit;
+    }
+}
+
+// Get action and id
+$action = $_GET['action'] ?? 'list';
+$id = intval($_GET['id'] ?? 0);
+
+// Get post for editing
+$post = null;
+if ($action === 'edit' && $id > 0) {
+    $post = Database::fetchOne("SELECT * FROM blog_posts WHERE id = ?", [$id]);
+}
+
+// Get posts for list view
+$status = $_GET['status'] ?? '';
+$search = $_GET['search'] ?? '';
+$page = max(1, intval($_GET['page'] ?? 1));
+$perPage = 20;
+$offset = ($page - 1) * $perPage;
+
+$whereConditions = [];
+$params = [];
+
+if ($status) {
+    $whereConditions[] = "status = ?";
+    $params[] = $status;
+}
+
+if ($search) {
+    $whereConditions[] = "(title LIKE ? OR excerpt LIKE ?)";
+    $params[] = "%$search%";
+    $params[] = "%$search%";
+}
+
+$whereClause = $whereConditions ? 'WHERE ' . implode(' AND ', $whereConditions) : '';
+
+$totalPosts = Database::fetchOne("SELECT COUNT(*) as c FROM blog_posts $whereClause", $params)['c'] ?? 0;
+$totalPages = ceil($totalPosts / $perPage);
+
+$posts = Database::fetchAll(
+    "SELECT p.*, u.name as author_name FROM blog_posts p 
+     LEFT JOIN users u ON p.author_id = u.id 
+     $whereClause ORDER BY p.created_at DESC LIMIT $perPage OFFSET $offset",
+    $params
+);
+
+// Get categories for filter
+$categories = Database::fetchAll("SELECT DISTINCT category FROM blog_posts WHERE category IS NOT NULL AND category != '' ORDER BY category");
+
+$pendingTickets = 0;
+$pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 'New Post') : 'Blog Management';
+?>
+
+<?php ob_start(); ?>
+
+<?php if ($action === 'new' || $action === 'edit'): ?>
+    <!-- Editor View -->
+    <div class="mb-6">
+        <a href="/admin/blog.php"
+            class="inline-flex items-center gap-2 text-slate-600 hover:text-primary transition-colors">
+            <span class="material-symbols-outlined">arrow_back</span>
+            Back to Posts
+        </a>
+    </div>
+
+    <form method="POST" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <input type="hidden" name="action" value="save_post">
+        <input type="hidden" name="id" value="<?= $post['id'] ?? 0 ?>">
+
+        <!-- Main Content -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Title -->
+            <div
+                class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                <input type="text" name="title" value="<?= Security::escape($post['title'] ?? '') ?>" required
+                    class="w-full text-2xl font-bold border-none focus:ring-0 p-0 bg-transparent placeholder:text-slate-400"
+                    placeholder="Post title...">
+            </div>
+
+            <!-- Slug -->
+            <div
+                class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-4">
+                <label class="text-xs text-slate-500 uppercase font-bold mb-1 block">URL Slug</label>
+                <div class="flex items-center gap-2">
+                    <span class="text-slate-400 text-sm">/blog/</span>
+                    <input type="text" name="slug" value="<?= Security::escape($post['slug'] ?? '') ?>"
+                        class="flex-1 text-sm border-none focus:ring-0 p-0 bg-transparent" placeholder="post-url-slug">
+                </div>
+            </div>
+
+            <!-- Excerpt -->
+            <div
+                class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                <label class="text-xs text-slate-500 uppercase font-bold mb-2 block">Excerpt</label>
+                <textarea name="excerpt" rows="2"
+                    class="w-full border-none focus:ring-0 p-0 bg-transparent text-sm resize-none placeholder:text-slate-400"
+                    placeholder="Brief summary for listings and SEO..."><?= Security::escape($post['excerpt'] ?? '') ?></textarea>
+            </div>
+
+            <!-- Content Editor -->
+            <div
+                class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                <div class="px-6 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-white/5">
+                    <span class="text-xs text-slate-500 uppercase font-bold">Content</span>
+                </div>
+                <div class="p-6">
+                    <textarea name="content" id="content-editor" rows="20"
+                        class="w-full border border-slate-200 rounded-lg p-4 text-sm focus:ring-2 focus:ring-primary focus:border-primary"><?= Security::escape($post['content'] ?? '') ?></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Publish Box -->
+            <div
+                class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                <h3 class="font-bold mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">publish</span>
+                    Publish
+                </h3>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Status</label>
+                        <select name="status"
+                            class="w-full h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
+                            <option value="draft" <?= ($post['status'] ?? 'draft') === 'draft' ? 'selected' : '' ?>>Draft
+                            </option>
+                            <option value="published" <?= ($post['status'] ?? '') === 'published' ? 'selected' : '' ?>>
+                                Published</option>
+                            <option value="archived" <?= ($post['status'] ?? '') === 'archived' ? 'selected' : '' ?>>Archived
+                            </option>
+                        </select>
+                    </div>
+
+                    <?php if ($post && $post['published_at']): ?>
+                        <p class="text-xs text-slate-500">
+                            Published: <?= date('M j, Y g:i A', strtotime($post['published_at'])) ?>
+                        </p>
+                    <?php endif; ?>
+
+                    <div class="flex gap-2 pt-2">
+                        <button type="submit"
+                            class="flex-1 py-2.5 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 transition-colors">
+                            <?= $post ? 'Update' : 'Publish' ?>
+                        </button>
+                        <a href="<?= $post ? '/blog/' . $post['slug'] : '#' ?>" target="_blank"
+                            class="px-4 py-2.5 border border-slate-200 rounded-lg hover:bg-slate-50 <?= !$post ? 'opacity-50 pointer-events-none' : '' ?>">
+                            <span class="material-symbols-outlined text-lg">visibility</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category -->
+            <div
+                class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                <h3 class="font-bold mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">category</span>
+                    Category
+                </h3>
+                <input type="text" name="category" value="<?= Security::escape($post['category'] ?? '') ?>"
+                    class="w-full h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 text-sm"
+                    placeholder="e.g., Wedding Tips, Birthday Ideas" list="category-suggestions">
+                <datalist id="category-suggestions">
+                    <?php foreach ($categories as $cat): ?>
+                        <option value="<?= Security::escape($cat['category']) ?>">
+                        <?php endforeach; ?>
+                </datalist>
+            </div>
+
+            <!-- Featured Image -->
+            <div
+                class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                <h3 class="font-bold mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">image</span>
+                    Featured Image
+                </h3>
+                <input type="url" name="featured_image" value="<?= Security::escape($post['featured_image'] ?? '') ?>"
+                    class="w-full h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 text-sm"
+                    placeholder="https://...">
+                <?php if ($post && $post['featured_image']): ?>
+                    <div class="mt-3 aspect-video rounded-lg overflow-hidden bg-slate-100">
+                        <img src="<?= Security::escape($post['featured_image']) ?>" alt="" class="w-full h-full object-cover">
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- SEO -->
+            <div
+                class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                <h3 class="font-bold mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">search</span>
+                    SEO Settings
+                </h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs text-slate-500 uppercase font-bold mb-1">Meta Title</label>
+                        <input type="text" name="meta_title" value="<?= Security::escape($post['meta_title'] ?? '') ?>"
+                            class="w-full h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 text-sm"
+                            placeholder="SEO title (60 chars max)">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-500 uppercase font-bold mb-1">Meta Description</label>
+                        <textarea name="meta_description" rows="3"
+                            class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-sm resize-none"
+                            placeholder="SEO description (160 chars max)"><?= Security::escape($post['meta_description'] ?? '') ?></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <!-- TinyMCE Editor -->
+    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <script>
+        tinymce.init({
+            selector: '#content-editor',
+            height: 500,
+            menubar: false,
+            plugins: 'lists link image code table wordcount',
+            toolbar: 'undo redo | blocks | bold italic | alignleft aligncenter alignright | bullist numlist | link image | code',
+            content_style: 'body { font-family: Plus Jakarta Sans, sans-serif; font-size: 14px; }'
+        });
+    </script>
+
+<?php else: ?>
+    <!-- List View -->
+
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div>
+            <h2 class="text-2xl font-bold">Blog Posts</h2>
+            <p class="text-slate-500 mt-1">Manage your blog content for SEO</p>
+        </div>
+        <a href="/admin/blog.php?action=new"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 transition-colors">
+            <span class="material-symbols-outlined">add</span>
+            New Post
+        </a>
+    </div>
+
+    <?php if (isset($_GET['success'])): ?>
+        <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6 flex items-center gap-2">
+            <span class="material-symbols-outlined">check_circle</span>
+            Post <?= Security::escape($_GET['success']) ?> successfully!
+        </div>
+    <?php endif; ?>
+
+    <!-- Filters -->
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-4 mb-6">
+        <form method="GET" class="flex flex-wrap items-center gap-4">
+            <div class="flex-1 min-w-[200px]">
+                <div class="relative">
+                    <span
+                        class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 material-symbols-outlined text-lg">search</span>
+                    <input type="text" name="search" value="<?= Security::escape($search) ?>"
+                        class="w-full h-10 pl-10 pr-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+                        placeholder="Search posts...">
+                </div>
+            </div>
+            <select name="status"
+                class="h-10 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
+                <option value="">All Status</option>
+                <option value="draft" <?= $status === 'draft' ? 'selected' : '' ?>>Draft</option>
+                <option value="published" <?= $status === 'published' ? 'selected' : '' ?>>Published</option>
+                <option value="archived" <?= $status === 'archived' ? 'selected' : '' ?>>Archived</option>
+            </select>
+            <button type="submit" class="h-10 px-6 bg-primary text-white font-bold rounded-lg hover:bg-primary/90">
+                Filter
+            </button>
+        </form>
+    </div>
+
+    <!-- Posts Table -->
+    <div
+        class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 dark:bg-white/5 text-slate-500 font-semibold uppercase text-xs">
+                    <tr>
+                        <th class="px-6 py-4">Title</th>
+                        <th class="px-6 py-4">Category</th>
+                        <th class="px-6 py-4">Author</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4">Views</th>
+                        <th class="px-6 py-4">Date</th>
+                        <th class="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                    <?php foreach ($posts as $p):
+                        $statusColors = [
+                            'draft' => 'bg-yellow-100 text-yellow-700',
+                            'published' => 'bg-green-100 text-green-700',
+                            'archived' => 'bg-slate-100 text-slate-700',
+                        ];
+                        ?>
+                        <tr class="hover:bg-slate-50 dark:hover:bg-white/5">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <?php if ($p['featured_image']): ?>
+                                        <div class="w-10 h-10 rounded-lg bg-slate-100 bg-cover bg-center flex-shrink-0"
+                                            style="background-image: url('<?= Security::escape($p['featured_image']) ?>');"></div>
+                                    <?php endif; ?>
+                                    <div>
+                                        <p class="font-bold text-slate-900 dark:text-white"><?= Security::escape($p['title']) ?>
+                                        </p>
+                                        <p class="text-xs text-slate-500 truncate max-w-xs">
+                                            /blog/<?= Security::escape($p['slug']) ?></p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-slate-500"><?= Security::escape($p['category'] ?? '—') ?></td>
+                            <td class="px-6 py-4 text-slate-500"><?= Security::escape($p['author_name'] ?? '—') ?></td>
+                            <td class="px-6 py-4">
+                                <span
+                                    class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium <?= $statusColors[$p['status']] ?? 'bg-slate-100' ?>">
+                                    <?= ucfirst($p['status']) ?>
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-slate-500"><?= number_format($p['view_count']) ?></td>
+                            <td class="px-6 py-4 text-slate-500 text-xs">
+                                <?= $p['published_at'] ? date('M j, Y', strtotime($p['published_at'])) : date('M j, Y', strtotime($p['created_at'])) ?>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center justify-end gap-1">
+                                    <a href="/admin/blog.php?action=edit&id=<?= $p['id'] ?>"
+                                        class="p-2 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-primary"
+                                        title="Edit">
+                                        <span class="material-symbols-outlined text-lg">edit</span>
+                                    </a>
+                                    <a href="/blog/<?= $p['slug'] ?>" target="_blank"
+                                        class="p-2 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-primary"
+                                        title="View">
+                                        <span class="material-symbols-outlined text-lg">visibility</span>
+                                    </a>
+                                    <form method="POST" class="inline" onsubmit="return confirm('Delete this post?')">
+                                        <input type="hidden" name="action" value="delete_post">
+                                        <input type="hidden" name="id" value="<?= $p['id'] ?>">
+                                        <button type="submit"
+                                            class="p-2 rounded-lg hover:bg-red-50 text-slate-500 hover:text-red-500"
+                                            title="Delete">
+                                            <span class="material-symbols-outlined text-lg">delete</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+
+                    <?php if (empty($posts)): ?>
+                        <tr>
+                            <td colspan="7" class="px-6 py-12 text-center text-slate-500">
+                                <span class="material-symbols-outlined text-5xl text-slate-300 mb-2">article</span>
+                                <p class="text-lg font-medium">No blog posts yet</p>
+                                <p class="text-sm">Create your first post to improve SEO</p>
+                                <a href="/admin/blog.php?action=new"
+                                    class="inline-flex items-center gap-2 mt-4 text-primary font-bold hover:underline">
+                                    <span class="material-symbols-outlined">add</span>
+                                    Create Post
+                                </a>
+                            </td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <?php if ($totalPages > 1): ?>
+            <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <p class="text-sm text-slate-500">
+                    Showing <?= $offset + 1 ?> to <?= min($offset + $perPage, $totalPosts) ?> of <?= $totalPosts ?> posts
+                </p>
+                <div class="flex items-center gap-1">
+                    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                        <a href="?page=<?= $i ?>&status=<?= $status ?>&search=<?= urlencode($search) ?>"
+                            class="w-10 h-10 flex items-center justify-center rounded-lg <?= $i === $page ? 'bg-primary text-white' : 'hover:bg-slate-100' ?> font-medium text-sm">
+                            <?= $i ?>
+                        </a>
+                    <?php endfor; ?>
+                </div>
+            </div>
+        <?php endif; ?>
+    </div>
+
+<?php endif; ?>
+
+<?php
+$content = ob_get_clean();
+include __DIR__ . '/layouts/admin.php';
+?>

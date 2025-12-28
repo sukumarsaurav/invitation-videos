@@ -75,6 +75,17 @@ $router->get('/order/{orderId}/confirmation', function ($orderId) {
     include __DIR__ . '/templates/pages/confirmation.php';
 });
 
+// Blog listing
+$router->get('/blog', function () {
+    include __DIR__ . '/templates/pages/blog.php';
+});
+
+// Single blog post
+$router->get('/blog/{slug}', function ($slug) {
+    $_GET['slug'] = $slug;
+    include __DIR__ . '/templates/pages/blog-post.php';
+});
+
 // ===================
 // API ROUTES
 // ===================
