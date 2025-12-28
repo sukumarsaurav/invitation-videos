@@ -88,16 +88,22 @@ session_regenerate_id(true);
 $_SESSION['user_id'] = $user['id'];
 $_SESSION['user_email'] = $user['email'];
 $_SESSION['user_name'] = $user['name'];
+$_SESSION['user_role'] = $user['role'];
 $_SESSION['user_avatar'] = $user['avatar_url'] ?? '';
 $_SESSION['user_logged_in_at'] = time();
 
 // Update last login
 Database::query("UPDATE users SET last_login = NOW() WHERE id = ?", [$user['id']]);
 
-// Redirect to intended URL or home
-$redirect = $_SESSION['redirect_url'] ?? '/';
+// Determine redirect based on role
+if ($user['role'] === 'admin') {
+    $redirect = '/admin/dashboard.php';
+} else {
+    $redirect = $_SESSION['redirect_url'] ?? '/';
+}
 unset($_SESSION['redirect_url']);
 
 $_SESSION['success'] = 'Signed in with Google successfully!';
 header('Location: ' . $redirect);
 exit;
+
