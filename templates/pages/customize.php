@@ -53,6 +53,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Create order
             $orderNumber = 'ORD-' . strtoupper(substr(uniqid(), -8));
 
+            // Auto-detect country if not set
+            if (!isset($_SESSION['user_country'])) {
+                // Check timezone first (most reliable for browser users)
+                $timezone = $_POST['user_timezone'] ?? '';
+                if (strpos($timezone, 'Asia/Kolkata') !== false || strpos($timezone, 'Asia/Calcutta') !== false) {
+                    $_SESSION['user_country'] = 'IN';
+                } else {
+                    // Fallback: Check IP-based geolocation using free ipapi.co service
+                    $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '';
+                    if ($ip && $ip !== '127.0.0.1' && $ip !== '::1') {
+                        $geoData = @file_get_contents("https://ipapi.co/{$ip}/json/");
+                        if ($geoData) {
+                            $geo = json_decode($geoData, true);
+                            $_SESSION['user_country'] = $geo['country_code'] ?? 'US';
+                        }
+                    }
+                }
+                // Default to US if still not set
+                if (!isset($_SESSION['user_country'])) {
+                    $_SESSION['user_country'] = 'US';
+                }
+            }
+
             // Determine currency based on user country
             $userCountry = $_SESSION['user_country'] ?? 'US';
             $currency = ($userCountry === 'IN') ? 'INR' : 'USD';
@@ -143,6 +166,7 @@ $pageTitle = 'Customize - ' . $template['title'];
 
             <form id="customize-form" method="POST" enctype="multipart/form-data" class="space-y-6">
                 <?= Security::csrfField() ?>
+                <input type="hidden" name="user_timezone" id="user_timezone" value="">
 
                 <?= $formRenderer->render($templateId) ?>
 
@@ -242,6 +266,16 @@ $pageTitle = 'Customize - ' . $template['title'];
 
     </div>
 </div>
+
+<script>
+    // Capture user timezone for country detection
+    document.addEventListener('DOMContentLoaded', function () {
+        const tzField = document.getElementById('user_timezone');
+        if (tzField) {
+            tzField.value = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        }
+    });
+</script>
 
 <?php
 $content = ob_get_clean();
