@@ -102,51 +102,33 @@
                     </h2>
                 </a>
 
-                <!-- Desktop Navigation -->
-                <nav class="hidden md:flex items-center gap-6">
-                    <a href="/templates"
-                        class="text-sm font-medium text-slate-600 hover:text-primary transition-colors">All
-                        Templates</a>
-
-                    <!-- Categories Dropdown -->
-                    <div class="relative group">
-                        <button
-                            class="flex items-center gap-1 text-sm font-medium text-slate-600 hover:text-primary transition-colors">
-                            Categories
-                            <span class="material-symbols-outlined text-lg">expand_more</span>
-                        </button>
-                        <div
-                            class="absolute left-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                            <div
-                                class="bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 py-2 min-w-[180px]">
-                                <a href="/templates?category=wedding"
-                                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-primary/5 hover:text-primary transition-colors">
-                                    <span class="material-symbols-outlined text-lg text-rose-500">favorite</span>
-                                    Wedding
-                                </a>
-                                <a href="/templates?category=birthday"
-                                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-primary/5 hover:text-primary transition-colors">
-                                    <span class="material-symbols-outlined text-lg text-amber-500">cake</span>
-                                    Birthday
-                                </a>
-                                <a href="/templates?category=corporate"
-                                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-primary/5 hover:text-primary transition-colors">
-                                    <span class="material-symbols-outlined text-lg text-blue-500">business_center</span>
-                                    Corporate
-                                </a>
-                                <a href="/templates?category=baby_shower"
-                                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-primary/5 hover:text-primary transition-colors">
-                                    <span class="material-symbols-outlined text-lg text-teal-500">child_care</span>
-                                    Baby Shower
-                                </a>
-                                <a href="/templates?category=anniversary"
-                                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-primary/5 hover:text-primary transition-colors">
-                                    <span class="material-symbols-outlined text-lg text-purple-500">celebration</span>
-                                    Anniversary
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+                <!-- Desktop Navigation - Categories directly -->
+                <nav class="hidden md:flex items-center gap-5">
+                    <a href="/templates?category=wedding"
+                        class="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined text-lg text-rose-500">favorite</span>
+                        Wedding
+                    </a>
+                    <a href="/templates?category=birthday"
+                        class="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined text-lg text-amber-500">cake</span>
+                        Birthday
+                    </a>
+                    <a href="/templates?category=corporate"
+                        class="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined text-lg text-blue-500">business_center</span>
+                        Corporate
+                    </a>
+                    <a href="/templates?category=baby_shower"
+                        class="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined text-lg text-teal-500">child_care</span>
+                        Baby Shower
+                    </a>
+                    <a href="/templates?category=anniversary"
+                        class="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined text-lg text-purple-500">celebration</span>
+                        Anniversary
+                    </a>
                 </nav>
 
                 <!-- Desktop Auth -->
@@ -175,35 +157,32 @@
         <div id="mobileMenu"
             class="md:hidden closed border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
             <nav class="px-4 py-4 space-y-1">
-                <a href="/templates"
-                    class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-100 font-medium">
-                    <span class="material-symbols-outlined">video_library</span>
-                    All Templates
-                </a>
-                
                 <!-- Category Links -->
-                <div class="pl-4 space-y-0.5">
-                    <a href="/templates?category=wedding" class="flex items-center gap-3 px-4 py-2 rounded-lg text-slate-500 hover:bg-slate-100 text-sm">
-                        <span class="material-symbols-outlined text-rose-500">favorite</span>
-                        Wedding
-                    </a>
-                    <a href="/templates?category=birthday" class="flex items-center gap-3 px-4 py-2 rounded-lg text-slate-500 hover:bg-slate-100 text-sm">
-                        <span class="material-symbols-outlined text-amber-500">cake</span>
-                        Birthday
-                    </a>
-                    <a href="/templates?category=corporate" class="flex items-center gap-3 px-4 py-2 rounded-lg text-slate-500 hover:bg-slate-100 text-sm">
-                        <span class="material-symbols-outlined text-blue-500">business_center</span>
-                        Corporate
-                    </a>
-                    <a href="/templates?category=baby_shower" class="flex items-center gap-3 px-4 py-2 rounded-lg text-slate-500 hover:bg-slate-100 text-sm">
-                        <span class="material-symbols-outlined text-teal-500">child_care</span>
-                        Baby Shower
-                    </a>
-                    <a href="/templates?category=anniversary" class="flex items-center gap-3 px-4 py-2 rounded-lg text-slate-500 hover:bg-slate-100 text-sm">
-                        <span class="material-symbols-outlined text-purple-500">celebration</span>
-                        Anniversary
-                    </a>
-                </div>
+                <a href="/templates?category=wedding"
+                    class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-100 font-medium">
+                    <span class="material-symbols-outlined text-rose-500">favorite</span>
+                    Wedding
+                </a>
+                <a href="/templates?category=birthday"
+                    class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-100 font-medium">
+                    <span class="material-symbols-outlined text-amber-500">cake</span>
+                    Birthday
+                </a>
+                <a href="/templates?category=corporate"
+                    class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-100 font-medium">
+                    <span class="material-symbols-outlined text-blue-500">business_center</span>
+                    Corporate
+                </a>
+                <a href="/templates?category=baby_shower"
+                    class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-100 font-medium">
+                    <span class="material-symbols-outlined text-teal-500">child_care</span>
+                    Baby Shower
+                </a>
+                <a href="/templates?category=anniversary"
+                    class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-100 font-medium">
+                    <span class="material-symbols-outlined text-purple-500">celebration</span>
+                    Anniversary
+                </a>
 
                 <div class="border-t border-slate-200 my-3"></div>
 
