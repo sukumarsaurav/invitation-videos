@@ -57,6 +57,12 @@ $router->get('/template/{slug}', function ($slug) {
     include __DIR__ . '/templates/pages/customize.php';
 });
 
+// Handle template customization form POST
+$router->post('/template/{slug}', function ($slug) {
+    $_GET['template_slug'] = $slug;
+    include __DIR__ . '/templates/pages/customize.php';
+});
+
 // Checkout page
 $router->get('/checkout/{orderId}', function ($orderId) {
     $_GET['order_id'] = $orderId;
