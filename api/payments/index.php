@@ -170,9 +170,9 @@ function createRazorpayOrder(array $input): void
         [$result['order_id'], $orderId]
     );
 
-    // Get checkout options
+    // Get checkout options - merge order data with Razorpay result
     $checkoutOptions = $razorpayService->getCheckoutOptions(
-        $result,
+        array_merge($order, ['razorpay_order_id' => $result['order_id']]),
         [
             'name' => $order['customer_name'] ?? '',
             'email' => $order['customer_email'] ?? '',
