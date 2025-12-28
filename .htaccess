@@ -1,5 +1,5 @@
-# InvitationVideos - Apache Configuration
-# Place this in your web root OR the public folder
+# InvitationVideos - Apache/LiteSpeed Configuration
+# Handles URL routing for the application
 
 RewriteEngine On
 
@@ -11,11 +11,26 @@ RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 # RewriteCond %{HTTPS} off
 # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-# If the requested file/directory exists, serve it directly
+# Remove trailing slash (except for actual directories with index files)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_URI} (.+)/$
+RewriteRule ^ %1 [R=301,L]
+
+# Block access to sensitive directories
+RewriteRule ^(config|src|templates|admin|api|database|vendor)/ index.php [L]
+
+# If request is for a file that exists, serve it
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+# Route all other requests to index.php
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [L]
 
-# Otherwise, route to index.php
+# Also route directory requests that aren't real public dirs to index.php
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteCond %{REQUEST_URI} !^/(uploads|assets)
 RewriteRule ^ index.php [L]
 
 # Security headers
@@ -26,9 +41,16 @@ RewriteRule ^ index.php [L]
 </IfModule>
 
 # Prevent access to sensitive files
-<FilesMatch "(^\.env|composer\.(json|lock)|\.git)">
+<FilesMatch "(^\.env|composer\.(json|lock)|\.git|\.md)">
     Order deny,allow
     Deny from all
+</FilesMatch>
+
+# Deny access to PHP files in certain directories (security)
+<FilesMatch "\.php$">
+    <If "%{REQUEST_URI} =~ m#^/(config|src|database)/.*\.php$#">
+        Require all denied
+    </If>
 </FilesMatch>
 
 # PHP settings (if allowed by host)
