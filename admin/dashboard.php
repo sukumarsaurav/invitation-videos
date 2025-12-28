@@ -3,11 +3,9 @@
  * Admin Dashboard
  */
 
+require_once __DIR__ . '/auth.php';  // Must be first for authentication
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../src/Core/Security.php';
-
-// TODO: Add admin authentication check
-// if (!isset($_SESSION['admin_id'])) { header('Location: /admin/login.php'); exit; }
 
 // Get stats
 $stats = [
@@ -282,7 +280,7 @@ $pageTitle = 'Dashboard';
                             <td class="px-6 py-4"><?= Security::escape($order['template_title'] ?? '-') ?></td>
                             <td class="px-6 py-4"><?= date('M j, Y', strtotime($order['created_at'])) ?></td>
                             <td class="px-6 py-4 font-semibold text-slate-900 dark:text-white">
-                                <?= $order['currency'] === 'INR' ? '₹' : '$' ?>    <?= number_format($order['amount'], 2) ?>
+                                <?= $order['currency'] === 'INR' ? '₹' : '$' ?>     <?= number_format($order['amount'], 2) ?>
                             </td>
                             <td class="px-6 py-4">
                                 <span

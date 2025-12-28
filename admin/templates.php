@@ -4,6 +4,7 @@
  * Full functionality with SEO slugs, pricing, discounts, media, and field editor
  */
 
+require_once __DIR__ . '/auth.php';  // Must be first for authentication
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../src/Core/Security.php';
 

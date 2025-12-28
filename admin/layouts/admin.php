@@ -157,32 +157,39 @@ require_once __DIR__ . '/../auth.php';
             </div>
 
             <!-- Bottom Section -->
-            <div class="p-4 border-t border-slate-200 dark:border-slate-800">
-                <nav class="flex flex-col gap-1 mb-4">
-                    <a href="/admin/settings.php"
-                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors">
-                        <span class="material-symbols-outlined">settings</span>
-                        <span class="text-sm font-medium">Settings</span>
-                    </a>
-                    <a href="/logout"
-                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
-                        <span class="material-symbols-outlined">logout</span>
-                        <span class="text-sm font-medium">Logout</span>
-                    </a>
-                </nav>
+            <div class="p-4 border-t border-slate-200 dark:border-slate-800 relative">
+                <!-- Admin Profile with Dropdown -->
+                <div class="relative">
+                    <!-- Dropdown Menu (hidden by default) -->
+                    <div id="user-dropdown"
+                        class="absolute bottom-full left-0 right-0 mb-2 bg-white dark:bg-surface-dark rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden hidden">
+                        <a href="/admin/settings.php"
+                            class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                            <span class="material-symbols-outlined text-lg">settings</span>
+                            <span class="text-sm font-medium">Settings</span>
+                        </a>
+                        <a href="/logout"
+                            class="flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors border-t border-slate-100 dark:border-slate-700">
+                            <span class="material-symbols-outlined text-lg">logout</span>
+                            <span class="text-sm font-medium">Logout</span>
+                        </a>
+                    </div>
 
-                <!-- Admin Profile -->
-                <div
-                    class="flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-50 dark:bg-white/5 cursor-pointer hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
-                    <div
-                        class="size-9 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
-                        <?= substr($_SESSION['user_name'] ?? 'A', 0, 1) ?>
-                    </div>
-                    <div class="flex flex-col overflow-hidden">
-                        <p class="text-sm font-bold truncate"><?= $_SESSION['user_name'] ?? 'Admin' ?></p>
-                        <p class="text-xs text-slate-500 truncate"><?= ucfirst($_SESSION['user_role'] ?? 'Admin') ?></p>
-                    </div>
-                    <span class="material-symbols-outlined ml-auto text-slate-400 text-[20px]">expand_more</span>
+                    <!-- Profile Button -->
+                    <button type="button" onclick="toggleUserDropdown()"
+                        class="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-50 dark:bg-white/5 cursor-pointer hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
+                        <div
+                            class="size-9 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
+                            <?= substr($_SESSION['user_name'] ?? 'A', 0, 1) ?>
+                        </div>
+                        <div class="flex flex-col overflow-hidden text-left">
+                            <p class="text-sm font-bold truncate"><?= $_SESSION['user_name'] ?? 'Admin' ?></p>
+                            <p class="text-xs text-slate-500 truncate"><?= ucfirst($_SESSION['user_role'] ?? 'Admin') ?>
+                            </p>
+                        </div>
+                        <span id="dropdown-arrow"
+                            class="material-symbols-outlined ml-auto text-slate-400 text-[20px] transition-transform">expand_more</span>
+                    </button>
                 </div>
             </div>
         </aside>
@@ -261,6 +268,25 @@ require_once __DIR__ . '/../auth.php';
             sidebar.classList.toggle('closed');
             overlay.classList.toggle('hidden');
         }
+
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('user-dropdown');
+            const arrow = document.getElementById('dropdown-arrow');
+
+            dropdown.classList.toggle('hidden');
+            arrow.style.transform = dropdown.classList.contains('hidden') ? '' : 'rotate(180deg)';
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function (e) {
+            const dropdown = document.getElementById('user-dropdown');
+            const profileBtn = e.target.closest('button[onclick="toggleUserDropdown()"]');
+
+            if (!profileBtn && dropdown && !dropdown.contains(e.target)) {
+                dropdown.classList.add('hidden');
+                document.getElementById('dropdown-arrow').style.transform = '';
+            }
+        });
 
         // Close sidebar when clicking a link (mobile)
         document.querySelectorAll('#sidebar a').forEach(link => {

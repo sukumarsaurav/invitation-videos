@@ -4,6 +4,7 @@
  * Full CRUD for discount codes
  */
 
+require_once __DIR__ . '/auth.php';  // Must be first for authentication
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../src/Core/Security.php';
 
@@ -231,7 +232,8 @@ $pageTitle = $action === 'new' ? 'New Promo Code' : ($action === 'edit' ? 'Edit 
         <div>
             <h2 class="text-2xl font-bold"><?= $action === 'new' ? 'New Promo Code' : 'Edit Promo Code' ?></h2>
             <p class="text-slate-500 mt-1">
-                <?= $action === 'new' ? 'Create a new discount code' : 'Update promo code settings' ?></p>
+                <?= $action === 'new' ? 'Create a new discount code' : 'Update promo code settings' ?>
+            </p>
         </div>
     </div>
 
