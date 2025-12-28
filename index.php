@@ -81,11 +81,19 @@ $router->get('/order/{orderId}/confirmation', function ($orderId) {
 
 // Create payment intent (Stripe)
 $router->post('/api/create-payment-intent', function () {
+    $_GET['action'] = 'create-stripe-intent';
     require_once __DIR__ . '/api/payments/index.php';
 });
 
 // Create order (Razorpay)
 $router->post('/api/create-razorpay-order', function () {
+    $_GET['action'] = 'create-razorpay-order';
+    require_once __DIR__ . '/api/payments/index.php';
+});
+
+// Verify Razorpay payment
+$router->post('/api/verify-razorpay', function () {
+    $_GET['action'] = 'verify-razorpay';
     require_once __DIR__ . '/api/payments/index.php';
 });
 
