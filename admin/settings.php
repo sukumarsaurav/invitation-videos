@@ -4,6 +4,7 @@
  * Manage application settings stored in the database
  */
 
+require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../src/Core/Security.php';
 
