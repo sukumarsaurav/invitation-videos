@@ -237,7 +237,7 @@ $pageTitle = 'Template Gallery';
                                 </div>
                             </div>
 
-                            <a href="/template/<?= $template['id'] ?>"
+                            <a href="/template/<?= Security::escape($template['slug']) ?>"
                                 class="mt-auto flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2 text-sm font-bold text-white transition-all hover:bg-primary/90 focus:ring-4 focus:ring-primary/20">
                                 Select
                             </a>
@@ -259,13 +259,13 @@ $pageTitle = 'Template Gallery';
 </div>
 
 <script>
-function toggleFilters() {
-    const sidebar = document.getElementById('filterSidebar');
-    const arrow = document.getElementById('filterArrow');
-    
-    sidebar.classList.toggle('hidden');
-    arrow.style.transform = sidebar.classList.contains('hidden') ? '' : 'rotate(180deg)';
-}
+    function toggleFilters() {
+        const sidebar = document.getElementById('filterSidebar');
+        const arrow = document.getElementById('filterArrow');
+
+        sidebar.classList.toggle('hidden');
+        arrow.style.transform = sidebar.classList.contains('hidden') ? '' : 'rotate(180deg)';
+    }
 </script>
 
 <?php

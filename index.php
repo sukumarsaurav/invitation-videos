@@ -51,9 +51,9 @@ $router->get('/templates', function () {
     include __DIR__ . '/templates/pages/gallery.php';
 });
 
-// Template detail & customization
-$router->get('/template/{id}', function ($id) {
-    $_GET['template_id'] = $id;
+// Template detail & customization (supports both slug and ID for backward compatibility)
+$router->get('/template/{slug}', function ($slug) {
+    $_GET['template_slug'] = $slug;
     include __DIR__ . '/templates/pages/customize.php';
 });
 
@@ -93,11 +93,11 @@ $router->post('/api/webhook/razorpay', function () {
     require_once __DIR__ . '/api/webhooks/razorpay.php';
 });
 
-// Get template fields (for dynamic forms)
-$router->get('/api/template/{id}/fields', function ($id) {
+// Get template fields (for dynamic forms) - supports both ID and slug
+$router->get('/api/template/{identifier}/fields', function ($identifier) {
     require_once __DIR__ . '/src/Controllers/TemplateController.php';
     $controller = new TemplateController();
-    $controller->getFields($id);
+    $controller->getFields($identifier);
 });
 
 // Submit customization form

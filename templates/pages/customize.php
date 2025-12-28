@@ -9,20 +9,31 @@ require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../src/Core/Security.php';
 require_once __DIR__ . '/../../src/Form/DynamicFormRenderer.php';
 
+// Support both slug and ID for template lookup
+$templateSlug = $_GET['template_slug'] ?? null;
 $templateId = intval($_GET['template_id'] ?? 0);
 
-if (!$templateId) {
+// Get template by slug or ID
+if ($templateSlug) {
+    // Check if it's numeric (backward compatibility for ID-based URLs)
+    if (is_numeric($templateSlug)) {
+        $template = Database::fetchOne("SELECT * FROM templates WHERE id = ? AND is_active = 1", [$templateSlug]);
+    } else {
+        $template = Database::fetchOne("SELECT * FROM templates WHERE slug = ? AND is_active = 1", [$templateSlug]);
+    }
+} elseif ($templateId) {
+    $template = Database::fetchOne("SELECT * FROM templates WHERE id = ? AND is_active = 1", [$templateId]);
+} else {
     header('Location: /templates');
     exit;
 }
-
-// Get template details
-$template = Database::fetchOne("SELECT * FROM templates WHERE id = ? AND is_active = 1", [$templateId]);
 
 if (!$template) {
     header('Location: /templates');
     exit;
 }
+
+$templateId = $template['id'];
 
 // Initialize form renderer
 $formRenderer = new DynamicFormRenderer();
@@ -130,7 +141,7 @@ $pageTitle = 'Customize - ' . $template['title'];
                 </div>
             <?php endif; ?>
 
-            <form method="POST" enctype="multipart/form-data" class="space-y-6">
+            <form id="customize-form" method="POST" enctype="multipart/form-data" class="space-y-6">
                 <?= Security::csrfField() ?>
 
                 <?= $formRenderer->render($templateId) ?>

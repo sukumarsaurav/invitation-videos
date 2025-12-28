@@ -191,7 +191,7 @@ $pageTitle = 'Create Stunning Video Invitations';
                         </div>
                     </div>
 
-                    <a href="/template/<?= $template['id'] ?>"
+                    <a href="/template/<?= Security::escape($template['slug']) ?>"
                         class="p-4 flex items-center justify-center gap-2 bg-primary text-white font-bold hover:bg-primary/90 transition-colors">
                         <span>Customize</span>
                         <span class="material-symbols-outlined text-lg">arrow_forward</span>
