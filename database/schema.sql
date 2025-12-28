@@ -237,6 +237,96 @@ CREATE TABLE IF NOT EXISTS `promo_codes` (
     UNIQUE KEY `uk_promo_code` (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- =====================
+-- VISITORS TABLE (Analytics)
+-- =====================
+CREATE TABLE IF NOT EXISTS `visitors` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `session_id` VARCHAR(100) NOT NULL,
+    `user_id` INT UNSIGNED DEFAULT NULL,
+    `ip_address` VARCHAR(45) DEFAULT NULL,
+    `country_code` CHAR(2) DEFAULT NULL,
+    `country_name` VARCHAR(100) DEFAULT NULL,
+    `city` VARCHAR(100) DEFAULT NULL,
+    `region` VARCHAR(100) DEFAULT NULL,
+    `latitude` DECIMAL(10,6) DEFAULT NULL,
+    `longitude` DECIMAL(10,6) DEFAULT NULL,
+    `user_agent` TEXT DEFAULT NULL,
+    `referrer` VARCHAR(500) DEFAULT NULL,
+    `landing_page` VARCHAR(500) DEFAULT NULL,
+    `device_type` ENUM('desktop', 'mobile', 'tablet') DEFAULT 'desktop',
+    `browser` VARCHAR(50) DEFAULT NULL,
+    `os` VARCHAR(50) DEFAULT NULL,
+    `is_returning` TINYINT(1) NOT NULL DEFAULT 0,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    INDEX `idx_visitors_session` (`session_id`),
+    INDEX `idx_visitors_user` (`user_id`),
+    INDEX `idx_visitors_country` (`country_code`),
+    INDEX `idx_visitors_date` (`created_at`),
+    CONSTRAINT `fk_visitors_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================
+-- PAGE VIEWS TABLE (Funnel Tracking)
+-- =====================
+CREATE TABLE IF NOT EXISTS `page_views` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `visitor_id` INT UNSIGNED NOT NULL,
+    `page_url` VARCHAR(500) NOT NULL,
+    `page_type` ENUM('home', 'template', 'templates_list', 'checkout', 'confirmation', 'blog', 'account', 'other') DEFAULT 'other',
+    `template_id` INT UNSIGNED DEFAULT NULL,
+    `time_on_page` INT UNSIGNED DEFAULT 0 COMMENT 'seconds',
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    INDEX `idx_page_views_visitor` (`visitor_id`),
+    INDEX `idx_page_views_type` (`page_type`),
+    INDEX `idx_page_views_date` (`created_at`),
+    CONSTRAINT `fk_page_views_visitor` FOREIGN KEY (`visitor_id`) REFERENCES `visitors` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================
+-- BLOG POSTS TABLE
+-- =====================
+CREATE TABLE IF NOT EXISTS `blog_posts` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `title` VARCHAR(255) NOT NULL,
+    `slug` VARCHAR(255) NOT NULL,
+    `excerpt` TEXT DEFAULT NULL,
+    `content` LONGTEXT NOT NULL,
+    `featured_image` VARCHAR(500) DEFAULT NULL,
+    `category` VARCHAR(100) DEFAULT NULL,
+    `tags` JSON DEFAULT NULL,
+    `status` ENUM('draft', 'published', 'archived') NOT NULL DEFAULT 'draft',
+    `author_id` INT UNSIGNED DEFAULT NULL,
+    `view_count` INT UNSIGNED NOT NULL DEFAULT 0,
+    `meta_title` VARCHAR(255) DEFAULT NULL,
+    `meta_description` TEXT DEFAULT NULL,
+    `published_at` TIMESTAMP NULL DEFAULT NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_blog_posts_slug` (`slug`),
+    INDEX `idx_blog_posts_status` (`status`),
+    INDEX `idx_blog_posts_category` (`category`),
+    INDEX `idx_blog_posts_published` (`published_at`),
+    CONSTRAINT `fk_blog_posts_author` FOREIGN KEY (`author_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================
+-- COMPETITORS TABLE
+-- =====================
+CREATE TABLE IF NOT EXISTS `competitors` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `domain` VARCHAR(255) NOT NULL,
+    `name` VARCHAR(255) DEFAULT NULL,
+    `notes` TEXT DEFAULT NULL,
+    `last_checked_at` TIMESTAMP NULL DEFAULT NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_competitors_domain` (`domain`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- =====================
