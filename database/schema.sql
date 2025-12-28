@@ -211,6 +211,7 @@ CREATE TABLE IF NOT EXISTS `support_tickets` (
     `user_id` INT UNSIGNED NOT NULL,
     `order_id` INT UNSIGNED DEFAULT NULL,
     `subject` VARCHAR(255) NOT NULL,
+    `message` TEXT DEFAULT NULL COMMENT 'Initial message from user',
     `priority` ENUM('low', 'medium', 'high') NOT NULL DEFAULT 'medium',
     `status` ENUM('open', 'in_progress', 'resolved', 'closed') NOT NULL DEFAULT 'open',
     `assigned_to` INT UNSIGNED DEFAULT NULL,
@@ -233,14 +234,16 @@ CREATE TABLE IF NOT EXISTS `support_tickets` (
 CREATE TABLE IF NOT EXISTS `ticket_messages` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
     `ticket_id` INT UNSIGNED NOT NULL,
-    `user_id` INT UNSIGNED NOT NULL,
+    `sender_type` ENUM('user', 'admin') NOT NULL DEFAULT 'user',
+    `sender_id` INT UNSIGNED DEFAULT NULL,
+    `user_id` INT UNSIGNED DEFAULT NULL COMMENT 'Deprecated - use sender_id instead',
     `message` TEXT NOT NULL,
     `is_internal` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Internal staff notes',
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     INDEX `idx_ticket_messages_ticket` (`ticket_id`),
-    CONSTRAINT `fk_ticket_messages_ticket` FOREIGN KEY (`ticket_id`) REFERENCES `support_tickets` (`id`) ON DELETE CASCADE,
-    CONSTRAINT `fk_ticket_messages_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+    INDEX `idx_ticket_messages_sender` (`sender_type`, `sender_id`),
+    CONSTRAINT `fk_ticket_messages_ticket` FOREIGN KEY (`ticket_id`) REFERENCES `support_tickets` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================

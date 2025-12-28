@@ -147,8 +147,93 @@ $router->get('/support', function () {
 });
 
 $router->post('/support', function () {
-    // TODO: Handle support form submission (email or save to DB)
-    $_SESSION['success'] = 'Thank you! We\'ll get back to you within 24 hours.';
+    require_once __DIR__ . '/config/database.php';
+    require_once __DIR__ . '/src/Core/Security.php';
+
+    // Validate CSRF token
+    if (!Security::validateCSRFToken($_POST['csrf_token'] ?? '')) {
+        $_SESSION['error'] = 'Invalid form submission. Please try again.';
+        header('Location: /support');
+        exit;
+    }
+
+    // Get form data
+    $name = Security::sanitizeString($_POST['name'] ?? '');
+    $email = Security::sanitizeString($_POST['email'] ?? '');
+    $subject = Security::sanitizeString($_POST['subject'] ?? '');
+    $orderNumber = Security::sanitizeString($_POST['order_id'] ?? '');
+    $message = Security::sanitizeString($_POST['message'] ?? '');
+
+    // Validate required fields
+    if (empty($name) || empty($email) || empty($subject) || empty($message)) {
+        $_SESSION['error'] = 'Please fill in all required fields.';
+        header('Location: /support');
+        exit;
+    }
+
+    // Validate email
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $_SESSION['error'] = 'Please enter a valid email address.';
+        header('Location: /support');
+        exit;
+    }
+
+    // Find or create user
+    $user = Database::fetchOne("SELECT id FROM users WHERE email = ?", [$email]);
+    if (!$user) {
+        // Create a guest user for non-registered users
+        Database::query(
+            "INSERT INTO users (email, name, role, status) VALUES (?, ?, 'customer', 'active')",
+            [$email, $name]
+        );
+        $userId = Database::lastInsertId();
+    } else {
+        $userId = $user['id'];
+    }
+
+    // Find order if order number provided
+    $orderId = null;
+    if (!empty($orderNumber)) {
+        $order = Database::fetchOne("SELECT id FROM orders WHERE order_number = ?", [$orderNumber]);
+        if ($order) {
+            $orderId = $order['id'];
+        }
+    }
+
+    // Generate ticket number (ST-YYYYMMDD-XXXX)
+    $today = date('Ymd');
+    $lastTicket = Database::fetchOne(
+        "SELECT ticket_number FROM support_tickets WHERE ticket_number LIKE ? ORDER BY id DESC LIMIT 1",
+        ["ST-{$today}-%"]
+    );
+
+    if ($lastTicket) {
+        $lastNumber = intval(substr($lastTicket['ticket_number'], -4));
+        $newNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
+    } else {
+        $newNumber = '0001';
+    }
+    $ticketNumber = "ST-{$today}-{$newNumber}";
+
+    // Map subject to proper label
+    $subjectLabels = [
+        'order' => 'Order Issue',
+        'payment' => 'Payment Problem',
+        'revision' => 'Request Revision',
+        'refund' => 'Refund Request',
+        'technical' => 'Technical Support',
+        'other' => 'Other'
+    ];
+    $subjectLabel = $subjectLabels[$subject] ?? $subject;
+
+    // Create support ticket
+    Database::query(
+        "INSERT INTO support_tickets (ticket_number, user_id, order_id, subject, message, priority, status) 
+         VALUES (?, ?, ?, ?, ?, 'medium', 'open')",
+        [$ticketNumber, $userId, $orderId, $subjectLabel, $message]
+    );
+
+    $_SESSION['success'] = "Thank you! Your ticket #{$ticketNumber} has been created. We'll get back to you within 24 hours.";
     header('Location: /support');
     exit;
 });
