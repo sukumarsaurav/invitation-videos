@@ -316,13 +316,13 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
 
                         <!-- Play Button Overlay -->
                         <?php if (!empty($template['preview_video_url'])): ?>
-                            <div onclick="openVideoModal('<?= Security::escape($template['preview_video_url']) ?>')"
-                                class="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-colors cursor-pointer group">
-                                <div
-                                    class="size-20 rounded-full bg-white/30 backdrop-blur-md flex items-center justify-center text-white border border-white/50 shadow-lg group-hover:scale-110 transition-transform">
-                                    <span class="material-symbols-outlined text-4xl">play_arrow</span>
-                                </div>
+                        <div onclick="openVideoModal(<?= json_encode($template['preview_video_url']) ?>)" 
+                            class="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-colors cursor-pointer group">
+                            <div
+                                class="size-20 rounded-full bg-white/30 backdrop-blur-md flex items-center justify-center text-white border border-white/50 shadow-lg group-hover:scale-110 transition-transform">
+                                <span class="material-symbols-outlined text-4xl">play_arrow</span>
                             </div>
+                        </div>
                         <?php endif; ?>
 
                         <!-- Duration Badge -->
