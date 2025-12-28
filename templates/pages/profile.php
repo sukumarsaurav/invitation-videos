@@ -18,7 +18,11 @@ $userId = $_SESSION['user_id'];
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    Security::validateCsrf();
+    if (!Security::validateCSRFToken($_POST[CSRF_TOKEN_NAME] ?? '')) {
+        $_SESSION['errors'] = ['Invalid security token'];
+        header('Location: /profile');
+        exit;
+    }
 
     $name = trim($_POST['name'] ?? '');
     $phone = trim($_POST['phone'] ?? '');
@@ -79,7 +83,8 @@ unset($_SESSION['success'], $_SESSION['errors']);
             <?php endif; ?>
             <div class="text-center sm:text-left">
                 <h2 class="text-xl font-bold text-slate-900 dark:text-white">
-                    <?= Security::escape($user['name'] ?? 'User') ?></h2>
+                    <?= Security::escape($user['name'] ?? 'User') ?>
+                </h2>
                 <p class="text-slate-600 dark:text-slate-400"><?= Security::escape($user['email']) ?></p>
                 <?php if ($user['google_id']): ?>
                     <span

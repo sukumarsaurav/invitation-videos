@@ -133,6 +133,7 @@ require_once __DIR__ . '/../auth.php';
                         ['href' => '/admin/dashboard.php', 'icon' => 'dashboard', 'label' => 'Dashboard', 'page' => 'dashboard'],
                         ['href' => '/admin/orders.php', 'icon' => 'shopping_bag', 'label' => 'Orders', 'page' => 'orders'],
                         ['href' => '/admin/templates.php', 'icon' => 'video_library', 'label' => 'Templates', 'page' => 'templates'],
+                        ['href' => '/admin/promo-codes.php', 'icon' => 'confirmation_number', 'label' => 'Promo Codes', 'page' => 'promo-codes'],
                         ['href' => '/admin/users.php', 'icon' => 'group', 'label' => 'Users', 'page' => 'users'],
                         ['href' => '/admin/support.php', 'icon' => 'contact_support', 'label' => 'Support', 'page' => 'support', 'badge' => $pendingTickets ?? null],
                     ];
@@ -163,7 +164,7 @@ require_once __DIR__ . '/../auth.php';
                         <span class="material-symbols-outlined">settings</span>
                         <span class="text-sm font-medium">Settings</span>
                     </a>
-                    <a href="/admin/logout.php"
+                    <a href="/logout"
                         class="flex items-center gap-3 px-3 py-2 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
                         <span class="material-symbols-outlined">logout</span>
                         <span class="text-sm font-medium">Logout</span>
@@ -175,11 +176,11 @@ require_once __DIR__ . '/../auth.php';
                     class="flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-50 dark:bg-white/5 cursor-pointer hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
                     <div
                         class="size-9 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
-                        <?= substr($_SESSION['admin_name'] ?? 'A', 0, 1) ?>
+                        <?= substr($_SESSION['user_name'] ?? 'A', 0, 1) ?>
                     </div>
                     <div class="flex flex-col overflow-hidden">
-                        <p class="text-sm font-bold truncate"><?= $_SESSION['admin_name'] ?? 'Admin' ?></p>
-                        <p class="text-xs text-slate-500 truncate"><?= $_SESSION['admin_role'] ?? 'Super Admin' ?></p>
+                        <p class="text-sm font-bold truncate"><?= $_SESSION['user_name'] ?? 'Admin' ?></p>
+                        <p class="text-xs text-slate-500 truncate"><?= ucfirst($_SESSION['user_role'] ?? 'Admin') ?></p>
                     </div>
                     <span class="material-symbols-outlined ml-auto text-slate-400 text-[20px]">expand_more</span>
                 </div>
@@ -256,11 +257,11 @@ require_once __DIR__ . '/../auth.php';
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('overlay');
-            
+
             sidebar.classList.toggle('closed');
             overlay.classList.toggle('hidden');
         }
-        
+
         // Close sidebar when clicking a link (mobile)
         document.querySelectorAll('#sidebar a').forEach(link => {
             link.addEventListener('click', () => {

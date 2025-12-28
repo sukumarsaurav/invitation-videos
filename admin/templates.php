@@ -1,6 +1,7 @@
 <?php
 /**
  * Admin - Template Management
+ * Full functionality with SEO slugs, pricing, discounts, media, and field editor
  */
 
 require_once __DIR__ . '/../config/database.php';
@@ -8,35 +9,122 @@ require_once __DIR__ . '/../src/Core/Security.php';
 
 $action = $_GET['action'] ?? 'list';
 $templateId = intval($_GET['id'] ?? 0);
+$error = null;
+$success = null;
+
+// Handle AJAX requests for template fields
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_action'])) {
+    header('Content-Type: application/json');
+    
+    if (!Security::validateCSRFToken($_POST[CSRF_TOKEN_NAME] ?? '')) {
+        echo json_encode(['success' => false, 'error' => 'Invalid security token']);
+        exit;
+    }
+    
+    switch ($_POST['ajax_action']) {
+        case 'add_field':
+            $fieldData = [
+                'template_id' => intval($_POST['template_id']),
+                'field_name' => Security::sanitizeString($_POST['field_name'] ?? ''),
+                'field_label' => Security::sanitizeString($_POST['field_label'] ?? ''),
+                'field_type' => $_POST['field_type'] ?? 'text',
+                'field_subtype' => Security::sanitizeString($_POST['field_subtype'] ?? ''),
+                'placeholder' => Security::sanitizeString($_POST['placeholder'] ?? ''),
+                'is_required' => isset($_POST['is_required']) ? 1 : 0,
+                'display_order' => intval($_POST['display_order'] ?? 0),
+                'field_group' => Security::sanitizeString($_POST['field_group'] ?? ''),
+                'help_text' => Security::sanitizeString($_POST['help_text'] ?? ''),
+            ];
+            
+            $sql = "INSERT INTO template_fields (template_id, field_name, field_label, field_type, field_subtype, placeholder, is_required, display_order, field_group, help_text) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            Database::query($sql, array_values($fieldData));
+            $fieldId = Database::lastInsertId();
+            
+            echo json_encode(['success' => true, 'field_id' => $fieldId]);
+            exit;
+            
+        case 'update_field':
+            $sql = "UPDATE template_fields SET field_label=?, field_type=?, placeholder=?, is_required=?, display_order=?, field_group=?, help_text=? WHERE id=?";
+            Database::query($sql, [
+                Security::sanitizeString($_POST['field_label'] ?? ''),
+                $_POST['field_type'] ?? 'text',
+                Security::sanitizeString($_POST['placeholder'] ?? ''),
+                isset($_POST['is_required']) ? 1 : 0,
+                intval($_POST['display_order'] ?? 0),
+                Security::sanitizeString($_POST['field_group'] ?? ''),
+                Security::sanitizeString($_POST['help_text'] ?? ''),
+                intval($_POST['field_id'])
+            ]);
+            echo json_encode(['success' => true]);
+            exit;
+            
+        case 'delete_field':
+            Database::query("DELETE FROM template_fields WHERE id = ?", [intval($_POST['field_id'])]);
+            echo json_encode(['success' => true]);
+            exit;
+    }
+}
+
+// Handle thumbnail upload
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['thumbnail'])) {
+    $file = $_FILES['thumbnail'];
+    $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    $maxSize = 5 * 1024 * 1024; // 5MB
+    
+    if ($file['error'] === UPLOAD_ERR_OK && in_array($file['type'], $allowedTypes) && $file['size'] <= $maxSize) {
+        $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+        $filename = 'template_' . time() . '_' . uniqid() . '.' . $ext;
+        $uploadDir = __DIR__ . '/../uploads/templates/';
+        
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+        
+        if (move_uploaded_file($file['tmp_name'], $uploadDir . $filename)) {
+            $_POST['thumbnail_url'] = '/uploads/templates/' . $filename;
+        }
+    }
+}
 
 // Handle form submissions
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['form_action'])) {
     if (!Security::validateCSRFToken($_POST[CSRF_TOKEN_NAME] ?? '')) {
         $error = 'Invalid security token';
     } else {
+        // Generate slug from title if not provided
+        $slug = trim($_POST['slug'] ?? '');
+        if (empty($slug)) {
+            $slug = strtolower(preg_replace('/[^a-z0-9]+/', '-', strtolower($_POST['title'] ?? '')));
+        }
+        $slug = trim($slug, '-');
+        
         $data = [
             'title' => Security::sanitizeString($_POST['title'] ?? ''),
-            'slug' => strtolower(preg_replace('/[^a-z0-9]+/', '-', $_POST['title'] ?? '')),
+            'slug' => $slug,
             'description' => Security::sanitizeString($_POST['description'] ?? ''),
             'category' => $_POST['category'] ?? 'wedding',
             'subcategory' => Security::sanitizeString($_POST['subcategory'] ?? ''),
             'cultural_tradition' => Security::sanitizeString($_POST['cultural_tradition'] ?? ''),
             'price_usd' => floatval($_POST['price_usd'] ?? 0),
             'price_inr' => floatval($_POST['price_inr'] ?? 0),
+            'discounted_price_usd' => !empty($_POST['discounted_price_usd']) ? floatval($_POST['discounted_price_usd']) : null,
+            'discounted_price_inr' => !empty($_POST['discounted_price_inr']) ? floatval($_POST['discounted_price_inr']) : null,
+            'preview_video_url' => Security::sanitizeString($_POST['preview_video_url'] ?? ''),
+            'thumbnail_url' => $_POST['thumbnail_url'] ?? ($template['thumbnail_url'] ?? ''),
             'duration_seconds' => intval($_POST['duration_seconds'] ?? 30),
             'is_premium' => isset($_POST['is_premium']) ? 1 : 0,
             'is_active' => isset($_POST['is_active']) ? 1 : 0,
         ];
         
         if ($_POST['form_action'] === 'create') {
-            $sql = "INSERT INTO templates (title, slug, description, category, subcategory, cultural_tradition, price_usd, price_inr, duration_seconds, is_premium, is_active)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            $sql = "INSERT INTO templates (title, slug, description, category, subcategory, cultural_tradition, price_usd, price_inr, discounted_price_usd, discounted_price_inr, preview_video_url, thumbnail_url, duration_seconds, is_premium, is_active)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             Database::query($sql, array_values($data));
             $templateId = Database::lastInsertId();
             header('Location: /admin/templates.php?action=edit&id=' . $templateId . '&success=created');
             exit;
         } elseif ($_POST['form_action'] === 'update' && $templateId) {
-            $sql = "UPDATE templates SET title=?, slug=?, description=?, category=?, subcategory=?, cultural_tradition=?, price_usd=?, price_inr=?, duration_seconds=?, is_premium=?, is_active=? WHERE id=?";
+            $sql = "UPDATE templates SET title=?, slug=?, description=?, category=?, subcategory=?, cultural_tradition=?, price_usd=?, price_inr=?, discounted_price_usd=?, discounted_price_inr=?, preview_video_url=?, thumbnail_url=?, duration_seconds=?, is_premium=?, is_active=? WHERE id=?";
             $params = array_values($data);
             $params[] = $templateId;
             Database::query($sql, $params);
@@ -81,7 +169,24 @@ if ($templateId) {
 $pendingTickets = 0;
 $pageTitle = $action === 'new' ? 'New Template' : ($action === 'edit' ? 'Edit Template' : 'Templates');
 $categories = ['wedding', 'birthday', 'corporate', 'baby_shower', 'anniversary', 'other'];
-$fieldTypes = ['text', 'textarea', 'date', 'time', 'datetime', 'image', 'music', 'color', 'select'];
+$fieldTypes = ['text', 'textarea', 'date', 'time', 'datetime', 'image', 'music', 'color', 'select', 'number'];
+$fieldGroups = ['couple_details', 'family_details', 'event_details', 'photos', 'audio', 'other'];
+
+// Helper function to get YouTube embed URL
+function getYouTubeEmbedUrl($url) {
+    if (empty($url)) return '';
+    
+    $videoId = '';
+    if (preg_match('/youtube\.com\/watch\?v=([^&]+)/', $url, $matches)) {
+        $videoId = $matches[1];
+    } elseif (preg_match('/youtu\.be\/([^?]+)/', $url, $matches)) {
+        $videoId = $matches[1];
+    } elseif (preg_match('/youtube\.com\/embed\/([^?]+)/', $url, $matches)) {
+        $videoId = $matches[1];
+    }
+    
+    return $videoId ? "https://www.youtube.com/embed/{$videoId}" : '';
+}
 ?>
 
 <?php ob_start(); ?>
@@ -131,15 +236,29 @@ $fieldTypes = ['text', 'textarea', 'date', 'time', 'datetime', 'image', 'music',
                                  style="background-image: url('<?= Security::escape($tpl['thumbnail_url'] ?? '') ?>');"></div>
                             <div>
                                 <p class="font-semibold text-slate-900 dark:text-white"><?= Security::escape($tpl['title']) ?></p>
-                                <p class="text-xs text-slate-500"><?= $tpl['duration_seconds'] ?>s • <?= $tpl['aspect_ratio'] ?? '9:16' ?></p>
+                                <p class="text-xs text-slate-500"><?= $tpl['duration_seconds'] ?>s • <?= Security::escape($tpl['slug']) ?></p>
                             </div>
                         </div>
                     </td>
                     <td class="px-6 py-4">
                         <span class="capitalize"><?= $tpl['category'] ?></span>
                     </td>
-                    <td class="px-6 py-4 font-semibold">$<?= number_format($tpl['price_usd'], 2) ?></td>
-                    <td class="px-6 py-4 font-semibold">₹<?= number_format($tpl['price_inr'], 0) ?></td>
+                    <td class="px-6 py-4">
+                        <?php if (!empty($tpl['discounted_price_usd']) && $tpl['discounted_price_usd'] < $tpl['price_usd']): ?>
+                            <span class="text-slate-400 line-through text-xs">$<?= number_format($tpl['price_usd'], 2) ?></span><br>
+                            <span class="font-semibold text-green-600">$<?= number_format($tpl['discounted_price_usd'], 2) ?></span>
+                        <?php else: ?>
+                            <span class="font-semibold">$<?= number_format($tpl['price_usd'], 2) ?></span>
+                        <?php endif; ?>
+                    </td>
+                    <td class="px-6 py-4">
+                        <?php if (!empty($tpl['discounted_price_inr']) && $tpl['discounted_price_inr'] < $tpl['price_inr']): ?>
+                            <span class="text-slate-400 line-through text-xs">₹<?= number_format($tpl['price_inr'], 0) ?></span><br>
+                            <span class="font-semibold text-green-600">₹<?= number_format($tpl['discounted_price_inr'], 0) ?></span>
+                        <?php else: ?>
+                            <span class="font-semibold">₹<?= number_format($tpl['price_inr'], 0) ?></span>
+                        <?php endif; ?>
+                    </td>
                     <td class="px-6 py-4">
                         <?php if ($tpl['is_active']): ?>
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Active</span>
@@ -201,9 +320,10 @@ $fieldTypes = ['text', 'textarea', 'date', 'time', 'datetime', 'image', 'music',
 </div>
 <?php endif; ?>
 
-<form method="POST" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<form method="POST" enctype="multipart/form-data" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <?= Security::csrfField() ?>
     <input type="hidden" name="form_action" value="<?= $action === 'new' ? 'create' : 'update' ?>">
+    <input type="hidden" name="thumbnail_url" value="<?= Security::escape($template['thumbnail_url'] ?? '') ?>">
     
     <!-- Main Details -->
     <div class="lg:col-span-2 space-y-6">
@@ -218,7 +338,19 @@ $fieldTypes = ['text', 'textarea', 'date', 'time', 'datetime', 'image', 'music',
                     <input type="text" name="title" required
                            class="h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 focus:border-primary"
                            value="<?= Security::escape($template['title'] ?? '') ?>"
-                           placeholder="e.g., Floral Elegance Wedding">
+                           placeholder="e.g., Floral Elegance Wedding"
+                           oninput="generateSlug(this.value)">
+                </label>
+                
+                <label class="flex flex-col gap-2 md:col-span-2">
+                    <span class="text-sm font-medium">SEO Slug <span class="text-slate-400 font-normal">(URL-friendly name)</span></span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-slate-400 text-sm">/templates/</span>
+                        <input type="text" name="slug" id="slug-input"
+                               class="flex-1 h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                               value="<?= Security::escape($template['slug'] ?? '') ?>"
+                               placeholder="floral-elegance-wedding">
+                    </div>
                 </label>
                 
                 <label class="flex flex-col gap-2 md:col-span-2">
@@ -265,27 +397,56 @@ $fieldTypes = ['text', 'textarea', 'date', 'time', 'datetime', 'image', 'music',
         <!-- Pricing -->
         <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
             <h3 class="text-lg font-bold mb-4">Pricing</h3>
+            <p class="text-sm text-slate-500 mb-4">Set prices for both payment gateways: Stripe (USD) for international, Razorpay (INR) for India</p>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <label class="flex flex-col gap-2">
-                    <span class="text-sm font-medium">Price (USD)</span>
-                    <div class="relative">
-                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">$</span>
-                        <input type="number" name="price_usd" step="0.01" min="0"
-                               class="h-11 pl-8 pr-4 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20"
-                               value="<?= $template['price_usd'] ?? 0 ?>">
-                    </div>
-                </label>
+                <div class="space-y-4">
+                    <p class="text-sm font-semibold text-blue-600">💳 Stripe (USD - International)</p>
+                    <label class="flex flex-col gap-2">
+                        <span class="text-sm font-medium">Regular Price (USD)</span>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">$</span>
+                            <input type="number" name="price_usd" step="0.01" min="0"
+                                   class="h-11 pl-8 pr-4 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20"
+                                   value="<?= $template['price_usd'] ?? 0 ?>">
+                        </div>
+                    </label>
+                    
+                    <label class="flex flex-col gap-2">
+                        <span class="text-sm font-medium">Discounted Price (USD) <span class="text-slate-400 font-normal">Optional</span></span>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">$</span>
+                            <input type="number" name="discounted_price_usd" step="0.01" min="0"
+                                   class="h-11 pl-8 pr-4 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20"
+                                   value="<?= $template['discounted_price_usd'] ?? '' ?>"
+                                   placeholder="Leave empty for no discount">
+                        </div>
+                    </label>
+                </div>
                 
-                <label class="flex flex-col gap-2">
-                    <span class="text-sm font-medium">Price (INR)</span>
-                    <div class="relative">
-                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">₹</span>
-                        <input type="number" name="price_inr" step="1" min="0"
-                               class="h-11 pl-8 pr-4 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20"
-                               value="<?= $template['price_inr'] ?? 0 ?>">
-                    </div>
-                </label>
+                <div class="space-y-4">
+                    <p class="text-sm font-semibold text-green-600">🇮🇳 Razorpay (INR - India)</p>
+                    <label class="flex flex-col gap-2">
+                        <span class="text-sm font-medium">Regular Price (INR)</span>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">₹</span>
+                            <input type="number" name="price_inr" step="1" min="0"
+                                   class="h-11 pl-8 pr-4 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20"
+                                   value="<?= $template['price_inr'] ?? 0 ?>">
+                        </div>
+                    </label>
+                    
+                    <label class="flex flex-col gap-2">
+                        <span class="text-sm font-medium">Discounted Price (INR) <span class="text-slate-400 font-normal">Optional</span></span>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">₹</span>
+                            <input type="number" name="discounted_price_inr" step="1" min="0"
+                                   class="h-11 pl-8 pr-4 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20"
+                                   value="<?= $template['discounted_price_inr'] ?? '' ?>"
+                                   placeholder="Leave empty for no discount">
+                        </div>
+                    </label>
+                </div>
             </div>
         </div>
         
@@ -293,8 +454,11 @@ $fieldTypes = ['text', 'textarea', 'date', 'time', 'datetime', 'image', 'music',
         <!-- Template Fields Editor -->
         <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-bold">Customization Fields</h3>
-                <button type="button" onclick="addField()" 
+                <div>
+                    <h3 class="text-lg font-bold">Customization Fields</h3>
+                    <p class="text-sm text-slate-500">Fields users will fill when ordering this template</p>
+                </div>
+                <button type="button" onclick="openFieldModal()" 
                         class="flex items-center gap-1 text-primary text-sm font-bold hover:underline">
                     <span class="material-symbols-outlined text-lg">add</span>
                     Add Field
@@ -303,25 +467,30 @@ $fieldTypes = ['text', 'textarea', 'date', 'time', 'datetime', 'image', 'music',
             
             <div id="fields-container" class="space-y-3">
                 <?php foreach ($templateFields as $field): ?>
-                <div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-white/5 rounded-lg border border-slate-200 dark:border-slate-700">
+                <div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-white/5 rounded-lg border border-slate-200 dark:border-slate-700" data-field-id="<?= $field['id'] ?>">
                     <span class="material-symbols-outlined text-slate-400 cursor-move">drag_indicator</span>
                     <div class="flex-1 grid grid-cols-4 gap-3">
-                        <input type="text" value="<?= Security::escape($field['field_label']) ?>" readonly 
-                               class="h-9 px-3 rounded border border-slate-200 bg-white text-sm">
-                        <span class="h-9 px-3 flex items-center text-sm text-slate-500 bg-white rounded border border-slate-200"><?= $field['field_type'] ?></span>
-                        <span class="h-9 px-3 flex items-center text-sm text-slate-500 bg-white rounded border border-slate-200"><?= $field['field_group'] ?? '-' ?></span>
-                        <span class="h-9 px-3 flex items-center text-xs <?= $field['is_required'] ? 'text-green-600' : 'text-slate-400' ?>">
+                        <div>
+                            <p class="font-medium text-sm"><?= Security::escape($field['field_label']) ?></p>
+                            <p class="text-xs text-slate-400"><?= $field['field_name'] ?></p>
+                        </div>
+                        <span class="h-8 px-3 flex items-center text-xs font-medium text-slate-600 bg-white rounded border border-slate-200 w-fit"><?= $field['field_type'] ?></span>
+                        <span class="h-8 px-3 flex items-center text-xs text-slate-500 bg-white rounded border border-slate-200 w-fit"><?= $field['field_group'] ?? '-' ?></span>
+                        <span class="h-8 px-3 flex items-center text-xs <?= $field['is_required'] ? 'text-green-600 bg-green-50' : 'text-slate-400 bg-slate-100' ?> rounded w-fit">
                             <?= $field['is_required'] ? 'Required' : 'Optional' ?>
                         </span>
                     </div>
-                    <button type="button" class="p-1 text-slate-400 hover:text-red-500">
+                    <button type="button" onclick="editField(<?= htmlspecialchars(json_encode($field)) ?>)" class="p-1 text-slate-400 hover:text-primary">
+                        <span class="material-symbols-outlined text-lg">edit</span>
+                    </button>
+                    <button type="button" onclick="deleteField(<?= $field['id'] ?>)" class="p-1 text-slate-400 hover:text-red-500">
                         <span class="material-symbols-outlined text-lg">delete</span>
                     </button>
                 </div>
                 <?php endforeach; ?>
                 
                 <?php if (empty($templateFields)): ?>
-                <p class="text-slate-500 text-sm text-center py-4">No fields defined yet. Click "Add Field" to create customization fields.</p>
+                <p id="no-fields-msg" class="text-slate-500 text-sm text-center py-4">No fields defined yet. Click "Add Field" to create customization fields.</p>
                 <?php endif; ?>
             </div>
         </div>
@@ -368,20 +537,37 @@ $fieldTypes = ['text', 'textarea', 'date', 'time', 'datetime', 'image', 'music',
             <div class="space-y-4">
                 <div>
                     <label class="text-sm font-medium block mb-2">Thumbnail Image</label>
-                    <div class="aspect-[9/16] rounded-lg bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors">
+                    <div id="thumbnail-preview" class="aspect-[9/16] rounded-lg bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors overflow-hidden"
+                         onclick="document.getElementById('thumbnail-input').click()"
+                         style="<?= !empty($template['thumbnail_url']) ? "background-image: url('" . Security::escape($template['thumbnail_url']) . "'); background-size: cover; background-position: center;" : '' ?>">
+                        <?php if (empty($template['thumbnail_url'])): ?>
                         <div class="text-center">
                             <span class="material-symbols-outlined text-3xl text-slate-400">cloud_upload</span>
                             <p class="text-xs text-slate-500 mt-1">Click to upload</p>
                         </div>
+                        <?php endif; ?>
                     </div>
+                    <input type="file" id="thumbnail-input" name="thumbnail" accept="image/*" class="hidden" onchange="previewThumbnail(this)">
                 </div>
                 
                 <div>
-                    <label class="text-sm font-medium block mb-2">Preview Video URL</label>
-                    <input type="text" name="preview_video_url" 
+                    <label class="text-sm font-medium block mb-2">YouTube Preview Video URL</label>
+                    <input type="text" name="preview_video_url" id="youtube-url"
                            class="w-full h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
                            value="<?= Security::escape($template['preview_video_url'] ?? '') ?>"
-                           placeholder="https://...">
+                           placeholder="https://youtube.com/watch?v=..."
+                           onchange="updateYouTubePreview()">
+                    
+                    <!-- YouTube Preview -->
+                    <?php $embedUrl = getYouTubeEmbedUrl($template['preview_video_url'] ?? ''); ?>
+                    <div id="youtube-preview" class="mt-3 <?= empty($embedUrl) ? 'hidden' : '' ?>">
+                        <iframe id="youtube-iframe" 
+                                src="<?= $embedUrl ?>" 
+                                class="w-full aspect-video rounded-lg"
+                                frameborder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowfullscreen></iframe>
+                    </div>
                 </div>
             </div>
         </div>
@@ -389,13 +575,204 @@ $fieldTypes = ['text', 'textarea', 'date', 'time', 'datetime', 'image', 'music',
     </div>
 </form>
 
-<?php endif; ?>
+<!-- Field Modal -->
+<div id="field-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-surface-dark rounded-xl shadow-xl w-full max-w-lg">
+        <div class="p-6 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+            <h3 class="text-lg font-bold" id="modal-title">Add Field</h3>
+            <button type="button" onclick="closeFieldModal()" class="text-slate-400 hover:text-slate-600">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <form id="field-form" class="p-6 space-y-4">
+            <?= Security::csrfField() ?>
+            <input type="hidden" name="ajax_action" value="add_field">
+            <input type="hidden" name="template_id" value="<?= $templateId ?>">
+            <input type="hidden" name="field_id" id="field_id" value="">
+            
+            <label class="flex flex-col gap-2">
+                <span class="text-sm font-medium">Field Name <span class="text-slate-400 font-normal">(internal)</span></span>
+                <input type="text" name="field_name" id="field_name" required
+                       class="h-10 px-3 rounded-lg border border-slate-200 bg-slate-50"
+                       placeholder="e.g., groom_name">
+            </label>
+            
+            <label class="flex flex-col gap-2">
+                <span class="text-sm font-medium">Field Label <span class="text-slate-400 font-normal">(shown to users)</span></span>
+                <input type="text" name="field_label" id="field_label" required
+                       class="h-10 px-3 rounded-lg border border-slate-200 bg-slate-50"
+                       placeholder="e.g., Groom's Name">
+            </label>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <label class="flex flex-col gap-2">
+                    <span class="text-sm font-medium">Field Type</span>
+                    <select name="field_type" id="field_type" class="h-10 px-3 rounded-lg border border-slate-200 bg-slate-50">
+                        <?php foreach ($fieldTypes as $type): ?>
+                        <option value="<?= $type ?>"><?= ucfirst($type) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+                
+                <label class="flex flex-col gap-2">
+                    <span class="text-sm font-medium">Field Group</span>
+                    <select name="field_group" id="field_group" class="h-10 px-3 rounded-lg border border-slate-200 bg-slate-50">
+                        <option value="">-- Select --</option>
+                        <?php foreach ($fieldGroups as $group): ?>
+                        <option value="<?= $group ?>"><?= ucfirst(str_replace('_', ' ', $group)) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+            </div>
+            
+            <label class="flex flex-col gap-2">
+                <span class="text-sm font-medium">Placeholder Text</span>
+                <input type="text" name="placeholder" id="placeholder"
+                       class="h-10 px-3 rounded-lg border border-slate-200 bg-slate-50"
+                       placeholder="e.g., Enter name...">
+            </label>
+            
+            <label class="flex flex-col gap-2">
+                <span class="text-sm font-medium">Help Text</span>
+                <input type="text" name="help_text" id="help_text"
+                       class="h-10 px-3 rounded-lg border border-slate-200 bg-slate-50"
+                       placeholder="Additional instructions for users">
+            </label>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <label class="flex flex-col gap-2">
+                    <span class="text-sm font-medium">Display Order</span>
+                    <input type="number" name="display_order" id="display_order" value="0"
+                           class="h-10 px-3 rounded-lg border border-slate-200 bg-slate-50">
+                </label>
+                
+                <label class="flex items-center gap-3 cursor-pointer pt-6">
+                    <input type="checkbox" name="is_required" id="is_required" value="1" checked
+                           class="rounded border-slate-300 text-primary focus:ring-primary">
+                    <span class="text-sm font-medium">Required Field</span>
+                </label>
+            </div>
+            
+            <div class="pt-4 flex gap-3">
+                <button type="button" onclick="closeFieldModal()" class="flex-1 py-2.5 px-4 border border-slate-200 rounded-lg font-medium hover:bg-slate-50">
+                    Cancel
+                </button>
+                <button type="submit" class="flex-1 py-2.5 px-4 bg-primary text-white rounded-lg font-bold hover:bg-primary/90">
+                    Save Field
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <script>
-function addField() {
-    alert('Field editor modal coming soon! For now, you can add fields directly in the database.');
+function generateSlug(title) {
+    const slug = title.toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+    document.getElementById('slug-input').value = slug;
 }
+
+function previewThumbnail(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('thumbnail-preview');
+            preview.style.backgroundImage = `url('${e.target.result}')`;
+            preview.style.backgroundSize = 'cover';
+            preview.style.backgroundPosition = 'center';
+            preview.innerHTML = '';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function updateYouTubePreview() {
+    const url = document.getElementById('youtube-url').value;
+    const preview = document.getElementById('youtube-preview');
+    const iframe = document.getElementById('youtube-iframe');
+    
+    let videoId = '';
+    const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&?]+)/);
+    if (match) {
+        videoId = match[1];
+    }
+    
+    if (videoId) {
+        iframe.src = `https://www.youtube.com/embed/${videoId}`;
+        preview.classList.remove('hidden');
+    } else {
+        preview.classList.add('hidden');
+    }
+}
+
+function openFieldModal() {
+    document.getElementById('modal-title').textContent = 'Add Field';
+    document.getElementById('field-form').reset();
+    document.getElementById('field_id').value = '';
+    document.querySelector('#field-form input[name="ajax_action"]').value = 'add_field';
+    document.getElementById('field-modal').classList.remove('hidden');
+}
+
+function closeFieldModal() {
+    document.getElementById('field-modal').classList.add('hidden');
+}
+
+function editField(field) {
+    document.getElementById('modal-title').textContent = 'Edit Field';
+    document.getElementById('field_id').value = field.id;
+    document.getElementById('field_name').value = field.field_name;
+    document.getElementById('field_label').value = field.field_label;
+    document.getElementById('field_type').value = field.field_type;
+    document.getElementById('field_group').value = field.field_group || '';
+    document.getElementById('placeholder').value = field.placeholder || '';
+    document.getElementById('help_text').value = field.help_text || '';
+    document.getElementById('display_order').value = field.display_order || 0;
+    document.getElementById('is_required').checked = field.is_required == 1;
+    document.querySelector('#field-form input[name="ajax_action"]').value = 'update_field';
+    document.getElementById('field-modal').classList.remove('hidden');
+}
+
+async function deleteField(fieldId) {
+    if (!confirm('Delete this field?')) return;
+    
+    const formData = new FormData();
+    formData.append('ajax_action', 'delete_field');
+    formData.append('field_id', fieldId);
+    formData.append('<?= CSRF_TOKEN_NAME ?>', '<?= Security::generateCSRFToken() ?>');
+    
+    const response = await fetch(window.location.href, {
+        method: 'POST',
+        body: formData
+    });
+    
+    const result = await response.json();
+    if (result.success) {
+        document.querySelector(`[data-field-id="${fieldId}"]`).remove();
+    }
+}
+
+document.getElementById('field-form')?.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    const response = await fetch(window.location.href, {
+        method: 'POST',
+        body: formData
+    });
+    
+    const result = await response.json();
+    if (result.success) {
+        closeFieldModal();
+        window.location.reload();
+    } else {
+        alert(result.error || 'Error saving field');
+    }
+});
 </script>
+
+<?php endif; ?>
 
 <?php 
 $content = ob_get_clean();
