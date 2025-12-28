@@ -21,6 +21,13 @@ $categories = Database::fetchAll(
     "SELECT category, COUNT(*) as count FROM templates WHERE is_active = 1 GROUP BY category ORDER BY count DESC"
 );
 
+// Get latest blog posts
+$blogPosts = Database::fetchAll(
+    "SELECT id, title, slug, excerpt, featured_image, category, published_at 
+     FROM blog_posts WHERE status = 'published' 
+     ORDER BY published_at DESC LIMIT 3"
+);
+
 $pageTitle = 'Create Stunning Video Invitations | InvitationVideos';
 $pageDescription = 'Create beautiful video invitations for weddings, birthdays, baby showers, and more. Choose from stunning templates and customize with your details.';
 ?>
@@ -144,7 +151,8 @@ $pageDescription = 'Create beautiful video invitations for weddings, birthdays, 
                         <span class="material-symbols-outlined text-2xl"><?= $icon ?></span>
                     </div>
                     <h3 class="font-bold text-slate-900 dark:text-white capitalize mb-1">
-                        <?= str_replace('_', ' ', $cat['category']) ?></h3>
+                        <?= str_replace('_', ' ', $cat['category']) ?>
+                    </h3>
                     <p class="text-sm text-slate-500"><?= $cat['count'] ?> templates</p>
                 </a>
             <?php endforeach; ?>
@@ -343,6 +351,7 @@ $pageDescription = 'Create beautiful video invitations for weddings, birthdays, 
 </section>
 
 <!-- Blog/Tips Section for SEO -->
+<?php if (!empty($blogPosts)): ?>
 <section class="py-12 bg-white dark:bg-slate-900">
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
         <div class="flex items-center justify-between mb-8">
@@ -350,73 +359,50 @@ $pageDescription = 'Create beautiful video invitations for weddings, birthdays, 
                 <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2">Tips & Inspiration</h2>
                 <p class="text-slate-600 dark:text-slate-400">Ideas to make your invitations unforgettable</p>
             </div>
+            <a href="/blog" class="text-primary font-bold hover:underline flex items-center gap-1">
+                View All <span class="material-symbols-outlined text-base">arrow_forward</span>
+            </a>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Blog Post 1 -->
-            <article
-                class="group bg-slate-50 dark:bg-slate-800 rounded-2xl overflow-hidden hover:shadow-xl transition-all">
-                <div class="aspect-video bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center">
-                    <span class="material-symbols-outlined text-5xl text-white/80">favorite</span>
-                </div>
-                <div class="p-5">
-                    <span class="text-xs font-bold text-primary uppercase tracking-wide">Wedding Tips</span>
-                    <h3
-                        class="font-bold text-lg text-slate-900 dark:text-white mt-2 mb-2 group-hover:text-primary transition-colors">
-                        10 Creative Ways to Send Your Wedding Invitations</h3>
-                    <p class="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">Discover unique and memorable
-                        ways to invite your guests to your special day. From video invites to custom QR codes...</p>
-                    <a href="#"
-                        class="inline-flex items-center gap-1 text-primary font-bold text-sm mt-3 hover:underline">
-                        Read More <span class="material-symbols-outlined text-base">arrow_forward</span>
-                    </a>
-                </div>
+            <?php 
+            $colors = [
+                ['from-rose-400', 'to-pink-500', 'favorite'],
+                ['from-amber-400', 'to-orange-500', 'cake'],
+                ['from-teal-400', 'to-cyan-500', 'child_care']
+            ];
+            foreach ($blogPosts as $i => $post): 
+                $color = $colors[$i % count($colors)];
+            ?>
+            <article class="group bg-slate-50 dark:bg-slate-800 rounded-2xl overflow-hidden hover:shadow-xl transition-all">
+                <a href="/blog/<?= Security::escape($post['slug']) ?>" class="block">
+                    <div class="aspect-video <?= $post['featured_image'] ? 'bg-cover bg-center' : "bg-gradient-to-br {$color[0]} {$color[1]}" ?> flex items-center justify-center"
+                         <?php if ($post['featured_image']): ?>style="background-image: url('<?= Security::escape($post['featured_image']) ?>')"<?php endif; ?>>
+                        <?php if (!$post['featured_image']): ?>
+                        <span class="material-symbols-outlined text-5xl text-white/80"><?= $color[2] ?></span>
+                        <?php endif; ?>
+                    </div>
+                    <div class="p-5">
+                        <?php if ($post['category']): ?>
+                        <span class="text-xs font-bold text-primary uppercase tracking-wide"><?= Security::escape($post['category']) ?></span>
+                        <?php endif; ?>
+                        <h3 class="font-bold text-lg text-slate-900 dark:text-white mt-2 mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                            <?= Security::escape($post['title']) ?>
+                        </h3>
+                        <?php if ($post['excerpt']): ?>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 line-clamp-2"><?= Security::escape($post['excerpt']) ?></p>
+                        <?php endif; ?>
+                        <span class="inline-flex items-center gap-1 text-primary font-bold text-sm mt-3 group-hover:underline">
+                            Read More <span class="material-symbols-outlined text-base">arrow_forward</span>
+                        </span>
+                    </div>
+                </a>
             </article>
-
-            <!-- Blog Post 2 -->
-            <article
-                class="group bg-slate-50 dark:bg-slate-800 rounded-2xl overflow-hidden hover:shadow-xl transition-all">
-                <div
-                    class="aspect-video bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
-                    <span class="material-symbols-outlined text-5xl text-white/80">cake</span>
-                </div>
-                <div class="p-5">
-                    <span class="text-xs font-bold text-primary uppercase tracking-wide">Birthday Ideas</span>
-                    <h3
-                        class="font-bold text-lg text-slate-900 dark:text-white mt-2 mb-2 group-hover:text-primary transition-colors">
-                        How to Plan a Surprise Birthday Party in 2024</h3>
-                    <p class="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">From secret invitations to
-                        perfect surprise timing. Learn the best strategies to throw an unforgettable surprise party...
-                    </p>
-                    <a href="#"
-                        class="inline-flex items-center gap-1 text-primary font-bold text-sm mt-3 hover:underline">
-                        Read More <span class="material-symbols-outlined text-base">arrow_forward</span>
-                    </a>
-                </div>
-            </article>
-
-            <!-- Blog Post 3 -->
-            <article
-                class="group bg-slate-50 dark:bg-slate-800 rounded-2xl overflow-hidden hover:shadow-xl transition-all">
-                <div class="aspect-video bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center">
-                    <span class="material-symbols-outlined text-5xl text-white/80">child_care</span>
-                </div>
-                <div class="p-5">
-                    <span class="text-xs font-bold text-primary uppercase tracking-wide">Baby Shower</span>
-                    <h3
-                        class="font-bold text-lg text-slate-900 dark:text-white mt-2 mb-2 group-hover:text-primary transition-colors">
-                        Baby Shower Trends: What's Hot This Year</h3>
-                    <p class="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">From gender reveal ideas to
-                        themed decorations. Explore the latest trends in baby shower celebrations and invitations...</p>
-                    <a href="#"
-                        class="inline-flex items-center gap-1 text-primary font-bold text-sm mt-3 hover:underline">
-                        Read More <span class="material-symbols-outlined text-base">arrow_forward</span>
-                    </a>
-                </div>
-            </article>
+            <?php endforeach; ?>
         </div>
     </div>
 </section>
+<?php endif; ?>
 
 <!-- CTA Section -->
 <section class="py-16 bg-gradient-to-r from-primary to-purple-600">

@@ -169,7 +169,7 @@ if ($templateId) {
 
 $pendingTickets = 0;
 $pageTitle = $action === 'new' ? 'New Template' : ($action === 'edit' ? 'Edit Template' : 'Templates');
-$categories = ['wedding', 'birthday', 'corporate', 'baby_shower', 'anniversary', 'other'];
+$categories = Database::fetchAll("SELECT slug, name FROM categories WHERE is_active = 1 ORDER BY display_order ASC");
 $fieldTypes = ['text', 'textarea', 'date', 'time', 'datetime', 'image', 'music', 'color', 'select', 'number'];
 $fieldGroups = ['couple_details', 'family_details', 'event_details', 'photos', 'audio', 'other'];
 
@@ -365,7 +365,7 @@ function getYouTubeEmbedUrl($url) {
                     <span class="text-sm font-medium">Category</span>
                     <select name="category" class="h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20">
                         <?php foreach ($categories as $cat): ?>
-                        <option value="<?= $cat ?>" <?= ($template['category'] ?? '') === $cat ? 'selected' : '' ?>><?= ucfirst(str_replace('_', ' ', $cat)) ?></option>
+                        <option value="<?= $cat['slug'] ?>" <?= ($template['category'] ?? '') === $cat['slug'] ? 'selected' : '' ?>><?= Security::escape($cat['name']) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </label>

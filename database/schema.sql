@@ -30,6 +30,31 @@ CREATE TABLE IF NOT EXISTS `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================
+-- CATEGORIES TABLE (Template Categories)
+-- =====================
+CREATE TABLE IF NOT EXISTS `categories` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(100) NOT NULL,
+    `slug` VARCHAR(100) NOT NULL,
+    `icon` VARCHAR(50) DEFAULT 'category',
+    `color` VARCHAR(7) DEFAULT '#7f13ec',
+    `display_order` INT NOT NULL DEFAULT 0,
+    `is_active` TINYINT(1) NOT NULL DEFAULT 1,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_categories_slug` (`slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Insert default categories
+INSERT IGNORE INTO `categories` (`name`, `slug`, `icon`, `color`, `display_order`) VALUES
+('Wedding', 'wedding', 'favorite', '#ec4899', 1),
+('Birthday', 'birthday', 'cake', '#f59e0b', 2),
+('Baby Shower', 'baby_shower', 'child_care', '#10b981', 3),
+('Corporate', 'corporate', 'business', '#3b82f6', 4),
+('Anniversary', 'anniversary', 'celebration', '#8b5cf6', 5),
+('Other', 'other', 'category', '#6b7280', 99);
+
+-- =====================
 -- TEMPLATES TABLE
 -- =====================
 CREATE TABLE IF NOT EXISTS `templates` (

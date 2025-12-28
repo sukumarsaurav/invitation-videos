@@ -9,6 +9,7 @@ require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../src/Core/Security.php';
 require_once __DIR__ . '/../../src/Auth/GoogleAuthService.php';
+require_once __DIR__ . '/../../src/Services/GeoLocationService.php';
 
 // Start session if not started
 if (session_status() === PHP_SESSION_NONE) {
@@ -72,11 +73,13 @@ if ($user) {
         );
     }
 } else {
-    // Create new user
+    // Create new user - detect country from IP
+    $geoData = GeoLocationService::getCountryFromIP(GeoLocationService::getClientIP());
+
     Database::query(
-        "INSERT INTO users (name, email, google_id, avatar_url, role, status, email_verified_at) 
-         VALUES (?, ?, ?, ?, 'customer', 'active', NOW())",
-        [$name, $email, $googleId, $picture]
+        "INSERT INTO users (name, email, google_id, avatar_url, country_code, role, status, email_verified_at) 
+         VALUES (?, ?, ?, ?, ?, 'customer', 'active', NOW())",
+        [$name, $email, $googleId, $picture, $geoData['country_code']]
     );
 
     $user = Database::fetchOne("SELECT * FROM users WHERE email = ?", [$email]);
