@@ -3,19 +3,31 @@
  * Admin Authentication Middleware
  * 
  * Include this file at the top of all protected admin pages
+ * Uses the main user authentication system
  */
+
+require_once __DIR__ . '/../config/config.php';
 
 // Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
+    session_name(SESSION_NAME);
     session_start();
 }
 
 /**
- * Check if admin is authenticated
+ * Check if user is authenticated
  */
-function isAdminAuthenticated(): bool
+function isAuthenticated(): bool
 {
-    return isset($_SESSION['admin_id']) && !empty($_SESSION['admin_id']);
+    return isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);
+}
+
+/**
+ * Check if current user is admin
+ */
+function isAdmin(): bool
+{
+    return isAuthenticated() && isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin';
 }
 
 /**
@@ -23,75 +35,67 @@ function isAdminAuthenticated(): bool
  */
 function getAdminUser(): ?array
 {
-    if (!isAdminAuthenticated()) {
+    if (!isAdmin()) {
         return null;
     }
 
     return [
-        'id' => $_SESSION['admin_id'],
-        'email' => $_SESSION['admin_email'] ?? '',
-        'name' => $_SESSION['admin_name'] ?? 'Admin',
-        'role' => $_SESSION['admin_role'] ?? 'admin',
-        'logged_in_at' => $_SESSION['admin_logged_in_at'] ?? 0,
+        'id' => $_SESSION['user_id'],
+        'email' => $_SESSION['user_email'] ?? '',
+        'name' => $_SESSION['user_name'] ?? 'Admin',
+        'role' => $_SESSION['user_role'] ?? 'admin',
+        'avatar' => $_SESSION['user_avatar'] ?? '',
+        'logged_in_at' => $_SESSION['user_logged_in_at'] ?? 0,
     ];
 }
 
 /**
  * Require admin authentication
- * Redirects to login page if not authenticated
+ * Redirects to main login page if not authenticated or not admin
  */
 function requireAdminAuth(): void
 {
-    if (!isAdminAuthenticated()) {
+    if (!isAuthenticated()) {
         // Store the intended URL for redirect after login
-        $_SESSION['admin_redirect_url'] = $_SERVER['REQUEST_URI'];
-
-        header('Location: /admin/login.php');
+        $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
+        header('Location: /login');
         exit;
+    }
+
+    if (!isAdmin()) {
+        // User is logged in but not an admin
+        http_response_code(403);
+        die('<h1>Access Denied</h1><p>You do not have admin privileges.</p><p><a href="/">Go to Home</a></p>');
     }
 
     // Check session timeout (8 hours)
     $sessionTimeout = 8 * 60 * 60;
-    if (isset($_SESSION['admin_logged_in_at']) && (time() - $_SESSION['admin_logged_in_at']) > $sessionTimeout) {
+    if (isset($_SESSION['user_logged_in_at']) && (time() - $_SESSION['user_logged_in_at']) > $sessionTimeout) {
         // Session expired
         session_destroy();
         session_start();
-        $_SESSION['admin_redirect_url'] = $_SERVER['REQUEST_URI'];
-
-        header('Location: /admin/login.php?expired=1');
+        $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
+        $_SESSION['error'] = 'Your session has expired. Please log in again.';
+        header('Location: /login');
         exit;
     }
 }
 
 /**
- * Check if current admin has specific role
+ * Check if current user has specific role
  */
-function hasAdminRole(string $role): bool
+function hasRole(string $role): bool
 {
-    return isset($_SESSION['admin_role']) && $_SESSION['admin_role'] === $role;
+    return isset($_SESSION['user_role']) && $_SESSION['user_role'] === $role;
 }
 
 /**
- * Check if current admin is super admin
+ * Check if current user is admin or editor
  */
-function isSuperAdmin(): bool
+function canManageContent(): bool
 {
-    return hasAdminRole('admin');
+    return hasRole('admin') || hasRole('editor');
 }
 
-/**
- * Require specific admin role
- */
-function requireAdminRole(string $role): void
-{
-    requireAdminAuth();
-
-    if (!hasAdminRole($role)) {
-        http_response_code(403);
-        die('Access denied. You do not have permission to access this page.');
-    }
-}
-
-// Auto-require authentication when this file is included
-// Comment out the line below if you want to manually call requireAdminAuth()
+// Auto-require admin authentication when this file is included
 requireAdminAuth();
