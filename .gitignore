@@ -1,0 +1,73 @@
+# VideoInvites - Git Ignore File
+
+# Environment files (NEVER commit these!)
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+/vendor/
+/node_modules/
+
+# IDE and Editor files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+.project
+.settings/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# User uploads (keep directory but ignore contents)
+/uploads/*
+!/uploads/.gitkeep
+
+# Compiled files
+*.log
+*.cache
+*.tmp
+
+# PHP specific
+/composer.lock
+*.phar
+
+# Debug and profiling
+xdebug.log
+cachegrind.out.*
+
+# Testing
+/coverage/
+.phpunit.result.cache
+
+# Build artifacts
+/dist/
+/build/
+
+# Backup files
+*.bak
+*.backup
+
+# Temporary files
+/tmp/
+/temp/
+
+# Documentation builds
+/docs/_build/
+
+# UI design files (optional - remove if you want to version these)
+/ui/
+
+# Keep these empty directories
+!.gitkeep
