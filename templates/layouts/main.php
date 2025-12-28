@@ -90,49 +90,52 @@
     <header
         class="sticky top-0 z-50 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <!-- Logo -->
-                <a href="/" class="flex items-center gap-2 sm:gap-3">
-                    <div
-                        class="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                        <span class="material-symbols-outlined text-2xl sm:text-3xl">movie_filter</span>
-                    </div>
-                    <h2 class="text-lg sm:text-xl font-bold leading-tight tracking-tight">
-                        <?= APP_NAME ?? 'VideoInvites' ?>
-                    </h2>
-                </a>
+            <div class="flex items-center h-16">
+                <!-- Left Section: Logo + Categories -->
+                <div class="flex items-center gap-6 lg:gap-8 flex-1">
+                    <!-- Logo -->
+                    <a href="/" class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                        <div
+                            class="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                            <span class="material-symbols-outlined text-2xl sm:text-3xl">movie_filter</span>
+                        </div>
+                        <h2 class="text-lg sm:text-xl font-bold leading-tight tracking-tight">
+                            <?= APP_NAME ?? 'VideoInvites' ?>
+                        </h2>
+                    </a>
 
-                <!-- Desktop Navigation - Categories directly -->
-                <nav class="hidden md:flex items-center gap-5">
-                    <a href="/templates?category=wedding"
-                        class="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-primary transition-colors">
-                        <span class="material-symbols-outlined text-lg text-rose-500">favorite</span>
-                        Wedding
-                    </a>
-                    <a href="/templates?category=birthday"
-                        class="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-primary transition-colors">
-                        <span class="material-symbols-outlined text-lg text-amber-500">cake</span>
-                        Birthday
-                    </a>
-                    <a href="/templates?category=corporate"
-                        class="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-primary transition-colors">
-                        <span class="material-symbols-outlined text-lg text-blue-500">business_center</span>
-                        Corporate
-                    </a>
-                    <a href="/templates?category=baby_shower"
-                        class="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-primary transition-colors">
-                        <span class="material-symbols-outlined text-lg text-teal-500">child_care</span>
-                        Baby Shower
-                    </a>
-                    <a href="/templates?category=anniversary"
-                        class="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-primary transition-colors">
-                        <span class="material-symbols-outlined text-lg text-purple-500">celebration</span>
-                        Anniversary
-                    </a>
-                </nav>
+                    <!-- Desktop Navigation - Categories directly after logo -->
+                    <nav class="hidden lg:flex items-center gap-4 xl:gap-5">
+                        <a href="/templates?category=wedding"
+                            class="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-primary transition-colors">
+                            <span class="material-symbols-outlined text-lg text-rose-500">favorite</span>
+                            Wedding
+                        </a>
+                        <a href="/templates?category=birthday"
+                            class="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-primary transition-colors">
+                            <span class="material-symbols-outlined text-lg text-amber-500">cake</span>
+                            Birthday
+                        </a>
+                        <a href="/templates?category=corporate"
+                            class="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-primary transition-colors">
+                            <span class="material-symbols-outlined text-lg text-blue-500">business_center</span>
+                            Corporate
+                        </a>
+                        <a href="/templates?category=baby_shower"
+                            class="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-primary transition-colors">
+                            <span class="material-symbols-outlined text-lg text-teal-500">child_care</span>
+                            Baby Shower
+                        </a>
+                        <a href="/templates?category=anniversary"
+                            class="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-primary transition-colors">
+                            <span class="material-symbols-outlined text-lg text-purple-500">celebration</span>
+                            Anniversary
+                        </a>
+                    </nav>
+                </div>
 
-                <!-- Desktop Auth -->
-                <div class="hidden md:flex items-center gap-4">
+                <!-- Desktop Auth (Right) -->
+                <div class="hidden lg:flex items-center gap-4">
                     <?php if (isset($_SESSION['user_id'])): ?>
                         <a href="/my-orders" class="text-sm font-medium text-slate-600 hover:text-primary">My Orders</a>
                         <a href="/logout" class="text-sm font-medium text-slate-600 hover:text-primary">Logout</a>
