@@ -91,17 +91,17 @@ $pageTitle = 'Create Stunning Video Invitations';
             </div>
 
             <div class="relative hidden lg:block">
-                <div class="absolute -top-10 -right-10 w-72 h-72 bg-primary/20 rounded-full blur-3xl"></div>
-                <div class="absolute -bottom-10 -left-10 w-72 h-72 bg-pink-500/20 rounded-full blur-3xl"></div>
+                <div class="absolute -top-8 -right-8 w-48 h-48 bg-primary/20 rounded-full blur-3xl"></div>
+                <div class="absolute -bottom-8 -left-8 w-48 h-48 bg-pink-500/20 rounded-full blur-3xl"></div>
 
                 <div
-                    class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-3 transform rotate-3 hover:rotate-0 transition-transform duration-500">
-                    <div class="aspect-[9/16] rounded-xl bg-gradient-to-br from-purple-400 to-pink-500 overflow-hidden">
+                    class="relative max-w-[280px] bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-2 transform rotate-3 hover:rotate-0 transition-transform duration-500">
+                    <div class="aspect-[3/4] rounded-xl bg-gradient-to-br from-purple-400 to-pink-500 overflow-hidden">
                         <div class="w-full h-full flex items-center justify-center text-white">
-                            <div class="text-center p-8">
-                                <span class="material-symbols-outlined text-6xl mb-4">celebration</span>
-                                <h3 class="text-2xl font-bold">Your Event</h3>
-                                <p class="opacity-80">Save the Date</p>
+                            <div class="text-center p-6">
+                                <span class="material-symbols-outlined text-5xl mb-3">celebration</span>
+                                <h3 class="text-xl font-bold">Your Event</h3>
+                                <p class="opacity-80 text-sm">Save the Date</p>
                             </div>
                         </div>
                     </div>
