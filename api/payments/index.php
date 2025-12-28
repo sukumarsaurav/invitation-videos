@@ -154,7 +154,7 @@ function createRazorpayOrder(array $input): void
         floatval($order['amount']),
         [
             'order_id' => $order['id'],
-            'order_number' => $order['order_number'],
+            'order_number' => $order['order_number'] ?? 'ORD-' . $order['id'],
         ]
     );
 
