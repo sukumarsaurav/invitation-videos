@@ -107,6 +107,11 @@ $router->post('/api/webhook/razorpay', function () {
     require_once __DIR__ . '/api/webhooks/razorpay.php';
 });
 
+// Promo code validation
+$router->post('/api/promo/validate', function () {
+    require_once __DIR__ . '/api/promo/validate.php';
+});
+
 // Get template fields (for dynamic forms) - supports both ID and slug
 $router->get('/api/template/{identifier}/fields', function ($identifier) {
     require_once __DIR__ . '/src/Controllers/TemplateController.php';

@@ -326,10 +326,84 @@ $pageTitle = 'Checkout - ' . $order['order_number'];
         rzp.open();
     }
 
-    function applyPromo() {
-        const code = document.getElementById('promo-code').value;
-        // TODO: Implement promo code validation
-        alert('Promo code functionality coming soon!');
+    let currentDiscount = 0;
+    let currentTotal = amount;
+
+    async function applyPromo() {
+        const code = document.getElementById('promo-code').value.trim();
+        if (!code) {
+            showPromoError('Please enter a promo code');
+            return;
+        }
+
+        const button = event.target;
+        const originalText = button.innerText;
+        button.disabled = true;
+        button.innerText = 'Applying...';
+
+        try {
+            const response = await fetch('/api/promo/validate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: code, order_id: orderId })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                currentDiscount = result.discount_amount;
+                currentTotal = result.new_total;
+
+                // Update UI
+                document.getElementById('discount-amount').textContent = result.discount_display;
+                document.getElementById('total-amount').textContent = result.new_total_display;
+
+                // Update pay button
+                const payBtn = document.getElementById('pay-button');
+                payBtn.innerHTML = '<span class="material-symbols-outlined">lock</span> Pay ' + result.new_total_display;
+
+                // Show success and disable input
+                showPromoSuccess(result.message + ' (' + result.promo_description + ')');
+                document.getElementById('promo-code').disabled = true;
+                button.disabled = true;
+                button.innerText = 'Applied';
+                button.classList.remove('hover:bg-slate-200');
+                button.classList.add('bg-green-100', 'text-green-700');
+            } else {
+                showPromoError(result.error);
+                button.disabled = false;
+                button.innerText = originalText;
+            }
+        } catch (error) {
+            showPromoError('Failed to validate promo code');
+            button.disabled = false;
+            button.innerText = originalText;
+        }
+    }
+
+    function showPromoError(message) {
+        const container = document.getElementById('promo-code').parentElement;
+        removePromoMessages();
+        const errorDiv = document.createElement('div');
+        errorDiv.id = 'promo-message';
+        errorDiv.className = 'text-red-500 text-xs mt-2 flex items-center gap-1';
+        errorDiv.innerHTML = '<span class="material-symbols-outlined text-sm">error</span>' + message;
+        container.appendChild(errorDiv);
+    }
+
+    function showPromoSuccess(message) {
+        const container = document.getElementById('promo-code').parentElement;
+        removePromoMessages();
+        const successDiv = document.createElement('div');
+        successDiv.id = 'promo-message';
+        successDiv.className = 'text-green-600 text-xs mt-2 flex items-center gap-1';
+        successDiv.innerHTML = '<span class="material-symbols-outlined text-sm">check_circle</span>' + message;
+        container.appendChild(successDiv);
+    }
+
+    function removePromoMessages() {
+        const existing = document.getElementById('promo-message');
+        if (existing) existing.remove();
     }
 </script>
 
