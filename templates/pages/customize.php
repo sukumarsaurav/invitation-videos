@@ -494,74 +494,74 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
 
 <script>
     // Capture user timezone for country detection
-    document.addEventListener('DOMContentLoaded', funct i on() {
+    document.addEventListener('DOMContentLoaded', function () {
         const tzField = document.getElementById('user_timezone');
         if (tzField) {
             tzField.value = Intl.DateTimeFormat().resolvedOptions().timeZone;
         }
     });
 
-  // Video Modal Functions
+    // Video Modal Functions
     function getYouTubeEmbedUrl(url) {
         // Handle various YouTube URL formats
         var videoId = null;
-        
+
         // youtube.com/watch?v=VIDEO_ID
         var watchMatch = url.match(/[?&]v=([^&]+)/);
         if (watchMatch) videoId = watchMatch[1];
-        
+
         // youtu.be/VIDEO_ID
         var shortMatch = url.match(/youtu\.be\/([^?&]+)/);
         if (shortMatch) videoId = shortMatch[1];
-        
+
         // youtube.com/embed/VIDEO_ID
         var embedMatch = url.match(/youtube\.com\/embed\/([^?&]+)/);
         if (embedMatch) videoId = embedMatch[1];
-        
+
         // youtube.com/shorts/VIDEO_ID
         var shortsMatch = url.match(/youtube\.com\/shorts\/([^?&]+)/);
         if (shortsMatch) videoId = shortsMatch[1];
-        
+
         if (videoId) {
             return 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&rel=0';
         }
-        
+
         // Return original URL if not YouTube
         return url;
     }
 
     function openVideoModal(videoUrl) {
         var embedUrl = getYouTubeEmbedUrl(videoUrl);
-        
+
         // Create modal
         var modal = document.createElement('div');
         modal.id = 'video-modal';
         modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm';
-        
+
         var container = document.createElement('div');
         container.className = 'relative w-full max-w-4xl aspect-[9/16] sm:aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl';
-        
+
         var iframe = document.createElement('iframe');
         iframe.src = embedUrl;
         iframe.className = 'w-full h-full';
         iframe.frameBorder = '0';
         iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
         iframe.allowFullscreen = true;
-        
+
         var closeBtn = document.createElement('button');
         closeBtn.className = 'absolute top-4 right-4 size-10 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center transition-colors';
         closeBtn.innerHTML = '<span class="material-symbols-outlined">close</span>';
         closeBtn.onclick = closeVideoModal;
-        
+
         container.appendChild(iframe);
         container.appendChild(closeBtn);
         modal.appendChild(container);
-        
+
         // Close on backdrop click
-        modal.addEventListener('click', function(e) {
+        modal.addEventListener('click', function (e) {
             if (e.target === modal) closeVideoModal();
         });
-        
+
         // Close on Escape key
         document.addEventListener('keydown', function escHandler(e) {
             if (e.key === 'Escape') {
@@ -569,7 +569,7 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                 document.removeEventListener('keydown', escHandler);
             }
         });
-        
+
         document.body.appendChild(modal);
         document.body.style.overflow = 'hidden';
     }
@@ -581,12 +581,12 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
             document.body.style.overflow = '';
         }
     }
-    
+
     // Attach click handler to play button
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         var playBtn = document.getElementById('play-video-btn');
         if (playBtn) {
-            playBtn.addEventListener('click', function() {
+            playBtn.addEventListener('click', function () {
                 var videoUrl = this.getAttribute('data-video-url');
                 if (videoUrl) {
                     openVideoModal(videoUrl);
