@@ -165,9 +165,11 @@
                                     <!-- User Info -->
                                     <div class="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
                                         <p class="font-medium text-slate-900 dark:text-white">
-                                            <?= Security::escape($userName) ?></p>
+                                            <?= Security::escape($userName) ?>
+                                        </p>
                                         <p class="text-xs text-slate-500 truncate">
-                                            <?= Security::escape($_SESSION['user_email'] ?? '') ?></p>
+                                            <?= Security::escape($_SESSION['user_email'] ?? '') ?>
+                                        </p>
                                     </div>
 
                                     <a href="/profile"
@@ -272,6 +274,14 @@
     <main class="flex-1">
         <?= $content ?? '' ?>
     </main>
+
+    <!-- Floating Help Button -->
+    <a href="/support"
+        class="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 bg-primary text-white font-bold rounded-full shadow-xl shadow-primary/30 hover:bg-primary/90 hover:scale-105 transition-all group"
+        title="Need help?">
+        <span class="material-symbols-outlined text-xl">support_agent</span>
+        <span class="hidden sm:group-hover:inline whitespace-nowrap text-sm">Need Help?</span>
+    </a>
 
     <!-- Footer -->
     <footer class="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 mt-auto">

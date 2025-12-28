@@ -111,6 +111,18 @@ $router->post('/api/template/{id}/customize', function ($id) {
 // AUTH ROUTES
 // ===================
 
+// Support page
+$router->get('/support', function () {
+    include __DIR__ . '/templates/pages/support.php';
+});
+
+$router->post('/support', function () {
+    // TODO: Handle support form submission (email or save to DB)
+    $_SESSION['success'] = 'Thank you! We\'ll get back to you within 24 hours.';
+    header('Location: /support');
+    exit;
+});
+
 // Profile page
 $router->get('/profile', function () {
     include __DIR__ . '/templates/pages/profile.php';
