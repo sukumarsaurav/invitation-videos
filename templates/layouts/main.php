@@ -9,6 +9,7 @@
     <!-- SEO Meta Tags -->
     <meta name="description"
         content="<?= $metaDescription ?? 'Create stunning video invitations for weddings, birthdays, and special events. Easy customization, professional quality.' ?>">
+    <meta name="author" content="Sukumar Saurav - NeoWebX.com">
 
     <!-- Favicon -->
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
@@ -492,7 +493,9 @@
                 <div
                     class="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-500 pt-6 border-t border-slate-100 dark:border-slate-800">
                     <p>&copy; <?= date('Y') ?> <?= APP_NAME ?? 'VideoInvites' ?>. All rights reserved.</p>
-                    <p class="text-xs">Made with <span class="text-red-500">❤</span> in India</p>
+                    <p class="text-xs">Made with <span class="text-red-500">❤</span> in India | Developed by <a
+                            href="https://neowebx.com" target="_blank" rel="noopener"
+                            class="text-primary hover:underline font-medium">NeoWebX.com</a></p>
                 </div>
             </div>
         </div>
