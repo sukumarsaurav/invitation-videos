@@ -96,6 +96,39 @@ $router->get('/blog/{slug}', function ($slug) {
 });
 
 // ===================
+// STATIC PAGES
+// ===================
+
+// Privacy Policy
+$router->get('/privacy', function () {
+    include __DIR__ . '/templates/pages/privacy.php';
+});
+
+// Terms of Service
+$router->get('/terms', function () {
+    include __DIR__ . '/templates/pages/terms.php';
+});
+
+// Refund Policy
+$router->get('/refund', function () {
+    include __DIR__ . '/templates/pages/refund.php';
+});
+
+// FAQ
+$router->get('/faq', function () {
+    include __DIR__ . '/templates/pages/faq.php';
+});
+
+// Contact Us
+$router->get('/contact', function () {
+    include __DIR__ . '/templates/pages/contact.php';
+});
+
+$router->post('/contact', function () {
+    include __DIR__ . '/templates/pages/contact.php';
+});
+
+// ===================
 // API ROUTES
 // ===================
 
