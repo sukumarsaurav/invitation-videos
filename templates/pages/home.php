@@ -34,189 +34,113 @@ $pageDescription = 'Create beautiful video invitations for weddings, birthdays, 
 
 <?php ob_start(); ?>
 
-<!-- Hero Section - Compact -->
-<section
-    class="relative bg-gradient-to-br from-primary/10 via-purple-50 to-pink-50 dark:from-primary/20 dark:via-slate-900 dark:to-slate-900 py-10 sm:py-12 lg:py-14 overflow-hidden">
-    <div class="absolute inset-0 bg-[url('/assets/images/grid.svg')] opacity-20"></div>
-
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6">
-        <div class="text-center max-w-3xl mx-auto">
-            <span
-                class="inline-flex items-center gap-2 bg-primary/10 text-primary font-bold text-xs sm:text-sm px-3 sm:px-4 py-1 rounded-full mb-4">
-                <span class="material-symbols-outlined text-base sm:text-lg">auto_awesome</span>
-                <span>Create stunning invitations in minutes</span>
-            </span>
-
-            <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight mb-4">
-                Beautiful <span class="text-primary">Video Invitations</span> for Every Occasion
-            </h1>
-
-            <p class="text-base sm:text-lg text-slate-600 dark:text-slate-400 mb-6 max-w-2xl mx-auto">
-                Choose from our stunning templates, customize with your details, and share your personalized video
-                invitation with loved ones.
-            </p>
-
-            <div class="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
-                <a href="/templates"
-                    class="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white font-bold px-6 sm:px-8 py-3 rounded-xl shadow-lg shadow-primary/30 transition-all">
-                    <span>Browse Templates</span>
-                    <span class="material-symbols-outlined">arrow_forward</span>
-                </a>
-                <a href="#how-it-works"
-                    class="inline-flex items-center justify-center gap-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-white font-bold px-6 sm:px-8 py-3 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 transition-all">
-                    <span class="material-symbols-outlined">play_circle</span>
-                    <span>Watch Demo</span>
-                </a>
-            </div>
-
-            <!-- Trust Indicators -->
-            <div class="flex items-center justify-center gap-6 mt-8">
-                <div class="flex -space-x-2">
-                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-pink-400 to-rose-500 border-2 border-white">
-                    </div>
-                    <div
-                        class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 border-2 border-white">
-                    </div>
-                    <div
-                        class="w-8 h-8 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 border-2 border-white">
-                    </div>
-                    <div
-                        class="w-8 h-8 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 border-2 border-white">
-                    </div>
-                </div>
-                <div class="text-left">
-                    <p class="font-bold text-sm text-slate-900 dark:text-white">10,000+ Happy Customers</p>
-                    <div class="flex items-center gap-0.5 text-yellow-500">
-                        <span class="material-symbols-outlined text-sm">star</span>
-                        <span class="material-symbols-outlined text-sm">star</span>
-                        <span class="material-symbols-outlined text-sm">star</span>
-                        <span class="material-symbols-outlined text-sm">star</span>
-                        <span class="material-symbols-outlined text-sm">star</span>
-                        <span class="text-slate-600 dark:text-slate-400 text-xs ml-1">4.9/5</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Browse Most Loved Categories -->
-<section class="py-12 bg-white dark:bg-slate-900">
+<!-- All Categories Section -->
+<section class="py-10 sm:py-12 bg-white dark:bg-slate-900">
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
-        <div class="flex items-center justify-between mb-8">
+        <div class="flex items-start sm:items-center justify-between mb-8 flex-col sm:flex-row gap-4">
             <div>
-                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2">Browse Most Loved
-                    Categories</h2>
-                <p class="text-slate-600 dark:text-slate-400">Find the perfect template for your occasion</p>
+                <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2">All Categories</h1>
+                <p class="text-slate-600 dark:text-slate-400">Browse our comprehensive collection of video templates for
+                    any event.</p>
             </div>
-            <a href="/templates" class="hidden md:flex items-center gap-2 text-primary font-bold hover:underline">
-                View All
+            <a href="/templates"
+                class="flex items-center gap-2 text-primary font-bold hover:underline whitespace-nowrap">
+                View Full Catalog
                 <span class="material-symbols-outlined">arrow_forward</span>
             </a>
         </div>
 
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
             <?php
-            $categoryIcons = [
-                'wedding' => 'favorite',
-                'birthday' => 'cake',
-                'corporate' => 'business_center',
-                'baby_shower' => 'child_care',
-                'anniversary' => 'celebration'
-            ];
-            $categoryColors = [
-                'wedding' => 'from-rose-400 to-pink-500',
-                'birthday' => 'from-amber-400 to-orange-500',
-                'corporate' => 'from-blue-400 to-indigo-500',
-                'baby_shower' => 'from-teal-400 to-cyan-500',
-                'anniversary' => 'from-purple-400 to-violet-500'
+            $allCategories = [
+                ['slug' => 'wedding', 'name' => 'Wedding', 'icon' => 'favorite', 'color' => 'text-rose-500', 'bg' => 'bg-rose-50 dark:bg-rose-900/20'],
+                ['slug' => 'birthday', 'name' => 'Birthday', 'icon' => 'cake', 'color' => 'text-amber-500', 'bg' => 'bg-amber-50 dark:bg-amber-900/20'],
+                ['slug' => 'baby_shower', 'name' => 'Baby Shower', 'icon' => 'child_care', 'color' => 'text-teal-500', 'bg' => 'bg-teal-50 dark:bg-teal-900/20'],
+                ['slug' => 'save_the_date', 'name' => 'Save the Date', 'icon' => 'event', 'color' => 'text-blue-500', 'bg' => 'bg-blue-50 dark:bg-blue-900/20'],
+                ['slug' => 'parties', 'name' => 'Parties', 'icon' => 'celebration', 'color' => 'text-orange-500', 'bg' => 'bg-orange-50 dark:bg-orange-900/20'],
+                ['slug' => 'corporate', 'name' => 'Corporate', 'icon' => 'business_center', 'color' => 'text-slate-600', 'bg' => 'bg-slate-100 dark:bg-slate-800'],
+                ['slug' => 'holidays', 'name' => 'Holidays', 'icon' => 'redeem', 'color' => 'text-red-500', 'bg' => 'bg-red-50 dark:bg-red-900/20'],
+                ['slug' => 'anniversary', 'name' => 'Anniversary', 'icon' => 'favorite_border', 'color' => 'text-pink-500', 'bg' => 'bg-pink-50 dark:bg-pink-900/20'],
+                ['slug' => 'graduation', 'name' => 'Graduation', 'icon' => 'school', 'color' => 'text-indigo-500', 'bg' => 'bg-indigo-50 dark:bg-indigo-900/20'],
+                ['slug' => 'housewarming', 'name' => 'Housewarming', 'icon' => 'home', 'color' => 'text-cyan-500', 'bg' => 'bg-cyan-50 dark:bg-cyan-900/20'],
+                ['slug' => 'religious', 'name' => 'Religious', 'icon' => 'church', 'color' => 'text-yellow-600', 'bg' => 'bg-yellow-50 dark:bg-yellow-900/20'],
+                ['slug' => 'farewell', 'name' => 'Farewell', 'icon' => 'waving_hand', 'color' => 'text-purple-500', 'bg' => 'bg-purple-50 dark:bg-purple-900/20'],
             ];
 
-            foreach ($categories as $index => $cat):
-                $icon = $categoryIcons[$cat['category']] ?? 'category';
-                $gradient = $categoryColors[$cat['category']] ?? 'from-slate-400 to-slate-500';
-                $isTopCategory = $index < 3;
-                ?>
-                <a href="/templates?category=<?= $cat['category'] ?>"
-                    class="group relative p-5 rounded-2xl bg-slate-50 dark:bg-slate-800 hover:shadow-xl transition-all border border-transparent hover:border-primary/20 <?= $isTopCategory ? 'ring-2 ring-primary/20' : '' ?>">
-                    <?php if ($isTopCategory): ?>
-                        <span
-                            class="absolute -top-2 -right-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                            <span class="material-symbols-outlined text-xs">local_fire_department</span>
-                            Hot
-                        </span>
-                    <?php endif; ?>
+            foreach ($allCategories as $cat): ?>
+                <a href="/templates?category=<?= $cat['slug'] ?>"
+                    class="group flex flex-col items-center p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:shadow-lg hover:border-primary/30 transition-all">
                     <div
-                        class="w-14 h-14 rounded-xl bg-gradient-to-br <?= $gradient ?> flex items-center justify-center text-white mb-3 group-hover:scale-110 transition-transform">
-                        <span class="material-symbols-outlined text-2xl"><?= $icon ?></span>
+                        class="w-14 h-14 rounded-xl <?= $cat['bg'] ?> flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined text-2xl <?= $cat['color'] ?>"><?= $cat['icon'] ?></span>
                     </div>
-                    <h3 class="font-bold text-slate-900 dark:text-white capitalize mb-1">
-                        <?= str_replace('_', ' ', $cat['category']) ?>
-                    </h3>
-                    <p class="text-sm text-slate-500"><?= $cat['count'] ?> templates</p>
+                    <span
+                        class="font-semibold text-sm text-slate-900 dark:text-white text-center"><?= $cat['name'] ?></span>
                 </a>
             <?php endforeach; ?>
         </div>
     </div>
 </section>
 
-<!-- Trending Templates -->
+<!-- Popular Templates -->
 <section class="py-12 bg-slate-50 dark:bg-slate-800/50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
-        <div class="flex items-center justify-between mb-8">
+        <div class="flex items-start sm:items-center justify-between mb-8 flex-col sm:flex-row gap-4">
             <div>
-                <div class="flex items-center gap-2 mb-2">
-                    <span class="material-symbols-outlined text-2xl text-orange-500">trending_up</span>
-                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">Trending Templates</h2>
-                </div>
-                <p class="text-slate-600 dark:text-slate-400">Most popular picks this week</p>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2">Popular Templates</h2>
+                <p class="text-slate-600 dark:text-slate-400">Discover trending designs for your next event.</p>
             </div>
-            <a href="/templates" class="hidden md:flex items-center gap-2 text-primary font-bold hover:underline">
-                View All
+            <a href="/templates"
+                class="flex items-center gap-2 text-primary font-bold hover:underline whitespace-nowrap">
+                View All Templates
                 <span class="material-symbols-outlined">arrow_forward</span>
             </a>
         </div>
 
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            <?php foreach ($trendingTemplates as $index => $template): ?>
-                <div
-                    class="group relative flex flex-col overflow-hidden rounded-xl bg-white dark:bg-slate-900 shadow-sm hover:shadow-xl transition-all">
-                    <div class="relative aspect-[4/5] w-full overflow-hidden">
-                        <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+        <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <?php
+            $categoryBadgeColors = [
+                'wedding' => 'bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300',
+                'birthday' => 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300',
+                'baby_shower' => 'bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-300',
+                'corporate' => 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300',
+                'anniversary' => 'bg-pink-100 text-pink-700 dark:bg-pink-900/50 dark:text-pink-300',
+                'parties' => 'bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300',
+                'graduation' => 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300',
+                'religious' => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300',
+            ];
+
+            foreach ($trendingTemplates as $template):
+                $badgeColor = $categoryBadgeColors[$template['category']] ?? 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300';
+                ?>
+                <a href="/template/<?= Security::escape($template['slug']) ?>"
+                    class="group block bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200 dark:border-slate-700 hover:border-primary/30">
+                    <!-- Image -->
+                    <div class="relative aspect-[4/5] overflow-hidden">
+                        <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
                             style="background-image: url('<?= Security::escape($template['thumbnail_url'] ?? '/assets/images/placeholder.jpg') ?>');">
                         </div>
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
 
-                        <?php if ($index < 3): ?>
-                            <div class="absolute top-3 left-3">
-                                <span
-                                    class="bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
-                                    <span class="material-symbols-outlined text-xs">local_fire_department</span>
-                                    #<?= $index + 1 ?> Trending
-                                </span>
-                            </div>
-                        <?php endif; ?>
-
-                        <div class="absolute bottom-3 left-3 right-3 text-white">
-                            <h3 class="font-bold text-sm sm:text-base truncate"><?= Security::escape($template['title']) ?>
-                            </h3>
-                            <p class="text-xs opacity-80 capitalize"><?= str_replace('_', ' ', $template['category']) ?></p>
-                        </div>
-
-                        <div class="absolute top-3 right-3">
-                            <span
-                                class="bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-bold text-slate-900">
-                                $<?= number_format($template['price_usd'], 0) ?>
+                        <!-- Category Badge -->
+                        <div class="absolute top-3 left-3">
+                            <span class="px-3 py-1 rounded-full text-xs font-bold <?= $badgeColor ?>">
+                                <?= ucfirst(str_replace('_', ' ', $template['category'])) ?>
                             </span>
                         </div>
                     </div>
 
-                    <a href="/template/<?= Security::escape($template['slug']) ?>"
-                        class="p-3 flex items-center justify-center gap-2 bg-primary text-white font-bold text-sm hover:bg-primary/90 transition-colors">
-                        <span>Customize</span>
-                        <span class="material-symbols-outlined text-base">arrow_forward</span>
-                    </a>
-                </div>
+                    <!-- Content -->
+                    <div class="p-4">
+                        <h3
+                            class="font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors truncate">
+                            <?= Security::escape($template['title']) ?>
+                        </h3>
+                        <p
+                            class="text-sm <?= $template['price_usd'] > 0 ? 'text-primary font-bold' : 'text-green-600 font-bold' ?>">
+                            <?= $template['price_usd'] > 0 ? '$' . number_format($template['price_usd'], 2) : 'Free' ?>
+                        </p>
+                    </div>
+                </a>
             <?php endforeach; ?>
         </div>
     </div>
@@ -352,56 +276,61 @@ $pageDescription = 'Create beautiful video invitations for weddings, birthdays, 
 
 <!-- Blog/Tips Section for SEO -->
 <?php if (!empty($blogPosts)): ?>
-<section class="py-12 bg-white dark:bg-slate-900">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6">
-        <div class="flex items-center justify-between mb-8">
-            <div>
-                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2">Tips & Inspiration</h2>
-                <p class="text-slate-600 dark:text-slate-400">Ideas to make your invitations unforgettable</p>
-            </div>
-            <a href="/blog" class="text-primary font-bold hover:underline flex items-center gap-1">
-                View All <span class="material-symbols-outlined text-base">arrow_forward</span>
-            </a>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <?php 
-            $colors = [
-                ['from-rose-400', 'to-pink-500', 'favorite'],
-                ['from-amber-400', 'to-orange-500', 'cake'],
-                ['from-teal-400', 'to-cyan-500', 'child_care']
-            ];
-            foreach ($blogPosts as $i => $post): 
-                $color = $colors[$i % count($colors)];
-            ?>
-            <article class="group bg-slate-50 dark:bg-slate-800 rounded-2xl overflow-hidden hover:shadow-xl transition-all">
-                <a href="/blog/<?= Security::escape($post['slug']) ?>" class="block">
-                    <div class="aspect-video <?= $post['featured_image'] ? 'bg-cover bg-center' : "bg-gradient-to-br {$color[0]} {$color[1]}" ?> flex items-center justify-center"
-                         <?php if ($post['featured_image']): ?>style="background-image: url('<?= Security::escape($post['featured_image']) ?>')"<?php endif; ?>>
-                        <?php if (!$post['featured_image']): ?>
-                        <span class="material-symbols-outlined text-5xl text-white/80"><?= $color[2] ?></span>
-                        <?php endif; ?>
-                    </div>
-                    <div class="p-5">
-                        <?php if ($post['category']): ?>
-                        <span class="text-xs font-bold text-primary uppercase tracking-wide"><?= Security::escape($post['category']) ?></span>
-                        <?php endif; ?>
-                        <h3 class="font-bold text-lg text-slate-900 dark:text-white mt-2 mb-2 group-hover:text-primary transition-colors line-clamp-2">
-                            <?= Security::escape($post['title']) ?>
-                        </h3>
-                        <?php if ($post['excerpt']): ?>
-                        <p class="text-sm text-slate-600 dark:text-slate-400 line-clamp-2"><?= Security::escape($post['excerpt']) ?></p>
-                        <?php endif; ?>
-                        <span class="inline-flex items-center gap-1 text-primary font-bold text-sm mt-3 group-hover:underline">
-                            Read More <span class="material-symbols-outlined text-base">arrow_forward</span>
-                        </span>
-                    </div>
+    <section class="py-12 bg-white dark:bg-slate-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="flex items-center justify-between mb-8">
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2">Tips & Inspiration</h2>
+                    <p class="text-slate-600 dark:text-slate-400">Ideas to make your invitations unforgettable</p>
+                </div>
+                <a href="/blog" class="text-primary font-bold hover:underline flex items-center gap-1">
+                    View All <span class="material-symbols-outlined text-base">arrow_forward</span>
                 </a>
-            </article>
-            <?php endforeach; ?>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <?php
+                $colors = [
+                    ['from-rose-400', 'to-pink-500', 'favorite'],
+                    ['from-amber-400', 'to-orange-500', 'cake'],
+                    ['from-teal-400', 'to-cyan-500', 'child_care']
+                ];
+                foreach ($blogPosts as $i => $post):
+                    $color = $colors[$i % count($colors)];
+                    ?>
+                    <article
+                        class="group bg-slate-50 dark:bg-slate-800 rounded-2xl overflow-hidden hover:shadow-xl transition-all">
+                        <a href="/blog/<?= Security::escape($post['slug']) ?>" class="block">
+                            <div class="aspect-video <?= $post['featured_image'] ? 'bg-cover bg-center' : "bg-gradient-to-br {$color[0]} {$color[1]}" ?> flex items-center justify-center"
+                                <?php if ($post['featured_image']): ?>style="background-image: url('<?= Security::escape($post['featured_image']) ?>')" <?php endif; ?>>
+                                <?php if (!$post['featured_image']): ?>
+                                    <span class="material-symbols-outlined text-5xl text-white/80"><?= $color[2] ?></span>
+                                <?php endif; ?>
+                            </div>
+                            <div class="p-5">
+                                <?php if ($post['category']): ?>
+                                    <span
+                                        class="text-xs font-bold text-primary uppercase tracking-wide"><?= Security::escape($post['category']) ?></span>
+                                <?php endif; ?>
+                                <h3
+                                    class="font-bold text-lg text-slate-900 dark:text-white mt-2 mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                                    <?= Security::escape($post['title']) ?>
+                                </h3>
+                                <?php if ($post['excerpt']): ?>
+                                    <p class="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
+                                        <?= Security::escape($post['excerpt']) ?></p>
+                                <?php endif; ?>
+                                <span
+                                    class="inline-flex items-center gap-1 text-primary font-bold text-sm mt-3 group-hover:underline">
+                                    Read More <span class="material-symbols-outlined text-base">arrow_forward</span>
+                                </span>
+                            </div>
+                        </a>
+                    </article>
+                <?php endforeach; ?>
+            </div>
         </div>
-    </div>
-</section>
+    </section>
 <?php endif; ?>
 
 <!-- CTA Section -->
