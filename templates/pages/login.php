@@ -8,12 +8,22 @@ require_once __DIR__ . '/../../src/Core/Security.php';
 
 // Redirect if already logged in
 if (isset($_SESSION['user_id'])) {
-    header('Location: /');
+    $redirect = $_GET['redirect'] ?? $_SESSION['redirect_url'] ?? '/';
+    unset($_SESSION['redirect_url']);
+    header('Location: ' . $redirect);
     exit;
+}
+
+// Capture redirect URL if present
+if (!empty($_GET['redirect'])) {
+    $_SESSION['redirect_url'] = $_GET['redirect'];
 }
 
 $error = $_SESSION['error'] ?? null;
 unset($_SESSION['error']);
+
+// Build redirect query string for links
+$redirectParam = !empty($_GET['redirect']) ? '?redirect=' . urlencode($_GET['redirect']) : '';
 
 $pageTitle = 'Login';
 ?>
@@ -93,7 +103,7 @@ $pageTitle = 'Login';
             </div>
 
             <!-- Google Sign In -->
-            <a href="/auth/google"
+            <a href="/auth/google<?= $redirectParam ?>"
                 class="flex items-center justify-center gap-3 w-full py-3 px-4 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
                 <svg class="w-5 h-5" viewBox="0 0 24 24">
                     <path fill="#4285F4"
@@ -111,7 +121,8 @@ $pageTitle = 'Login';
             <div class="mt-6 text-center">
                 <p class="text-slate-600 dark:text-slate-400">
                     Don't have an account?
-                    <a href="/register" class="text-primary font-semibold hover:underline">Sign up</a>
+                    <a href="/register<?= $redirectParam ?>" class="text-primary font-semibold hover:underline">Sign
+                        up</a>
                 </p>
             </div>
         </div>

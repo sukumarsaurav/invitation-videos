@@ -136,7 +136,11 @@ class AuthController
         $_SESSION['user_logged_in_at'] = time();
 
         $_SESSION['success'] = 'Account created successfully!';
-        header('Location: /');
+
+        // Redirect to intended URL or home
+        $redirect = $_SESSION['redirect_url'] ?? '/';
+        unset($_SESSION['redirect_url']);
+        header('Location: ' . $redirect);
         exit;
     }
 

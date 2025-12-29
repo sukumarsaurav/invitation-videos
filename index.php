@@ -285,6 +285,12 @@ $router->get('/logout', function () {
 // Google OAuth
 $router->get('/auth/google', function () {
     require_once __DIR__ . '/src/Auth/GoogleAuthService.php';
+
+    // Capture redirect URL from query param if present
+    if (!empty($_GET['redirect'])) {
+        $_SESSION['redirect_url'] = $_GET['redirect'];
+    }
+
     $google = new GoogleAuthService();
     header('Location: ' . $google->getAuthUrl());
     exit;
