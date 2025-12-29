@@ -10,6 +10,13 @@
     <meta name="description"
         content="<?= $metaDescription ?? 'Create stunning video invitations for weddings, birthdays, and special events. Easy customization, professional quality.' ?>">
 
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="shortcut icon" href="/favicon.ico">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -97,10 +104,8 @@
                 <div class="flex items-center gap-6 lg:gap-8 flex-1">
                     <!-- Logo -->
                     <a href="/" class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                        <div
-                            class="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                            <span class="material-symbols-outlined text-2xl sm:text-3xl">movie_filter</span>
-                        </div>
+                        <img src="/assets/images/logo.png" alt="<?= APP_NAME ?? 'InvitationVideos' ?>"
+                            class="h-9 sm:h-10 w-auto">
                         <h2 class="text-lg sm:text-xl font-bold leading-tight tracking-tight">
                             <?= APP_NAME ?? 'VideoInvites' ?>
                         </h2>
@@ -302,7 +307,8 @@
                 <!-- Brand -->
                 <div class="col-span-2 sm:col-span-3 lg:col-span-1">
                     <div class="flex items-center gap-2 mb-4">
-                        <span class="material-symbols-outlined text-primary text-2xl">movie_filter</span>
+                        <img src="/assets/images/logo.png" alt="<?= APP_NAME ?? 'InvitationVideos' ?>"
+                            class="h-8 w-auto">
                         <span class="font-bold text-lg"><?= APP_NAME ?? 'VideoInvites' ?></span>
                     </div>
                     <p class="text-sm text-slate-500 mb-4">Create stunning video invitations for your special occasions.
