@@ -124,6 +124,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         } else {
             // Final step - create order
+            // Ensure user is logged in before creating order
+            if (empty($_SESSION['user_id'])) {
+                // Store customization data and redirect to login
+                $_SESSION['checkout_redirect'] = '/template/' . $templateSlug . '?step=' . $step;
+                $_SESSION['pending_customization'] = true;
+                header('Location: /login?redirect=' . urlencode('/template/' . $templateSlug . '?step=' . $step));
+                exit;
+            }
+
             $allData = $_SESSION['customize_data'];
 
             // Auto-detect country
@@ -158,7 +167,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             Database::query($sql, [
                 $orderNumber,
-                $_SESSION['user_id'] ?? 1,
+                $_SESSION['user_id'],
                 $templateId,
                 $amount,
                 $currency,
