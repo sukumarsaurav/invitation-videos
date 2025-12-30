@@ -1142,11 +1142,15 @@ class TemplateBuilder {
                 const currentSlide = this.slides[slideIndex];
                 if (!currentSlide) return;
 
+                // Clear all background properties first
+                currentSlide.background_color = null;
+                currentSlide.background_image = null;
+                currentSlide.background_gradient = null;
+                currentSlide.background_video = null;
+
                 if (type === 'color') {
                     const color = item.dataset.value;
                     currentSlide.background_color = color;
-                    currentSlide.background_image = null;
-                    currentSlide.background_gradient = null;
 
                     // Update canvas background
                     if (canvasContainer) {
@@ -1155,8 +1159,6 @@ class TemplateBuilder {
                 } else if (type === 'gradient') {
                     const gradient = item.dataset.value;
                     currentSlide.background_gradient = gradient;
-                    currentSlide.background_image = null;
-                    currentSlide.background_color = null;
 
                     if (canvasContainer) {
                         canvasContainer.style.background = gradient;
@@ -1164,8 +1166,6 @@ class TemplateBuilder {
                 } else if (type === 'image') {
                     const src = item.dataset.src;
                     currentSlide.background_image = src;
-                    currentSlide.background_type = 'image';
-                    currentSlide.background_gradient = null;
 
                     if (canvasContainer) {
                         canvasContainer.style.background = `url(${src}) center/cover no-repeat`;
@@ -1173,7 +1173,6 @@ class TemplateBuilder {
                 } else if (type === 'video') {
                     const src = item.dataset.src;
                     currentSlide.background_video = src;
-                    currentSlide.background_type = 'video';
                     // For videos, show a placeholder or first frame
                     if (canvasContainer) {
                         canvasContainer.style.background = '#1e293b';

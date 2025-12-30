@@ -70,14 +70,17 @@ export class SlideManager {
         thumb.className = 'slide-thumb';
         thumb.dataset.slideId = slide.id;
         thumb.dataset.slideOrder = slide.slide_order;
-        thumb.style.backgroundColor = slide.background_color || '#ffffff';
 
-        if (slide.background_image) {
-            thumb.style.backgroundImage = `url(${slide.background_image})`;
+        // Apply background based on type (priority: gradient > image > color)
+        if (slide.background_gradient) {
+            thumb.style.background = slide.background_gradient;
+        } else if (slide.background_image) {
+            thumb.style.background = `url(${slide.background_image}) center/cover no-repeat`;
+        } else {
+            thumb.style.background = slide.background_color || '#ffffff';
         }
 
         thumb.innerHTML = `
-            <span class="slide-number">${index + 1}</span>
             <span class="slide-duration">${(slide.duration_ms / 1000).toFixed(1)}s</span>
         `;
 
@@ -106,14 +109,19 @@ export class SlideManager {
     updateThumbnail(index, slide) {
         const thumbs = this.slidesStrip.querySelectorAll('.slide-thumb');
         if (thumbs[index]) {
-            thumbs[index].style.backgroundColor = slide.background_color || '#ffffff';
-            if (slide.background_image) {
-                thumbs[index].style.backgroundImage = `url(${slide.background_image})`;
+            // Apply background based on type (priority: gradient > image > color)
+            if (slide.background_gradient) {
+                thumbs[index].style.background = slide.background_gradient;
+            } else if (slide.background_image) {
+                thumbs[index].style.background = `url(${slide.background_image}) center/cover no-repeat`;
             } else {
-                thumbs[index].style.backgroundImage = 'none';
+                thumbs[index].style.background = slide.background_color || '#ffffff';
             }
-            thumbs[index].querySelector('.slide-duration').textContent =
-                `${(slide.duration_ms / 1000).toFixed(1)}s`;
+
+            const durationEl = thumbs[index].querySelector('.slide-duration');
+            if (durationEl) {
+                durationEl.textContent = `${(slide.duration_ms / 1000).toFixed(1)}s`;
+            }
         }
     }
 
