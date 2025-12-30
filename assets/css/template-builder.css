@@ -240,13 +240,15 @@
 
 .canvas-text-element {
     position: absolute;
-    padding: 0.25rem 0.5rem;
+    padding: 0.5rem;
     cursor: move;
     pointer-events: auto;
     user-select: none;
     border: 2px dashed transparent;
     border-radius: 0.25rem;
     transition: border-color 0.2s;
+    min-width: 50px;
+    min-height: 20px;
 }
 
 .canvas-text-element:hover,
@@ -256,6 +258,40 @@
 
 .canvas-text-element.selected {
     border-style: solid;
+}
+
+/* Resize Handles */
+.canvas-text-element.selected .resize-handle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: #ffffff;
+    border: 2px solid #7c3aed;
+    border-radius: 2px;
+}
+
+.canvas-text-element .resize-handle.nw {
+    top: -5px;
+    left: -5px;
+    cursor: nw-resize;
+}
+
+.canvas-text-element .resize-handle.ne {
+    top: -5px;
+    right: -5px;
+    cursor: ne-resize;
+}
+
+.canvas-text-element .resize-handle.sw {
+    bottom: -5px;
+    left: -5px;
+    cursor: sw-resize;
+}
+
+.canvas-text-element .resize-handle.se {
+    bottom: -5px;
+    right: -5px;
+    cursor: se-resize;
 }
 
 .canvas-info {
@@ -1048,6 +1084,8 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 1rem;
+    margin-left: 72px;
+    /* Start after icon sidebar */
     background: #ffffff;
     border-bottom: 1px solid #e2e8f0;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);

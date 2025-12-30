@@ -57,15 +57,37 @@ export class TextEditor {
             element = document.createElement('div');
             element.className = 'canvas-text-element';
             element.dataset.fieldId = fieldId;
+
+            // Create resize handles
+            const handles = ['nw', 'ne', 'sw', 'se'];
+            handles.forEach(pos => {
+                const handle = document.createElement('div');
+                handle.className = `resize-handle ${pos}`;
+                handle.dataset.handle = pos;
+                element.appendChild(handle);
+            });
+
+            // Create text content wrapper
+            const textContent = document.createElement('span');
+            textContent.className = 'text-content';
+            element.appendChild(textContent);
+
             this.overlaysContainer.appendChild(element);
 
             // Make draggable
             this.makeDraggable(element);
 
+            // Make resizable
+            this.makeResizable(element);
+
             // Click to select
             element.addEventListener('click', (e) => {
                 e.stopPropagation();
                 this.builder.selectElement(element);
+                // Show text toolbar
+                if (this.builder.showTextToolbar) {
+                    this.builder.showTextToolbar();
+                }
             });
         }
 
@@ -80,7 +102,12 @@ export class TextEditor {
         element.style.textAlign = field.text_align || 'center';
 
         // Display sample value or placeholder
-        element.textContent = field.sample_value || `{${field.field_name}}`;
+        const textSpan = element.querySelector('.text-content');
+        if (textSpan) {
+            textSpan.textContent = field.sample_value || `{${field.field_name}}`;
+        } else {
+            element.textContent = field.sample_value || `{${field.field_name}}`;
+        }
     }
 
     makeDraggable(element) {
@@ -128,6 +155,82 @@ export class TextEditor {
                 this.builder.updateField(fieldId, {
                     position_x: newX,
                     position_y: newY
+                });
+            }
+        });
+    }
+
+    makeResizable(element) {
+        const handles = element.querySelectorAll('.resize-handle');
+        let isResizing = false;
+        let currentHandle = null;
+        let startWidth, startHeight, startX, startY, startFontSize;
+
+        handles.forEach(handle => {
+            handle.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                isResizing = true;
+                currentHandle = handle.dataset.handle;
+                startX = e.clientX;
+                startY = e.clientY;
+                startWidth = element.offsetWidth;
+                startHeight = element.offsetHeight;
+
+                const fieldId = element.dataset.fieldId;
+                const field = this.builder.getFieldById(fieldId);
+                startFontSize = field?.font_size || 24;
+
+                e.preventDefault();
+            });
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+
+            const deltaX = e.clientX - startX;
+            const deltaY = e.clientY - startY;
+
+            let newWidth = startWidth;
+            let newHeight = startHeight;
+
+            // Adjust based on which handle is being dragged
+            if (currentHandle.includes('e')) {
+                newWidth = startWidth + deltaX;
+            }
+            if (currentHandle.includes('w')) {
+                newWidth = startWidth - deltaX;
+            }
+            if (currentHandle.includes('s')) {
+                newHeight = startHeight + deltaY;
+            }
+            if (currentHandle.includes('n')) {
+                newHeight = startHeight - deltaY;
+            }
+
+            // Minimum size
+            newWidth = Math.max(50, newWidth);
+            newHeight = Math.max(20, newHeight);
+
+            element.style.width = `${newWidth}px`;
+            element.style.height = `${newHeight}px`;
+
+            // Scale font size proportionally to width change
+            const scale = newWidth / startWidth;
+            const newFontSize = Math.round(startFontSize * scale);
+            element.style.fontSize = `${newFontSize / 4}px`; // Scaled for preview
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isResizing) {
+                isResizing = false;
+
+                // Update field with new font size based on final width
+                const fieldId = element.dataset.fieldId;
+                const scale = element.offsetWidth / startWidth;
+                const newFontSize = Math.round(startFontSize * scale);
+
+                this.builder.updateField(fieldId, {
+                    font_size: newFontSize
                 });
             }
         });
