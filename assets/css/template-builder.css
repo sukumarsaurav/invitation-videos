@@ -1080,15 +1080,20 @@
 
 /* Floating Text Toolbar */
 .text-toolbar {
+    position: absolute;
+    top: 56px;
+    /* Below header */
+    left: 352px;
+    /* After icon sidebar (72px) + content panel (280px) */
+    right: 0;
+    z-index: 100;
     display: flex;
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 1rem;
-    margin-left: 72px;
-    /* Start after icon sidebar */
     background: #ffffff;
     border-bottom: 1px solid #e2e8f0;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .text-toolbar.hidden {
