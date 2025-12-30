@@ -154,6 +154,9 @@ class TemplateBuilder {
         // Field drag and drop
         this.setupFieldDragDrop();
 
+        // Timeline setup
+        this.setupTimeline();
+
         // Warn before leaving if unsaved
         window.addEventListener('beforeunload', (e) => {
             if (this.isDirty) {
@@ -543,6 +546,9 @@ class TemplateBuilder {
 
         // Show toolbar
         this.showTextToolbar();
+
+        // Refresh timeline to show new element
+        this.refreshTimeline();
     }
 
     setupTextToolbar() {
@@ -705,6 +711,208 @@ class TemplateBuilder {
         if (toolbar) {
             toolbar.classList.add('hidden');
         }
+    }
+
+    setupTimeline() {
+        this.renderTimelineRuler();
+        this.renderTimelineTracks();
+        this.setupPlayhead();
+    }
+
+    renderTimelineRuler() {
+        const ruler = document.getElementById('timeline-ruler');
+        const durationSpan = document.getElementById('timeline-duration');
+        if (!ruler) return;
+
+        const currentSlide = this.slides.find(s => s.id == this.currentSlideIndex) || this.slides[0];
+        const duration = currentSlide?.duration_ms || 3000;
+
+        if (durationSpan) {
+            durationSpan.textContent = (duration / 1000).toFixed(1) + 's';
+        }
+
+        // Clear existing marks (keep playhead)
+        const playhead = ruler.querySelector('.playhead');
+        ruler.innerHTML = '';
+        if (playhead) ruler.appendChild(playhead);
+
+        // Generate time marks based on duration
+        const stepMs = duration <= 3000 ? 500 : (duration <= 10000 ? 1000 : 2000);
+        for (let t = 0; t <= duration; t += stepMs) {
+            const mark = document.createElement('span');
+            mark.className = 'ruler-mark';
+            mark.style.left = `${(t / duration) * 100}%`;
+            mark.textContent = (t / 1000).toFixed(1) + 's';
+            ruler.appendChild(mark);
+        }
+    }
+
+    renderTimelineTracks() {
+        const container = document.getElementById('element-tracks');
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        // Get current slide's fields
+        const currentSlide = this.slides.find(s => s.id == this.currentSlideIndex) || this.slides[0];
+        const duration = currentSlide?.duration_ms || 3000;
+        const slideFields = currentSlide?.fields || [];
+
+        slideFields.forEach(field => {
+            const animStart = field.animation_start || 0;
+            const animEnd = field.animation_end || duration;
+
+            const startPercent = (animStart / duration) * 100;
+            const widthPercent = ((animEnd - animStart) / duration) * 100;
+
+            const track = document.createElement('div');
+            track.className = 'timeline-track';
+            track.dataset.fieldId = field.id;
+
+            // Determine icon based on field type
+            let icon = 'title';
+            let trackClass = 'text-track';
+            if (field.field_type === 'image') {
+                icon = 'image';
+                trackClass = 'image-track';
+            } else if (field.field_type === 'shape') {
+                icon = 'shapes';
+                trackClass = '';
+            }
+
+            track.innerHTML = `
+                <span class="track-label">
+                    <span class="track-icon material-symbols-outlined">${icon}</span>
+                    ${field.field_name || field.name || 'Element'}
+                </span>
+                <div class="track-bar-container">
+                    <div class="track-bar ${trackClass}" 
+                         data-start="${animStart}" 
+                         data-end="${animEnd}"
+                         style="left: ${startPercent}%; width: ${widthPercent}%;">
+                        <div class="track-handle track-handle-left"></div>
+                        <div class="track-handle track-handle-right"></div>
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(track);
+            this.makeTrackDraggable(track, field, duration);
+        });
+    }
+
+    makeTrackDraggable(track, field, duration) {
+        const bar = track.querySelector('.track-bar');
+        const container = track.querySelector('.track-bar-container');
+        const leftHandle = bar.querySelector('.track-handle-left');
+        const rightHandle = bar.querySelector('.track-handle-right');
+
+        let isDragging = false;
+        let dragType = null; // 'move', 'left', 'right'
+        let startX, startLeft, startWidth;
+
+        const onMouseDown = (e, type) => {
+            e.preventDefault();
+            e.stopPropagation();
+            isDragging = true;
+            dragType = type;
+            startX = e.clientX;
+            startLeft = parseFloat(bar.style.left) || 0;
+            startWidth = parseFloat(bar.style.width) || 100;
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+            bar.style.cursor = 'grabbing';
+        };
+
+        const onMouseMove = (e) => {
+            if (!isDragging) return;
+
+            const containerRect = container.getBoundingClientRect();
+            const deltaX = e.clientX - startX;
+            const deltaPercent = (deltaX / containerRect.width) * 100;
+
+            if (dragType === 'move') {
+                let newLeft = startLeft + deltaPercent;
+                newLeft = Math.max(0, Math.min(newLeft, 100 - startWidth));
+                bar.style.left = newLeft + '%';
+            } else if (dragType === 'left') {
+                let newLeft = startLeft + deltaPercent;
+                let newWidth = startWidth - deltaPercent;
+                if (newLeft >= 0 && newWidth >= 5) {
+                    bar.style.left = newLeft + '%';
+                    bar.style.width = newWidth + '%';
+                }
+            } else if (dragType === 'right') {
+                let newWidth = startWidth + deltaPercent;
+                if (newWidth >= 5 && startLeft + newWidth <= 100) {
+                    bar.style.width = newWidth + '%';
+                }
+            }
+        };
+
+        const onMouseUp = () => {
+            if (!isDragging) return;
+            isDragging = false;
+            bar.style.cursor = 'grab';
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+
+            // Update field data
+            const left = parseFloat(bar.style.left) || 0;
+            const width = parseFloat(bar.style.width) || 100;
+            const newStart = Math.round((left / 100) * duration);
+            const newEnd = Math.round(((left + width) / 100) * duration);
+
+            bar.dataset.start = newStart;
+            bar.dataset.end = newEnd;
+
+            this.updateField(field.id, {
+                animation_start: newStart,
+                animation_end: newEnd
+            });
+        };
+
+        bar.addEventListener('mousedown', (e) => {
+            if (e.target === leftHandle) return;
+            if (e.target === rightHandle) return;
+            onMouseDown(e, 'move');
+        });
+        leftHandle.addEventListener('mousedown', (e) => onMouseDown(e, 'left'));
+        rightHandle.addEventListener('mousedown', (e) => onMouseDown(e, 'right'));
+    }
+
+    setupPlayhead() {
+        const playhead = document.getElementById('timeline-playhead');
+        const ruler = document.getElementById('timeline-ruler');
+        if (!playhead || !ruler) return;
+
+        const head = playhead.querySelector('.playhead-head');
+        let isDragging = false;
+
+        head.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
+        });
+
+        const onMove = (e) => {
+            if (!isDragging) return;
+            const rect = ruler.getBoundingClientRect();
+            let percent = ((e.clientX - rect.left) / rect.width) * 100;
+            percent = Math.max(0, Math.min(100, percent));
+            playhead.style.left = percent + '%';
+        };
+
+        const onUp = () => {
+            isDragging = false;
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup', onUp);
+        };
+    }
+
+    refreshTimeline() {
+        this.renderTimelineRuler();
+        this.renderTimelineTracks();
     }
 
     setupPresetQuickAdd() {

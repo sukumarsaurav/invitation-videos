@@ -416,90 +416,195 @@
 .timeline-tracks {
     flex: 1;
     overflow-y: auto;
-    background: #f8fafc;
-    border-top: 1px solid #e2e8f0;
-    max-height: 120px;
+    background: #ffffff;
+    max-height: 150px;
+}
+
+.timeline-ruler-container {
+    display: flex;
+    position: sticky;
+    top: 0;
+    background: #f1f5f9;
+    border-bottom: 1px solid #e2e8f0;
+    z-index: 10;
+}
+
+.track-label-spacer {
+    width: 100px;
+    flex-shrink: 0;
+    border-right: 1px solid #e2e8f0;
 }
 
 .timeline-ruler {
+    flex: 1;
+    position: relative;
+    height: 24px;
     display: flex;
-    align-items: center;
-    padding: 0.25rem 1rem;
-    background: #f1f5f9;
-    border-bottom: 1px solid #e2e8f0;
-    font-size: 0.625rem;
-    color: #94a3b8;
-    gap: 0;
+    align-items: flex-end;
+    padding-bottom: 2px;
 }
 
-.timeline-ruler span {
-    flex: 1;
-    text-align: center;
+.ruler-mark {
+    position: absolute;
+    font-size: 0.625rem;
+    color: #94a3b8;
+    transform: translateX(-50%);
+}
+
+.ruler-mark::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    width: 1px;
+    height: 4px;
+    background: #cbd5e1;
+}
+
+/* Playhead */
+.playhead {
+    position: absolute;
+    top: 0;
+    bottom: -150px;
+    width: 2px;
+    z-index: 20;
+    pointer-events: none;
+}
+
+.playhead-head {
+    width: 12px;
+    height: 12px;
+    background: #ef4444;
+    border-radius: 2px 2px 0 0;
+    margin-left: -5px;
+    cursor: ew-resize;
+    pointer-events: auto;
+}
+
+.playhead-line {
+    width: 2px;
+    height: calc(100% - 12px);
+    background: #ef4444;
+    margin-left: -0px;
+}
+
+/* Element Tracks Container */
+.element-tracks-container {
+    min-height: 60px;
 }
 
 .timeline-track {
     display: flex;
     align-items: center;
-    padding: 0.25rem 1rem;
-    border-bottom: 1px solid #e2e8f0;
-    min-height: 32px;
+    border-bottom: 1px solid #f1f5f9;
+    min-height: 28px;
+    background: #ffffff;
+}
+
+.timeline-track:hover {
+    background: #f8fafc;
+}
+
+.timeline-track.selected {
+    background: #f5f3ff;
 }
 
 .track-label {
-    width: 80px;
+    width: 100px;
+    padding: 0 0.5rem;
     font-size: 0.625rem;
     color: #64748b;
     font-weight: 500;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    border-right: 1px solid #e2e8f0;
+}
+
+.track-icon {
+    font-size: 0.875rem;
+    color: #94a3b8;
 }
 
 .track-bar-container {
     flex: 1;
-    height: 20px;
+    height: 22px;
     position: relative;
-    background: #e2e8f0;
-    border-radius: 0.25rem;
+    background: linear-gradient(to right,
+            transparent 0%, transparent 10%,
+            #f8fafc 10%, #f8fafc 20%,
+            transparent 20%, transparent 30%,
+            #f8fafc 30%, #f8fafc 40%,
+            transparent 40%, transparent 50%,
+            #f8fafc 50%, #f8fafc 60%,
+            transparent 60%, transparent 70%,
+            #f8fafc 70%, #f8fafc 80%,
+            transparent 80%, transparent 90%,
+            #f8fafc 90%, #f8fafc 100%);
+    padding: 2px 0;
 }
 
 .track-bar {
     position: absolute;
-    height: 100%;
-    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-    border-radius: 0.25rem;
-    cursor: ew-resize;
+    top: 2px;
+    height: calc(100% - 4px);
+    background: linear-gradient(135deg, #a78bfa, #7c3aed);
+    border-radius: 3px;
+    cursor: grab;
     min-width: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 1px 3px rgba(124, 58, 237, 0.3);
+    transition: box-shadow 0.2s;
 }
 
 .track-bar:hover {
-    background: linear-gradient(135deg, #a78bfa, #8b5cf6);
+    box-shadow: 0 2px 6px rgba(124, 58, 237, 0.4);
 }
 
-.track-bar::before,
-.track-bar::after {
-    content: '';
+.track-bar:active {
+    cursor: grabbing;
+}
+
+.track-bar.text-track {
+    background: linear-gradient(135deg, #60a5fa, #3b82f6);
+    box-shadow: 0 1px 3px rgba(59, 130, 246, 0.3);
+}
+
+.track-bar.image-track {
+    background: linear-gradient(135deg, #4ade80, #22c55e);
+    box-shadow: 0 1px 3px rgba(34, 197, 94, 0.3);
+}
+
+/* Resize Handles */
+.track-handle {
     position: absolute;
-    width: 4px;
-    height: 12px;
-    background: rgba(255, 255, 255, 0.6);
-    border-radius: 2px;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 0;
+    width: 6px;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.4);
+    cursor: ew-resize;
+    opacity: 0;
+    transition: opacity 0.2s;
 }
 
-.track-bar::before {
-    left: 4px;
-    cursor: w-resize;
+.track-bar:hover .track-handle {
+    opacity: 1;
 }
 
-.track-bar::after {
-    right: 4px;
-    cursor: e-resize;
+.track-handle-left {
+    left: 0;
+    border-radius: 3px 0 0 3px;
+}
+
+.track-handle-right {
+    right: 0;
+    border-radius: 0 3px 3px 0;
 }
 
 .slide-thumb {
