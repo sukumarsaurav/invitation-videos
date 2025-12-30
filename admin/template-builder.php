@@ -432,27 +432,61 @@ $pageTitle = 'Template Builder: ' . $template['title'];
                 <span class="separator">•</span>
                 <span id="current-slide-info">Slide 1</span>
             </div>
+        </div>
+    </div>
+</div>
 
-            <!-- Slide Strip (inside canvas wrapper) -->
-            <div class="builder-slides">
-                <div id="slides-strip" class="slides-strip">
-                    <?php if (empty($slides)): ?>
-                        <!-- Will be populated by JS if no slides exist -->
-                    <?php else: ?>
-                        <?php foreach ($slides as $index => $slide): ?>
-                            <div class="slide-thumb <?= $index === 0 ? 'active' : '' ?>" data-slide-id="<?= $slide['id'] ?>"
-                                data-slide-order="<?= $slide['slide_order'] ?>"
-                                style="background-color: <?= Security::escape($slide['background_color']) ?>;">
-                                <span class="slide-number"><?= $index + 1 ?></span>
-                                <span class="slide-duration"><?= $slide['duration_ms'] / 1000 ?>s</span>
-                            </div>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
+<!-- Fixed Bottom Timeline -->
+<div class="builder-timeline" id="builder-timeline">
+    <div class="timeline-header">
+        <h4>Timeline</h4>
+        <div class="timeline-controls">
+            <span id="timeline-duration">3.0s</span>
+        </div>
+    </div>
+
+    <!-- Slide Thumbnails -->
+    <div class="builder-slides">
+        <div id="slides-strip" class="slides-strip">
+            <?php if (empty($slides)): ?>
+                <!-- Will be populated by JS if no slides exist -->
+            <?php else: ?>
+                <?php foreach ($slides as $index => $slide): ?>
+                    <div class="slide-thumb <?= $index === 0 ? 'active' : '' ?>" data-slide-id="<?= $slide['id'] ?>"
+                        data-slide-order="<?= $slide['slide_order'] ?>"
+                        style="background-color: <?= Security::escape($slide['background_color']) ?>;">
+                        <span class="slide-number"><?= $index + 1 ?></span>
+                        <span class="slide-duration"><?= $slide['duration_ms'] / 1000 ?>s</span>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+        <button type="button" id="btn-add-slide" class="btn-add-slide" title="Add Slide">
+            <span class="material-symbols-outlined">add</span>
+        </button>
+    </div>
+
+    <!-- Timeline Tracks for Element Animations -->
+    <div class="timeline-tracks" id="timeline-tracks">
+        <div class="timeline-ruler">
+            <span>0s</span>
+            <span>0.5s</span>
+            <span>1s</span>
+            <span>1.5s</span>
+            <span>2s</span>
+            <span>2.5s</span>
+            <span>3s</span>
+        </div>
+        <!-- Element tracks will be dynamically added here -->
+        <div id="element-tracks">
+            <!-- Example track structure:
+            <div class="timeline-track">
+                <span class="track-label">Heading</span>
+                <div class="track-bar-container">
+                    <div class="track-bar" style="left: 10%; width: 40%"></div>
                 </div>
-                <button type="button" id="btn-add-slide" class="btn-add-slide" title="Add Slide">
-                    <span class="material-symbols-outlined">add</span>
-                </button>
             </div>
+            -->
         </div>
     </div>
 </div>
