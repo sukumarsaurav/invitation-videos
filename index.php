@@ -72,6 +72,12 @@ $router->post('/template/{slug}', function ($slug) {
     include __DIR__ . '/templates/pages/customize.php';
 });
 
+// Simple editor page (live preview)
+$router->get('/editor/{id}', function ($id) {
+    $_GET['id'] = $id;
+    include __DIR__ . '/templates/pages/editor.php';
+});
+
 // Checkout page
 $router->get('/checkout/{orderId}', function ($orderId) {
     $_GET['order_id'] = $orderId;
