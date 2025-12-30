@@ -1049,43 +1049,58 @@ class TemplateBuilder {
         document.querySelectorAll('.bg-item').forEach(item => {
             item.addEventListener('click', () => {
                 const type = item.dataset.type;
-                const canvas = document.getElementById('template-canvas');
-                const ctx = canvas?.getContext('2d');
+                const canvasContainer = document.getElementById('canvas-container');
 
                 // Remove selected from all
                 document.querySelectorAll('.bg-item').forEach(i => i.classList.remove('selected'));
                 item.classList.add('selected');
 
-                // Get current slide
-                const currentSlide = this.slides.find(s => s.id == this.currentSlideIndex) || this.slides[0];
+                // Get current slide index
+                const slideIndex = this.slides.findIndex(s => s.id == this.currentSlideIndex);
+                const currentSlide = this.slides[slideIndex] || this.slides[0];
                 if (!currentSlide) return;
 
                 if (type === 'color') {
                     const color = item.dataset.value;
                     currentSlide.background_color = color;
                     currentSlide.background_image = null;
-                    this.renderCanvas();
-                    this.isDirty = true;
+                    currentSlide.background_gradient = null;
+
+                    // Update canvas background
+                    if (canvasContainer) {
+                        canvasContainer.style.background = color;
+                    }
                 } else if (type === 'gradient') {
                     const gradient = item.dataset.value;
                     currentSlide.background_gradient = gradient;
                     currentSlide.background_image = null;
-                    this.renderCanvas();
-                    this.isDirty = true;
+                    currentSlide.background_color = null;
+
+                    if (canvasContainer) {
+                        canvasContainer.style.background = gradient;
+                    }
                 } else if (type === 'image') {
                     const src = item.dataset.src;
                     currentSlide.background_image = src;
                     currentSlide.background_type = 'image';
-                    this.renderCanvas();
-                    this.isDirty = true;
+                    currentSlide.background_gradient = null;
+
+                    if (canvasContainer) {
+                        canvasContainer.style.background = `url(${src}) center/cover no-repeat`;
+                    }
                 } else if (type === 'video') {
                     const src = item.dataset.src;
                     currentSlide.background_video = src;
                     currentSlide.background_type = 'video';
-                    // For canvas preview, show first frame
-                    this.renderCanvas();
-                    this.isDirty = true;
+                    // For videos, show a placeholder or first frame
+                    if (canvasContainer) {
+                        canvasContainer.style.background = '#1e293b';
+                    }
                 }
+
+                // Update the slide thumbnail
+                this.slideManager.updateThumbnail(slideIndex >= 0 ? slideIndex : 0, currentSlide);
+                this.isDirty = true;
             });
         });
     }
