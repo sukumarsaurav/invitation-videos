@@ -322,4 +322,13 @@ export class ShapeManager {
     getShapesForSlide(slideId) {
         return this.shapes.filter(s => s.slideId == slideId);
     }
+
+    /**
+     * Get a shape by its ID
+     * @param {string} shapeId - The shape ID to find
+     * @returns {Object|null} - The shape object or null if not found
+     */
+    getShapeById(shapeId) {
+        return this.shapes.find(s => s.id === shapeId) || null;
+    }
 }

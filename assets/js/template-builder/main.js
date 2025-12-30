@@ -923,6 +923,9 @@ class TemplateBuilder {
             let percent = ((e.clientX - rect.left) / rect.width) * 100;
             percent = Math.max(0, Math.min(100, percent));
             playhead.style.left = percent + '%';
+
+            // Update canvas preview at this time position
+            this.updateCanvasAtTime(percent);
         };
 
         const onUp = () => {
@@ -930,7 +933,70 @@ class TemplateBuilder {
             document.removeEventListener('mousemove', onMove);
             document.removeEventListener('mouseup', onUp);
         };
+
+        // Also allow clicking on ruler to jump playhead
+        ruler.addEventListener('click', (e) => {
+            if (e.target.classList.contains('playhead-head')) return;
+            const rect = ruler.getBoundingClientRect();
+            let percent = ((e.clientX - rect.left) / rect.width) * 100;
+            percent = Math.max(0, Math.min(100, percent));
+            playhead.style.left = percent + '%';
+            this.updateCanvasAtTime(percent);
+        });
     }
+
+    /**
+     * Update canvas preview based on playhead position
+     * Shows/hides elements based on their animation start/end times
+     * @param {number} percent - Playhead position as percentage (0-100)
+     */
+    updateCanvasAtTime(percent) {
+        const currentSlide = this.slides[this.currentSlideIndex];
+        if (!currentSlide) return;
+
+        const duration = currentSlide.duration_ms || 3000;
+        const currentTimeMs = (percent / 100) * duration;
+
+        // Get all text elements on canvas
+        const textElements = document.querySelectorAll('.canvas-text-element');
+        textElements.forEach(element => {
+            const fieldId = element.dataset.fieldId;
+            const field = this.getFieldById(fieldId);
+            if (!field) return;
+
+            const animStart = field.animation_start || 0;
+            const animEnd = field.animation_end || duration;
+
+            // Show element if current time is within its animation range
+            if (currentTimeMs >= animStart && currentTimeMs <= animEnd) {
+                element.style.opacity = '1';
+                element.style.visibility = 'visible';
+            } else {
+                element.style.opacity = '0.3';
+                element.style.visibility = 'visible';
+            }
+        });
+
+        // Get all shape elements on canvas
+        const shapeElements = document.querySelectorAll('.canvas-shape-element');
+        shapeElements.forEach(element => {
+            const shapeId = element.dataset.shapeId;
+            const shape = this.shapeManager.getShapeById(shapeId);
+            if (!shape) return;
+
+            const animStart = shape.animation_start || 0;
+            const animEnd = shape.animation_end || duration;
+
+            if (currentTimeMs >= animStart && currentTimeMs <= animEnd) {
+                element.style.opacity = shape.opacity || '1';
+                element.style.visibility = 'visible';
+            } else {
+                element.style.opacity = '0.3';
+                element.style.visibility = 'visible';
+            }
+        });
+    }
+
 
     refreshTimeline() {
         this.renderTimelineRuler();
