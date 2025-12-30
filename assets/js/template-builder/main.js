@@ -34,6 +34,7 @@ class TemplateBuilder {
 
     init() {
         this.bindEvents();
+        this.setupSidebar();
 
         // Create default slide if none exist
         if (this.slides.length === 0) {
@@ -42,6 +43,38 @@ class TemplateBuilder {
 
         // Render first slide
         this.selectSlide(0);
+    }
+
+    setupSidebar() {
+        const iconButtons = document.querySelectorAll('.icon-btn');
+        const panels = document.querySelectorAll('.panel-view');
+        const contentPanel = document.getElementById('content-panel');
+
+        iconButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const panelId = btn.dataset.panel;
+
+                // Toggle panel if clicking the same button
+                if (btn.classList.contains('active')) {
+                    contentPanel.classList.toggle('open');
+                    return;
+                }
+
+                // Switch active button
+                iconButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                // Switch panel
+                panels.forEach(p => p.classList.remove('active'));
+                const targetPanel = document.getElementById(`panel-${panelId}`);
+                if (targetPanel) {
+                    targetPanel.classList.add('active');
+                }
+
+                // Ensure panel is open
+                contentPanel.classList.add('open');
+            });
+        });
     }
 
     bindEvents() {

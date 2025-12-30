@@ -86,92 +86,258 @@ $pageTitle = 'Template Builder: ' . $template['title'];
 
     <!-- Main Content -->
     <div class="builder-content">
-        <!-- Left Panel - Fields -->
-        <div class="builder-panel panel-left">
-            <div class="panel-header">
-                <h3>Fields</h3>
-                <button type="button" id="btn-add-field" class="btn-icon-sm" title="Add Field">
-                    <span class="material-symbols-outlined">add</span>
-                </button>
-            </div>
-            <div class="panel-content">
-                <!-- Shape Toolbar -->
-                <div class="shape-toolbar">
-                    <span class="toolbar-label">Add Elements</span>
-                    <div class="toolbar-buttons">
-                        <button type="button" id="btn-add-rectangle" class="btn-tool" title="Rectangle">
-                            <span class="material-symbols-outlined">rectangle</span>
-                        </button>
-                        <button type="button" id="btn-add-ellipse" class="btn-tool" title="Ellipse">
-                            <span class="material-symbols-outlined">circle</span>
-                        </button>
-                        <button type="button" id="btn-add-line" class="btn-tool" title="Line">
-                            <span class="material-symbols-outlined">horizontal_rule</span>
-                        </button>
-                        <button type="button" id="btn-add-image" class="btn-tool" title="Image">
-                            <span class="material-symbols-outlined">image</span>
-                        </button>
-                        <input type="file" id="shape-image-input" accept="image/*" class="hidden">
+        <!-- Icon Sidebar -->
+        <div class="icon-sidebar">
+            <button class="icon-btn active" data-panel="fields" title="Fields">
+                <span class="material-symbols-outlined">text_fields</span>
+                <span class="icon-label">Fields</span>
+            </button>
+            <button class="icon-btn" data-panel="elements" title="Elements">
+                <span class="material-symbols-outlined">category</span>
+                <span class="icon-label">Elements</span>
+            </button>
+            <button class="icon-btn" data-panel="uploads" title="Uploads">
+                <span class="material-symbols-outlined">cloud_upload</span>
+                <span class="icon-label">Uploads</span>
+            </button>
+            <button class="icon-btn" data-panel="background" title="Background">
+                <span class="material-symbols-outlined">wallpaper</span>
+                <span class="icon-label">Background</span>
+            </button>
+            <button class="icon-btn" data-panel="settings" title="Slide Settings">
+                <span class="material-symbols-outlined">tune</span>
+                <span class="icon-label">Settings</span>
+            </button>
+        </div>
+
+        <!-- Content Panel (slides in/out based on selection) -->
+        <div class="content-panel open" id="content-panel">
+            <!-- Fields Panel -->
+            <div class="panel-view active" id="panel-fields">
+                <div class="panel-header">
+                    <h3>Fields</h3>
+                </div>
+                <div class="panel-body">
+                    <!-- Quick Add Preset -->
+                    <?php if (!empty($presetsByCategory)): ?>
+                        <div class="quick-add-preset">
+                            <span class="toolbar-label">Quick Add Field</span>
+                            <div class="preset-row">
+                                <select id="preset-select" class="preset-dropdown">
+                                    <option value="">Select preset...</option>
+                                    <?php foreach ($presetsByCategory as $category => $categoryPresets): ?>
+                                        <optgroup label="<?= ucfirst(str_replace('_', ' ', $category)) ?>">
+                                            <?php foreach ($categoryPresets as $preset): ?>
+                                                <option value="<?= $preset['id'] ?>"
+                                                    data-name="<?= Security::escape($preset['name']) ?>"
+                                                    data-field-name="<?= Security::escape($preset['field_name']) ?>"
+                                                    data-type="<?= $preset['field_type'] ?>">
+                                                    <?= Security::escape($preset['name']) ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </optgroup>
+                                    <?php endforeach; ?>
+                                </select>
+                                <button type="button" id="btn-add-preset" class="btn-icon-primary" title="Add">
+                                    <span class="material-symbols-outlined">add</span>
+                                </button>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                    <p class="hint-text">Drag fields onto the canvas</p>
+                    <div id="fields-list" class="fields-list">
+                        <?php foreach ($fields as $field): ?>
+                            <div class="field-item" data-field-id="<?= $field['id'] ?>"
+                                data-field-name="<?= Security::escape($field['field_name']) ?>"
+                                data-field-label="<?= Security::escape($field['field_label']) ?>"
+                                data-sample-value="<?= Security::escape($field['sample_value'] ?? '') ?>" draggable="true">
+                                <span class="material-symbols-outlined drag-handle">drag_indicator</span>
+                                <div class="field-info">
+                                    <span class="field-label"><?= Security::escape($field['field_label']) ?></span>
+                                    <span class="field-type"><?= $field['field_type'] ?></span>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                        <?php if (empty($fields)): ?>
+                            <p class="empty-hint">No fields yet. Add using presets above.</p>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- Text Properties (shown when text is selected) -->
+                    <div class="context-properties" id="text-properties" style="display: none;">
+                        <h4>Text Properties</h4>
+                        <label class="property-row">
+                            <span>Sample Text</span>
+                            <input type="text" id="text-sample" placeholder="Preview text...">
+                        </label>
+                        <label class="property-row">
+                            <span>Font Size</span>
+                            <input type="number" id="text-font-size" value="24" min="8" max="200">
+                        </label>
+                        <label class="property-row">
+                            <span>Font Family</span>
+                            <select id="text-font-family">
+                                <optgroup label="Sans Serif">
+                                    <option value="Inter">Inter</option>
+                                    <option value="Montserrat">Montserrat</option>
+                                    <option value="Roboto">Roboto</option>
+                                    <option value="Poppins">Poppins</option>
+                                    <option value="Open Sans">Open Sans</option>
+                                    <option value="Lato">Lato</option>
+                                </optgroup>
+                                <optgroup label="Serif">
+                                    <option value="Playfair Display">Playfair Display</option>
+                                    <option value="Merriweather">Merriweather</option>
+                                    <option value="Lora">Lora</option>
+                                </optgroup>
+                                <optgroup label="Script">
+                                    <option value="Great Vibes">Great Vibes</option>
+                                    <option value="Dancing Script">Dancing Script</option>
+                                    <option value="Pacifico">Pacifico</option>
+                                </optgroup>
+                                <optgroup label="Display">
+                                    <option value="Abril Fatface">Abril Fatface</option>
+                                    <option value="Bebas Neue">Bebas Neue</option>
+                                    <option value="Oswald">Oswald</option>
+                                </optgroup>
+                            </select>
+                        </label>
+                        <label class="property-row">
+                            <span>Color</span>
+                            <input type="color" id="text-color" value="#000000">
+                        </label>
+                        <label class="property-row">
+                            <span>Animation</span>
+                            <select id="text-animation">
+                                <option value="none">None</option>
+                                <option value="fadeIn" selected>Fade In</option>
+                                <option value="slideUp">Slide Up</option>
+                                <option value="slideDown">Slide Down</option>
+                                <option value="zoomIn">Zoom In</option>
+                                <option value="bounce">Bounce</option>
+                            </select>
+                        </label>
+                        <label class="property-row">
+                            <span>Delay (ms)</span>
+                            <input type="number" id="text-delay" value="0" min="0" max="10000" step="100">
+                        </label>
                     </div>
                 </div>
-                <hr class="panel-divider">
+            </div>
 
-                <!-- Quick Add Preset -->
-                <?php if (!empty($presetsByCategory)): ?>
-                    <div class="quick-add-preset">
-                        <span class="toolbar-label">Quick Add Field</span>
-                        <select id="preset-select" class="preset-dropdown">
-                            <option value="">Select a preset...</option>
-                            <?php foreach ($presetsByCategory as $category => $categoryPresets): ?>
-                                <optgroup label="<?= ucfirst(str_replace('_', ' ', $category)) ?>">
-                                    <?php foreach ($categoryPresets as $preset): ?>
-                                        <option value="<?= $preset['id'] ?>" data-name="<?= Security::escape($preset['name']) ?>"
-                                            data-field-name="<?= Security::escape($preset['field_name']) ?>"
-                                            data-type="<?= $preset['field_type'] ?>"
-                                            data-placeholder="<?= Security::escape($preset['placeholder'] ?? '') ?>"
-                                            data-sample="<?= Security::escape($preset['sample_value'] ?? '') ?>">
-                                            <?= Security::escape($preset['name']) ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </optgroup>
-                            <?php endforeach; ?>
-                        </select>
-                        <button type="button" id="btn-add-preset" class="btn-add-preset" title="Add selected preset">
-                            <span class="material-symbols-outlined">add</span>
+            <!-- Elements Panel -->
+            <div class="panel-view" id="panel-elements">
+                <div class="panel-header">
+                    <h3>Elements</h3>
+                </div>
+                <div class="panel-body">
+                    <span class="toolbar-label">Shapes</span>
+                    <div class="elements-grid">
+                        <button type="button" id="btn-add-rectangle" class="element-btn" title="Rectangle">
+                            <span class="material-symbols-outlined">rectangle</span>
+                            <span>Rectangle</span>
+                        </button>
+                        <button type="button" id="btn-add-ellipse" class="element-btn" title="Ellipse">
+                            <span class="material-symbols-outlined">circle</span>
+                            <span>Ellipse</span>
+                        </button>
+                        <button type="button" id="btn-add-line" class="element-btn" title="Line">
+                            <span class="material-symbols-outlined">horizontal_rule</span>
+                            <span>Line</span>
                         </button>
                     </div>
-                    <hr class="panel-divider">
-                <?php endif; ?>
 
-                <p class="text-xs text-slate-400 mb-3">Drag fields onto the canvas</p>
-                <div id="fields-list" class="fields-list">
-                    <?php foreach ($fields as $field): ?>
-                        <div class="field-item" data-field-id="<?= $field['id'] ?>"
-                            data-field-name="<?= Security::escape($field['field_name']) ?>"
-                            data-field-label="<?= Security::escape($field['field_label']) ?>"
-                            data-sample-value="<?= Security::escape($field['sample_value'] ?? '') ?>" draggable="true">
-                            <span class="material-symbols-outlined drag-handle">drag_indicator</span>
-                            <div class="field-info">
-                                <span class="field-label"><?= Security::escape($field['field_label']) ?></span>
-                                <span class="field-type"><?= $field['field_type'] ?></span>
-                            </div>
-                            <span class="field-slide-badge" data-slide="<?= $field['slide_id'] ?? '' ?>">
-                                <?= $field['slide_id'] ? 'S' . $field['slide_id'] : '—' ?>
-                            </span>
-                        </div>
-                    <?php endforeach; ?>
-                    <?php if (empty($fields)): ?>
-                        <p class="text-center text-slate-400 py-4 text-sm">
-                            No fields yet.<br>
-                            <a href="/admin/templates.php?action=edit&id=<?= $templateId ?>" class="text-primary">Add fields
-                                first</a>
-                        </p>
-                    <?php endif; ?>
+                    <!-- Shape Properties (shown when shape is selected) -->
+                    <div class="context-properties" id="shape-properties" style="display: none;">
+                        <h4>Shape Properties</h4>
+                        <label class="property-row">
+                            <span>Fill Color</span>
+                            <input type="color" id="shape-fill" value="#7c3aed">
+                        </label>
+                        <label class="property-row">
+                            <span>Stroke</span>
+                            <input type="color" id="shape-stroke" value="#000000">
+                        </label>
+                        <label class="property-row">
+                            <span>Stroke Width</span>
+                            <input type="number" id="shape-stroke-width" value="0" min="0" max="20">
+                        </label>
+                        <label class="property-row">
+                            <span>Opacity (%)</span>
+                            <input type="number" id="shape-opacity" value="100" min="0" max="100">
+                        </label>
+                        <label class="property-row">
+                            <span>Border Radius</span>
+                            <input type="number" id="shape-radius" value="0" min="0" max="100">
+                        </label>
+                        <button type="button" id="btn-delete-shape" class="btn btn-sm btn-danger">
+                            <span class="material-symbols-outlined">delete</span>
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Uploads Panel -->
+            <div class="panel-view" id="panel-uploads">
+                <div class="panel-header">
+                    <h3>Uploads</h3>
+                </div>
+                <div class="panel-body">
+                    <span class="toolbar-label">Add Image</span>
+                    <input type="file" id="shape-image-input" accept="image/*" class="hidden">
+                    <button type="button" id="btn-add-image" class="upload-btn">
+                        <span class="material-symbols-outlined">add_photo_alternate</span>
+                        Upload Image
+                    </button>
+                    <p class="hint-text">Upload images to add to your canvas</p>
+                </div>
+            </div>
+
+            <!-- Background Panel -->
+            <div class="panel-view" id="panel-background">
+                <div class="panel-header">
+                    <h3>Background</h3>
+                </div>
+                <div class="panel-body">
+                    <label class="property-row">
+                        <span>Color</span>
+                        <input type="color" id="slide-bg-color" value="#ffffff">
+                    </label>
+                    <span class="toolbar-label">Background Image</span>
+                    <input type="file" id="slide-bg-image" accept="image/*" class="hidden">
+                    <button type="button" id="btn-upload-bg" class="upload-btn">
+                        <span class="material-symbols-outlined">add_photo_alternate</span>
+                        Upload Image
+                    </button>
+                </div>
+            </div>
+
+            <!-- Settings Panel -->
+            <div class="panel-view" id="panel-settings">
+                <div class="panel-header">
+                    <h3>Slide Settings</h3>
+                </div>
+                <div class="panel-body">
+                    <label class="property-row">
+                        <span>Duration (ms)</span>
+                        <input type="number" id="slide-duration" value="3000" min="500" max="30000" step="100">
+                    </label>
+                    <label class="property-row">
+                        <span>Transition</span>
+                        <select id="slide-transition">
+                            <option value="none">None</option>
+                            <option value="fade" selected>Fade</option>
+                            <option value="slide">Slide</option>
+                            <option value="zoom">Zoom</option>
+                        </select>
+                    </label>
                 </div>
             </div>
         </div>
 
-        <!-- Center - Canvas -->
+        <!-- Canvas Area -->
         <div class="builder-canvas-wrapper">
             <div class="canvas-container" id="canvas-container">
                 <canvas id="template-canvas" width="1080" height="1920"></canvas>
@@ -185,171 +351,6 @@ $pageTitle = 'Template Builder: ' . $template['title'];
                 <span>1080 × 1920</span>
                 <span class="separator">•</span>
                 <span id="current-slide-info">Slide 1</span>
-            </div>
-        </div>
-
-        <!-- Right Panel - Properties -->
-        <div class="builder-panel panel-right">
-            <div class="panel-header">
-                <h3>Properties</h3>
-            </div>
-            <div class="panel-content" id="properties-panel">
-                <div class="property-section">
-                    <h4>Slide Settings</h4>
-                    <label class="property-row">
-                        <span>Duration (ms)</span>
-                        <input type="number" id="slide-duration" value="3000" min="500" max="30000" step="100">
-                    </label>
-                    <label class="property-row">
-                        <span>Background</span>
-                        <input type="color" id="slide-bg-color" value="#ffffff">
-                    </label>
-                    <label class="property-row">
-                        <span>Image</span>
-                        <input type="file" id="slide-bg-image" accept="image/*" class="hidden">
-                        <button type="button" id="btn-upload-bg" class="btn btn-sm btn-secondary">Upload</button>
-                    </label>
-                    <label class="property-row">
-                        <span>Transition</span>
-                        <select id="slide-transition">
-                            <option value="none">None</option>
-                            <option value="fade" selected>Fade</option>
-                            <option value="slide">Slide</option>
-                            <option value="zoom">Zoom</option>
-                        </select>
-                    </label>
-                </div>
-
-                <div class="property-section" id="text-properties" style="display: none;">
-                    <h4>Text Properties</h4>
-                    <label class="property-row">
-                        <span>Sample Text</span>
-                        <input type="text" id="text-sample" placeholder="Preview text...">
-                    </label>
-                    <label class="property-row">
-                        <span>Font Size</span>
-                        <input type="number" id="text-font-size" value="24" min="8" max="200">
-                    </label>
-                    <label class="property-row">
-                        <span>Font Family</span>
-                        <select id="text-font-family">
-                            <optgroup label="Sans Serif">
-                                <option value="Inter">Inter</option>
-                                <option value="Montserrat">Montserrat</option>
-                                <option value="Roboto">Roboto</option>
-                                <option value="Poppins">Poppins</option>
-                                <option value="Open Sans">Open Sans</option>
-                                <option value="Lato">Lato</option>
-                                <option value="Raleway">Raleway</option>
-                                <option value="Nunito">Nunito</option>
-                            </optgroup>
-                            <optgroup label="Serif">
-                                <option value="Playfair Display">Playfair Display</option>
-                                <option value="Merriweather">Merriweather</option>
-                                <option value="Lora">Lora</option>
-                                <option value="Cormorant Garamond">Cormorant Garamond</option>
-                                <option value="Cinzel">Cinzel</option>
-                            </optgroup>
-                            <optgroup label="Script">
-                                <option value="Great Vibes">Great Vibes</option>
-                                <option value="Dancing Script">Dancing Script</option>
-                                <option value="Pacifico">Pacifico</option>
-                                <option value="Satisfy">Satisfy</option>
-                                <option value="Alex Brush">Alex Brush</option>
-                                <option value="Tangerine">Tangerine</option>
-                            </optgroup>
-                            <optgroup label="Display">
-                                <option value="Abril Fatface">Abril Fatface</option>
-                                <option value="Bebas Neue">Bebas Neue</option>
-                                <option value="Anton">Anton</option>
-                                <option value="Oswald">Oswald</option>
-                            </optgroup>
-                        </select>
-                    </label>
-                    <label class="property-row">
-                        <span>Color</span>
-                        <input type="color" id="text-color" value="#000000">
-                    </label>
-                    <label class="property-row">
-                        <span>Animation</span>
-                        <select id="text-animation">
-                            <optgroup label="Fade">
-                                <option value="none">None</option>
-                                <option value="fadeIn" selected>Fade In</option>
-                                <option value="fadeOut">Fade Out</option>
-                            </optgroup>
-                            <optgroup label="Slide">
-                                <option value="slideUp">Slide Up</option>
-                                <option value="slideDown">Slide Down</option>
-                                <option value="slideLeft">Slide Left</option>
-                                <option value="slideRight">Slide Right</option>
-                            </optgroup>
-                            <optgroup label="Zoom">
-                                <option value="zoomIn">Zoom In</option>
-                                <option value="zoomOut">Zoom Out</option>
-                            </optgroup>
-                            <optgroup label="Special">
-                                <option value="typewriter">Typewriter</option>
-                                <option value="bounce">Bounce</option>
-                                <option value="pulse">Pulse</option>
-                                <option value="shake">Shake</option>
-                                <option value="flip">Flip</option>
-                                <option value="rotate">Rotate In</option>
-                            </optgroup>
-                        </select>
-                    </label>
-                    <label class="property-row">
-                        <span>Delay (ms)</span>
-                        <input type="number" id="text-delay" value="0" min="0" max="10000" step="100">
-                    </label>
-                    <label class="property-row">
-                        <span>Duration (ms)</span>
-                        <input type="number" id="text-duration" value="500" min="100" max="5000" step="100">
-                    </label>
-                </div>
-
-                <!-- Shape Properties -->
-                <div class="property-section" id="shape-properties" style="display: none;">
-                    <h4>Shape Properties</h4>
-                    <label class="property-row">
-                        <span>Fill Color</span>
-                        <input type="color" id="shape-fill" value="#7c3aed">
-                    </label>
-                    <label class="property-row">
-                        <span>Stroke Color</span>
-                        <input type="color" id="shape-stroke" value="#000000">
-                    </label>
-                    <label class="property-row">
-                        <span>Stroke Width</span>
-                        <input type="number" id="shape-stroke-width" value="0" min="0" max="20">
-                    </label>
-                    <label class="property-row">
-                        <span>Opacity (%)</span>
-                        <input type="number" id="shape-opacity" value="100" min="0" max="100">
-                    </label>
-                    <label class="property-row">
-                        <span>Border Radius</span>
-                        <input type="number" id="shape-radius" value="0" min="0" max="100">
-                    </label>
-                    <label class="property-row">
-                        <span>Animation</span>
-                        <select id="shape-animation">
-                            <option value="none">None</option>
-                            <option value="fadeIn">Fade In</option>
-                            <option value="slideUp">Slide Up</option>
-                            <option value="slideDown">Slide Down</option>
-                            <option value="zoomIn">Zoom In</option>
-                            <option value="bounce">Bounce</option>
-                            <option value="pulse">Pulse</option>
-                        </select>
-                    </label>
-                    <div class="property-row">
-                        <button type="button" id="btn-delete-shape" class="btn btn-sm btn-danger">
-                            <span class="material-symbols-outlined">delete</span>
-                            Delete Shape
-                        </button>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
