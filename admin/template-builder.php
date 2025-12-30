@@ -271,19 +271,66 @@ $pageTitle = 'Template Builder: ' . $template['title'];
                     <h3>Elements</h3>
                 </div>
                 <div class="panel-body">
-                    <span class="toolbar-label">Shapes</span>
-                    <div class="elements-grid">
+                    <!-- Category Tabs -->
+                    <div class="elements-tabs">
+                        <button type="button" class="element-tab active" data-category="shapes">Shapes</button>
+                        <button type="button" class="element-tab" data-category="frames">Frames</button>
+                        <button type="button" class="element-tab" data-category="graphics">Graphics</button>
+                        <button type="button" class="element-tab" data-category="stickers">Stickers</button>
+                    </div>
+                    
+                    <!-- Elements Grid (loaded dynamically) -->
+                    <div class="elements-grid" id="elements-grid">
+                        <?php
+                        // Fetch active elements from database
+                        $designElements = Database::fetchAll(
+                            "SELECT * FROM design_elements WHERE is_active = 1 ORDER BY category, display_order"
+                        );
+                        
+                        // Group by category
+                        $elementsByCategory = [];
+                        foreach ($designElements as $el) {
+                            $elementsByCategory[$el['category']][] = $el;
+                        }
+                        ?>
+                        
+                        <?php foreach (['shapes', 'frames', 'graphics', 'stickers'] as $cat): ?>
+                            <div class="elements-category" data-category="<?= $cat ?>" style="<?= $cat !== 'shapes' ? 'display: none;' : '' ?>">
+                                <?php if (!empty($elementsByCategory[$cat])): ?>
+                                    <?php foreach ($elementsByCategory[$cat] as $el): ?>
+                                        <button type="button" class="element-item" 
+                                            data-element-id="<?= $el['id'] ?>"
+                                            data-src="<?= Security::escape($el['file_path']) ?>"
+                                            data-width="<?= $el['width'] ?>"
+                                            data-height="<?= $el['height'] ?>"
+                                            title="<?= Security::escape($el['name']) ?>">
+                                            <img src="<?= Security::escape($el['file_path']) ?>" alt="<?= Security::escape($el['name']) ?>">
+                                            <?php if ($el['is_premium']): ?>
+                                                <span class="premium-badge">★</span>
+                                            <?php endif; ?>
+                                        </button>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <p class="no-elements">No <?= $cat ?> yet. <a href="/admin/elements.php?action=new&category=<?= $cat ?>" target="_blank">Add some</a></p>
+                                <?php endif; ?>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                    
+                    <!-- Basic Shapes (fallback) -->
+                    <span class="toolbar-label mt-3">Basic Shapes</span>
+                    <div class="elements-grid basic-shapes">
                         <button type="button" id="btn-add-rectangle" class="element-btn" title="Rectangle">
                             <span class="material-symbols-outlined">rectangle</span>
-                            <span>Rectangle</span>
                         </button>
                         <button type="button" id="btn-add-ellipse" class="element-btn" title="Ellipse">
                             <span class="material-symbols-outlined">circle</span>
-                            <span>Ellipse</span>
                         </button>
                         <button type="button" id="btn-add-line" class="element-btn" title="Line">
                             <span class="material-symbols-outlined">horizontal_rule</span>
-                            <span>Line</span>
+                        </button>
+                        <button type="button" id="btn-add-triangle" class="element-btn" title="Triangle">
+                            <span class="material-symbols-outlined">change_history</span>
                         </button>
                     </div>
 
