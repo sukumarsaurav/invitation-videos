@@ -61,64 +61,101 @@ export class SlideManager {
         };
 
         this.builder.slides.push(duplicate);
-        this.renderThumbnail(duplicate, this.builder.slides.length - 1);
+        this.renderAllThumbnails();
         this.builder.isDirty = true;
     }
 
-    renderThumbnail(slide, index) {
-        const thumb = document.createElement('div');
-        thumb.className = 'slide-thumb';
-        thumb.dataset.slideId = slide.id;
-        thumb.dataset.slideOrder = slide.slide_order;
+    /**
+     * Get total duration of all slides in ms
+     */
+    getTotalDuration() {
+        return this.builder.slides.reduce((total, slide) => total + (slide.duration_ms || 3000), 0);
+    }
+
+    /**
+     * Render a single slide bar (horizontal, width proportional to duration)
+     */
+    renderSlideBar(slide, index, totalDuration) {
+        const bar = document.createElement('div');
+        bar.className = 'slide-bar';
+        bar.dataset.slideId = slide.id;
+        bar.dataset.slideOrder = slide.slide_order;
+        bar.dataset.duration = slide.duration_ms || 3000;
+
+        // Calculate width based on duration percentage
+        const duration = slide.duration_ms || 3000;
+        const widthPercent = (duration / totalDuration) * 100;
+        bar.style.width = `${widthPercent}%`;
+        bar.style.minWidth = '60px';
 
         // Apply background based on type (priority: gradient > image > color)
         if (slide.background_gradient) {
-            thumb.style.background = slide.background_gradient;
+            bar.style.background = slide.background_gradient;
         } else if (slide.background_image) {
-            thumb.style.background = `url(${slide.background_image}) center/cover no-repeat`;
+            bar.style.background = `url(${slide.background_image}) center/cover no-repeat`;
         } else {
-            thumb.style.background = slide.background_color || '#ffffff';
+            bar.style.background = slide.background_color || '#ffffff';
         }
 
-        thumb.innerHTML = `
-            <span class="slide-duration">${(slide.duration_ms / 1000).toFixed(1)}s</span>
+        bar.innerHTML = `
+            <span class="slide-label">${(duration / 1000).toFixed(1)}s</span>
         `;
 
-        thumb.addEventListener('click', () => {
+        bar.addEventListener('click', () => {
             const slideIndex = this.builder.slides.findIndex(s => s.id === slide.id);
             this.builder.selectSlide(slideIndex);
         });
 
         // Context menu for delete/duplicate
-        thumb.addEventListener('contextmenu', (e) => {
+        bar.addEventListener('contextmenu', (e) => {
             e.preventDefault();
             const slideIndex = this.builder.slides.findIndex(s => s.id === slide.id);
             this.showContextMenu(e.clientX, e.clientY, slideIndex);
         });
 
-        this.slidesStrip.appendChild(thumb);
+        return bar;
     }
 
+    /**
+     * Render/re-render all slide bars with proper widths
+     */
     renderAllThumbnails() {
         this.slidesStrip.innerHTML = '';
+        const totalDuration = this.getTotalDuration();
+
         this.builder.slides.forEach((slide, index) => {
-            this.renderThumbnail(slide, index);
+            const bar = this.renderSlideBar(slide, index, totalDuration);
+            if (index === this.builder.currentSlideIndex) {
+                bar.classList.add('active');
+            }
+            this.slidesStrip.appendChild(bar);
         });
+
+        // Update total duration display
+        const durationSpan = document.getElementById('timeline-duration');
+        if (durationSpan) {
+            durationSpan.textContent = (totalDuration / 1000).toFixed(1) + 's';
+        }
+
+        // Refresh timeline ruler to show total duration
+        if (this.builder.refreshTimeline) {
+            this.builder.renderTimelineRuler();
+        }
     }
 
     updateThumbnail(index, slide) {
-        const thumbs = this.slidesStrip.querySelectorAll('.slide-thumb');
-        if (thumbs[index]) {
+        const bars = this.slidesStrip.querySelectorAll('.slide-bar');
+        if (bars[index]) {
             // Apply background based on type (priority: gradient > image > color)
             if (slide.background_gradient) {
-                thumbs[index].style.background = slide.background_gradient;
+                bars[index].style.background = slide.background_gradient;
             } else if (slide.background_image) {
-                thumbs[index].style.background = `url(${slide.background_image}) center/cover no-repeat`;
+                bars[index].style.background = `url(${slide.background_image}) center/cover no-repeat`;
             } else {
-                thumbs[index].style.background = slide.background_color || '#ffffff';
+                bars[index].style.background = slide.background_color || '#ffffff';
             }
 
-            const durationEl = thumbs[index].querySelector('.slide-duration');
+            const durationEl = bars[index].querySelector('.slide-label');
             if (durationEl) {
                 durationEl.textContent = `${(slide.duration_ms / 1000).toFixed(1)}s`;
             }

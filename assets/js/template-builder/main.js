@@ -219,9 +219,9 @@ class TemplateBuilder {
         this.currentSlideIndex = index;
         const slide = this.slides[index];
 
-        // Update slide thumbnails
-        document.querySelectorAll('.slide-thumb').forEach((thumb, i) => {
-            thumb.classList.toggle('active', i === index);
+        // Update slide bars (horizontal layout)
+        document.querySelectorAll('.slide-bar').forEach((bar, i) => {
+            bar.classList.toggle('active', i === index);
         });
 
         // Update properties panel
@@ -746,11 +746,11 @@ class TemplateBuilder {
         const durationSpan = document.getElementById('timeline-duration');
         if (!ruler) return;
 
-        const currentSlide = this.slides.find(s => s.id == this.currentSlideIndex) || this.slides[0];
-        const duration = currentSlide?.duration_ms || 3000;
+        // Calculate total duration of all slides
+        const totalDuration = this.slides.reduce((total, slide) => total + (slide.duration_ms || 3000), 0);
 
         if (durationSpan) {
-            durationSpan.textContent = (duration / 1000).toFixed(1) + 's';
+            durationSpan.textContent = (totalDuration / 1000).toFixed(1) + 's';
         }
 
         // Clear existing marks (keep playhead)
@@ -758,13 +758,13 @@ class TemplateBuilder {
         ruler.innerHTML = '';
         if (playhead) ruler.appendChild(playhead);
 
-        // Generate time marks based on duration
-        const stepMs = duration <= 3000 ? 500 : (duration <= 10000 ? 1000 : 2000);
-        for (let t = 0; t <= duration; t += stepMs) {
+        // Generate time marks based on total duration
+        const stepMs = totalDuration <= 5000 ? 1000 : (totalDuration <= 15000 ? 2000 : 5000);
+        for (let t = 0; t <= totalDuration; t += stepMs) {
             const mark = document.createElement('span');
             mark.className = 'ruler-mark';
-            mark.style.left = `${(t / duration) * 100}%`;
-            mark.textContent = (t / 1000).toFixed(1) + 's';
+            mark.style.left = `${(t / totalDuration) * 100}%`;
+            mark.textContent = (t / 1000).toFixed(0) + 's';
             ruler.appendChild(mark);
         }
     }
