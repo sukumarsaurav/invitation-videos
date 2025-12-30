@@ -334,7 +334,7 @@ $pageTitle = 'Template Builder: ' . $template['title'];
             </div>
         </div>
 
-        <!-- Canvas Area -->
+        <!-- Canvas Area with Slides -->
         <div class="builder-canvas-wrapper">
             <div class="canvas-container" id="canvas-container">
                 <canvas id="template-canvas" width="1080" height="1920"></canvas>
@@ -349,28 +349,28 @@ $pageTitle = 'Template Builder: ' . $template['title'];
                 <span class="separator">•</span>
                 <span id="current-slide-info">Slide 1</span>
             </div>
-        </div>
-    </div>
 
-    <!-- Bottom - Slide Strip -->
-    <div class="builder-slides">
-        <div id="slides-strip" class="slides-strip">
-            <?php if (empty($slides)): ?>
-                <!-- Will be populated by JS if no slides exist -->
-            <?php else: ?>
-                <?php foreach ($slides as $index => $slide): ?>
-                    <div class="slide-thumb <?= $index === 0 ? 'active' : '' ?>" data-slide-id="<?= $slide['id'] ?>"
-                        data-slide-order="<?= $slide['slide_order'] ?>"
-                        style="background-color: <?= Security::escape($slide['background_color']) ?>;">
-                        <span class="slide-number"><?= $index + 1 ?></span>
-                        <span class="slide-duration"><?= $slide['duration_ms'] / 1000 ?>s</span>
-                    </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
+            <!-- Slide Strip (inside canvas wrapper) -->
+            <div class="builder-slides">
+                <div id="slides-strip" class="slides-strip">
+                    <?php if (empty($slides)): ?>
+                        <!-- Will be populated by JS if no slides exist -->
+                    <?php else: ?>
+                        <?php foreach ($slides as $index => $slide): ?>
+                            <div class="slide-thumb <?= $index === 0 ? 'active' : '' ?>" data-slide-id="<?= $slide['id'] ?>"
+                                data-slide-order="<?= $slide['slide_order'] ?>"
+                                style="background-color: <?= Security::escape($slide['background_color']) ?>;">
+                                <span class="slide-number"><?= $index + 1 ?></span>
+                                <span class="slide-duration"><?= $slide['duration_ms'] / 1000 ?>s</span>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+                <button type="button" id="btn-add-slide" class="btn-add-slide" title="Add Slide">
+                    <span class="material-symbols-outlined">add</span>
+                </button>
+            </div>
         </div>
-        <button type="button" id="btn-add-slide" class="btn-add-slide" title="Add Slide">
-            <span class="material-symbols-outlined">add</span>
-        </button>
     </div>
 </div>
 
