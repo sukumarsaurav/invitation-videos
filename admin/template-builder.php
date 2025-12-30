@@ -63,23 +63,20 @@ $pageTitle = 'Template Builder: ' . $template['title'];
 <div class="template-builder">
     <!-- Header -->
     <div class="builder-header">
-        <div class="flex items-center gap-4">
+        <div class="header-left">
             <a href="/admin/templates.php?action=edit&id=<?= $templateId ?>" class="btn-icon" title="Back">
                 <span class="material-symbols-outlined">arrow_back</span>
             </a>
-            <div>
-                <h1 class="text-xl font-bold"><?= Security::escape($template['title']) ?></h1>
-                <p class="text-sm text-slate-500">Template Builder</p>
-            </div>
+            <h1 class="header-title"><?= Security::escape($template['title']) ?></h1>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="header-right">
             <button type="button" id="btn-preview" class="btn btn-secondary">
                 <span class="material-symbols-outlined">play_arrow</span>
                 Preview
             </button>
             <button type="button" id="btn-save" class="btn btn-primary">
                 <span class="material-symbols-outlined">save</span>
-                Save Changes
+                Save
             </button>
         </div>
     </div>
