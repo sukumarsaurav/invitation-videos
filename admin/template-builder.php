@@ -278,7 +278,7 @@ $pageTitle = 'Template Builder: ' . $template['title'];
                         <button type="button" class="element-tab" data-category="graphics">Graphics</button>
                         <button type="button" class="element-tab" data-category="stickers">Stickers</button>
                     </div>
-                    
+
                     <!-- Elements Grid (loaded dynamically) -->
                     <div class="elements-grid" id="elements-grid">
                         <?php
@@ -286,37 +286,38 @@ $pageTitle = 'Template Builder: ' . $template['title'];
                         $designElements = Database::fetchAll(
                             "SELECT * FROM design_elements WHERE is_active = 1 ORDER BY category, display_order"
                         );
-                        
+
                         // Group by category
                         $elementsByCategory = [];
                         foreach ($designElements as $el) {
                             $elementsByCategory[$el['category']][] = $el;
                         }
                         ?>
-                        
+
                         <?php foreach (['shapes', 'frames', 'graphics', 'stickers'] as $cat): ?>
-                            <div class="elements-category" data-category="<?= $cat ?>" style="<?= $cat !== 'shapes' ? 'display: none;' : '' ?>">
+                            <div class="elements-category" data-category="<?= $cat ?>"
+                                style="<?= $cat !== 'shapes' ? 'display: none;' : '' ?>">
                                 <?php if (!empty($elementsByCategory[$cat])): ?>
                                     <?php foreach ($elementsByCategory[$cat] as $el): ?>
-                                        <button type="button" class="element-item" 
-                                            data-element-id="<?= $el['id'] ?>"
-                                            data-src="<?= Security::escape($el['file_path']) ?>"
-                                            data-width="<?= $el['width'] ?>"
-                                            data-height="<?= $el['height'] ?>"
-                                            title="<?= Security::escape($el['name']) ?>">
-                                            <img src="<?= Security::escape($el['file_path']) ?>" alt="<?= Security::escape($el['name']) ?>">
+                                        <button type="button" class="element-item" data-element-id="<?= $el['id'] ?>"
+                                            data-src="<?= Security::escape($el['file_path']) ?>" data-width="<?= $el['width'] ?>"
+                                            data-height="<?= $el['height'] ?>" title="<?= Security::escape($el['name']) ?>">
+                                            <img src="<?= Security::escape($el['file_path']) ?>"
+                                                alt="<?= Security::escape($el['name']) ?>">
                                             <?php if ($el['is_premium']): ?>
                                                 <span class="premium-badge">★</span>
                                             <?php endif; ?>
                                         </button>
                                     <?php endforeach; ?>
                                 <?php else: ?>
-                                    <p class="no-elements">No <?= $cat ?> yet. <a href="/admin/elements.php?action=new&category=<?= $cat ?>" target="_blank">Add some</a></p>
+                                    <p class="no-elements">No <?= $cat ?> yet. <a
+                                            href="/admin/elements.php?action=new&category=<?= $cat ?>" target="_blank">Add
+                                            some</a></p>
                                 <?php endif; ?>
                             </div>
                         <?php endforeach; ?>
                     </div>
-                    
+
                     <!-- Basic Shapes (fallback) -->
                     <span class="toolbar-label mt-3">Basic Shapes</span>
                     <div class="elements-grid basic-shapes">
@@ -585,10 +586,10 @@ $pageTitle = 'Template Builder: ' . $template['title'];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $pageTitle ?> - VideoInvites Admin</title>
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link
         href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Great+Vibes&family=Inter:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap"
         rel="stylesheet">
