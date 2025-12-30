@@ -274,7 +274,14 @@ class TemplateBuilder {
 
         // Re-render
         this.canvasEditor.renderSlide(slide);
-        this.slideManager.updateThumbnail(this.currentSlideIndex, slide);
+
+        // If duration changed, re-render all thumbnails to recalculate widths
+        if (updates.duration_ms) {
+            this.slideManager.renderAllThumbnails();
+            this.refreshTimeline();
+        } else {
+            this.slideManager.updateThumbnail(this.currentSlideIndex, slide);
+        }
     }
 
     selectElement(element) {

@@ -89,6 +89,43 @@ export class TextEditor {
                     this.builder.showTextToolbar();
                 }
             });
+
+            // Double-click to edit text inline
+            element.addEventListener('dblclick', (e) => {
+                e.stopPropagation();
+                const textSpan = element.querySelector('.text-content');
+                if (!textSpan) return;
+
+                // Make text editable
+                textSpan.contentEditable = true;
+                textSpan.focus();
+
+                // Select all text
+                const selection = window.getSelection();
+                const range = document.createRange();
+                range.selectNodeContents(textSpan);
+                selection.removeAllRanges();
+                selection.addRange(range);
+
+                // Save on blur
+                const saveText = () => {
+                    textSpan.contentEditable = false;
+                    const newText = textSpan.textContent.trim();
+                    const fieldId = element.dataset.fieldId;
+                    this.builder.updateField(fieldId, { sample_value: newText });
+                };
+
+                textSpan.addEventListener('blur', saveText, { once: true });
+                textSpan.addEventListener('keydown', (ke) => {
+                    if (ke.key === 'Enter') {
+                        ke.preventDefault();
+                        textSpan.blur();
+                    }
+                    if (ke.key === 'Escape') {
+                        textSpan.blur();
+                    }
+                });
+            });
         }
 
         // Update styles
@@ -269,5 +306,8 @@ export class TextEditor {
         }
 
         this.builder.isDirty = true;
+
+        // Refresh timeline to remove the element track
+        this.builder.refreshTimeline();
     }
 }
