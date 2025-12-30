@@ -157,6 +157,9 @@ class TemplateBuilder {
         // Timeline setup
         this.setupTimeline();
 
+        // Zoom and Pan controls
+        this.setupZoomPan();
+
         // Warn before leaving if unsaved
         window.addEventListener('beforeunload', (e) => {
             if (this.isDirty) {
@@ -913,6 +916,114 @@ class TemplateBuilder {
     refreshTimeline() {
         this.renderTimelineRuler();
         this.renderTimelineTracks();
+    }
+
+    setupZoomPan() {
+        this.zoom = 100;
+        this.panX = 0;
+        this.panY = 0;
+
+        const canvasWrapper = document.querySelector('.builder-canvas-wrapper');
+        const canvasContainer = document.getElementById('canvas-container');
+        const zoomSlider = document.getElementById('zoom-slider');
+        const zoomDisplay = document.getElementById('canvas-zoom');
+        const btnZoomIn = document.getElementById('btn-zoom-in');
+        const btnZoomOut = document.getElementById('btn-zoom-out');
+        const btnZoomFit = document.getElementById('btn-zoom-fit');
+
+        if (!canvasContainer) return;
+
+        const updateZoom = (newZoom) => {
+            this.zoom = Math.max(25, Math.min(200, newZoom));
+            canvasContainer.style.transform = `scale(${this.zoom / 100}) translate(${this.panX}px, ${this.panY}px)`;
+            if (zoomSlider) zoomSlider.value = this.zoom;
+            if (zoomDisplay) zoomDisplay.textContent = Math.round(this.zoom) + '%';
+        };
+
+        // Zoom In/Out buttons
+        if (btnZoomIn) {
+            btnZoomIn.addEventListener('click', () => updateZoom(this.zoom + 10));
+        }
+        if (btnZoomOut) {
+            btnZoomOut.addEventListener('click', () => updateZoom(this.zoom - 10));
+        }
+
+        // Zoom Slider
+        if (zoomSlider) {
+            zoomSlider.addEventListener('input', (e) => updateZoom(parseInt(e.target.value)));
+        }
+
+        // Fit to Screen
+        if (btnZoomFit) {
+            btnZoomFit.addEventListener('click', () => {
+                this.panX = 0;
+                this.panY = 0;
+                // Calculate zoom to fit
+                const wrapperRect = canvasWrapper.getBoundingClientRect();
+                const canvasHeight = 480; // Default canvas display height
+                const availableHeight = wrapperRect.height - 260; // Account for controls and timeline
+                const fitZoom = Math.min(100, (availableHeight / canvasHeight) * 100);
+                updateZoom(Math.round(fitZoom));
+            });
+        }
+
+        // Mouse wheel zoom
+        canvasWrapper.addEventListener('wheel', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                e.preventDefault();
+                const delta = e.deltaY > 0 ? -10 : 10;
+                updateZoom(this.zoom + delta);
+            }
+        }, { passive: false });
+
+        // Panning with space + drag or middle mouse button
+        let isPanning = false;
+        let startX, startY;
+
+        canvasWrapper.addEventListener('mousedown', (e) => {
+            if (e.button === 1 || (e.button === 0 && e.altKey)) {
+                isPanning = true;
+                startX = e.clientX - this.panX;
+                startY = e.clientY - this.panY;
+                canvasWrapper.classList.add('panning');
+                e.preventDefault();
+            }
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isPanning) return;
+            this.panX = e.clientX - startX;
+            this.panY = e.clientY - startY;
+            canvasContainer.style.transform = `scale(${this.zoom / 100}) translate(${this.panX}px, ${this.panY}px)`;
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isPanning) {
+                isPanning = false;
+                canvasWrapper.classList.remove('panning');
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ctrl/Cmd + 0: Reset zoom
+            if ((e.ctrlKey || e.metaKey) && e.key === '0') {
+                e.preventDefault();
+                this.panX = 0;
+                this.panY = 0;
+                updateZoom(100);
+            }
+            // Ctrl/Cmd + +: Zoom in
+            if ((e.ctrlKey || e.metaKey) && (e.key === '+' || e.key === '=')) {
+                e.preventDefault();
+                updateZoom(this.zoom + 10);
+            }
+            // Ctrl/Cmd + -: Zoom out
+            if ((e.ctrlKey || e.metaKey) && e.key === '-') {
+                e.preventDefault();
+                updateZoom(this.zoom - 10);
+            }
+        });
     }
 
     setupPresetQuickAdd() {
