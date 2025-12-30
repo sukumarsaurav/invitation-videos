@@ -225,9 +225,22 @@ class TemplateBuilder {
         });
 
         // Update properties panel
-        document.getElementById('slide-duration').value = slide.duration_ms || 3000;
-        document.getElementById('slide-bg-color').value = slide.background_color || '#ffffff';
-        document.getElementById('slide-transition').value = slide.transition_type || 'fade';
+        const durationEl = document.getElementById('slide-duration');
+        const transitionEl = document.getElementById('slide-transition');
+        if (durationEl) durationEl.value = slide.duration_ms || 3000;
+        if (transitionEl) transitionEl.value = slide.transition_type || 'fade';
+
+        // Update canvas background based on slide
+        const canvasContainer = document.getElementById('canvas-container');
+        if (canvasContainer) {
+            if (slide.background_gradient) {
+                canvasContainer.style.background = slide.background_gradient;
+            } else if (slide.background_image) {
+                canvasContainer.style.background = `url(${slide.background_image}) center/cover no-repeat`;
+            } else {
+                canvasContainer.style.background = slide.background_color || '#ffffff';
+            }
+        }
 
         // Update slide info
         document.getElementById('current-slide-info').textContent = `Slide ${index + 1} of ${this.slides.length}`;
@@ -243,6 +256,9 @@ class TemplateBuilder {
 
         // Clear selection
         this.deselectElement();
+
+        // Refresh timeline for this slide
+        this.refreshTimeline();
     }
 
     getCurrentSlide() {
@@ -1055,9 +1071,9 @@ class TemplateBuilder {
                 document.querySelectorAll('.bg-item').forEach(i => i.classList.remove('selected'));
                 item.classList.add('selected');
 
-                // Get current slide index
-                const slideIndex = this.slides.findIndex(s => s.id == this.currentSlideIndex);
-                const currentSlide = this.slides[slideIndex] || this.slides[0];
+                // Get current slide using index directly (currentSlideIndex IS the index)
+                const slideIndex = this.currentSlideIndex;
+                const currentSlide = this.slides[slideIndex];
                 if (!currentSlide) return;
 
                 if (type === 'color') {
