@@ -429,9 +429,9 @@ $pageTitle = 'Template Builder: ' . $template['title'];
         body {
             margin: 0;
             padding: 0;
-            background: #0f172a;
+            background: #f1f5f9;
             font-family: 'Inter', system-ui, sans-serif;
-            color: #f1f5f9;
+            color: #1e293b;
             overflow: hidden;
         }
     </style>

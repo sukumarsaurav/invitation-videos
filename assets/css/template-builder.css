@@ -1,5 +1,5 @@
 /**
- * Template Builder Styles
+ * Template Builder Styles - Light Mode
  */
 
 /* Layout */
@@ -7,7 +7,7 @@
     display: flex;
     flex-direction: column;
     height: 100vh;
-    background: #0f172a;
+    background: #f1f5f9;
 }
 
 .builder-header {
@@ -15,9 +15,9 @@
     justify-content: space-between;
     align-items: center;
     padding: 0 1rem;
-    height: 50px;
-    background: #1e293b;
-    border-bottom: 1px solid #334155;
+    height: 56px;
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
     flex-shrink: 0;
 }
 
@@ -30,7 +30,7 @@
 .header-title {
     font-size: 1rem;
     font-weight: 600;
-    color: #f1f5f9;
+    color: #1e293b;
     margin: 0;
 }
 
@@ -49,8 +49,8 @@
 /* Icon Sidebar */
 .icon-sidebar {
     width: 72px;
-    background: #1e293b;
-    border-right: 1px solid #334155;
+    background: #ffffff;
+    border-right: 1px solid #e2e8f0;
     display: flex;
     flex-direction: column;
     padding: 0.5rem 0;
@@ -63,7 +63,7 @@
     align-items: center;
     gap: 0.25rem;
     padding: 0.75rem 0.5rem;
-    color: #94a3b8;
+    color: #64748b;
     background: none;
     border: none;
     cursor: pointer;
@@ -71,13 +71,13 @@
 }
 
 .icon-btn:hover {
-    color: #f1f5f9;
-    background: rgba(124, 58, 237, 0.1);
+    color: #7c3aed;
+    background: rgba(124, 58, 237, 0.08);
 }
 
 .icon-btn.active {
-    color: #a78bfa;
-    background: rgba(124, 58, 237, 0.15);
+    color: #7c3aed;
+    background: rgba(124, 58, 237, 0.1);
 }
 
 .icon-btn .material-symbols-outlined {
@@ -93,8 +93,8 @@
 /* Content Panel */
 .content-panel {
     width: 280px;
-    background: #1e293b;
-    border-right: 1px solid #334155;
+    background: #ffffff;
+    border-right: 1px solid #e2e8f0;
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
@@ -122,15 +122,15 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem;
-    border-bottom: 1px solid #334155;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e2e8f0;
     flex-shrink: 0;
 }
 
 .panel-header h3 {
     font-size: 0.875rem;
     font-weight: 600;
-    color: #f1f5f9;
+    color: #1e293b;
 }
 
 .panel-body {
@@ -151,8 +151,8 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.75rem;
-    background: #0f172a;
-    border: 1px solid #334155;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
     border-radius: 0.5rem;
     cursor: grab;
     transition: all 0.2s;
@@ -160,7 +160,7 @@
 
 .field-item:hover {
     border-color: #7c3aed;
-    background: #1e1b4b;
+    background: #f5f3ff;
 }
 
 .field-item.dragging {
@@ -182,7 +182,7 @@
 
 .field-label {
     font-size: 0.875rem;
-    color: #f1f5f9;
+    color: #1e293b;
 }
 
 .field-type {
@@ -206,7 +206,7 @@
     align-items: center;
     justify-content: center;
     padding: 2rem;
-    background: #0f172a;
+    background: #e2e8f0;
     position: relative;
     overflow: hidden;
 }
