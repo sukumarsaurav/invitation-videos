@@ -157,6 +157,9 @@ class TemplateBuilder {
         // Timeline setup
         this.setupTimeline();
 
+        // Background panel tabs and items
+        this.setupBackgroundPanel();
+
         // Zoom and Pan controls
         this.setupZoomPan();
 
@@ -1023,6 +1026,67 @@ class TemplateBuilder {
                 e.preventDefault();
                 updateZoom(this.zoom - 10);
             }
+        });
+    }
+
+    setupBackgroundPanel() {
+        // Tab switching
+        const bgTabs = document.querySelectorAll('.bg-tab');
+        const bgContainers = document.querySelectorAll('.bg-grid-container');
+
+        bgTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                bgTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                const targetType = tab.dataset.bgType;
+                bgContainers.forEach(c => c.classList.add('hidden'));
+                document.getElementById(`bg-${targetType}`)?.classList.remove('hidden');
+            });
+        });
+
+        // Click on background items to apply
+        document.querySelectorAll('.bg-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const type = item.dataset.type;
+                const canvas = document.getElementById('template-canvas');
+                const ctx = canvas?.getContext('2d');
+
+                // Remove selected from all
+                document.querySelectorAll('.bg-item').forEach(i => i.classList.remove('selected'));
+                item.classList.add('selected');
+
+                // Get current slide
+                const currentSlide = this.slides.find(s => s.id == this.currentSlideIndex) || this.slides[0];
+                if (!currentSlide) return;
+
+                if (type === 'color') {
+                    const color = item.dataset.value;
+                    currentSlide.background_color = color;
+                    currentSlide.background_image = null;
+                    this.renderCanvas();
+                    this.isDirty = true;
+                } else if (type === 'gradient') {
+                    const gradient = item.dataset.value;
+                    currentSlide.background_gradient = gradient;
+                    currentSlide.background_image = null;
+                    this.renderCanvas();
+                    this.isDirty = true;
+                } else if (type === 'image') {
+                    const src = item.dataset.src;
+                    currentSlide.background_image = src;
+                    currentSlide.background_type = 'image';
+                    this.renderCanvas();
+                    this.isDirty = true;
+                } else if (type === 'video') {
+                    const src = item.dataset.src;
+                    currentSlide.background_video = src;
+                    currentSlide.background_type = 'video';
+                    // For canvas preview, show first frame
+                    this.renderCanvas();
+                    this.isDirty = true;
+                }
+            });
         });
     }
 

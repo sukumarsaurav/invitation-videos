@@ -429,16 +429,100 @@ $pageTitle = 'Template Builder: ' . $template['title'];
                     <h3>Background</h3>
                 </div>
                 <div class="panel-body">
-                    <label class="property-row">
-                        <span>Color</span>
-                        <input type="color" id="slide-bg-color" value="#ffffff">
-                    </label>
-                    <span class="toolbar-label">Background Image</span>
-                    <input type="file" id="slide-bg-image" accept="image/*" class="hidden">
-                    <button type="button" id="btn-upload-bg" class="upload-btn">
-                        <span class="material-symbols-outlined">add_photo_alternate</span>
-                        Upload Image
-                    </button>
+                    <?php
+                    // Fetch backgrounds from database
+                    $allBackgrounds = Database::fetchAll(
+                        "SELECT * FROM backgrounds WHERE is_active = 1 ORDER BY type, display_order"
+                    );
+
+                    $bgColors = array_filter($allBackgrounds, fn($b) => $b['type'] === 'color');
+                    $bgGradients = array_filter($allBackgrounds, fn($b) => $b['type'] === 'gradient');
+                    $bgImages = array_filter($allBackgrounds, fn($b) => $b['type'] === 'image');
+                    $bgVideos = array_filter($allBackgrounds, fn($b) => $b['type'] === 'video');
+                    ?>
+
+                    <!-- Background Type Tabs -->
+                    <div class="bg-tabs">
+                        <button type="button" class="bg-tab active" data-bg-type="colors">Colors</button>
+                        <button type="button" class="bg-tab" data-bg-type="gradients">Gradients</button>
+                        <button type="button" class="bg-tab" data-bg-type="images">Images</button>
+                        <button type="button" class="bg-tab" data-bg-type="videos">Videos</button>
+                    </div>
+
+                    <!-- Colors Grid -->
+                    <div class="bg-grid-container" id="bg-colors">
+                        <div class="bg-grid scrollable">
+                            <?php foreach ($bgColors as $bg): ?>
+                                <div class="bg-item bg-color-item" data-type="color"
+                                    data-value="<?= Security::escape($bg['color_value']) ?>"
+                                    style="background: <?= Security::escape($bg['color_value']) ?>;"
+                                    title="<?= Security::escape($bg['name']) ?>">
+                                    <?php if ($bg['is_premium']): ?><span class="premium-badge">★</span><?php endif; ?>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+
+                    <!-- Gradients Grid -->
+                    <div class="bg-grid-container hidden" id="bg-gradients">
+                        <div class="bg-grid scrollable">
+                            <?php foreach ($bgGradients as $bg): ?>
+                                <div class="bg-item bg-gradient-item" data-type="gradient"
+                                    data-value="<?= Security::escape($bg['gradient_value']) ?>"
+                                    style="background: <?= Security::escape($bg['gradient_value']) ?>;"
+                                    title="<?= Security::escape($bg['name']) ?>">
+                                    <?php if ($bg['is_premium']): ?><span class="premium-badge">★</span><?php endif; ?>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+
+                    <!-- Images Grid -->
+                    <div class="bg-grid-container hidden" id="bg-images">
+                        <div class="bg-grid scrollable">
+                            <?php foreach ($bgImages as $bg): ?>
+                                <div class="bg-item bg-image-item" data-type="image"
+                                    data-src="<?= Security::escape($bg['file_path']) ?>"
+                                    title="<?= Security::escape($bg['name']) ?>">
+                                    <img src="<?= Security::escape($bg['file_path']) ?>"
+                                        alt="<?= Security::escape($bg['name']) ?>">
+                                    <?php if ($bg['is_premium']): ?><span class="premium-badge">★</span><?php endif; ?>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <!-- Upload custom -->
+                        <div class="bg-upload-section">
+                            <input type="file" id="slide-bg-image" accept="image/*" class="hidden">
+                            <button type="button" id="btn-upload-bg" class="upload-btn-sm">
+                                <span class="material-symbols-outlined">add</span> Upload
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Videos Grid -->
+                    <div class="bg-grid-container hidden" id="bg-videos">
+                        <div class="bg-grid scrollable">
+                            <?php foreach ($bgVideos as $bg): ?>
+                                <div class="bg-item bg-video-item" data-type="video"
+                                    data-src="<?= Security::escape($bg['file_path']) ?>"
+                                    title="<?= Security::escape($bg['name']) ?>">
+                                    <?php if ($bg['thumbnail_path']): ?>
+                                        <img src="<?= Security::escape($bg['thumbnail_path']) ?>"
+                                            alt="<?= Security::escape($bg['name']) ?>">
+                                    <?php else: ?>
+                                        <video src="<?= Security::escape($bg['file_path']) ?>" muted></video>
+                                    <?php endif; ?>
+                                    <span class="video-indicator">▶</span>
+                                    <?php if ($bg['is_premium']): ?><span class="premium-badge">★</span><?php endif; ?>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+
+                    <?php if (empty($allBackgrounds)): ?>
+                        <p class="no-items-msg">No backgrounds. <a href="/admin/backgrounds.php" target="_blank">Add
+                                some</a></p>
+                    <?php endif; ?>
                 </div>
             </div>
 
