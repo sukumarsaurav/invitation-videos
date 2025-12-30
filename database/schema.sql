@@ -89,29 +89,66 @@ CREATE TABLE IF NOT EXISTS `templates` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================
--- TEMPLATE FIELDS (Dynamic Forms)
+-- TEMPLATE SLIDES (For Template Builder)
+-- =====================
+CREATE TABLE IF NOT EXISTS `template_slides` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `template_id` INT UNSIGNED NOT NULL,
+    `slide_order` INT NOT NULL DEFAULT 0,
+    `duration_ms` INT NOT NULL DEFAULT 3000,
+    `background_color` VARCHAR(7) DEFAULT '#ffffff',
+    `background_image` VARCHAR(500) DEFAULT NULL,
+    `transition_type` ENUM('none', 'fade', 'slide', 'zoom') DEFAULT 'fade',
+    `transition_duration_ms` INT DEFAULT 500,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    INDEX `idx_slides_template` (`template_id`),
+    INDEX `idx_slides_order` (`slide_order`),
+    CONSTRAINT `fk_slides_template` FOREIGN KEY (`template_id`) REFERENCES `templates` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================
+-- TEMPLATE FIELDS (Dynamic Forms + Visual Positioning)
 -- =====================
 CREATE TABLE IF NOT EXISTS `template_fields` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
     `template_id` INT UNSIGNED NOT NULL,
+    `slide_id` INT UNSIGNED DEFAULT NULL COMMENT 'Which slide this field appears on',
     `field_name` VARCHAR(100) NOT NULL,
     `field_label` VARCHAR(255) NOT NULL,
     `field_type` ENUM('text', 'textarea', 'date', 'time', 'datetime', 'image', 'music', 'color', 'select', 'number') NOT NULL,
     `field_subtype` VARCHAR(50) DEFAULT NULL COMMENT 'e.g., groom_name, bride_name, venue, parents',
     `placeholder` VARCHAR(255) DEFAULT NULL,
     `default_value` TEXT DEFAULT NULL,
+    `sample_value` VARCHAR(255) DEFAULT NULL COMMENT 'Sample data for template preview',
     `is_required` TINYINT(1) NOT NULL DEFAULT 1,
     `validation_rules` JSON DEFAULT NULL COMMENT '{"max_length": 100, "file_types": ["jpg","png"]}',
     `display_order` INT NOT NULL DEFAULT 0,
     `appears_at_timestamp` VARCHAR(20) DEFAULT NULL COMMENT 'When field appears in video (e.g., 00:05)',
     `field_group` VARCHAR(50) DEFAULT NULL COMMENT 'Group fields together (e.g., event_details, photos)',
     `help_text` VARCHAR(500) DEFAULT NULL,
+    -- Visual positioning for template builder
+    `position_x` INT DEFAULT 50 COMMENT 'Percentage from left (0-100)',
+    `position_y` INT DEFAULT 50 COMMENT 'Percentage from top (0-100)',
+    `width` INT DEFAULT NULL COMMENT 'Width in percentage (optional)',
+    `font_family` VARCHAR(100) DEFAULT 'Inter',
+    `font_size` INT DEFAULT 24,
+    `font_weight` INT DEFAULT 400,
+    `font_color` VARCHAR(7) DEFAULT '#000000',
+    `text_align` ENUM('left', 'center', 'right') DEFAULT 'center',
+    -- Animation settings
+    `animation_type` VARCHAR(50) DEFAULT 'fadeIn',
+    `animation_delay_ms` INT DEFAULT 0,
+    `animation_duration_ms` INT DEFAULT 500,
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     INDEX `idx_template_fields_template` (`template_id`),
+    INDEX `idx_template_fields_slide` (`slide_id`),
     INDEX `idx_template_fields_group` (`field_group`),
     INDEX `idx_template_fields_order` (`display_order`),
-    CONSTRAINT `fk_template_fields_template` FOREIGN KEY (`template_id`) REFERENCES `templates` (`id`) ON DELETE CASCADE
+    CONSTRAINT `fk_template_fields_template` FOREIGN KEY (`template_id`) REFERENCES `templates` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_template_fields_slide` FOREIGN KEY (`slide_id`) REFERENCES `template_slides` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================
