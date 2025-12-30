@@ -136,6 +136,7 @@ require_once __DIR__ . '/../auth.php';
                         ['href' => '/admin/categories.php', 'icon' => 'category', 'label' => 'Categories', 'page' => 'categories'],
                         ['href' => '/admin/field-presets.php', 'icon' => 'input', 'label' => 'Field Presets', 'page' => 'field-presets'],
                         ['href' => '/admin/elements.php', 'icon' => 'shapes', 'label' => 'Elements', 'page' => 'elements'],
+                        ['href' => '/admin/fonts.php', 'icon' => 'text_fields', 'label' => 'Fonts', 'page' => 'fonts'],
                         ['href' => '/admin/promo-codes.php', 'icon' => 'confirmation_number', 'label' => 'Promo Codes', 'page' => 'promo-codes'],
                         ['href' => '/admin/users.php', 'icon' => 'group', 'label' => 'Users', 'page' => 'users'],
                         ['href' => '/admin/blog.php', 'icon' => 'article', 'label' => 'Blog', 'page' => 'blog'],
