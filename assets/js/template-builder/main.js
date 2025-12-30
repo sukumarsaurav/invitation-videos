@@ -142,6 +142,9 @@ class TemplateBuilder {
         // Shape properties
         this.setupShapeProperties();
 
+        // Text presets (Add Heading/Subheading/Body)
+        this.setupTextPresets();
+
         // Preset quick add button
         this.setupPresetQuickAdd();
 
@@ -460,6 +463,96 @@ class TemplateBuilder {
             animationInput.addEventListener('change', (e) => {
                 this.shapeManager.updateShape({ animation: e.target.value });
             });
+        }
+    }
+
+    setupTextPresets() {
+        // Add Heading button
+        const addHeadingBtn = document.getElementById('btn-add-heading');
+        if (addHeadingBtn) {
+            addHeadingBtn.addEventListener('click', () => {
+                this.addTextElement('heading', 'Add a heading', 48, 700);
+            });
+        }
+
+        // Add Subheading button
+        const addSubheadingBtn = document.getElementById('btn-add-subheading');
+        if (addSubheadingBtn) {
+            addSubheadingBtn.addEventListener('click', () => {
+                this.addTextElement('subheading', 'Add a subheading', 32, 600);
+            });
+        }
+
+        // Add Body text button
+        const addBodyBtn = document.getElementById('btn-add-body');
+        if (addBodyBtn) {
+            addBodyBtn.addEventListener('click', () => {
+                this.addTextElement('body', 'Add body text', 24, 400);
+            });
+        }
+
+        // Font style buttons
+        const fontStyleBtns = document.querySelectorAll('.font-style-btn');
+        fontStyleBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const fontFamily = btn.dataset.font;
+                this.addTextElement('custom', 'Your text here', 32, 400, fontFamily);
+            });
+        });
+    }
+
+    addTextElement(type, text, fontSize, fontWeight, fontFamily = 'Inter') {
+        const currentSlide = this.slides[this.currentSlideIndex];
+        if (!currentSlide) return;
+
+        // Create a pseudo-field for the text element
+        const textField = {
+            id: 'text_' + Date.now(),
+            field_name: type + '_' + Date.now(),
+            field_label: text,
+            sample_value: text,
+            slide_id: currentSlide.id,
+            position_x: 50, // Center-ish position
+            position_y: 50,
+            font_family: fontFamily,
+            font_size: fontSize,
+            font_color: '#000000',
+            animation: 'fadeIn',
+            animation_delay: 0,
+            font_weight: fontWeight,
+            text_type: type
+        };
+
+        // Add to slide fields
+        if (!currentSlide.fields) {
+            currentSlide.fields = [];
+        }
+        currentSlide.fields.push(textField);
+
+        // Add to global fields array
+        this.fields.push(textField);
+
+        // Render on canvas
+        this.textEditor.addTextOverlay(textField);
+
+        // Mark as dirty
+        this.isDirty = true;
+
+        // Show toolbar
+        this.showTextToolbar();
+    }
+
+    showTextToolbar() {
+        const toolbar = document.getElementById('text-toolbar');
+        if (toolbar) {
+            toolbar.classList.remove('hidden');
+        }
+    }
+
+    hideTextToolbar() {
+        const toolbar = document.getElementById('text-toolbar');
+        if (toolbar) {
+            toolbar.classList.add('hidden');
         }
     }
 
