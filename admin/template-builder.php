@@ -41,6 +41,12 @@ $pageTitle = 'Template Builder: ' . $template['title'];
 <?php ob_start(); ?>
 
 <link rel="stylesheet" href="/assets/css/template-builder.css">
+<!-- Google Fonts for Canvas Text -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&family=Roboto:wght@400;500;700&family=Poppins:wght@400;500;600;700&family=Open+Sans:wght@400;600;700&family=Lato:wght@400;700&family=Raleway:wght@400;600;700&family=Nunito:wght@400;600;700&family=Playfair+Display:wght@400;600;700&family=Merriweather:wght@400;700&family=Lora:wght@400;600;700&family=Cormorant+Garamond:wght@400;600;700&family=Cinzel:wght@400;600;700&family=Great+Vibes&family=Dancing+Script:wght@400;600;700&family=Pacifico&family=Satisfy&family=Alex+Brush&family=Tangerine:wght@400;700&family=Abril+Fatface&family=Bebas+Neue&family=Anton&family=Oswald:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
 
 <div class="template-builder">
     <!-- Header -->
@@ -77,6 +83,26 @@ $pageTitle = 'Template Builder: ' . $template['title'];
                 </button>
             </div>
             <div class="panel-content">
+                <!-- Shape Toolbar -->
+                <div class="shape-toolbar">
+                    <span class="toolbar-label">Add Elements</span>
+                    <div class="toolbar-buttons">
+                        <button type="button" id="btn-add-rectangle" class="btn-tool" title="Rectangle">
+                            <span class="material-symbols-outlined">rectangle</span>
+                        </button>
+                        <button type="button" id="btn-add-ellipse" class="btn-tool" title="Ellipse">
+                            <span class="material-symbols-outlined">circle</span>
+                        </button>
+                        <button type="button" id="btn-add-line" class="btn-tool" title="Line">
+                            <span class="material-symbols-outlined">horizontal_rule</span>
+                        </button>
+                        <button type="button" id="btn-add-image" class="btn-tool" title="Image">
+                            <span class="material-symbols-outlined">image</span>
+                        </button>
+                        <input type="file" id="shape-image-input" accept="image/*" class="hidden">
+                    </div>
+                </div>
+                <hr class="panel-divider">
                 <p class="text-xs text-slate-400 mb-3">Drag fields onto the canvas</p>
                 <div id="fields-list" class="fields-list">
                     <?php foreach ($fields as $field): ?>
@@ -167,12 +193,37 @@ $pageTitle = 'Template Builder: ' . $template['title'];
                     <label class="property-row">
                         <span>Font Family</span>
                         <select id="text-font-family">
-                            <option value="Inter">Inter</option>
-                            <option value="Playfair Display">Playfair Display</option>
-                            <option value="Great Vibes">Great Vibes</option>
-                            <option value="Montserrat">Montserrat</option>
-                            <option value="Roboto">Roboto</option>
-                            <option value="Poppins">Poppins</option>
+                            <optgroup label="Sans Serif">
+                                <option value="Inter">Inter</option>
+                                <option value="Montserrat">Montserrat</option>
+                                <option value="Roboto">Roboto</option>
+                                <option value="Poppins">Poppins</option>
+                                <option value="Open Sans">Open Sans</option>
+                                <option value="Lato">Lato</option>
+                                <option value="Raleway">Raleway</option>
+                                <option value="Nunito">Nunito</option>
+                            </optgroup>
+                            <optgroup label="Serif">
+                                <option value="Playfair Display">Playfair Display</option>
+                                <option value="Merriweather">Merriweather</option>
+                                <option value="Lora">Lora</option>
+                                <option value="Cormorant Garamond">Cormorant Garamond</option>
+                                <option value="Cinzel">Cinzel</option>
+                            </optgroup>
+                            <optgroup label="Script">
+                                <option value="Great Vibes">Great Vibes</option>
+                                <option value="Dancing Script">Dancing Script</option>
+                                <option value="Pacifico">Pacifico</option>
+                                <option value="Satisfy">Satisfy</option>
+                                <option value="Alex Brush">Alex Brush</option>
+                                <option value="Tangerine">Tangerine</option>
+                            </optgroup>
+                            <optgroup label="Display">
+                                <option value="Abril Fatface">Abril Fatface</option>
+                                <option value="Bebas Neue">Bebas Neue</option>
+                                <option value="Anton">Anton</option>
+                                <option value="Oswald">Oswald</option>
+                            </optgroup>
                         </select>
                     </label>
                     <label class="property-row">
@@ -182,21 +233,82 @@ $pageTitle = 'Template Builder: ' . $template['title'];
                     <label class="property-row">
                         <span>Animation</span>
                         <select id="text-animation">
-                            <option value="none">None</option>
-                            <option value="fadeIn" selected>Fade In</option>
-                            <option value="slideUp">Slide Up</option>
-                            <option value="slideDown">Slide Down</option>
-                            <option value="slideLeft">Slide Left</option>
-                            <option value="slideRight">Slide Right</option>
-                            <option value="zoomIn">Zoom In</option>
-                            <option value="typewriter">Typewriter</option>
-                            <option value="bounce">Bounce</option>
+                            <optgroup label="Fade">
+                                <option value="none">None</option>
+                                <option value="fadeIn" selected>Fade In</option>
+                                <option value="fadeOut">Fade Out</option>
+                            </optgroup>
+                            <optgroup label="Slide">
+                                <option value="slideUp">Slide Up</option>
+                                <option value="slideDown">Slide Down</option>
+                                <option value="slideLeft">Slide Left</option>
+                                <option value="slideRight">Slide Right</option>
+                            </optgroup>
+                            <optgroup label="Zoom">
+                                <option value="zoomIn">Zoom In</option>
+                                <option value="zoomOut">Zoom Out</option>
+                            </optgroup>
+                            <optgroup label="Special">
+                                <option value="typewriter">Typewriter</option>
+                                <option value="bounce">Bounce</option>
+                                <option value="pulse">Pulse</option>
+                                <option value="shake">Shake</option>
+                                <option value="flip">Flip</option>
+                                <option value="rotate">Rotate In</option>
+                            </optgroup>
                         </select>
                     </label>
                     <label class="property-row">
                         <span>Delay (ms)</span>
                         <input type="number" id="text-delay" value="0" min="0" max="10000" step="100">
                     </label>
+                    <label class="property-row">
+                        <span>Duration (ms)</span>
+                        <input type="number" id="text-duration" value="500" min="100" max="5000" step="100">
+                    </label>
+                </div>
+
+                <!-- Shape Properties -->
+                <div class="property-section" id="shape-properties" style="display: none;">
+                    <h4>Shape Properties</h4>
+                    <label class="property-row">
+                        <span>Fill Color</span>
+                        <input type="color" id="shape-fill" value="#7c3aed">
+                    </label>
+                    <label class="property-row">
+                        <span>Stroke Color</span>
+                        <input type="color" id="shape-stroke" value="#000000">
+                    </label>
+                    <label class="property-row">
+                        <span>Stroke Width</span>
+                        <input type="number" id="shape-stroke-width" value="0" min="0" max="20">
+                    </label>
+                    <label class="property-row">
+                        <span>Opacity (%)</span>
+                        <input type="number" id="shape-opacity" value="100" min="0" max="100">
+                    </label>
+                    <label class="property-row">
+                        <span>Border Radius</span>
+                        <input type="number" id="shape-radius" value="0" min="0" max="100">
+                    </label>
+                    <label class="property-row">
+                        <span>Animation</span>
+                        <select id="shape-animation">
+                            <option value="none">None</option>
+                            <option value="fadeIn">Fade In</option>
+                            <option value="slideUp">Slide Up</option>
+                            <option value="slideDown">Slide Down</option>
+                            <option value="zoomIn">Zoom In</option>
+                            <option value="bounce">Bounce</option>
+                            <option value="pulse">Pulse</option>
+                        </select>
+                    </label>
+                    <div class="property-row">
+                        <button type="button" id="btn-delete-shape" class="btn btn-sm btn-danger">
+                            <span class="material-symbols-outlined">delete</span>
+                            Delete Shape
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

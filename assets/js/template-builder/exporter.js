@@ -104,10 +104,138 @@ export class Exporter {
             img.src = slide.background_image;
         }
 
+        // Draw shapes
+        const shapesForSlide = this.builder.shapeManager?.getShapesForSlide(slide.id) || [];
+        shapesForSlide.forEach(shape => {
+            this.renderShape(shape, progress, slide.duration_ms || 3000);
+        });
+
         // Draw texts with animations
         fieldsForSlide.forEach(field => {
             this.renderAnimatedText(field, slide.duration_ms || 3000, progress);
         });
+    }
+
+    renderShape(shape, progress, slideDuration) {
+        const { width, height } = this.previewCanvas;
+        const x = (shape.x / 100) * width;
+        const y = (shape.y / 100) * height;
+        const w = (shape.width / 100) * width;
+        const h = (shape.height / 100) * height;
+
+        // Calculate animation
+        const delayRatio = (shape.animationDelay || 0) / slideDuration;
+        const durationRatio = (shape.animationDuration || 500) / slideDuration;
+
+        let opacity = shape.opacity ?? 1;
+        let scale = 1;
+        let offsetY = 0;
+
+        if (shape.animation && shape.animation !== 'none') {
+            if (progress < delayRatio) {
+                opacity = 0;
+            } else if (progress < delayRatio + durationRatio) {
+                const t = (progress - delayRatio) / durationRatio;
+                const eased = this.easeOutCubic(t);
+
+                switch (shape.animation) {
+                    case 'fadeIn':
+                        opacity = eased * (shape.opacity ?? 1);
+                        break;
+                    case 'slideUp':
+                        opacity = eased * (shape.opacity ?? 1);
+                        offsetY = (1 - eased) * 30;
+                        break;
+                    case 'slideDown':
+                        opacity = eased * (shape.opacity ?? 1);
+                        offsetY = (eased - 1) * 30;
+                        break;
+                    case 'zoomIn':
+                        opacity = eased * (shape.opacity ?? 1);
+                        scale = 0.5 + (eased * 0.5);
+                        break;
+                    case 'pulse':
+                        const pulseT = t * Math.PI * 2;
+                        scale = 1 + 0.05 * Math.sin(pulseT);
+                        break;
+                    case 'bounce':
+                        const bounceT = t * 5;
+                        offsetY = -20 * Math.abs(Math.sin(bounceT)) * (1 - t);
+                        break;
+                }
+            }
+        }
+
+        this.previewCtx.save();
+        this.previewCtx.globalAlpha = opacity;
+
+        const centerX = x;
+        const centerY = y + offsetY;
+
+        if (scale !== 1) {
+            this.previewCtx.translate(centerX, centerY);
+            this.previewCtx.scale(scale, scale);
+            this.previewCtx.translate(-centerX, -centerY);
+        }
+
+        if (shape.rotation) {
+            this.previewCtx.translate(centerX, centerY);
+            this.previewCtx.rotate((shape.rotation * Math.PI) / 180);
+            this.previewCtx.translate(-centerX, -centerY);
+        }
+
+        if (shape.type === 'rectangle') {
+            this.previewCtx.fillStyle = shape.fill || '#7c3aed';
+            this.previewCtx.beginPath();
+            const radius = shape.borderRadius || 0;
+            this.roundRect(x - w / 2 + offsetY, centerY - h / 2, w, h, radius);
+            this.previewCtx.fill();
+            if (shape.strokeWidth > 0) {
+                this.previewCtx.strokeStyle = shape.stroke || '#000';
+                this.previewCtx.lineWidth = shape.strokeWidth;
+                this.previewCtx.stroke();
+            }
+        } else if (shape.type === 'ellipse') {
+            this.previewCtx.fillStyle = shape.fill || '#ec4899';
+            this.previewCtx.beginPath();
+            this.previewCtx.ellipse(centerX, centerY, w / 2, h / 2, 0, 0, Math.PI * 2);
+            this.previewCtx.fill();
+            if (shape.strokeWidth > 0) {
+                this.previewCtx.strokeStyle = shape.stroke || '#000';
+                this.previewCtx.lineWidth = shape.strokeWidth;
+                this.previewCtx.stroke();
+            }
+        } else if (shape.type === 'line') {
+            this.previewCtx.strokeStyle = shape.fill || '#f59e0b';
+            this.previewCtx.lineWidth = shape.strokeWidth || 2;
+            this.previewCtx.beginPath();
+            this.previewCtx.moveTo(centerX - w / 2, centerY);
+            this.previewCtx.lineTo(centerX + w / 2, centerY);
+            this.previewCtx.stroke();
+        } else if (shape.type === 'image' && shape.src) {
+            // Cache image
+            if (!shape._img) {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = () => { shape._img = img; };
+                img.src = shape.src;
+            } else {
+                this.previewCtx.drawImage(shape._img, centerX - w / 2, centerY - h / 2, w, h);
+            }
+        }
+
+        this.previewCtx.restore();
+    }
+
+    roundRect(x, y, w, h, r) {
+        if (r > w / 2) r = w / 2;
+        if (r > h / 2) r = h / 2;
+        this.previewCtx.moveTo(x + r, y);
+        this.previewCtx.arcTo(x + w, y, x + w, y + h, r);
+        this.previewCtx.arcTo(x + w, y + h, x, y + h, r);
+        this.previewCtx.arcTo(x, y + h, x, y, r);
+        this.previewCtx.arcTo(x, y, x + w, y, r);
+        this.previewCtx.closePath();
     }
 
     renderAnimatedText(field, slideDuration, progress) {
@@ -124,6 +252,7 @@ export class Exporter {
         let offsetX = 0;
         let offsetY = 0;
         let scale = 1;
+        let rotation = 0;
 
         if (progress < delayRatio) {
             opacity = 0;
@@ -134,6 +263,9 @@ export class Exporter {
             switch (field.animation_type) {
                 case 'fadeIn':
                     opacity = eased;
+                    break;
+                case 'fadeOut':
+                    opacity = 1 - eased;
                     break;
                 case 'slideUp':
                     opacity = eased;
@@ -155,6 +287,30 @@ export class Exporter {
                     opacity = eased;
                     scale = 0.5 + (eased * 0.5);
                     break;
+                case 'zoomOut':
+                    opacity = 1 - eased;
+                    scale = 1 - (eased * 0.5);
+                    break;
+                case 'pulse':
+                    const pulseT = t * Math.PI * 2;
+                    scale = 1 + 0.05 * Math.sin(pulseT);
+                    break;
+                case 'shake':
+                    const shakeT = t * 10;
+                    offsetX = 5 * Math.sin(shakeT * Math.PI) * (1 - t);
+                    break;
+                case 'flip':
+                    opacity = eased;
+                    // Simplified flip
+                    break;
+                case 'rotate':
+                    opacity = eased;
+                    rotation = -180 * (1 - eased);
+                    break;
+                case 'bounce':
+                    const bounceT = t * 5;
+                    offsetY = -20 * Math.abs(Math.sin(bounceT)) * (1 - t);
+                    break;
                 case 'none':
                 default:
                     opacity = 1;
@@ -168,16 +324,18 @@ export class Exporter {
         this.previewCtx.textAlign = field.text_align || 'center';
         this.previewCtx.textBaseline = 'middle';
 
-        if (scale !== 1) {
-            this.previewCtx.translate(x, y);
-            this.previewCtx.scale(scale, scale);
-            this.previewCtx.fillText(text, offsetX, offsetY);
-        } else {
-            this.previewCtx.fillText(text, x + offsetX, y + offsetY);
+        this.previewCtx.translate(x, y);
+        if (rotation !== 0) {
+            this.previewCtx.rotate((rotation * Math.PI) / 180);
         }
+        if (scale !== 1) {
+            this.previewCtx.scale(scale, scale);
+        }
+        this.previewCtx.fillText(text, offsetX, offsetY);
 
         this.previewCtx.restore();
     }
+
 
     drawImageCover(img, x, y, w, h) {
         const imgRatio = img.width / img.height;

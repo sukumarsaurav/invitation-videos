@@ -20,6 +20,13 @@ export class Animations {
                 { offset: 1, opacity: 1 }
             ]
         },
+        fadeOut: {
+            name: 'Fade Out',
+            keyframes: [
+                { offset: 0, opacity: 1 },
+                { offset: 1, opacity: 0 }
+            ]
+        },
         slideUp: {
             name: 'Slide Up',
             keyframes: [
@@ -55,6 +62,13 @@ export class Animations {
                 { offset: 1, opacity: 1, transform: 'scale(1)' }
             ]
         },
+        zoomOut: {
+            name: 'Zoom Out',
+            keyframes: [
+                { offset: 0, opacity: 1, transform: 'scale(1)' },
+                { offset: 1, opacity: 0, transform: 'scale(0.5)' }
+            ]
+        },
         typewriter: {
             name: 'Typewriter',
             keyframes: [
@@ -73,8 +87,57 @@ export class Animations {
                 { offset: 0.8, transform: 'translateY(0)' },
                 { offset: 1, transform: 'translateY(0)' }
             ]
+        },
+        pulse: {
+            name: 'Pulse',
+            keyframes: [
+                { offset: 0, transform: 'scale(1)' },
+                { offset: 0.5, transform: 'scale(1.05)' },
+                { offset: 1, transform: 'scale(1)' }
+            ]
+        },
+        shake: {
+            name: 'Shake',
+            keyframes: [
+                { offset: 0, transform: 'translateX(0)' },
+                { offset: 0.1, transform: 'translateX(-5px)' },
+                { offset: 0.2, transform: 'translateX(5px)' },
+                { offset: 0.3, transform: 'translateX(-5px)' },
+                { offset: 0.4, transform: 'translateX(5px)' },
+                { offset: 0.5, transform: 'translateX(-5px)' },
+                { offset: 0.6, transform: 'translateX(5px)' },
+                { offset: 0.7, transform: 'translateX(-5px)' },
+                { offset: 0.8, transform: 'translateX(5px)' },
+                { offset: 0.9, transform: 'translateX(-5px)' },
+                { offset: 1, transform: 'translateX(0)' }
+            ]
+        },
+        flip: {
+            name: 'Flip',
+            keyframes: [
+                { offset: 0, opacity: 0, transform: 'perspective(400px) rotateY(90deg)' },
+                { offset: 0.4, transform: 'perspective(400px) rotateY(-20deg)' },
+                { offset: 0.6, opacity: 1, transform: 'perspective(400px) rotateY(10deg)' },
+                { offset: 0.8, transform: 'perspective(400px) rotateY(-5deg)' },
+                { offset: 1, opacity: 1, transform: 'perspective(400px) rotateY(0)' }
+            ]
+        },
+        rotate: {
+            name: 'Rotate In',
+            keyframes: [
+                { offset: 0, opacity: 0, transform: 'rotate(-180deg)' },
+                { offset: 1, opacity: 1, transform: 'rotate(0)' }
+            ]
         }
     };
+
+    // Get list of animation names for dropdown menus
+    static getAnimationList() {
+        return Object.entries(Animations.presets).map(([key, preset]) => ({
+            value: key,
+            label: preset.name
+        }));
+    }
 
     // Preview animation on an element
     previewAnimation(element, animationType, duration = 500) {
@@ -141,3 +204,4 @@ export class Animations {
         return 1 - Math.pow(1 - t, 3);
     }
 }
+

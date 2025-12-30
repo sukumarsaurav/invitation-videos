@@ -50,6 +50,12 @@ try {
             exit;
         }
 
+        // Check for shape image upload
+        if (isset($_POST['action']) && $_POST['action'] === 'upload_shape_image') {
+            handleShapeImageUpload();
+            exit;
+        }
+
         // Handle JSON body
         $input = json_decode(file_get_contents('php://input'), true);
 
@@ -122,6 +128,47 @@ function handleBackgroundUpload()
     }
 
     $url = '/uploads/templates/slides/' . $filename;
+
+    echo json_encode(['success' => true, 'url' => $url]);
+}
+
+function handleShapeImageUpload()
+{
+    $templateId = intval($_POST['template_id'] ?? 0);
+
+    if (!isset($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
+        echo json_encode(['success' => false, 'error' => 'No file uploaded']);
+        return;
+    }
+
+    $file = $_FILES['image'];
+    $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+    $maxSize = 5 * 1024 * 1024; // 5MB
+
+    if (!in_array($file['type'], $allowedTypes)) {
+        echo json_encode(['success' => false, 'error' => 'Invalid file type. Allowed: JPG, PNG, GIF, WebP, SVG']);
+        return;
+    }
+
+    if ($file['size'] > $maxSize) {
+        echo json_encode(['success' => false, 'error' => 'File too large (max 5MB)']);
+        return;
+    }
+
+    $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+    $filename = 'shape_' . $templateId . '_' . time() . '_' . uniqid() . '.' . $ext;
+    $uploadDir = __DIR__ . '/../uploads/templates/shapes/';
+
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0755, true);
+    }
+
+    if (!move_uploaded_file($file['tmp_name'], $uploadDir . $filename)) {
+        echo json_encode(['success' => false, 'error' => 'Failed to save file']);
+        return;
+    }
+
+    $url = '/uploads/templates/shapes/' . $filename;
 
     echo json_encode(['success' => true, 'url' => $url]);
 }

@@ -6,6 +6,7 @@
 import { SlideManager } from './slideManager.js';
 import { CanvasEditor } from './canvasEditor.js';
 import { TextEditor } from './textEditor.js';
+import { ShapeManager } from './shapeManager.js';
 import { Animations } from './animations.js';
 import { Exporter } from './exporter.js';
 
@@ -24,6 +25,7 @@ class TemplateBuilder {
         this.slideManager = new SlideManager(this);
         this.canvasEditor = new CanvasEditor(this);
         this.textEditor = new TextEditor(this);
+        this.shapeManager = new ShapeManager(this);
         this.animations = new Animations(this);
         this.exporter = new Exporter(this);
 
@@ -101,6 +103,12 @@ class TemplateBuilder {
             this.textEditor.updateSelectedText({ animation_delay_ms: parseInt(e.target.value) });
         });
 
+        // Shape toolbar buttons
+        this.setupShapeToolbar();
+
+        // Shape properties
+        this.setupShapeProperties();
+
         // Field drag and drop
         this.setupFieldDragDrop();
 
@@ -147,6 +155,8 @@ class TemplateBuilder {
                 const x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
                 const y = Math.round(((e.clientY - rect.top) / rect.height) * 100);
 
+                this.shapeManager.deselectShape();
+
                 this.textEditor.addTextToSlide(fieldId, fieldName, fieldLabel, sampleValue, x, y);
             }
         });
@@ -176,6 +186,9 @@ class TemplateBuilder {
 
         // Render text elements for this slide
         this.textEditor.renderTextsForSlide(slide.id);
+
+        // Render shapes for this slide
+        this.shapeManager.renderShapesForSlide(slide.id);
 
         // Clear selection
         this.deselectElement();
@@ -260,7 +273,7 @@ class TemplateBuilder {
                 alert('Upload failed: ' + result.error);
             }
         } catch (error) {
-            console.error('Upload error:', error);
+            console.error('Background upload error:', error);
             alert('Upload failed');
         }
     }
@@ -279,6 +292,7 @@ class TemplateBuilder {
                     template_id: this.templateId,
                     csrf_token: this.csrfToken,
                     slides: this.slides,
+                    shapes: this.shapeManager.getShapesData(),
                     fields: this.fields
                 })
             });
@@ -303,6 +317,113 @@ class TemplateBuilder {
             btn.innerHTML = '<span class="material-symbols-outlined">save</span> Save Changes';
         } finally {
             btn.disabled = false;
+        }
+    }
+
+    setupShapeToolbar() {
+        // Rectangle button
+        const btnRect = document.getElementById('btn-add-rectangle');
+        if (btnRect) {
+            btnRect.addEventListener('click', () => {
+                this.shapeManager.addShape('rectangle');
+            });
+        }
+
+        // Ellipse button
+        const btnEllipse = document.getElementById('btn-add-ellipse');
+        if (btnEllipse) {
+            btnEllipse.addEventListener('click', () => {
+                this.shapeManager.addShape('ellipse');
+            });
+        }
+
+        // Line button
+        const btnLine = document.getElementById('btn-add-line');
+        if (btnLine) {
+            btnLine.addEventListener('click', () => {
+                this.shapeManager.addShape('line');
+            });
+        }
+
+        // Image upload button
+        const btnImage = document.getElementById('btn-add-image');
+        const imageInput = document.getElementById('shape-image-input');
+        if (btnImage && imageInput) {
+            btnImage.addEventListener('click', () => {
+                imageInput.click();
+            });
+            imageInput.addEventListener('change', (e) => {
+                if (e.target.files[0]) {
+                    this.shapeManager.addImageShape(e.target.files[0]);
+                    e.target.value = ''; // Reset input
+                }
+            });
+        }
+
+        // Delete shape button
+        const btnDelete = document.getElementById('btn-delete-shape');
+        if (btnDelete) {
+            btnDelete.addEventListener('click', () => {
+                this.shapeManager.deleteSelectedShape();
+            });
+        }
+
+        // Click on canvas background to deselect
+        document.getElementById('canvas-overlays').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                this.shapeManager.deselectShape();
+                this.deselectElement();
+            }
+        });
+    }
+
+    setupShapeProperties() {
+        // Fill color
+        const fillInput = document.getElementById('shape-fill');
+        if (fillInput) {
+            fillInput.addEventListener('input', (e) => {
+                this.shapeManager.updateShape({ fill: e.target.value });
+            });
+        }
+
+        // Stroke color
+        const strokeInput = document.getElementById('shape-stroke');
+        if (strokeInput) {
+            strokeInput.addEventListener('input', (e) => {
+                this.shapeManager.updateShape({ stroke: e.target.value });
+            });
+        }
+
+        // Stroke width
+        const strokeWidthInput = document.getElementById('shape-stroke-width');
+        if (strokeWidthInput) {
+            strokeWidthInput.addEventListener('change', (e) => {
+                this.shapeManager.updateShape({ strokeWidth: parseInt(e.target.value) });
+            });
+        }
+
+        // Opacity
+        const opacityInput = document.getElementById('shape-opacity');
+        if (opacityInput) {
+            opacityInput.addEventListener('input', (e) => {
+                this.shapeManager.updateShape({ opacity: parseInt(e.target.value) / 100 });
+            });
+        }
+
+        // Border radius
+        const radiusInput = document.getElementById('shape-radius');
+        if (radiusInput) {
+            radiusInput.addEventListener('change', (e) => {
+                this.shapeManager.updateShape({ borderRadius: parseInt(e.target.value) });
+            });
+        }
+
+        // Animation
+        const animationInput = document.getElementById('shape-animation');
+        if (animationInput) {
+            animationInput.addEventListener('change', (e) => {
+                this.shapeManager.updateShape({ animation: e.target.value });
+            });
         }
     }
 
