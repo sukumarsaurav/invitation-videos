@@ -47,8 +47,13 @@ export class TextEditor {
     }
 
     renderTextElement(fieldId) {
-        const field = this.builder.getFieldById(fieldId);
-        if (!field) return;
+        // Convert to string for consistent comparison
+        const field = this.builder.getFieldById(String(fieldId));
+        if (!field) {
+            console.warn('renderTextElement: Field not found with ID:', fieldId);
+            return;
+        }
+        console.log('renderTextElement: Rendering field:', field);
 
         // Check if element already exists
         let element = this.overlaysContainer.querySelector(`[data-field-id="${fieldId}"]`);

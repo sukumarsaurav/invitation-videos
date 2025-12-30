@@ -327,7 +327,8 @@ class TemplateBuilder {
     }
 
     getFieldById(fieldId) {
-        return this.fields.find(f => f.id == fieldId);
+        // Use String() conversion for consistent comparison (field.id might be number, fieldId might be string)
+        return this.fields.find(f => String(f.id) === String(fieldId));
     }
 
     updateField(fieldId, updates) {
