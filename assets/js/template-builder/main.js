@@ -109,6 +109,9 @@ class TemplateBuilder {
         // Shape properties
         this.setupShapeProperties();
 
+        // Preset quick add button
+        this.setupPresetQuickAdd();
+
         // Field drag and drop
         this.setupFieldDragDrop();
 
@@ -425,6 +428,100 @@ class TemplateBuilder {
                 this.shapeManager.updateShape({ animation: e.target.value });
             });
         }
+    }
+
+    setupPresetQuickAdd() {
+        const presetSelect = document.getElementById('preset-select');
+        const addPresetBtn = document.getElementById('btn-add-preset');
+
+        if (!presetSelect || !addPresetBtn) return;
+
+        addPresetBtn.addEventListener('click', async () => {
+            const presetId = presetSelect.value;
+            if (!presetId) {
+                alert('Please select a preset first');
+                return;
+            }
+
+            addPresetBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/template-builder.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'add_preset_field',
+                        template_id: this.templateId,
+                        preset_id: parseInt(presetId),
+                        csrf_token: this.csrfToken
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success && result.field) {
+                    // Add to our fields array
+                    this.fields.push(result.field);
+
+                    // Add to the fields list UI
+                    const fieldsList = document.getElementById('fields-list');
+                    const emptyMsg = fieldsList.querySelector('p.text-center');
+                    if (emptyMsg) emptyMsg.remove();
+
+                    const fieldItem = document.createElement('div');
+                    fieldItem.className = 'field-item';
+                    fieldItem.draggable = true;
+                    fieldItem.dataset.fieldId = result.field.id;
+                    fieldItem.dataset.fieldName = result.field.field_name;
+                    fieldItem.dataset.fieldLabel = result.field.field_label;
+                    fieldItem.dataset.sampleValue = result.field.sample_value || '';
+                    fieldItem.innerHTML = `
+                        <span class="material-symbols-outlined drag-handle">drag_indicator</span>
+                        <div class="field-info">
+                            <span class="field-label">${result.field.field_label}</span>
+                            <span class="field-type">${result.field.field_type}</span>
+                        </div>
+                        <span class="field-slide-badge" data-slide="">—</span>
+                    `;
+                    fieldsList.appendChild(fieldItem);
+
+                    // Re-setup drag and drop
+                    this.setupFieldDragDrop();
+
+                    // Reset select
+                    presetSelect.value = '';
+                    this.showNotification('Field added successfully!', 'success');
+                } else {
+                    throw new Error(result.error || 'Failed to add preset');
+                }
+            } catch (err) {
+                console.error('Add preset error:', err);
+                this.showNotification('Failed to add field: ' + err.message, 'error');
+            } finally {
+                addPresetBtn.disabled = false;
+            }
+        });
+    }
+
+    showNotification(message, type = 'success') {
+        // Simple notification - could be enhanced later
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        notification.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background: ${type === 'error' ? '#dc2626' : '#10b981'};
+            color: white;
+            border-radius: 8px;
+            font-weight: 500;
+            z-index: 10000;
+            animation: slideUp 0.3s ease-out;
+        `;
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 3000);
     }
 
     preview() {

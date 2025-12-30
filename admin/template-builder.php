@@ -34,6 +34,18 @@ $fields = Database::fetchAll(
     [$templateId]
 );
 
+// Get field presets for quick add
+$presets = Database::fetchAll(
+    "SELECT * FROM field_presets WHERE is_active = 1 ORDER BY category, display_order"
+);
+
+// Group presets by category
+$presetsByCategory = [];
+foreach ($presets as $preset) {
+    $cat = $preset['category'] ?? 'general';
+    $presetsByCategory[$cat][] = $preset;
+}
+
 $pendingTickets = 0;
 $pageTitle = 'Template Builder: ' . $template['title'];
 ?>
@@ -103,6 +115,34 @@ $pageTitle = 'Template Builder: ' . $template['title'];
                     </div>
                 </div>
                 <hr class="panel-divider">
+
+                <!-- Quick Add Preset -->
+                <?php if (!empty($presetsByCategory)): ?>
+                    <div class="quick-add-preset">
+                        <span class="toolbar-label">Quick Add Field</span>
+                        <select id="preset-select" class="preset-dropdown">
+                            <option value="">Select a preset...</option>
+                            <?php foreach ($presetsByCategory as $category => $categoryPresets): ?>
+                                <optgroup label="<?= ucfirst(str_replace('_', ' ', $category)) ?>">
+                                    <?php foreach ($categoryPresets as $preset): ?>
+                                        <option value="<?= $preset['id'] ?>" data-name="<?= Security::escape($preset['name']) ?>"
+                                            data-field-name="<?= Security::escape($preset['field_name']) ?>"
+                                            data-type="<?= $preset['field_type'] ?>"
+                                            data-placeholder="<?= Security::escape($preset['placeholder'] ?? '') ?>"
+                                            data-sample="<?= Security::escape($preset['sample_value'] ?? '') ?>">
+                                            <?= Security::escape($preset['name']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </optgroup>
+                            <?php endforeach; ?>
+                        </select>
+                        <button type="button" id="btn-add-preset" class="btn-add-preset" title="Add selected preset">
+                            <span class="material-symbols-outlined">add</span>
+                        </button>
+                    </div>
+                    <hr class="panel-divider">
+                <?php endif; ?>
+
                 <p class="text-xs text-slate-400 mb-3">Drag fields onto the canvas</p>
                 <div id="fields-list" class="fields-list">
                     <?php foreach ($fields as $field): ?>

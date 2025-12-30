@@ -639,6 +639,66 @@
     margin: 0.75rem 0;
 }
 
+/* Quick Add Preset */
+.quick-add-preset {
+    margin-bottom: 0.75rem;
+}
+
+.preset-dropdown {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 0.5rem;
+    color: #f1f5f9;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+}
+
+.preset-dropdown:focus {
+    outline: none;
+    border-color: #7c3aed;
+}
+
+.preset-dropdown option {
+    background: #1e293b;
+    color: #f1f5f9;
+}
+
+.preset-dropdown optgroup {
+    font-weight: 600;
+    color: #94a3b8;
+}
+
+.btn-add-preset {
+    width: 100%;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: #7c3aed;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-add-preset:hover {
+    background: #6d28d9;
+}
+
+.btn-add-preset:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+
 /* Shape Elements */
 .canvas-shape-element {
     position: absolute;

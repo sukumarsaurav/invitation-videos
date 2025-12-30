@@ -79,6 +79,8 @@ try {
 
         if ($action === 'save') {
             saveTemplateDesign($templateId, $input['slides'] ?? [], $input['fields'] ?? []);
+        } elseif ($action === 'add_preset_field') {
+            addPresetField($templateId, intval($input['preset_id'] ?? 0));
         } else {
             throw new Exception('Unknown action');
         }
@@ -178,6 +180,63 @@ function handleShapeImageUpload()
     $url = '/uploads/templates/shapes/' . $filename;
 
     echo json_encode(['success' => true, 'url' => $url]);
+}
+
+function addPresetField($templateId, $presetId)
+{
+    if (!$templateId || !$presetId) {
+        throw new Exception('Template ID and Preset ID required');
+    }
+
+    // Get preset
+    $preset = Database::fetchOne("SELECT * FROM field_presets WHERE id = ?", [$presetId]);
+    if (!$preset) {
+        throw new Exception('Preset not found');
+    }
+
+    // Get max display order for this template
+    $maxOrder = Database::fetchOne(
+        "SELECT MAX(display_order) as max_order FROM template_fields WHERE template_id = ?",
+        [$templateId]
+    );
+    $displayOrder = ($maxOrder['max_order'] ?? 0) + 1;
+
+    // Check if field name already exists in template (add suffix if so)
+    $fieldName = $preset['field_name'];
+    $existing = Database::fetchOne(
+        "SELECT COUNT(*) as cnt FROM template_fields WHERE template_id = ? AND field_name = ?",
+        [$templateId, $fieldName]
+    );
+    if ($existing['cnt'] > 0) {
+        $fieldName = $preset['field_name'] . '_' . time();
+    }
+
+    // Insert new template field
+    Database::query(
+        "INSERT INTO template_fields 
+            (template_id, field_name, field_label, field_type, placeholder, sample_value, help_text, display_order, position_x, position_y, font_family, font_size, font_color, animation_type)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 50, 50, 'Inter', 24, '#000000', 'fadeIn')",
+        [
+            $templateId,
+            $fieldName,
+            $preset['name'],
+            $preset['field_type'],
+            $preset['placeholder'] ?? '',
+            $preset['sample_value'] ?? '',
+            $preset['help_text'] ?? '',
+            $displayOrder
+        ]
+    );
+
+    $fieldId = Database::lastInsertId();
+
+    // Return the created field
+    $field = Database::fetchOne("SELECT * FROM template_fields WHERE id = ?", [$fieldId]);
+
+    echo json_encode([
+        'success' => true,
+        'field' => $field
+    ]);
 }
 
 function saveTemplateDesign($templateId, $slides, $fields)
