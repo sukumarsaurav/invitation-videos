@@ -14,23 +14,30 @@ export class Exporter {
     playPreview() {
         if (this.isPlaying) return;
         this.isPlaying = true;
+        this.isPaused = false;
 
         const slides = this.builder.slides;
         const fields = this.builder.fields;
 
         // Calculate total duration
-        const totalDuration = slides.reduce((sum, s) => sum + (s.duration_ms || 3000), 0);
+        this.totalDuration = slides.reduce((sum, s) => sum + (s.duration_ms || 3000), 0);
+
+        // If resuming from pause, use saved offset
+        const startOffset = this.pausedAt || 0;
+        this.startTime = performance.now() - startOffset;
 
         document.getElementById('btn-play-preview').innerHTML =
-            '<span class="material-symbols-outlined">pause</span> Pause';
-
-        const startTime = performance.now();
+            '<span class="material-symbols-outlined">pause</span>';
 
         const animate = (currentTime) => {
             if (!this.isPlaying) return;
 
-            const elapsed = currentTime - startTime;
-            const progress = (elapsed % totalDuration) / totalDuration;
+            const elapsed = currentTime - this.startTime;
+            const progress = (elapsed % this.totalDuration) / this.totalDuration;
+
+            // Store current progress for pause/resume
+            this.currentProgress = progress;
+            this.currentElapsed = elapsed % this.totalDuration;
 
             // Find current slide
             let accumulatedTime = 0;
@@ -39,8 +46,8 @@ export class Exporter {
 
             for (const slide of slides) {
                 const slideDuration = slide.duration_ms || 3000;
-                const slideStart = accumulatedTime / totalDuration;
-                const slideEnd = (accumulatedTime + slideDuration) / totalDuration;
+                const slideStart = accumulatedTime / this.totalDuration;
+                const slideEnd = (accumulatedTime + slideDuration) / this.totalDuration;
 
                 if (progress >= slideStart && progress < slideEnd) {
                     currentSlide = slide;
@@ -60,8 +67,8 @@ export class Exporter {
             document.getElementById('preview-progress-bar').style.width = `${progress * 100}%`;
 
             // Update time display
-            const elapsedSec = Math.floor(elapsed / 1000);
-            const totalSec = Math.floor(totalDuration / 1000);
+            const elapsedSec = Math.floor((elapsed % this.totalDuration) / 1000);
+            const totalSec = Math.floor(this.totalDuration / 1000);
             document.getElementById('preview-time').textContent =
                 `${Math.floor(elapsedSec / 60)}:${String(elapsedSec % 60).padStart(2, '0')} / ${Math.floor(totalSec / 60)}:${String(totalSec % 60).padStart(2, '0')}`;
 
@@ -71,14 +78,94 @@ export class Exporter {
         this.animationFrame = requestAnimationFrame(animate);
     }
 
-    stopPreview() {
+    pausePreview() {
+        if (!this.isPlaying) return;
         this.isPlaying = false;
+        this.isPaused = true;
+        this.pausedAt = this.currentElapsed || 0;
+
         if (this.animationFrame) {
             cancelAnimationFrame(this.animationFrame);
             this.animationFrame = null;
         }
         document.getElementById('btn-play-preview').innerHTML =
-            '<span class="material-symbols-outlined">play_arrow</span> Play';
+            '<span class="material-symbols-outlined">play_arrow</span>';
+    }
+
+    togglePreview() {
+        if (this.isPlaying) {
+            this.pausePreview();
+        } else {
+            this.playPreview();
+        }
+    }
+
+    stopPreview() {
+        this.isPlaying = false;
+        this.isPaused = false;
+        this.pausedAt = 0;
+        this.currentElapsed = 0;
+        this.currentProgress = 0;
+
+        if (this.animationFrame) {
+            cancelAnimationFrame(this.animationFrame);
+            this.animationFrame = null;
+        }
+        document.getElementById('btn-play-preview').innerHTML =
+            '<span class="material-symbols-outlined">play_arrow</span>';
+    }
+
+    seekPreview(progressPercent) {
+        const seekTime = progressPercent * this.totalDuration;
+        this.pausedAt = seekTime;
+
+        if (this.isPlaying) {
+            // If playing, restart from new position
+            this.isPlaying = false;
+            if (this.animationFrame) {
+                cancelAnimationFrame(this.animationFrame);
+            }
+            this.playPreview();
+        } else {
+            // If paused, just render the frame at this position
+            this.currentElapsed = seekTime;
+            this.renderPreviewAtProgress(progressPercent);
+        }
+
+        // Update progress bar
+        document.getElementById('preview-progress-bar').style.width = `${progressPercent * 100}%`;
+    }
+
+    renderPreviewAtProgress(progress) {
+        const slides = this.builder.slides;
+        const fields = this.builder.fields;
+
+        // Find current slide at this progress
+        let accumulatedTime = 0;
+        let currentSlide = slides[0];
+        let slideProgress = 0;
+
+        for (const slide of slides) {
+            const slideDuration = slide.duration_ms || 3000;
+            const slideStart = accumulatedTime / this.totalDuration;
+            const slideEnd = (accumulatedTime + slideDuration) / this.totalDuration;
+
+            if (progress >= slideStart && progress < slideEnd) {
+                currentSlide = slide;
+                slideProgress = (progress - slideStart) / (slideEnd - slideStart);
+                break;
+            }
+            accumulatedTime += slideDuration;
+        }
+
+        const slideFields = fields.filter(f => f.slide_id == currentSlide.id);
+        this.renderPreviewFrame(currentSlide, slideFields, slideProgress);
+
+        // Update time display
+        const elapsedSec = Math.floor((progress * this.totalDuration) / 1000);
+        const totalSec = Math.floor(this.totalDuration / 1000);
+        document.getElementById('preview-time').textContent =
+            `${Math.floor(elapsedSec / 60)}:${String(elapsedSec % 60).padStart(2, '0')} / ${Math.floor(totalSec / 60)}:${String(totalSec % 60).padStart(2, '0')}`;
     }
 
     renderPreviewFrame(slide, fieldsForSlide, progress) {

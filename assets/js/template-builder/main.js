@@ -1297,8 +1297,41 @@ class TemplateBuilder {
     }
 
     preview() {
-        document.getElementById('preview-modal').classList.remove('hidden');
-        this.exporter.playPreview();
+        const modal = document.getElementById('preview-modal');
+        modal.classList.remove('hidden');
+
+        // Calculate total duration for display
+        const totalDuration = this.slides.reduce((sum, s) => sum + (s.duration_ms || 3000), 0);
+        this.exporter.totalDuration = totalDuration;
+
+        // Update initial time display
+        const totalSec = Math.floor(totalDuration / 1000);
+        document.getElementById('preview-time').textContent =
+            `0:00 / ${Math.floor(totalSec / 60)}:${String(totalSec % 60).padStart(2, '0')}`;
+
+        // Reset progress bar
+        document.getElementById('preview-progress-bar').style.width = '0%';
+
+        // Setup play button toggle
+        const playBtn = document.getElementById('btn-play-preview');
+        playBtn.onclick = () => this.exporter.togglePreview();
+
+        // Setup progress bar click to seek
+        const progressContainer = document.querySelector('.preview-progress');
+        if (progressContainer) {
+            progressContainer.onclick = (e) => {
+                const rect = progressContainer.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                const progress = clickX / rect.width;
+                this.exporter.seekPreview(Math.max(0, Math.min(1, progress)));
+            };
+            progressContainer.style.cursor = 'pointer';
+        }
+
+        // Render first frame
+        if (this.slides.length > 0) {
+            this.exporter.renderPreviewAtProgress(0);
+        }
     }
 }
 
