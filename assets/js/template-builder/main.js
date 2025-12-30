@@ -79,60 +79,60 @@ class TemplateBuilder {
 
     bindEvents() {
         // Save button
-        document.getElementById('btn-save').addEventListener('click', () => this.save());
+        document.getElementById('btn-save')?.addEventListener('click', () => this.save());
 
         // Preview button
-        document.getElementById('btn-preview').addEventListener('click', () => this.preview());
+        document.getElementById('btn-preview')?.addEventListener('click', () => this.preview());
 
         // Add slide button
-        document.getElementById('btn-add-slide').addEventListener('click', () => {
+        document.getElementById('btn-add-slide')?.addEventListener('click', () => {
             this.slideManager.addSlide();
         });
 
         // Upload background button
-        document.getElementById('btn-upload-bg').addEventListener('click', () => {
-            document.getElementById('slide-bg-image').click();
+        document.getElementById('btn-upload-bg')?.addEventListener('click', () => {
+            document.getElementById('slide-bg-image')?.click();
         });
 
-        document.getElementById('slide-bg-image').addEventListener('change', (e) => {
+        document.getElementById('slide-bg-image')?.addEventListener('change', (e) => {
             this.uploadBackground(e.target.files[0]);
         });
 
         // Slide settings
-        document.getElementById('slide-duration').addEventListener('change', (e) => {
+        document.getElementById('slide-duration')?.addEventListener('change', (e) => {
             this.updateCurrentSlide({ duration_ms: parseInt(e.target.value) });
         });
 
-        document.getElementById('slide-bg-color').addEventListener('input', (e) => {
+        document.getElementById('slide-bg-color')?.addEventListener('input', (e) => {
             this.updateCurrentSlide({ background_color: e.target.value });
         });
 
-        document.getElementById('slide-transition').addEventListener('change', (e) => {
+        document.getElementById('slide-transition')?.addEventListener('change', (e) => {
             this.updateCurrentSlide({ transition_type: e.target.value });
         });
 
         // Text properties
-        document.getElementById('text-sample').addEventListener('input', (e) => {
+        document.getElementById('text-sample')?.addEventListener('input', (e) => {
             this.textEditor.updateSelectedText({ sample_value: e.target.value });
         });
 
-        document.getElementById('text-font-size').addEventListener('change', (e) => {
+        document.getElementById('text-font-size')?.addEventListener('change', (e) => {
             this.textEditor.updateSelectedText({ font_size: parseInt(e.target.value) });
         });
 
-        document.getElementById('text-font-family').addEventListener('change', (e) => {
+        document.getElementById('text-font-family')?.addEventListener('change', (e) => {
             this.textEditor.updateSelectedText({ font_family: e.target.value });
         });
 
-        document.getElementById('text-color').addEventListener('input', (e) => {
+        document.getElementById('text-color')?.addEventListener('input', (e) => {
             this.textEditor.updateSelectedText({ font_color: e.target.value });
         });
 
-        document.getElementById('text-animation').addEventListener('change', (e) => {
+        document.getElementById('text-animation')?.addEventListener('change', (e) => {
             this.textEditor.updateSelectedText({ animation_type: e.target.value });
         });
 
-        document.getElementById('text-delay').addEventListener('change', (e) => {
+        document.getElementById('text-delay')?.addEventListener('change', (e) => {
             this.textEditor.updateSelectedText({ animation_delay_ms: parseInt(e.target.value) });
         });
 
