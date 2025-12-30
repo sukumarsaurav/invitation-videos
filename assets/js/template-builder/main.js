@@ -782,10 +782,14 @@ class TemplateBuilder {
 
         container.innerHTML = '';
 
-        // Get current slide's fields
-        const currentSlide = this.slides.find(s => s.id == this.currentSlideIndex) || this.slides[0];
-        const duration = currentSlide?.duration_ms || 3000;
-        const slideFields = currentSlide?.fields || [];
+        // Get current slide
+        const currentSlide = this.slides[this.currentSlideIndex];
+        if (!currentSlide) return;
+
+        const duration = currentSlide.duration_ms || 3000;
+
+        // Get fields assigned to this slide (from this.fields, not currentSlide.fields)
+        const slideFields = this.fields.filter(f => f.slide_id == currentSlide.id);
 
         slideFields.forEach(field => {
             const animStart = field.animation_start || 0;
@@ -809,16 +813,21 @@ class TemplateBuilder {
                 trackClass = '';
             }
 
+            // Get the display text (sample value or field label)
+            const displayText = field.sample_value || field.field_label || field.field_name || 'Element';
+            const shortText = displayText.length > 20 ? displayText.substring(0, 18) + '...' : displayText;
+
             track.innerHTML = `
                 <span class="track-label">
                     <span class="track-icon material-symbols-outlined">${icon}</span>
-                    ${field.field_name || field.name || 'Element'}
+                    ${field.field_name || 'Text'}
                 </span>
                 <div class="track-bar-container">
                     <div class="track-bar ${trackClass}" 
                          data-start="${animStart}" 
                          data-end="${animEnd}"
                          style="left: ${startPercent}%; width: ${widthPercent}%;">
+                        <span class="track-bar-text">${shortText}</span>
                         <div class="track-handle track-handle-left"></div>
                         <div class="track-handle track-handle-right"></div>
                     </div>

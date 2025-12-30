@@ -21,7 +21,7 @@ export class SlideManager {
         };
 
         this.builder.slides.push(newSlide);
-        this.renderThumbnail(newSlide, slideOrder);
+        this.renderAllThumbnails();
         this.builder.isDirty = true;
 
         // Select the new slide

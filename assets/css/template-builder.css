@@ -728,6 +728,19 @@
     background: linear-gradient(135deg, #a78bfa, #8b5cf6);
 }
 
+/* Text inside track bar */
+.track-bar-text {
+    font-size: 0.625rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: calc(100% - 16px);
+    padding: 0 4px;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+
 /* Resize Handles */
 .track-handle {
     position: absolute;
