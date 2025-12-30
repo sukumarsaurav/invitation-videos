@@ -647,15 +647,23 @@ $pageTitle = 'Template Builder: ' . $template['title'];
             <div id="preview-container" class="preview-container">
                 <canvas id="preview-canvas" width="1080" height="1920"></canvas>
             </div>
-            <div class="preview-controls">
-                <button type="button" id="btn-play-preview" class="btn btn-primary">
+            
+            <!-- Video Player Control Bar -->
+            <div class="video-player-controls">
+                <button type="button" id="btn-play-preview" class="player-btn" title="Play/Pause">
                     <span class="material-symbols-outlined">play_arrow</span>
-                    Play
                 </button>
-                <div class="preview-progress">
-                    <div id="preview-progress-bar" class="progress-bar"></div>
+                
+                <span id="preview-time-current" class="player-time">0:00</span>
+                
+                <div class="player-timeline" id="player-timeline">
+                    <div class="timeline-track">
+                        <div class="timeline-progress" id="timeline-progress"></div>
+                        <div class="timeline-playhead" id="timeline-playhead"></div>
+                    </div>
                 </div>
-                <span id="preview-time">0:00 / 0:00</span>
+                
+                <span id="preview-time-total" class="player-time">0:00</span>
             </div>
         </div>
     </div>

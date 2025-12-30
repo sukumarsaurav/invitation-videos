@@ -912,25 +912,107 @@
     gap: 1rem;
 }
 
-.preview-progress {
-    flex: 1;
-    height: 4px;
-    background: #334155;
-    border-radius: 2px;
-    overflow: hidden;
+/* Video Player Control Bar */
+.video-player-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    border-radius: 0 0 0.75rem 0.75rem;
+    border-top: 1px solid #334155;
 }
 
-.progress-bar {
-    height: 100%;
-    width: 0%;
+.player-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
     background: #7c3aed;
-    transition: width 0.1s linear;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
 }
 
-#preview-time {
-    font-size: 0.75rem;
+.player-btn:hover {
+    background: #6d28d9;
+    transform: scale(1.05);
+}
+
+.player-btn .material-symbols-outlined {
+    font-size: 1.5rem;
+}
+
+.player-time {
+    font-size: 0.8125rem;
     color: #94a3b8;
     font-variant-numeric: tabular-nums;
+    min-width: 40px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+/* Timeline Slider */
+.player-timeline {
+    flex: 1;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 0 4px;
+}
+
+.timeline-track {
+    position: relative;
+    width: 100%;
+    height: 6px;
+    background: #475569;
+    border-radius: 3px;
+    overflow: visible;
+}
+
+.timeline-progress {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #7c3aed, #a855f7);
+    border-radius: 3px 0 0 3px;
+    transition: width 0.05s linear;
+}
+
+.timeline-playhead {
+    position: absolute;
+    top: 50%;
+    left: 0%;
+    width: 14px;
+    height: 14px;
+    background: #ffffff;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    cursor: grab;
+    transition: transform 0.1s;
+}
+
+.timeline-playhead:hover {
+    transform: translate(-50%, -50%) scale(1.2);
+}
+
+.timeline-playhead:active {
+    cursor: grabbing;
+    transform: translate(-50%, -50%) scale(1.1);
+}
+
+.player-timeline:hover .timeline-track {
+    height: 8px;
+}
+
+.player-timeline:hover .timeline-playhead {
+    width: 16px;
+    height: 16px;
 }
 
 /* Utilities */

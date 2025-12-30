@@ -63,14 +63,19 @@ export class Exporter {
             // Render frame
             this.renderPreviewFrame(currentSlide, slideFields, slideProgress);
 
-            // Update progress bar
-            document.getElementById('preview-progress-bar').style.width = `${progress * 100}%`;
+            // Update timeline progress and playhead
+            const progressPercent = progress * 100;
+            const progressEl = document.getElementById('timeline-progress');
+            const playheadEl = document.getElementById('timeline-playhead');
+            if (progressEl) progressEl.style.width = `${progressPercent}%`;
+            if (playheadEl) playheadEl.style.left = `${progressPercent}%`;
 
             // Update time display
             const elapsedSec = Math.floor((elapsed % this.totalDuration) / 1000);
-            const totalSec = Math.floor(this.totalDuration / 1000);
-            document.getElementById('preview-time').textContent =
-                `${Math.floor(elapsedSec / 60)}:${String(elapsedSec % 60).padStart(2, '0')} / ${Math.floor(totalSec / 60)}:${String(totalSec % 60).padStart(2, '0')}`;
+            const currentTimeEl = document.getElementById('preview-time-current');
+            if (currentTimeEl) {
+                currentTimeEl.textContent = `${Math.floor(elapsedSec / 60)}:${String(elapsedSec % 60).padStart(2, '0')}`;
+            }
 
             this.animationFrame = requestAnimationFrame(animate);
         };
@@ -132,8 +137,12 @@ export class Exporter {
             this.renderPreviewAtProgress(progressPercent);
         }
 
-        // Update progress bar
-        document.getElementById('preview-progress-bar').style.width = `${progressPercent * 100}%`;
+        // Update timeline progress and playhead
+        const percent = progressPercent * 100;
+        const progressEl = document.getElementById('timeline-progress');
+        const playheadEl = document.getElementById('timeline-playhead');
+        if (progressEl) progressEl.style.width = `${percent}%`;
+        if (playheadEl) playheadEl.style.left = `${percent}%`;
     }
 
     renderPreviewAtProgress(progress) {
@@ -163,9 +172,10 @@ export class Exporter {
 
         // Update time display
         const elapsedSec = Math.floor((progress * this.totalDuration) / 1000);
-        const totalSec = Math.floor(this.totalDuration / 1000);
-        document.getElementById('preview-time').textContent =
-            `${Math.floor(elapsedSec / 60)}:${String(elapsedSec % 60).padStart(2, '0')} / ${Math.floor(totalSec / 60)}:${String(totalSec % 60).padStart(2, '0')}`;
+        const currentTimeEl = document.getElementById('preview-time-current');
+        if (currentTimeEl) {
+            currentTimeEl.textContent = `${Math.floor(elapsedSec / 60)}:${String(elapsedSec % 60).padStart(2, '0')}`;
+        }
     }
 
     renderPreviewFrame(slide, fieldsForSlide, progress) {
