@@ -533,7 +533,7 @@ class TemplateBuilder {
         this.fields.push(textField);
 
         // Render on canvas
-        this.textEditor.addTextOverlay(textField);
+        this.textEditor.renderTextElement(textField.id);
 
         // Mark as dirty
         this.isDirty = true;

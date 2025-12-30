@@ -504,10 +504,14 @@ $pageTitle = 'Template Builder: ' . $template['title'];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $pageTitle ?> - VideoInvites Admin</title>
-    <link rel="icon" type="image/png" href="/assets/images/favicon.png">
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-    <link rel="stylesheet" href="/assets/css/theme.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Great+Vibes&family=Inter:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/template-builder.css">
     <style>
         body {
             margin: 0;
@@ -516,6 +520,10 @@ $pageTitle = 'Template Builder: ' . $template['title'];
             font-family: 'Inter', system-ui, sans-serif;
             color: #1e293b;
             overflow: hidden;
+        }
+
+        .hidden {
+            display: none !important;
         }
     </style>
 </head>
