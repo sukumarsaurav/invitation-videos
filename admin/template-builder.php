@@ -81,6 +81,44 @@ $pageTitle = 'Template Builder: ' . $template['title'];
         </div>
     </div>
 
+    <!-- Floating Text Toolbar (shown when text is selected) -->
+    <div class="text-toolbar hidden" id="text-toolbar">
+        <select id="toolbar-font" class="toolbar-select">
+            <option value="Inter">Inter</option>
+            <option value="Montserrat">Montserrat</option>
+            <option value="Roboto">Roboto</option>
+            <option value="Playfair Display">Playfair Display</option>
+            <option value="Great Vibes">Great Vibes</option>
+            <option value="Bebas Neue">Bebas Neue</option>
+        </select>
+        <input type="number" id="toolbar-size" class="toolbar-input" value="24" min="8" max="200" title="Font Size">
+        <input type="color" id="toolbar-color" class="toolbar-color" value="#000000" title="Text Color">
+        <div class="toolbar-divider"></div>
+        <button type="button" class="toolbar-btn" data-action="bold" title="Bold">
+            <span class="material-symbols-outlined">format_bold</span>
+        </button>
+        <button type="button" class="toolbar-btn" data-action="italic" title="Italic">
+            <span class="material-symbols-outlined">format_italic</span>
+        </button>
+        <button type="button" class="toolbar-btn" data-action="underline" title="Underline">
+            <span class="material-symbols-outlined">format_underlined</span>
+        </button>
+        <div class="toolbar-divider"></div>
+        <button type="button" class="toolbar-btn" data-action="align-left" title="Align Left">
+            <span class="material-symbols-outlined">format_align_left</span>
+        </button>
+        <button type="button" class="toolbar-btn" data-action="align-center" title="Align Center">
+            <span class="material-symbols-outlined">format_align_center</span>
+        </button>
+        <button type="button" class="toolbar-btn" data-action="align-right" title="Align Right">
+            <span class="material-symbols-outlined">format_align_right</span>
+        </button>
+        <div class="toolbar-divider"></div>
+        <button type="button" class="toolbar-btn" id="toolbar-delete" title="Delete">
+            <span class="material-symbols-outlined">delete</span>
+        </button>
+    </div>
+
     <!-- Main Content -->
     <div class="builder-content">
         <!-- Icon Sidebar -->
@@ -92,6 +130,10 @@ $pageTitle = 'Template Builder: ' . $template['title'];
             <button class="icon-btn" data-panel="elements" title="Elements">
                 <span class="material-symbols-outlined">category</span>
                 <span class="icon-label">Elements</span>
+            </button>
+            <button class="icon-btn" data-panel="text" title="Text">
+                <span class="material-symbols-outlined">title</span>
+                <span class="icon-label">Text</span>
             </button>
             <button class="icon-btn" data-panel="uploads" title="Uploads">
                 <span class="material-symbols-outlined">cloud_upload</span>
@@ -271,6 +313,47 @@ $pageTitle = 'Template Builder: ' . $template['title'];
                         <button type="button" id="btn-delete-shape" class="btn btn-sm btn-danger">
                             <span class="material-symbols-outlined">delete</span>
                             Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Text Panel -->
+            <div class="panel-view" id="panel-text">
+                <div class="panel-header">
+                    <h3>Text</h3>
+                </div>
+                <div class="panel-body">
+                    <span class="toolbar-label">Add Text</span>
+                    <div class="text-presets">
+                        <button type="button" id="btn-add-heading" class="text-preset-btn">
+                            <span class="preset-preview heading">Add a heading</span>
+                        </button>
+                        <button type="button" id="btn-add-subheading" class="text-preset-btn">
+                            <span class="preset-preview subheading">Add a subheading</span>
+                        </button>
+                        <button type="button" id="btn-add-body" class="text-preset-btn">
+                            <span class="preset-preview body">Add body text</span>
+                        </button>
+                    </div>
+
+                    <span class="toolbar-label mt-3">Font Styles</span>
+                    <div class="font-styles-grid">
+                        <button type="button" class="font-style-btn" data-font="Inter">
+                            <span style="font-family: Inter">Aa</span>
+                            <span>Inter</span>
+                        </button>
+                        <button type="button" class="font-style-btn" data-font="Playfair Display">
+                            <span style="font-family: 'Playfair Display'">Aa</span>
+                            <span>Playfair</span>
+                        </button>
+                        <button type="button" class="font-style-btn" data-font="Great Vibes">
+                            <span style="font-family: 'Great Vibes'">Aa</span>
+                            <span>Great Vibes</span>
+                        </button>
+                        <button type="button" class="font-style-btn" data-font="Bebas Neue">
+                            <span style="font-family: 'Bebas Neue'">Aa</span>
+                            <span>Bebas</span>
                         </button>
                     </div>
                 </div>
