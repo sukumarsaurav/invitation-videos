@@ -6,7 +6,7 @@
 .template-builder {
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 60px);
+    height: 100vh;
     background: #0f172a;
 }
 

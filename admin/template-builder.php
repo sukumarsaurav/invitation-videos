@@ -416,7 +416,32 @@ $pageTitle = 'Template Builder: ' . $template['title'];
 </script>
 <script src="/assets/js/template-builder/main.js" type="module"></script>
 
-<?php
-$content = ob_get_clean();
-include __DIR__ . '/layouts/admin.php';
-?>
+<?php $content = ob_get_clean(); ?>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= $pageTitle ?> - VideoInvites Admin</title>
+    <link rel="icon" type="image/png" href="/assets/images/favicon.png">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="stylesheet" href="/assets/css/theme.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #0f172a;
+            font-family: 'Inter', system-ui, sans-serif;
+            color: #f1f5f9;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <?= $content ?>
+</body>
+
+</html>
