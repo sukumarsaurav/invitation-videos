@@ -98,6 +98,8 @@ export class TextEditor {
         element.style.fontFamily = field.font_family || 'Inter';
         element.style.fontSize = `${(field.font_size || 24) / 4}px`; // Scale down for preview
         element.style.fontWeight = field.font_weight || 400;
+        element.style.fontStyle = field.font_style || 'normal';
+        element.style.textDecoration = field.text_decoration || 'none';
         element.style.color = field.font_color || '#000000';
         element.style.textAlign = field.text_align || 'center';
 

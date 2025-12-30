@@ -145,6 +145,9 @@ class TemplateBuilder {
         // Text presets (Add Heading/Subheading/Body)
         this.setupTextPresets();
 
+        // Text toolbar (floating toolbar handlers)
+        this.setupTextToolbar();
+
         // Preset quick add button
         this.setupPresetQuickAdd();
 
@@ -542,10 +545,158 @@ class TemplateBuilder {
         this.showTextToolbar();
     }
 
+    setupTextToolbar() {
+        // Font family change
+        const fontSelect = document.getElementById('toolbar-font');
+        if (fontSelect) {
+            fontSelect.addEventListener('change', (e) => {
+                if (this.selectedElement) {
+                    const fieldId = this.selectedElement.dataset.fieldId;
+                    this.updateField(fieldId, { font_family: e.target.value });
+                    this.textEditor.renderTextElement(fieldId);
+                }
+            });
+        }
+
+        // Font size change
+        const sizeInput = document.getElementById('toolbar-size');
+        if (sizeInput) {
+            sizeInput.addEventListener('change', (e) => {
+                if (this.selectedElement) {
+                    const fieldId = this.selectedElement.dataset.fieldId;
+                    this.updateField(fieldId, { font_size: parseInt(e.target.value) });
+                    this.textEditor.renderTextElement(fieldId);
+                }
+            });
+        }
+
+        // Color change
+        const colorInput = document.getElementById('toolbar-color');
+        if (colorInput) {
+            colorInput.addEventListener('input', (e) => {
+                if (this.selectedElement) {
+                    const fieldId = this.selectedElement.dataset.fieldId;
+                    this.updateField(fieldId, { font_color: e.target.value });
+                    this.textEditor.renderTextElement(fieldId);
+                }
+            });
+        }
+
+        // Bold button
+        const boldBtn = document.querySelector('.toolbar-btn[data-action="bold"]');
+        if (boldBtn) {
+            boldBtn.addEventListener('click', () => {
+                if (this.selectedElement) {
+                    const fieldId = this.selectedElement.dataset.fieldId;
+                    const field = this.getFieldById(fieldId);
+                    const currentWeight = field?.font_weight || 400;
+                    const newWeight = currentWeight >= 700 ? 400 : 700;
+                    this.updateField(fieldId, { font_weight: newWeight });
+                    this.textEditor.renderTextElement(fieldId);
+                    boldBtn.classList.toggle('active', newWeight >= 700);
+                }
+            });
+        }
+
+        // Italic button
+        const italicBtn = document.querySelector('.toolbar-btn[data-action="italic"]');
+        if (italicBtn) {
+            italicBtn.addEventListener('click', () => {
+                if (this.selectedElement) {
+                    const fieldId = this.selectedElement.dataset.fieldId;
+                    const field = this.getFieldById(fieldId);
+                    const isItalic = field?.font_style === 'italic';
+                    this.updateField(fieldId, { font_style: isItalic ? 'normal' : 'italic' });
+                    this.textEditor.renderTextElement(fieldId);
+                    italicBtn.classList.toggle('active', !isItalic);
+                }
+            });
+        }
+
+        // Underline button
+        const underlineBtn = document.querySelector('.toolbar-btn[data-action="underline"]');
+        if (underlineBtn) {
+            underlineBtn.addEventListener('click', () => {
+                if (this.selectedElement) {
+                    const fieldId = this.selectedElement.dataset.fieldId;
+                    const field = this.getFieldById(fieldId);
+                    const isUnderline = field?.text_decoration === 'underline';
+                    this.updateField(fieldId, { text_decoration: isUnderline ? 'none' : 'underline' });
+                    this.textEditor.renderTextElement(fieldId);
+                    underlineBtn.classList.toggle('active', !isUnderline);
+                }
+            });
+        }
+
+        // Alignment buttons
+        ['left', 'center', 'right'].forEach(align => {
+            const btn = document.querySelector(`.toolbar-btn[data-action="align-${align}"]`);
+            if (btn) {
+                btn.addEventListener('click', () => {
+                    if (this.selectedElement) {
+                        const fieldId = this.selectedElement.dataset.fieldId;
+                        this.updateField(fieldId, { text_align: align });
+                        this.textEditor.renderTextElement(fieldId);
+                        // Update active state
+                        document.querySelectorAll('.toolbar-btn[data-action^="align-"]').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                    }
+                });
+            }
+        });
+
+        // Delete button
+        const deleteBtn = document.getElementById('toolbar-delete');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', () => {
+                if (this.selectedElement) {
+                    const fieldId = this.selectedElement.dataset.fieldId;
+                    this.textEditor.removeTextFromSlide(fieldId);
+                    this.selectedElement = null;
+                    this.hideTextToolbar();
+                }
+            });
+        }
+
+        // Click outside to deselect and hide toolbar
+        document.getElementById('canvas-container')?.addEventListener('click', (e) => {
+            if (e.target.id === 'canvas-container' || e.target.id === 'template-canvas') {
+                if (this.selectedElement) {
+                    this.selectedElement.classList.remove('selected');
+                    this.selectedElement = null;
+                    this.hideTextToolbar();
+                }
+            }
+        });
+    }
+
     showTextToolbar() {
         const toolbar = document.getElementById('text-toolbar');
         if (toolbar) {
             toolbar.classList.remove('hidden');
+
+            // Sync toolbar values with selected element
+            if (this.selectedElement) {
+                const fieldId = this.selectedElement.dataset.fieldId;
+                const field = this.getFieldById(fieldId);
+                if (field) {
+                    const fontSelect = document.getElementById('toolbar-font');
+                    const sizeInput = document.getElementById('toolbar-size');
+                    const colorInput = document.getElementById('toolbar-color');
+
+                    if (fontSelect) fontSelect.value = field.font_family || 'Inter';
+                    if (sizeInput) sizeInput.value = field.font_size || 24;
+                    if (colorInput) colorInput.value = field.font_color || '#000000';
+
+                    // Update button states
+                    document.querySelector('.toolbar-btn[data-action="bold"]')?.classList.toggle('active', field.font_weight >= 700);
+                    document.querySelector('.toolbar-btn[data-action="italic"]')?.classList.toggle('active', field.font_style === 'italic');
+                    document.querySelector('.toolbar-btn[data-action="underline"]')?.classList.toggle('active', field.text_decoration === 'underline');
+
+                    document.querySelectorAll('.toolbar-btn[data-action^="align-"]').forEach(b => b.classList.remove('active'));
+                    document.querySelector(`.toolbar-btn[data-action="align-${field.text_align || 'center'}"]`)?.classList.add('active');
+                }
+            }
         }
     }
 
