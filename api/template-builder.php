@@ -4,18 +4,25 @@
  * Handles saving/loading template designs with slides and field positions
  */
 
+require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../src/Core/Security.php';
 
 header('Content-Type: application/json');
 
-// Check if admin (simple check - should use proper auth)
-session_start();
+// Start session with correct name if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_name(SESSION_NAME);
+    session_start();
+}
+
+// Check if admin
 if (!isset($_SESSION['user_id']) || ($_SESSION['user_role'] ?? '') !== 'admin') {
     http_response_code(401);
     echo json_encode(['success' => false, 'error' => 'Unauthorized']);
     exit;
 }
+
 
 $method = $_SERVER['REQUEST_METHOD'];
 
