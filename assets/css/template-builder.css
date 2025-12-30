@@ -240,6 +240,12 @@
     pointer-events: none;
 }
 
+.canvas-overlays.drag-over {
+    background: rgba(124, 58, 237, 0.1);
+    outline: 2px dashed #7c3aed;
+    outline-offset: -2px;
+}
+
 .canvas-text-element {
     position: absolute;
     padding: 0.5rem;

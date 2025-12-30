@@ -183,19 +183,30 @@ class TemplateBuilder {
                 e.dataTransfer.setData('field-label', item.dataset.fieldLabel);
                 e.dataTransfer.setData('sample-value', item.dataset.sampleValue);
                 item.classList.add('dragging');
+                // Enable pointer-events on overlays during drag
+                canvasOverlays.style.pointerEvents = 'auto';
             });
 
             item.addEventListener('dragend', () => {
                 item.classList.remove('dragging');
+                // Reset pointer-events after drag ends
+                canvasOverlays.style.pointerEvents = '';
             });
         });
 
         canvasOverlays.addEventListener('dragover', (e) => {
             e.preventDefault();
+            canvasOverlays.classList.add('drag-over');
+        });
+
+        canvasOverlays.addEventListener('dragleave', () => {
+            canvasOverlays.classList.remove('drag-over');
         });
 
         canvasOverlays.addEventListener('drop', (e) => {
             e.preventDefault();
+            canvasOverlays.classList.remove('drag-over');
+
             const fieldId = e.dataTransfer.getData('field-id');
             const fieldName = e.dataTransfer.getData('field-name');
             const fieldLabel = e.dataTransfer.getData('field-label');
@@ -209,6 +220,9 @@ class TemplateBuilder {
                 this.shapeManager.deselectShape();
 
                 this.textEditor.addTextToSlide(fieldId, fieldName, fieldLabel, sampleValue, x, y);
+
+                // Refresh timeline to show the new element
+                this.refreshTimeline();
             }
         });
     }
