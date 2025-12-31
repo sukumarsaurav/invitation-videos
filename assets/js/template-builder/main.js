@@ -259,8 +259,11 @@ class TemplateBuilder {
             }
         }
 
-        // Update slide info
-        document.getElementById('current-slide-info').textContent = `Slide ${index + 1} of ${this.slides.length}`;
+        // Update slide info (if element exists)
+        const slideInfoEl = document.getElementById('current-slide-info');
+        if (slideInfoEl) {
+            slideInfoEl.textContent = `Slide ${index + 1} of ${this.slides.length}`;
+        }
 
         // Render canvas
         this.canvasEditor.renderSlide(slide);
@@ -1740,62 +1743,38 @@ class TemplateBuilder {
             return;
         }
 
-        // Get fields for this slide (check both slide_id and slideId for compatibility)
-        const slideFields = this.fields.filter(f =>
-            f.slide_id == currentSlide.id || f.slideId == currentSlide.id
-        );
+        let allElements = [];
 
-        // Get shapes for this slide (shapes use slideId camelCase)
-        const slideShapes = this.shapeManager?.shapes?.filter(s =>
-            s.slideId == currentSlide.id || s.slide_id == currentSlide.id
-        ) || [];
+        // Get elements directly from DOM - this is the source of truth for what's visible
+        const textElements = document.querySelectorAll('#canvas-overlays .canvas-text-element');
+        const shapeElements = document.querySelectorAll('#canvas-overlays .canvas-shape-element');
 
-        // Also detect DOM elements directly as fallback
-        const textElements = document.querySelectorAll('.canvas-text-element');
-        const shapeElements = document.querySelectorAll('.canvas-shape-element');
+        // Add text elements from DOM
+        textElements.forEach(el => {
+            const fieldId = el.dataset.fieldId;
+            const textContent = el.querySelector('.text-content');
+            const text = textContent ? textContent.textContent?.trim() : el.textContent?.trim();
 
-        // Build array from data sources
-        let allElements = [
-            ...slideFields.map(f => ({
+            allElements.push({
                 type: 'text',
-                id: f.id,
-                label: f.sample_value || f.field_label || 'Text',
-                zIndex: f.z_index || f.zIndex || 0
-            })),
-            ...slideShapes.map(s => ({
-                type: s.type || 'shape',
-                id: s.id,
-                label: s.type || 'Shape',
-                zIndex: s.z_index || s.zIndex || 0
-            }))
-        ];
-
-        // If no elements found from data, try to get from DOM
-        if (allElements.length === 0) {
-            // Get text elements from DOM
-            textElements.forEach(el => {
-                const fieldId = el.dataset.fieldId;
-                const text = el.textContent?.trim() || 'Text';
-                allElements.push({
-                    type: 'text',
-                    id: fieldId || 'dom_' + Date.now(),
-                    label: text.substring(0, 30) || 'Text',
-                    zIndex: parseInt(el.style.zIndex) || 0
-                });
+                id: fieldId || 'text_' + Date.now(),
+                label: text?.substring(0, 30) || 'Text Element',
+                zIndex: parseInt(el.style.zIndex) || 0
             });
+        });
 
-            // Get shape elements from DOM
-            shapeElements.forEach(el => {
-                const shapeId = el.dataset.shapeId;
-                const shapeType = el.dataset.shapeType || 'shape';
-                allElements.push({
-                    type: shapeType,
-                    id: shapeId || 'dom_shape_' + Date.now(),
-                    label: shapeType.charAt(0).toUpperCase() + shapeType.slice(1),
-                    zIndex: parseInt(el.style.zIndex) || 0
-                });
+        // Add shape elements from DOM
+        shapeElements.forEach(el => {
+            const shapeId = el.dataset.shapeId;
+            const shapeType = el.dataset.shapeType || 'shape';
+
+            allElements.push({
+                type: shapeType,
+                id: shapeId || 'shape_' + Date.now(),
+                label: shapeType.charAt(0).toUpperCase() + shapeType.slice(1),
+                zIndex: parseInt(el.style.zIndex) || 0
             });
-        }
+        });
 
         if (allElements.length === 0) {
             layersList.innerHTML = '<p class="hint-text">No elements on this slide</p>';
@@ -1812,6 +1791,25 @@ class TemplateBuilder {
                 <span class="layer-label">${el.label.substring(0, 25)}${el.label.length > 25 ? '...' : ''}</span>
             </div>
         `).join('');
+
+        // Add click handlers to layer items to select corresponding element on canvas
+        layersList.querySelectorAll('.layer-item-inline').forEach(item => {
+            item.addEventListener('click', () => {
+                const elementId = item.dataset.elementId;
+                const elementType = item.dataset.elementType;
+
+                let canvasElement;
+                if (elementType === 'text') {
+                    canvasElement = document.querySelector(`#canvas-overlays [data-field-id="${elementId}"]`);
+                } else {
+                    canvasElement = document.querySelector(`#canvas-overlays [data-shape-id="${elementId}"]`);
+                }
+
+                if (canvasElement) {
+                    this.selectElement(canvasElement);
+                }
+            });
+        });
     }
 
     // Populate layers list
