@@ -241,8 +241,8 @@ class TemplateBuilder {
         this.currentSlideIndex = index;
         const slide = this.slides[index];
 
-        // Update slide bars (horizontal layout)
-        document.querySelectorAll('.slide-bar').forEach((bar, i) => {
+        // Update slide bars (horizontal layout - supports both old and new class names)
+        document.querySelectorAll('.slide-bar, .slide-duration-bar').forEach((bar, i) => {
             bar.classList.toggle('active', i === index);
         });
 

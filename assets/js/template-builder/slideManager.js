@@ -5,7 +5,8 @@
 export class SlideManager {
     constructor(builder) {
         this.builder = builder;
-        this.slidesStrip = document.getElementById('slides-strip');
+        // Support both old and new container IDs
+        this.slidesStrip = document.getElementById('slide-bar-wrapper') || document.getElementById('slides-strip');
     }
 
     addSlide() {
@@ -77,7 +78,7 @@ export class SlideManager {
      */
     renderSlideBar(slide, index, totalDuration) {
         const bar = document.createElement('div');
-        bar.className = 'slide-bar';
+        bar.className = 'slide-duration-bar slide-bar'; // Both classes for compatibility
         bar.dataset.slideId = slide.id;
         bar.dataset.slideOrder = slide.slide_order;
         bar.dataset.duration = slide.duration_ms || 3000;
@@ -85,20 +86,11 @@ export class SlideManager {
         // Calculate width based on duration percentage
         const duration = slide.duration_ms || 3000;
         const widthPercent = (duration / totalDuration) * 100;
-        bar.style.width = `${widthPercent}%`;
-        bar.style.minWidth = '60px';
-
-        // Apply background based on type (priority: gradient > image > color)
-        if (slide.background_gradient) {
-            bar.style.background = slide.background_gradient;
-        } else if (slide.background_image) {
-            bar.style.background = `url(${slide.background_image}) center/cover no-repeat`;
-        } else {
-            bar.style.background = slide.background_color || '#ffffff';
-        }
+        bar.style.flex = '1';
+        bar.style.minWidth = '100px';
 
         bar.innerHTML = `
-            <span class="slide-label">${(duration / 1000).toFixed(1)}s</span>
+            <span class="slide-duration-label">${(duration / 1000).toFixed(1)}s</span>
         `;
 
         bar.addEventListener('click', () => {
@@ -144,18 +136,9 @@ export class SlideManager {
     }
 
     updateThumbnail(index, slide) {
-        const bars = this.slidesStrip.querySelectorAll('.slide-bar');
+        const bars = this.slidesStrip.querySelectorAll('.slide-duration-bar, .slide-bar');
         if (bars[index]) {
-            // Apply background based on type (priority: gradient > image > color)
-            if (slide.background_gradient) {
-                bars[index].style.background = slide.background_gradient;
-            } else if (slide.background_image) {
-                bars[index].style.background = `url(${slide.background_image}) center/cover no-repeat`;
-            } else {
-                bars[index].style.background = slide.background_color || '#ffffff';
-            }
-
-            const durationEl = bars[index].querySelector('.slide-label');
+            const durationEl = bars[index].querySelector('.slide-duration-label, .slide-label');
             if (durationEl) {
                 durationEl.textContent = `${(slide.duration_ms / 1000).toFixed(1)}s`;
             }
