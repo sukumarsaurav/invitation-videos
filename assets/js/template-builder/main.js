@@ -820,46 +820,105 @@ class TemplateBuilder {
 
         const duration = currentSlide.duration_ms || 3000;
 
-        // Get fields assigned to this slide (from this.fields, not currentSlide.fields)
-        const slideFields = this.fields.filter(f => f.slide_id == currentSlide.id);
+        // Collect all elements (text + shapes) like the Layers panel does
+        let allElements = [];
 
-        slideFields.forEach(field => {
-            const animStart = field.animation_start || 0;
-            const animEnd = field.animation_end || duration;
+        // Get text elements from DOM (matches Layers panel logic)
+        const textElements = document.querySelectorAll('#canvas-overlays .canvas-text-element');
+        textElements.forEach(el => {
+            const fieldId = el.dataset.fieldId;
+            const field = this.getFieldById(fieldId);
+            const textContent = el.querySelector('.text-content');
+            const text = textContent ? textContent.textContent?.trim() : el.textContent?.trim();
+
+            allElements.push({
+                type: 'text',
+                id: fieldId,
+                label: text || 'Text',
+                zIndex: parseInt(el.style.zIndex) || (field?.z_index || 0),
+                field: field,
+                animationStart: field?.animation_start || 0,
+                animationEnd: field?.animation_end || duration
+            });
+        });
+
+        // Get shape elements from DOM
+        const shapeElements = document.querySelectorAll('#canvas-overlays .canvas-shape-element');
+        shapeElements.forEach(el => {
+            const shapeId = el.dataset.shapeId;
+            const shapeType = el.dataset.shapeType || 'shape';
+            const shape = this.shapeManager.getShapeById(shapeId);
+
+            allElements.push({
+                type: shapeType,
+                id: shapeId,
+                label: shapeType.charAt(0).toUpperCase() + shapeType.slice(1),
+                zIndex: parseInt(el.style.zIndex) || (shape?.zIndex || 0),
+                shape: shape,
+                src: shape?.src || null,
+                fill: shape?.fill || '#7c3aed',
+                animationStart: shape?.animationDelay || 0,
+                animationEnd: shape?.animationDelay + (shape?.animationDuration || duration)
+            });
+        });
+
+        // Sort by z-index (highest first, same as Layers panel)
+        allElements.sort((a, b) => (b.zIndex || 0) - (a.zIndex || 0));
+
+        // Render element tracks
+        allElements.forEach(el => {
+            const animStart = el.animationStart || 0;
+            const animEnd = Math.min(el.animationEnd || duration, duration);
 
             const startPercent = (animStart / duration) * 100;
             const widthPercent = ((animEnd - animStart) / duration) * 100;
 
             const track = document.createElement('div');
             track.className = 'timeline-track';
-            track.dataset.fieldId = field.id;
+            track.dataset.elementId = el.id;
+            track.dataset.elementType = el.type;
 
-            // Determine icon based on field type
+            // Determine icon based on type
             let icon = 'title';
-            let trackClass = 'text-track';
-            if (field.field_type === 'image') {
-                icon = 'image';
-                trackClass = 'image-track';
-            } else if (field.field_type === 'shape') {
-                icon = 'shapes';
-                trackClass = '';
-            }
+            let trackBarStyle = '';
+            let trackClass = '';
+            let displayLabel = el.label.length > 15 ? el.label.substring(0, 13) + '...' : el.label;
 
-            // Get the display text (sample value or field label)
-            const displayText = field.sample_value || field.field_label || field.field_name || 'Element';
-            const shortText = displayText.length > 20 ? displayText.substring(0, 18) + '...' : displayText;
+            if (el.type === 'text') {
+                // Text elements: T icon with cyan bar and text content
+                icon = 'title';
+                trackClass = 'text-track';
+            } else if (el.type === 'image' && el.src) {
+                // Image elements: Show tiled thumbnail
+                icon = 'image';
+                trackClass = 'thumbnail-track';
+                trackBarStyle = `background-image: url(${el.src}); background-size: auto 100%; background-repeat: repeat-x; background-position: left center;`;
+                displayLabel = ''; // No text label on thumbnail tracks
+            } else if (el.type === 'rectangle' || el.type === 'ellipse' || el.type === 'shape') {
+                // Shape elements: Show solid color preview
+                icon = 'crop_square';
+                trackClass = 'shape-preview-track';
+                trackBarStyle = `background: ${el.fill};`;
+                displayLabel = '';
+            } else if (el.type === 'line') {
+                icon = 'horizontal_rule';
+                trackClass = 'shape-preview-track';
+                trackBarStyle = `background: ${el.fill || '#f59e0b'};`;
+                displayLabel = '';
+            }
 
             track.innerHTML = `
                 <span class="track-label">
-                    <span class="track-icon material-symbols-outlined">${icon}</span>
-                    ${field.field_name || 'Text'}
+                    <span class="track-icon-box">
+                        <span class="material-symbols-outlined">${icon}</span>
+                    </span>
                 </span>
                 <div class="track-bar-container">
                     <div class="track-bar ${trackClass}" 
                          data-start="${animStart}" 
                          data-end="${animEnd}"
-                         style="left: ${startPercent}%; width: ${widthPercent}%;">
-                        <span class="track-bar-text">${shortText}</span>
+                         style="left: ${startPercent}%; width: ${widthPercent}%; ${trackBarStyle}">
+                        ${displayLabel ? `<span class="track-bar-text">${displayLabel}</span>` : ''}
                         <div class="track-handle track-handle-left"></div>
                         <div class="track-handle track-handle-right"></div>
                     </div>
@@ -867,8 +926,40 @@ class TemplateBuilder {
             `;
 
             container.appendChild(track);
-            this.makeTrackDraggable(track, field, duration);
+
+            // Make track draggable (for text fields with field data)
+            if (el.type === 'text' && el.field) {
+                this.makeTrackDraggable(track, el.field, duration);
+            }
         });
+
+        // Add background track at the bottom
+        const bgTrack = document.createElement('div');
+        bgTrack.className = 'timeline-track bg-track';
+        bgTrack.dataset.elementType = 'background';
+
+        let bgStyle = 'background: #64748b;';
+        if (currentSlide.background_image) {
+            bgStyle = `background-image: url(${currentSlide.background_image}); background-size: auto 100%; background-repeat: repeat-x; background-position: left center;`;
+        } else if (currentSlide.background_gradient) {
+            bgStyle = `background: ${currentSlide.background_gradient};`;
+        } else if (currentSlide.background_color) {
+            bgStyle = `background: ${currentSlide.background_color};`;
+        }
+
+        bgTrack.innerHTML = `
+            <span class="track-label">
+                <span class="track-icon-box bg-icon">
+                    <span class="material-symbols-outlined">wallpaper</span>
+                </span>
+            </span>
+            <div class="track-bar-container">
+                <div class="track-bar background-track" style="left: 0%; width: 100%; ${bgStyle}">
+                </div>
+            </div>
+        `;
+
+        container.appendChild(bgTrack);
     }
 
     makeTrackDraggable(track, field, duration) {
@@ -1923,6 +2014,10 @@ class TemplateBuilder {
         });
 
         this.isDirty = true;
+
+        // Refresh timeline to reflect new layer order
+        this.refreshTimeline();
+
         this.showNotification('Layer order updated', 'success');
     }
 
