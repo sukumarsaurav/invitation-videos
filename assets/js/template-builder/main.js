@@ -1496,8 +1496,18 @@ class TemplateBuilder {
                     }
                 }
 
+                // Re-render the canvas with the new background
+                this.canvasEditor.renderSlide(currentSlide);
+
                 // Update the slide thumbnail
                 this.slideManager.updateThumbnail(slideIndex >= 0 ? slideIndex : 0, currentSlide);
+
+                // Update timeline tracks to show new background
+                this.refreshTimeline();
+
+                // Update color panel preview
+                this.updateColorPreview();
+
                 this.isDirty = true;
             });
         });
