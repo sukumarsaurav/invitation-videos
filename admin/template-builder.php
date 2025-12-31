@@ -551,28 +551,6 @@ $pageTitle = 'Template Builder: ' . $template['title'];
 
         <!-- Canvas Area with Slides -->
         <div class="builder-canvas-wrapper">
-            <!-- Zoom Controls - At top -->
-            <div class="canvas-controls">
-                <div class="zoom-controls">
-                    <button type="button" id="btn-zoom-out" class="zoom-btn" title="Zoom Out">
-                        <span class="material-symbols-outlined">remove</span>
-                    </button>
-                    <input type="range" id="zoom-slider" min="25" max="200" value="100" class="zoom-slider">
-                    <button type="button" id="btn-zoom-in" class="zoom-btn" title="Zoom In">
-                        <span class="material-symbols-outlined">add</span>
-                    </button>
-                    <button type="button" id="btn-zoom-fit" class="zoom-btn" title="Fit to Width">
-                        <span class="material-symbols-outlined">fit_screen</span>
-                    </button>
-                    <span id="canvas-zoom" class="zoom-percent">100%</span>
-                </div>
-                <div class="canvas-info">
-                    <span>1080 × 1920</span>
-                    <span class="separator">•</span>
-                    <span id="current-slide-info">Slide 1</span>
-                </div>
-            </div>
-
             <div class="canvas-container" id="canvas-container">
                 <canvas id="template-canvas" width="1080" height="1920"></canvas>
                 <div id="canvas-overlays" class="canvas-overlays">
