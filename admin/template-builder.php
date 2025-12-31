@@ -551,14 +551,7 @@ $pageTitle = 'Template Builder: ' . $template['title'];
 
         <!-- Canvas Area with Slides -->
         <div class="builder-canvas-wrapper">
-            <div class="canvas-container" id="canvas-container">
-                <canvas id="template-canvas" width="1080" height="1920"></canvas>
-                <div id="canvas-overlays" class="canvas-overlays">
-                    <!-- Text elements will be rendered here -->
-                </div>
-            </div>
-
-            <!-- Zoom Controls -->
+            <!-- Zoom Controls - At top -->
             <div class="canvas-controls">
                 <div class="zoom-controls">
                     <button type="button" id="btn-zoom-out" class="zoom-btn" title="Zoom Out">
@@ -568,7 +561,7 @@ $pageTitle = 'Template Builder: ' . $template['title'];
                     <button type="button" id="btn-zoom-in" class="zoom-btn" title="Zoom In">
                         <span class="material-symbols-outlined">add</span>
                     </button>
-                    <button type="button" id="btn-zoom-fit" class="zoom-btn" title="Fit to Screen">
+                    <button type="button" id="btn-zoom-fit" class="zoom-btn" title="Fit to Width">
                         <span class="material-symbols-outlined">fit_screen</span>
                     </button>
                     <span id="canvas-zoom" class="zoom-percent">100%</span>
@@ -577,6 +570,13 @@ $pageTitle = 'Template Builder: ' . $template['title'];
                     <span>1080 × 1920</span>
                     <span class="separator">•</span>
                     <span id="current-slide-info">Slide 1</span>
+                </div>
+            </div>
+
+            <div class="canvas-container" id="canvas-container">
+                <canvas id="template-canvas" width="1080" height="1920"></canvas>
+                <div id="canvas-overlays" class="canvas-overlays">
+                    <!-- Text elements will be rendered here -->
                 </div>
             </div>
         </div>
@@ -609,10 +609,8 @@ $pageTitle = 'Template Builder: ' . $template['title'];
             <div id="slides-strip" class="slides-strip-horizontal">
                 <?php if (!empty($slides)): ?>
                     <?php foreach ($slides as $index => $slide): ?>
-                        <div class="slide-bar <?= $index === 0 ? 'active' : '' ?>" 
-                            data-slide-id="<?= $slide['id'] ?>"
-                            data-slide-order="<?= $slide['slide_order'] ?>"
-                            data-duration="<?= $slide['duration_ms'] ?>"
+                        <div class="slide-bar <?= $index === 0 ? 'active' : '' ?>" data-slide-id="<?= $slide['id'] ?>"
+                            data-slide-order="<?= $slide['slide_order'] ?>" data-duration="<?= $slide['duration_ms'] ?>"
                             style="background: <?= Security::escape($slide['background_gradient'] ?: ($slide['background_image'] ? 'url(' . $slide['background_image'] . ') center/cover' : ($slide['background_color'] ?: '#ffffff'))) ?>;">
                             <span class="slide-label"><?= $slide['duration_ms'] / 1000 ?>s</span>
                         </div>
@@ -647,22 +645,22 @@ $pageTitle = 'Template Builder: ' . $template['title'];
             <div id="preview-container" class="preview-container">
                 <canvas id="preview-canvas" width="1080" height="1920"></canvas>
             </div>
-            
+
             <!-- Video Player Control Bar -->
             <div class="video-player-controls">
                 <button type="button" id="btn-play-preview" class="player-btn" title="Play/Pause">
                     <span class="material-symbols-outlined">play_arrow</span>
                 </button>
-                
+
                 <span id="preview-time-current" class="player-time">0:00</span>
-                
+
                 <div class="player-timeline" id="player-timeline">
                     <div class="timeline-track">
                         <div class="timeline-progress" id="timeline-progress"></div>
                         <div class="timeline-playhead" id="timeline-playhead"></div>
                     </div>
                 </div>
-                
+
                 <span id="preview-time-total" class="player-time">0:00</span>
             </div>
         </div>

@@ -306,22 +306,23 @@
     cursor: se-resize;
 }
 
-/* Canvas Controls - Floating at top */
+/* Canvas Controls - Sticky at top */
 .canvas-controls {
-    position: absolute;
-    top: 1rem;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 100;
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     gap: 1rem;
-    padding: 0.5rem 1rem;
-    background: rgba(255, 255, 255, 0.95);
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    background: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(8px);
-    border-radius: 0.5rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    border-radius: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .zoom-controls {
