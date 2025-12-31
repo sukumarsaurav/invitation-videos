@@ -67,10 +67,17 @@ $pageTitle = $hasSelectedTemplate ? 'Template Builder: ' . $template['title'] : 
     <!-- Header -->
     <div class="builder-header">
         <div class="header-left">
-            <a href="/admin/templates.php?action=edit&id=<?= $templateId ?>" class="btn-icon" title="Back">
-                <span class="material-symbols-outlined">arrow_back</span>
-            </a>
-            <h1 class="header-title"><?= Security::escape($template['title']) ?></h1>
+            <?php if ($hasSelectedTemplate): ?>
+                <a href="/admin/templates.php?action=edit&id=<?= $templateId ?>" class="btn-icon" title="Back to Template">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </a>
+                <h1 class="header-title"><?= Security::escape($template['title']) ?></h1>
+            <?php else: ?>
+                <a href="/admin/dashboard.php" class="btn-icon" title="Back to Dashboard">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </a>
+                <h1 class="header-title">Template Builder</h1>
+            <?php endif; ?>
         </div>
         <div class="header-right">
             <button type="button" id="btn-preview" class="btn btn-secondary">
@@ -202,7 +209,8 @@ $pageTitle = $hasSelectedTemplate ? 'Template Builder: ' . $template['title'] : 
                                 <div style="padding: 0.5rem;">
                                     <p
                                         style="font-size: 0.75rem; font-weight: 600; color: var(--text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                        <?= Security::escape($tpl['title']) ?></p>
+                                        <?= Security::escape($tpl['title']) ?>
+                                    </p>
                                     <div
                                         style="display: flex; align-items: center; justify-content: space-between; margin-top: 0.25rem;">
                                         <span

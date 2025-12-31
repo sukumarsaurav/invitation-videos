@@ -273,12 +273,6 @@ function getYouTubeEmbedUrl($url) {
                     <td class="px-6 py-4"><?= number_format($tpl['purchase_count']) ?></td>
                     <td class="px-6 py-4 text-right">
                         <div class="flex items-center justify-end gap-2">
-                            <a href="/admin/template-builder.php?id=<?= $tpl['id'] ?>" 
-                               class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-sm font-medium transition-colors"
-                               title="Design Template">
-                                <span class="material-symbols-outlined text-base">design_services</span>
-                                Design
-                            </a>
                             <a href="/admin/templates.php?action=edit&id=<?= $tpl['id'] ?>" 
                                class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-500 hover:text-primary transition-colors">
                                 <span class="material-symbols-outlined text-lg">edit</span>
