@@ -206,7 +206,7 @@
     align-items: center;
     justify-content: center;
     padding: 2rem 2rem;
-    padding-bottom: 340px;
+    padding-bottom: 420px;
     /* Space for fixed timeline */
     background: #e2e8f0;
     position: relative;
@@ -571,7 +571,7 @@
     z-index: 50;
     display: flex;
     flex-direction: column;
-    max-height: 320px;
+    max-height: 400px;
 }
 
 /* Timeline Ruler Row (at TOP) */
