@@ -204,8 +204,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    padding: 0 2rem;
+    justify-content: center;
+    padding: 2rem 2rem;
     padding-bottom: 220px;
     /* Space for fixed timeline */
     background: #e2e8f0;
