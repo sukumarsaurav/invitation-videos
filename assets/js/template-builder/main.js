@@ -1821,6 +1821,109 @@ class TemplateBuilder {
                 }
             });
         });
+
+        // Setup drag-and-drop for layer reordering
+        this.setupLayerDragDrop();
+    }
+
+    // Setup drag-and-drop for layer items
+    setupLayerDragDrop() {
+        const layersList = document.getElementById('panel-layers-list');
+        if (!layersList) return;
+
+        const items = layersList.querySelectorAll('.layer-item-inline');
+        let draggedItem = null;
+
+        items.forEach(item => {
+            // Make draggable
+            item.setAttribute('draggable', 'true');
+
+            item.addEventListener('dragstart', (e) => {
+                draggedItem = item;
+                item.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', item.dataset.elementId);
+            });
+
+            item.addEventListener('dragend', () => {
+                item.classList.remove('dragging');
+                draggedItem = null;
+                // Remove all drag-over classes
+                items.forEach(i => i.classList.remove('drag-over'));
+            });
+
+            item.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+
+                if (item !== draggedItem) {
+                    item.classList.add('drag-over');
+                }
+            });
+
+            item.addEventListener('dragleave', () => {
+                item.classList.remove('drag-over');
+            });
+
+            item.addEventListener('drop', (e) => {
+                e.preventDefault();
+                item.classList.remove('drag-over');
+
+                if (draggedItem && item !== draggedItem) {
+                    // Determine if we're dropping before or after
+                    const rect = item.getBoundingClientRect();
+                    const midY = rect.top + rect.height / 2;
+                    const insertBefore = e.clientY < midY;
+
+                    if (insertBefore) {
+                        layersList.insertBefore(draggedItem, item);
+                    } else {
+                        layersList.insertBefore(draggedItem, item.nextSibling);
+                    }
+
+                    // Update z-index on canvas based on new order
+                    this.updateCanvasZIndex();
+                }
+            });
+        });
+    }
+
+    // Update canvas element z-index based on layer panel order
+    updateCanvasZIndex() {
+        const items = document.querySelectorAll('#panel-layers-list .layer-item-inline');
+        const totalItems = items.length;
+
+        items.forEach((item, index) => {
+            // Higher in list = higher z-index (reversed because top of list = front)
+            const zIndex = totalItems - index;
+            const elementId = item.dataset.elementId;
+            const elementType = item.dataset.elementType;
+
+            // Update the actual canvas element
+            let canvasElement;
+            if (elementType === 'text') {
+                canvasElement = document.querySelector(`#canvas-overlays [data-field-id="${elementId}"]`);
+                // Also update the field data
+                const field = this.getFieldById(elementId);
+                if (field) {
+                    field.z_index = zIndex;
+                }
+            } else {
+                canvasElement = document.querySelector(`#canvas-overlays [data-shape-id="${elementId}"]`);
+                // Also update shape data
+                const shape = this.shapeManager.getShapeById(elementId);
+                if (shape) {
+                    shape.zIndex = zIndex;
+                }
+            }
+
+            if (canvasElement) {
+                canvasElement.style.zIndex = zIndex;
+            }
+        });
+
+        this.isDirty = true;
+        this.showNotification('Layer order updated', 'success');
     }
 
     // Populate layers list

@@ -2541,3 +2541,24 @@
     font-size: 1.125rem;
     color: #64748b;
 }
+
+/* Layer Drag-and-Drop States */
+.layer-item-inline.dragging {
+    opacity: 0.5;
+    background: #e2e8f0;
+    border-style: dashed;
+}
+
+.layer-item-inline.drag-over {
+    border-color: #7c3aed;
+    background: #f5f3ff;
+    box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2);
+}
+
+.layer-item-inline .layer-drag-handle {
+    cursor: grab;
+}
+
+.layer-item-inline.dragging .layer-drag-handle {
+    cursor: grabbing;
+}
