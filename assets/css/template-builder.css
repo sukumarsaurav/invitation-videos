@@ -978,14 +978,23 @@
 .track-bar.background-track {
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 4px;
+    transition: opacity 0.2s, box-shadow 0.2s;
+}
+
+.track-bar.background-track:not(.active-segment) {
+    opacity: 0.6;
+}
+
+.track-bar.background-track.active-segment {
+    box-shadow: 0 0 0 2px #7c3aed;
 }
 
 .timeline-track.bg-track {
-    opacity: 0.9;
+    opacity: 1;
 }
 
 .timeline-track.bg-track .track-bar {
-    cursor: default;
+    cursor: pointer;
 }
 
 /* Text inside track bar */

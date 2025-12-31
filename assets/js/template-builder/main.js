@@ -943,19 +943,45 @@ class TemplateBuilder {
             }
         });
 
-        // Add background track at the bottom
+        // Add background track at the bottom - showing ALL slides' backgrounds
         const bgTrack = document.createElement('div');
         bgTrack.className = 'timeline-track bg-track';
         bgTrack.dataset.elementType = 'background';
 
-        let bgStyle = 'background: #64748b;';
-        if (currentSlide.background_image) {
-            bgStyle = `background-image: url(${currentSlide.background_image}); background-size: auto 100%; background-repeat: repeat-x; background-position: left center;`;
-        } else if (currentSlide.background_gradient) {
-            bgStyle = `background: ${currentSlide.background_gradient};`;
-        } else if (currentSlide.background_color) {
-            bgStyle = `background: ${currentSlide.background_color};`;
-        }
+        // Calculate total duration across all slides
+        const totalDuration = this.slides.reduce((sum, s) => sum + (s.duration_ms || 3000), 0);
+
+        // Build background segments for each slide
+        let bgSegmentsHTML = '';
+        let accumulatedTime = 0;
+
+        this.slides.forEach((slide, index) => {
+            const slideDuration = slide.duration_ms || 3000;
+            const startPercent = (accumulatedTime / totalDuration) * 100;
+            const widthPercent = (slideDuration / totalDuration) * 100;
+
+            let bgStyle = 'background: #64748b;';
+            if (slide.background_image) {
+                bgStyle = `background-image: url(${slide.background_image}); background-size: auto 100%; background-repeat: repeat-x; background-position: left center;`;
+            } else if (slide.background_gradient) {
+                bgStyle = `background: ${slide.background_gradient};`;
+            } else if (slide.background_color) {
+                bgStyle = `background: ${slide.background_color};`;
+            }
+
+            // Highlight current slide's segment
+            const isActive = index === this.currentSlideIndex;
+            const activeClass = isActive ? 'active-segment' : '';
+
+            bgSegmentsHTML += `
+                <div class="track-bar background-track ${activeClass}" 
+                     data-slide-index="${index}"
+                     style="left: ${startPercent}%; width: ${widthPercent}%; ${bgStyle}">
+                </div>
+            `;
+
+            accumulatedTime += slideDuration;
+        });
 
         bgTrack.innerHTML = `
             <span class="track-label">
@@ -964,12 +990,21 @@ class TemplateBuilder {
                 </span>
             </span>
             <div class="track-bar-container">
-                <div class="track-bar background-track" style="left: 0%; width: 100%; ${bgStyle}">
-                </div>
+                ${bgSegmentsHTML}
             </div>
         `;
 
         container.appendChild(bgTrack);
+
+        // Add click handler to switch slides when clicking on background segments
+        bgTrack.querySelectorAll('.track-bar.background-track').forEach((segment) => {
+            segment.addEventListener('click', () => {
+                const slideIndex = parseInt(segment.dataset.slideIndex);
+                if (!isNaN(slideIndex) && slideIndex !== this.currentSlideIndex) {
+                    this.selectSlide(slideIndex);
+                }
+            });
+        });
     }
 
     makeTrackDraggable(track, field, duration) {
