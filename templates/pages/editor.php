@@ -176,6 +176,150 @@ $pageTitle = 'Edit: ' . Security::escape($template['title']);
     </div>
 </div>
 
+<!-- Download Modal -->
+<div id="download-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeDownloadModal()"></div>
+    <div class="absolute inset-4 flex items-center justify-center">
+        <div class="bg-slate-800 rounded-2xl max-w-md w-full shadow-2xl border border-slate-700">
+            <!-- Modal Header -->
+            <div class="p-4 border-b border-slate-700 flex items-center justify-between">
+                <h3 class="font-bold text-lg text-white flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">download</span>
+                    Export Video
+                </h3>
+                <button onclick="closeDownloadModal()" class="text-slate-400 hover:text-white transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-5 space-y-5">
+                <!-- Resolution Selection -->
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-3">Resolution</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" onclick="selectResolution('480p')"
+                            class="resolution-btn px-4 py-3 rounded-lg border border-slate-600 text-slate-300 hover:border-primary hover:text-white transition-colors"
+                            data-resolution="480p">
+                            <div class="font-bold">480p</div>
+                            <div class="text-xs text-slate-500">480 × 854</div>
+                        </button>
+                        <button type="button" onclick="selectResolution('720p')"
+                            class="resolution-btn px-4 py-3 rounded-lg border border-slate-600 text-slate-300 hover:border-primary hover:text-white transition-colors"
+                            data-resolution="720p">
+                            <div class="font-bold">720p</div>
+                            <div class="text-xs text-slate-500">720 × 1280</div>
+                        </button>
+                        <button type="button" onclick="selectResolution('1080p')"
+                            class="resolution-btn px-4 py-3 rounded-lg border-2 border-primary bg-primary/10 text-white"
+                            data-resolution="1080p">
+                            <div class="font-bold">1080p</div>
+                            <div class="text-xs text-slate-400">1080 × 1920</div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Format Selection -->
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-3">Format</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" onclick="selectFormat('mp4')"
+                            class="format-btn px-4 py-3 rounded-lg border-2 border-primary bg-primary/10 text-white"
+                            data-format="mp4">
+                            <div class="font-bold flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined text-sm">videocam</span>
+                                MP4
+                            </div>
+                            <div class="text-xs text-slate-400">Best compatibility</div>
+                        </button>
+                        <button type="button" onclick="selectFormat('webm')"
+                            class="format-btn px-4 py-3 rounded-lg border border-slate-600 text-slate-300 hover:border-primary hover:text-white transition-colors"
+                            data-format="webm">
+                            <div class="font-bold flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined text-sm">videocam</span>
+                                WebM
+                            </div>
+                            <div class="text-xs text-slate-500">Smaller size</div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Export Progress (hidden by default) -->
+                <div id="export-progress" class="hidden">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm text-slate-400">Generating video...</span>
+                        <span id="export-percent" class="text-sm font-bold text-primary">0%</span>
+                    </div>
+                    <div class="h-2 bg-slate-700 rounded-full overflow-hidden">
+                        <div id="export-bar" class="h-full bg-primary rounded-full transition-all" style="width: 0%;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-4 border-t border-slate-700">
+                <button type="button" id="btn-start-export" onclick="startExport()"
+                    class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg transition-colors">
+                    <span class="material-symbols-outlined">download</span>
+                    Start Export
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Download modal state
+    let selectedResolution = '1080p';
+    let selectedFormat = 'mp4';
+
+    function openDownloadModal() {
+        document.getElementById('download-modal').classList.remove('hidden');
+    }
+
+    function closeDownloadModal() {
+        document.getElementById('download-modal').classList.add('hidden');
+        document.getElementById('export-progress').classList.add('hidden');
+        document.getElementById('btn-start-export').disabled = false;
+        document.getElementById('btn-start-export').innerHTML = '<span class="material-symbols-outlined">download</span> Start Export';
+    }
+
+    function selectResolution(res) {
+        selectedResolution = res;
+        document.querySelectorAll('.resolution-btn').forEach(btn => {
+            if (btn.dataset.resolution === res) {
+                btn.className = 'resolution-btn px-4 py-3 rounded-lg border-2 border-primary bg-primary/10 text-white';
+            } else {
+                btn.className = 'resolution-btn px-4 py-3 rounded-lg border border-slate-600 text-slate-300 hover:border-primary hover:text-white transition-colors';
+            }
+        });
+    }
+
+    function selectFormat(fmt) {
+        selectedFormat = fmt;
+        document.querySelectorAll('.format-btn').forEach(btn => {
+            if (btn.dataset.format === fmt) {
+                btn.className = 'format-btn px-4 py-3 rounded-lg border-2 border-primary bg-primary/10 text-white';
+            } else {
+                btn.className = 'format-btn px-4 py-3 rounded-lg border border-slate-600 text-slate-300 hover:border-primary hover:text-white transition-colors';
+            }
+        });
+    }
+
+    function startExport() {
+        if (window.editor) {
+            window.editor.downloadWithOptions(selectedResolution, selectedFormat);
+        }
+    }
+
+    function updateExportProgress(percent) {
+        document.getElementById('export-progress').classList.remove('hidden');
+        document.getElementById('export-percent').textContent = percent + '%';
+        document.getElementById('export-bar').style.width = percent + '%';
+    }
+</script>
+
 <!-- Pass data to JavaScript -->
 <script>
     window.EDITOR_DATA = {

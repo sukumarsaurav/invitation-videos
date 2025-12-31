@@ -83,9 +83,21 @@ class TemplateEditor {
             this.play();
         });
 
-        // Download button
-        document.getElementById('btn-download')?.addEventListener('click', () => this.download());
-        document.getElementById('btn-download-mobile')?.addEventListener('click', () => this.download());
+        // Download button - opens modal
+        document.getElementById('btn-download')?.addEventListener('click', () => {
+            if (typeof openDownloadModal === 'function') {
+                openDownloadModal();
+            } else {
+                this.download();
+            }
+        });
+        document.getElementById('btn-download-mobile')?.addEventListener('click', () => {
+            if (typeof openDownloadModal === 'function') {
+                openDownloadModal();
+            } else {
+                this.download();
+            }
+        });
     }
 
     setupProgressBar() {
@@ -463,6 +475,127 @@ class TemplateEditor {
         }
     }
 
+    async downloadWithOptions(resolution = '1080p', format = 'mp4') {
+        // Resolution settings
+        const resolutions = {
+            '480p': { width: 480, height: 854 },
+            '720p': { width: 720, height: 1280 },
+            '1080p': { width: 1080, height: 1920 }
+        };
+
+        const { width, height } = resolutions[resolution] || resolutions['1080p'];
+
+        // Bitrate based on resolution
+        const bitrates = {
+            '480p': 2500000,   // 2.5 Mbps
+            '720p': 5000000,   // 5 Mbps
+            '1080p': 8000000   // 8 Mbps
+        };
+        const bitrate = bitrates[resolution] || bitrates['1080p'];
+
+        // Disable export button
+        const exportBtn = document.getElementById('btn-start-export');
+        if (exportBtn) {
+            exportBtn.disabled = true;
+            exportBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span> Exporting...';
+        }
+
+        try {
+            // Create export canvas at selected resolution
+            const exportCanvas = document.createElement('canvas');
+            exportCanvas.width = width;
+            exportCanvas.height = height;
+            const exportCtx = exportCanvas.getContext('2d');
+
+            // Get MIME type based on format
+            const mimeType = this.getSupportedMimeTypeForFormat(format);
+
+            // Setup MediaRecorder
+            const stream = exportCanvas.captureStream(30); // 30 FPS
+            const mediaRecorder = new MediaRecorder(stream, {
+                mimeType: mimeType,
+                videoBitsPerSecond: bitrate
+            });
+
+            const chunks = [];
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) {
+                    chunks.push(e.data);
+                }
+            };
+
+            // Promise to wait for recording to finish
+            const recordingComplete = new Promise((resolve) => {
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(chunks, { type: mimeType });
+                    resolve(blob);
+                };
+            });
+
+            // Start recording
+            mediaRecorder.start();
+
+            // Pre-load all background images
+            await this.preloadAllImages();
+
+            // Render each frame
+            const fps = 30;
+            const frameDuration = 1000 / fps;
+            const totalFrames = Math.ceil(this.totalDuration / frameDuration);
+
+            for (let frame = 0; frame < totalFrames; frame++) {
+                const progress = frame / totalFrames;
+
+                // Render frame to export canvas
+                this.renderFrameToCanvas(exportCtx, width, height, progress);
+
+                // Update progress in modal
+                const percent = Math.floor(progress * 100);
+                if (typeof updateExportProgress === 'function') {
+                    updateExportProgress(percent);
+                }
+
+                // Small delay to allow MediaRecorder to capture the frame
+                await new Promise(r => setTimeout(r, frameDuration / 2));
+            }
+
+            // Stop recording
+            mediaRecorder.stop();
+
+            // Wait for blob
+            const blob = await recordingComplete;
+
+            // Determine file extension
+            const extension = mimeType.includes('mp4') ? 'mp4' : 'webm';
+
+            // Download the video
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${this.template.title || 'invitation'}_${resolution}_${Date.now()}.${extension}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            // Close modal and show success
+            if (typeof closeDownloadModal === 'function') {
+                closeDownloadModal();
+            }
+            this.showNotification(`Video exported successfully! (${resolution} ${extension.toUpperCase()})`, 'success');
+
+        } catch (error) {
+            console.error('Export error:', error);
+            this.showNotification('Failed to export video: ' + error.message, 'error');
+        } finally {
+            // Restore export button
+            if (exportBtn) {
+                exportBtn.disabled = false;
+                exportBtn.innerHTML = '<span class="material-symbols-outlined">download</span> Start Export';
+            }
+        }
+    }
+
     getSupportedMimeType() {
         const types = [
             'video/webm;codecs=vp9',
@@ -471,6 +604,37 @@ class TemplateEditor {
             'video/mp4'
         ];
         for (const type of types) {
+            if (MediaRecorder.isTypeSupported(type)) {
+                return type;
+            }
+        }
+        return 'video/webm';
+    }
+
+    getSupportedMimeTypeForFormat(format) {
+        if (format === 'mp4') {
+            // Check if MP4 is supported (Safari, etc.)
+            const mp4Types = [
+                'video/mp4;codecs=avc1',
+                'video/mp4;codecs=h264',
+                'video/mp4'
+            ];
+            for (const type of mp4Types) {
+                if (MediaRecorder.isTypeSupported(type)) {
+                    return type;
+                }
+            }
+            // Fall back to WebM if MP4 not supported
+            console.log('MP4 not supported, falling back to WebM');
+        }
+
+        // WebM types
+        const webmTypes = [
+            'video/webm;codecs=vp9',
+            'video/webm;codecs=vp8',
+            'video/webm'
+        ];
+        for (const type of webmTypes) {
             if (MediaRecorder.isTypeSupported(type)) {
                 return type;
             }
