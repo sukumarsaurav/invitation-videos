@@ -1060,22 +1060,22 @@ class TemplateBuilder {
             const scaledHeight = canvasBaseHeight * (this.zoom / 100);
             const zoomFactor = this.zoom / 100;
 
-            // Calculate how much the scaled canvas extends beyond the wrapper
+            // Top margin (toolbar + padding) and bottom margin (above timeline)
+            const topMargin = 80; // Space for toolbar + gap
+            const bottomMargin = 180; // Space for timeline + gap
+            const availableHeight = wrapperRect.height - topMargin - bottomMargin;
+
+            // Calculate how much the scaled canvas extends beyond the available area
             const excessWidth = Math.max(0, scaledWidth - wrapperRect.width);
-            const excessHeight = Math.max(0, scaledHeight - (wrapperRect.height - 180)); // 180 for timeline
+            const excessHeight = Math.max(0, scaledHeight - availableHeight);
 
             // Max pan is half the excess (since canvas is centered)
             const maxPanX = excessWidth / 2 / zoomFactor;
             const maxPanY = excessHeight / 2 / zoomFactor;
 
-            // For vertical: allow slight upward pan but limit downward
-            // We want canvas top to stay below the toolbar (~60px from top)
-            const minPanY = -maxPanY;
-            const maxPanYDown = Math.max(0, maxPanY - 30); // 30px margin at bottom
-
-            // Clamp pan values
+            // Clamp pan values equally
             this.panX = Math.max(-maxPanX, Math.min(maxPanX, this.panX));
-            this.panY = Math.max(minPanY, Math.min(maxPanYDown, this.panY));
+            this.panY = Math.max(-maxPanY, Math.min(maxPanY, this.panY));
         };
 
         // Apply transform to canvas
