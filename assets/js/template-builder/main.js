@@ -1046,8 +1046,40 @@ class TemplateBuilder {
         const btnZoomIn = document.getElementById('btn-zoom-in');
         const btnZoomOut = document.getElementById('btn-zoom-out');
         const btnZoomFit = document.getElementById('btn-zoom-fit');
+        const canvasToolbar = document.getElementById('canvas-toolbar');
 
         if (!canvasContainer) return;
+
+        // Canvas selection logic
+        let canvasSelected = false;
+
+        const selectCanvas = () => {
+            canvasSelected = true;
+            canvasContainer.classList.add('selected');
+            if (canvasToolbar) canvasToolbar.classList.remove('hidden');
+        };
+
+        const deselectCanvas = () => {
+            canvasSelected = false;
+            canvasContainer.classList.remove('selected');
+            if (canvasToolbar) canvasToolbar.classList.add('hidden');
+        };
+
+        // Click on canvas to select
+        canvasContainer.addEventListener('click', (e) => {
+            // Only select if click is directly on canvas/overlays (not on elements)
+            if (e.target === canvasContainer || e.target.id === 'template-canvas' || e.target.id === 'canvas-overlays') {
+                selectCanvas();
+                e.stopPropagation();
+            }
+        });
+
+        // Click outside canvas to deselect
+        document.addEventListener('click', (e) => {
+            if (canvasSelected && !canvasContainer.contains(e.target) && !canvasToolbar?.contains(e.target)) {
+                deselectCanvas();
+            }
+        });
 
         // Canvas dimensions
         const canvasBaseWidth = 270;

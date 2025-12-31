@@ -516,6 +516,35 @@ $pageTitle = 'Template Builder: ' . $template['title'];
 
         <!-- Canvas Area with Slides -->
         <div class="builder-canvas-wrapper">
+            <!-- Canvas Toolbar (shows when canvas is selected) -->
+            <div class="canvas-toolbar hidden" id="canvas-toolbar">
+                <button type="button" class="toolbar-btn" id="btn-reset-canvas" title="Reset">
+                    <span class="material-symbols-outlined">restart_alt</span>
+                </button>
+                <span class="toolbar-divider"></span>
+                <button type="button" class="toolbar-btn" id="btn-delete-slide" title="Delete Slide">
+                    <span class="material-symbols-outlined">delete</span>
+                </button>
+                <button type="button" class="toolbar-btn" id="btn-duplicate-slide" title="Duplicate Slide">
+                    <span class="material-symbols-outlined">content_copy</span>
+                </button>
+                <span class="toolbar-divider"></span>
+                <button type="button" class="toolbar-btn premium-feature" id="btn-magic-bg"
+                    title="Magic Background (AI)">
+                    Magic BG <span class="material-symbols-outlined premium-icon">crown</span>
+                </button>
+                <span class="toolbar-divider"></span>
+                <input type="color" id="canvas-bg-color" class="toolbar-color-picker" value="#ffffff"
+                    title="Background Color">
+                <span class="toolbar-divider"></span>
+                <button type="button" class="toolbar-btn" id="btn-position" title="Position">
+                    Position
+                </button>
+                <button type="button" class="toolbar-btn" id="btn-more-options" title="More Options">
+                    <span class="material-symbols-outlined">more_vert</span>
+                </button>
+            </div>
+
             <div class="canvas-container" id="canvas-container">
                 <canvas id="template-canvas" width="1080" height="1920"></canvas>
                 <div id="canvas-overlays" class="canvas-overlays">
