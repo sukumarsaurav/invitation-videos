@@ -73,6 +73,11 @@ class TemplateBuilder {
 
                 // Ensure panel is open
                 contentPanel.classList.add('open');
+
+                // Populate layers when switching to position/layers panel
+                if (panelId === 'position') {
+                    this.populateLayersPanel();
+                }
             });
         });
     }
@@ -273,6 +278,9 @@ class TemplateBuilder {
 
         // Render shapes for this slide
         this.shapeManager.renderShapesForSlide(slide.id);
+
+        // Populate layers panel for the new slide
+        this.populateLayersPanel();
 
         // Clear selection
         this.deselectElement();
@@ -599,6 +607,9 @@ class TemplateBuilder {
 
         // Refresh timeline to show new element
         this.refreshTimeline();
+
+        // Update layers panel
+        this.populateLayersPanel();
     }
 
     setupTextToolbar() {
