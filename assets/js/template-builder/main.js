@@ -1049,10 +1049,35 @@ class TemplateBuilder {
 
         if (!canvasContainer) return;
 
-        const updateZoom = (newZoom) => {
-            this.zoom = Math.max(25, Math.min(200, newZoom));
+        // Canvas dimensions
+        const canvasBaseWidth = 270;
+        const canvasBaseHeight = 480;
+
+        // Apply pan boundaries to prevent empty space
+        const clampPan = () => {
+            const wrapperRect = canvasWrapper.getBoundingClientRect();
+            const scaledWidth = canvasBaseWidth * (this.zoom / 100);
+            const scaledHeight = canvasBaseHeight * (this.zoom / 100);
+
+            // Calculate max pan values
+            const maxPanX = Math.max(0, (scaledWidth - wrapperRect.width) / 2 / (this.zoom / 100));
+            const maxPanY = Math.max(0, (scaledHeight - wrapperRect.height + 180) / 2 / (this.zoom / 100)); // 180 for timeline
+
+            // Clamp pan values
+            this.panX = Math.max(-maxPanX, Math.min(maxPanX, this.panX));
+            this.panY = Math.max(-maxPanY, Math.min(maxPanY, this.panY));
+        };
+
+        // Apply transform to canvas
+        const applyTransform = () => {
+            clampPan();
             canvasContainer.style.transform = `scale(${this.zoom / 100}) translate(${this.panX}px, ${this.panY}px)`;
-            if (zoomSlider) zoomSlider.value = this.zoom;
+        };
+
+        const updateZoom = (newZoom) => {
+            this.zoom = Math.max(25, Math.min(500, newZoom)); // Increased to 500%
+            applyTransform();
+            if (zoomSlider) zoomSlider.value = Math.min(200, this.zoom); // Slider max is 200
             if (zoomDisplay) zoomDisplay.textContent = Math.round(this.zoom) + '%';
         };
 
@@ -1069,16 +1094,14 @@ class TemplateBuilder {
             zoomSlider.addEventListener('input', (e) => updateZoom(parseInt(e.target.value)));
         }
 
-        // Fit to Screen
+        // Fit to Width - fill container width
         if (btnZoomFit) {
             btnZoomFit.addEventListener('click', () => {
                 this.panX = 0;
                 this.panY = 0;
-                // Calculate zoom to fit
+                // Calculate zoom to fit width
                 const wrapperRect = canvasWrapper.getBoundingClientRect();
-                const canvasHeight = 480; // Default canvas display height
-                const availableHeight = wrapperRect.height - 260; // Account for controls and timeline
-                const fitZoom = Math.min(100, (availableHeight / canvasHeight) * 100);
+                const fitZoom = (wrapperRect.width / canvasBaseWidth) * 100;
                 updateZoom(Math.round(fitZoom));
             });
         }
@@ -1110,7 +1133,7 @@ class TemplateBuilder {
             if (!isPanning) return;
             this.panX = e.clientX - startX;
             this.panY = e.clientY - startY;
-            canvasContainer.style.transform = `scale(${this.zoom / 100}) translate(${this.panX}px, ${this.panY}px)`;
+            applyTransform(); // Apply with bounds checking
         });
 
         document.addEventListener('mouseup', () => {
@@ -1198,7 +1221,7 @@ class TemplateBuilder {
                 // Pan while pinching
                 this.panX += (currentCenter.x - lastTouchCenter.x) / (this.zoom / 100);
                 this.panY += (currentCenter.y - lastTouchCenter.y) / (this.zoom / 100);
-                canvasContainer.style.transform = `scale(${this.zoom / 100}) translate(${this.panX}px, ${this.panY}px)`;
+                applyTransform();
 
                 lastTouchDistance = currentDistance;
                 lastTouchCenter = currentCenter;
@@ -1207,7 +1230,7 @@ class TemplateBuilder {
                 e.preventDefault();
                 this.panX = e.touches[0].clientX - startX;
                 this.panY = e.touches[0].clientY - startY;
-                canvasContainer.style.transform = `scale(${this.zoom / 100}) translate(${this.panX}px, ${this.panY}px)`;
+                applyTransform();
             }
         }, { passive: false });
 
@@ -1236,7 +1259,7 @@ class TemplateBuilder {
                     // Normal scroll = vertical pan
                     this.panY -= e.deltaY / 2;
                 }
-                canvasContainer.style.transform = `scale(${this.zoom / 100}) translate(${this.panX}px, ${this.panY}px)`;
+                applyTransform();
             }
         }, { passive: false });
     }
