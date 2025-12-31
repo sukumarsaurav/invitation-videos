@@ -1638,9 +1638,81 @@ class TemplateBuilder {
         if (progressEl) progressEl.style.width = '0%';
         if (playheadEl) playheadEl.style.left = '0%';
 
-        // Setup play button toggle
-        const playBtn = document.getElementById('btn-play-preview');
-        playBtn.onclick = () => this.exporter.togglePreview();
+        // Get overlay control elements
+        const playOverlay = document.getElementById('btn-play-overlay');
+        const controlsOverlay = document.getElementById('preview-controls-overlay');
+        const previewPlayer = document.getElementById('preview-player');
+        const previewContainer = document.getElementById('preview-container');
+
+        // Auto-hide timer
+        let hideTimer = null;
+        const HIDE_DELAY = 2500; // 2.5 seconds
+
+        const showControls = () => {
+            if (playOverlay) playOverlay.classList.remove('auto-hidden');
+            if (controlsOverlay) controlsOverlay.classList.remove('auto-hidden');
+        };
+
+        const hideControls = () => {
+            if (this.exporter.isPlaying) {
+                if (playOverlay) playOverlay.classList.add('auto-hidden');
+                if (controlsOverlay) controlsOverlay.classList.add('auto-hidden');
+            }
+        };
+
+        const startHideTimer = () => {
+            clearTimeout(hideTimer);
+            if (this.exporter.isPlaying) {
+                hideTimer = setTimeout(hideControls, HIDE_DELAY);
+            }
+        };
+
+        // Show controls and reset timer on mouse move
+        if (previewPlayer) {
+            previewPlayer.onmousemove = () => {
+                showControls();
+                startHideTimer();
+            };
+
+            previewPlayer.onmouseleave = () => {
+                if (this.exporter.isPlaying) {
+                    hideControls();
+                }
+            };
+        }
+
+        // Click on video container to toggle play/pause
+        if (previewContainer) {
+            previewContainer.onclick = (e) => {
+                // Only toggle if clicking directly on the container or canvas
+                if (e.target === previewContainer || e.target.tagName === 'CANVAS') {
+                    this.exporter.togglePreview();
+                    updatePlayState();
+                }
+            };
+        }
+
+        // Update play button state
+        const updatePlayState = () => {
+            if (playOverlay) {
+                if (this.exporter.isPlaying) {
+                    playOverlay.classList.add('playing');
+                    startHideTimer();
+                } else {
+                    playOverlay.classList.remove('playing');
+                    showControls(); // Always show controls when paused
+                }
+            }
+        };
+
+        // Setup play overlay button toggle
+        if (playOverlay) {
+            playOverlay.onclick = (e) => {
+                e.stopPropagation(); // Prevent triggering container click
+                this.exporter.togglePreview();
+                updatePlayState();
+            };
+        }
 
         // Setup timeline click and drag to seek
         const timeline = document.getElementById('player-timeline');
@@ -1658,6 +1730,7 @@ class TemplateBuilder {
             timeline.addEventListener('mousedown', (e) => {
                 isDragging = true;
                 seekToPosition(e);
+                showControls();
             });
 
             // Drag to seek
@@ -1668,9 +1741,16 @@ class TemplateBuilder {
             });
 
             document.addEventListener('mouseup', () => {
-                isDragging = false;
+                if (isDragging) {
+                    isDragging = false;
+                    startHideTimer();
+                }
             });
         }
+
+        // Reset state when opening
+        showControls();
+        if (playOverlay) playOverlay.classList.remove('playing');
 
         // Render first frame
         if (this.slides.length > 0) {

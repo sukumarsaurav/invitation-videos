@@ -818,33 +818,36 @@ $pageTitle = $hasSelectedTemplate ? 'Template Builder: ' . $template['title'] : 
 <div id="preview-modal" class="modal hidden">
     <div class="modal-backdrop" onclick="closePreviewModal()"></div>
     <div class="modal-content preview-modal-content">
-        <div class="modal-header">
-            <h3>Template Preview</h3>
-            <button type="button" onclick="closePreviewModal()" class="btn-icon">
+        <div class="preview-player" id="preview-player">
+            <!-- Close Button (top-right overlay) -->
+            <button type="button" class="preview-close-btn" onclick="closePreviewModal()" title="Close">
                 <span class="material-symbols-outlined">close</span>
             </button>
-        </div>
-        <div class="modal-body">
+
+            <!-- Canvas -->
             <div id="preview-container" class="preview-container">
                 <canvas id="preview-canvas" width="1080" height="1920"></canvas>
             </div>
 
-            <!-- Video Player Control Bar -->
-            <div class="video-player-controls">
-                <button type="button" id="btn-play-preview" class="player-btn" title="Play/Pause">
-                    <span class="material-symbols-outlined">play_arrow</span>
-                </button>
+            <!-- Center Play/Pause Button (overlay) -->
+            <button type="button" id="btn-play-overlay" class="preview-play-overlay" title="Play/Pause">
+                <span class="material-symbols-outlined play-icon">play_arrow</span>
+                <span class="material-symbols-outlined pause-icon hidden">pause</span>
+            </button>
 
-                <span id="preview-time-current" class="player-time">0:00</span>
-
-                <div class="player-timeline" id="player-timeline">
-                    <div class="timeline-track">
-                        <div class="timeline-progress" id="timeline-progress"></div>
-                        <div class="timeline-playhead" id="timeline-playhead"></div>
+            <!-- Bottom Controls (overlay) -->
+            <div class="preview-controls-overlay" id="preview-controls-overlay">
+                <div class="preview-time-display">
+                    <span id="preview-time-current" class="preview-time">0:00</span>
+                    <span class="preview-time-separator">/</span>
+                    <span id="preview-time-total" class="preview-time">0:00</span>
+                </div>
+                <div class="preview-timeline" id="player-timeline">
+                    <div class="preview-timeline-track">
+                        <div class="preview-timeline-progress" id="timeline-progress"></div>
+                        <div class="preview-timeline-playhead" id="timeline-playhead"></div>
                     </div>
                 </div>
-
-                <span id="preview-time-total" class="player-time">0:00</span>
             </div>
         </div>
     </div>
