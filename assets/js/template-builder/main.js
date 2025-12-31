@@ -1130,18 +1130,53 @@ class TemplateBuilder {
     }
 
     /**
-     * Update canvas preview based on playhead position
-     * Shows/hides elements based on their animation start/end times
-     * @param {number} percent - Playhead position as percentage (0-100)
+     * Update canvas preview based on playhead position (timeline scrubbing)
+     * Switches between slides and shows/hides elements based on animation timing
+     * @param {number} percent - Playhead position as percentage (0-100) of TOTAL timeline
      */
     updateCanvasAtTime(percent) {
-        const currentSlide = this.slides[this.currentSlideIndex];
+        // Calculate total duration across ALL slides
+        const totalDuration = this.slides.reduce((sum, s) => sum + (s.duration_ms || 3000), 0);
+
+        // Convert percentage to time in milliseconds
+        const globalTimeMs = (percent / 100) * totalDuration;
+
+        // Find which slide this time falls into
+        let accumulatedTime = 0;
+        let targetSlideIndex = 0;
+        let localTimeMs = 0;
+
+        for (let i = 0; i < this.slides.length; i++) {
+            const slideDuration = this.slides[i].duration_ms || 3000;
+            const slideEndTime = accumulatedTime + slideDuration;
+
+            if (globalTimeMs >= accumulatedTime && globalTimeMs < slideEndTime) {
+                targetSlideIndex = i;
+                localTimeMs = globalTimeMs - accumulatedTime;
+                break;
+            }
+            accumulatedTime = slideEndTime;
+
+            // Handle edge case: if we're at/past the end, stay on last slide
+            if (i === this.slides.length - 1) {
+                targetSlideIndex = i;
+                localTimeMs = slideDuration;
+            }
+        }
+
+        // If we need to switch slides, do so
+        if (targetSlideIndex !== this.currentSlideIndex) {
+            // Switch slide - this updates canvas, text elements, shapes, etc.
+            this.selectSlideForScrubbing(targetSlideIndex);
+        }
+
+        // Update element visibility based on local time within the slide
+        const currentSlide = this.slides[targetSlideIndex];
         if (!currentSlide) return;
 
-        const duration = currentSlide.duration_ms || 3000;
-        const currentTimeMs = (percent / 100) * duration;
+        const slideDuration = currentSlide.duration_ms || 3000;
 
-        // Get all text elements on canvas
+        // Get all text elements on canvas and update visibility
         const textElements = document.querySelectorAll('.canvas-text-element');
         textElements.forEach(element => {
             const fieldId = element.dataset.fieldId;
@@ -1149,10 +1184,10 @@ class TemplateBuilder {
             if (!field) return;
 
             const animStart = field.animation_start || 0;
-            const animEnd = field.animation_end || duration;
+            const animEnd = field.animation_end || slideDuration;
 
             // Show element if current time is within its animation range
-            if (currentTimeMs >= animStart && currentTimeMs <= animEnd) {
+            if (localTimeMs >= animStart && localTimeMs <= animEnd) {
                 element.style.opacity = '1';
                 element.style.visibility = 'visible';
             } else {
@@ -1161,23 +1196,68 @@ class TemplateBuilder {
             }
         });
 
-        // Get all shape elements on canvas
+        // Get all shape elements on canvas and update visibility
         const shapeElements = document.querySelectorAll('.canvas-shape-element');
         shapeElements.forEach(element => {
             const shapeId = element.dataset.shapeId;
-            const shape = this.shapeManager.getShapeById(shapeId);
+            const shape = this.shapeManager?.getShapeById(shapeId);
             if (!shape) return;
 
             const animStart = shape.animation_start || 0;
-            const animEnd = shape.animation_end || duration;
+            const animEnd = shape.animation_end || slideDuration;
 
-            if (currentTimeMs >= animStart && currentTimeMs <= animEnd) {
+            if (localTimeMs >= animStart && localTimeMs <= animEnd) {
                 element.style.opacity = shape.opacity || '1';
                 element.style.visibility = 'visible';
             } else {
                 element.style.opacity = '0.3';
                 element.style.visibility = 'visible';
             }
+        });
+    }
+
+    /**
+     * Switch to a slide during scrubbing (without some of the full selectSlide overhead)
+     */
+    selectSlideForScrubbing(index) {
+        if (index < 0 || index >= this.slides.length) return;
+        if (index === this.currentSlideIndex) return;
+
+        this.currentSlideIndex = index;
+        const slide = this.slides[index];
+
+        // Update slide bars highlight
+        document.querySelectorAll('.slide-bar, .slide-duration-bar').forEach((bar, i) => {
+            bar.classList.toggle('active', i === index);
+        });
+
+        // Update canvas background based on slide
+        const canvasContainer = document.getElementById('canvas-container');
+        if (canvasContainer) {
+            if (slide.background_gradient) {
+                canvasContainer.style.background = slide.background_gradient;
+            } else if (slide.background_image) {
+                canvasContainer.style.background = `url(${slide.background_image}) center/cover no-repeat`;
+            } else {
+                canvasContainer.style.background = slide.background_color || '#ffffff';
+            }
+        }
+
+        // Update canvas toolbar color picker
+        const canvasBgColor = document.getElementById('canvas-bg-color');
+        if (canvasBgColor) {
+            canvasBgColor.value = slide.background_color || '#ffffff';
+        }
+
+        // Render canvas elements
+        this.canvasEditor.renderSlide(slide);
+        this.textEditor.renderTextsForSlide(slide.id);
+        this.shapeManager.renderShapesForSlide(slide.id);
+
+        // Update background track highlighting
+        const bgTracks = document.querySelectorAll('.track-bar.background-track');
+        bgTracks.forEach((track, i) => {
+            track.classList.toggle('active-segment', i === index);
         });
     }
 
