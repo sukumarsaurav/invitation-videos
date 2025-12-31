@@ -1053,29 +1053,43 @@ class TemplateBuilder {
         const canvasBaseWidth = 270;
         const canvasBaseHeight = 480;
 
-        // Apply pan boundaries to prevent empty space
+        // Apply pan boundaries to prevent empty space - equal gaps at top and bottom
         const clampPan = () => {
             const wrapperRect = canvasWrapper.getBoundingClientRect();
             const scaledWidth = canvasBaseWidth * (this.zoom / 100);
             const scaledHeight = canvasBaseHeight * (this.zoom / 100);
             const zoomFactor = this.zoom / 100;
 
-            // Equal margins at top and bottom (gap from header and timeline)
-            const margin = 32; // Same gap at top and bottom
-            const timelineHeight = 160; // Height of fixed timeline at bottom
-            const availableHeight = wrapperRect.height - timelineHeight - (margin * 2);
+            // Gap to maintain at edges
+            const gapMargin = 32;
+            const timelineReserve = 160; // Fixed timeline at bottom
 
-            // Calculate how much the scaled canvas extends beyond the available area
-            const excessWidth = Math.max(0, scaledWidth - wrapperRect.width + (margin * 2));
-            const excessHeight = Math.max(0, scaledHeight - availableHeight);
+            // The canvas is centered in the wrapper initially
+            // Calculate how far it can pan while maintaining the gap
 
-            // Max pan is half the excess (since canvas is centered)
-            const maxPanX = excessWidth / 2 / zoomFactor;
-            const maxPanY = excessHeight / 2 / zoomFactor;
+            // Horizontal: canvas can pan until edge + gap touches container edge
+            const containerWidth = wrapperRect.width;
+            if (scaledWidth > containerWidth) {
+                // Canvas is wider than container - can pan
+                const maxPanX = ((scaledWidth - containerWidth) / 2 + gapMargin) / zoomFactor;
+                this.panX = Math.max(-maxPanX, Math.min(maxPanX, this.panX));
+            } else {
+                // Canvas fits - center it (no pan)
+                this.panX = 0;
+            }
 
-            // Clamp pan values equally
-            this.panX = Math.max(-maxPanX, Math.min(maxPanX, this.panX));
-            this.panY = Math.max(-maxPanY, Math.min(maxPanY, this.panY));
+            // Vertical: account for timeline and maintain equal gaps
+            const visibleHeight = wrapperRect.height - timelineReserve;
+            if (scaledHeight > visibleHeight) {
+                // Canvas is taller than visible area - can pan
+                // Max pan up: until top edge has gap from header
+                // Max pan down: until bottom edge has gap from timeline
+                const maxPanY = ((scaledHeight - visibleHeight) / 2 + gapMargin) / zoomFactor;
+                this.panY = Math.max(-maxPanY, Math.min(maxPanY, this.panY));
+            } else {
+                // Canvas fits - center it (no pan)
+                this.panY = 0;
+            }
         };
 
         // Apply transform to canvas
