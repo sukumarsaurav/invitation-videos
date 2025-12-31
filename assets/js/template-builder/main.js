@@ -2328,3 +2328,84 @@ window.closePreviewModal = function () {
     document.getElementById('preview-modal').classList.add('hidden');
     window.templateBuilder.exporter.stopPreview();
 };
+
+// Create Template Modal Functions
+window.openCreateTemplateModal = function () {
+    const modal = document.getElementById('create-template-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        // Focus on name input
+        const nameInput = document.getElementById('new-template-name');
+        if (nameInput) {
+            nameInput.focus();
+        }
+    }
+};
+
+window.closeCreateTemplateModal = function () {
+    const modal = document.getElementById('create-template-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        // Reset form
+        const form = document.getElementById('create-template-form');
+        if (form) form.reset();
+    }
+};
+
+// Handle New Template button click
+document.addEventListener('DOMContentLoaded', () => {
+    const btnNewTemplate = document.getElementById('btn-new-template');
+    if (btnNewTemplate) {
+        btnNewTemplate.addEventListener('click', () => {
+            openCreateTemplateModal();
+        });
+    }
+
+    // Handle form submission
+    const createForm = document.getElementById('create-template-form');
+    if (createForm) {
+        createForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('new-template-name').value.trim();
+            const description = document.getElementById('new-template-description').value.trim();
+            const category = document.getElementById('new-template-category').value;
+
+            if (!name) {
+                alert('Please enter a template name');
+                return;
+            }
+
+            const submitBtn = document.getElementById('btn-create-template-submit');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size: 1.125rem;">hourglass_empty</span> Creating...';
+
+            try {
+                const response = await fetch('/api/create-template.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, description, category })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Redirect to the new template
+                    window.location.href = data.redirect_url;
+                } else {
+                    alert('Error: ' + (data.error || 'Failed to create template'));
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+            } catch (error) {
+                console.error('Error creating template:', error);
+                alert('Error creating template. Please try again.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        });
+    }
+});

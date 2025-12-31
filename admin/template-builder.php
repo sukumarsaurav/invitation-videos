@@ -189,6 +189,13 @@ $pageTitle = $hasSelectedTemplate ? 'Template Builder: ' . $template['title'] : 
 
                     <div class="template-grid"
                         style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
+                        <!-- New Template Card -->
+                        <button type="button" id="btn-new-template" class="new-template-card"
+                            style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; border-radius: 0.5rem; overflow: hidden; border: 2px dashed var(--border-color); background: transparent; transition: all 0.2s; cursor: pointer; aspect-ratio: 9/16; color: #64748b;">
+                            <span class="material-symbols-outlined"
+                                style="font-size: 2.5rem; margin-bottom: 0.5rem;">add</span>
+                            <span style="font-size: 0.75rem; font-weight: 600;">New Template</span>
+                        </button>
                         <?php foreach ($allTemplates as $tpl): ?>
                             <a href="/admin/template-builder.php?id=<?= $tpl['id'] ?>"
                                 class="template-card <?= $tpl['id'] == $templateId ? 'selected' : '' ?>"
@@ -813,6 +820,55 @@ $pageTitle = $hasSelectedTemplate ? 'Template Builder: ' . $template['title'] : 
 
 
 <!-- Removed separate right-side Color Panel and Layers Panel - they are now in left sidebar -->
+
+<!-- Create New Template Modal -->
+<div id="create-template-modal" class="modal hidden">
+    <div class="modal-backdrop" onclick="closeCreateTemplateModal()"></div>
+    <div class="modal-content" style="width: 400px; max-width: 90vw;">
+        <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid #334155;">
+            <h3 style="font-size: 1.125rem; font-weight: 600; color: #f1f5f9;">Create New Template</h3>
+            <button type="button" onclick="closeCreateTemplateModal()" class="btn-icon">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <form id="create-template-form">
+            <div class="modal-body" style="padding: 1.5rem;">
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; font-size: 0.875rem; font-weight: 600; color: #cbd5e1; margin-bottom: 0.5rem;">Template Name *</label>
+                    <input type="text" id="new-template-name" name="name" required
+                        style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #334155; background: #0f172a; color: #f1f5f9; font-size: 0.875rem;"
+                        placeholder="e.g., Wedding Classic">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; font-size: 0.875rem; font-weight: 600; color: #cbd5e1; margin-bottom: 0.5rem;">Description</label>
+                    <textarea id="new-template-description" name="description" rows="3"
+                        style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #334155; background: #0f172a; color: #f1f5f9; font-size: 0.875rem; resize: vertical;"
+                        placeholder="Brief description of the template..."></textarea>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; font-size: 0.875rem; font-weight: 600; color: #cbd5e1; margin-bottom: 0.5rem;">Category</label>
+                    <select id="new-template-category" name="category"
+                        style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #334155; background: #0f172a; color: #f1f5f9; font-size: 0.875rem;">
+                        <option value="wedding">Wedding</option>
+                        <option value="birthday">Birthday</option>
+                        <option value="corporate">Corporate</option>
+                        <option value="festival">Festival</option>
+                        <option value="baby-shower">Baby Shower</option>
+                        <option value="graduation">Graduation</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 0.75rem; padding: 1rem 1.5rem; border-top: 1px solid #334155;">
+                <button type="button" onclick="closeCreateTemplateModal()" class="btn btn-secondary">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="btn-create-template-submit">
+                    <span class="material-symbols-outlined" style="font-size: 1.125rem;">add</span>
+                    Create Template
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <!-- Preview Modal -->
 <div id="preview-modal" class="modal hidden">
