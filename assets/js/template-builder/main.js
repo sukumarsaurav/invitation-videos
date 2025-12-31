@@ -1740,16 +1740,62 @@ class TemplateBuilder {
             return;
         }
 
-        // Get fields for this slide
-        const slideFields = this.fields.filter(f => f.slide_id == currentSlide.id);
+        // Get fields for this slide (check both slide_id and slideId for compatibility)
+        const slideFields = this.fields.filter(f =>
+            f.slide_id == currentSlide.id || f.slideId == currentSlide.id
+        );
 
-        // Get shapes for this slide
-        const slideShapes = this.shapeManager?.shapes?.filter(s => s.slide_id == currentSlide.id) || [];
+        // Get shapes for this slide (shapes use slideId camelCase)
+        const slideShapes = this.shapeManager?.shapes?.filter(s =>
+            s.slideId == currentSlide.id || s.slide_id == currentSlide.id
+        ) || [];
 
-        const allElements = [
-            ...slideFields.map(f => ({ type: 'text', id: f.id, label: f.sample_value || f.field_label || 'Text', zIndex: f.z_index || 0 })),
-            ...slideShapes.map(s => ({ type: s.shapeType || 'shape', id: s.id, label: s.shapeType || 'Shape', zIndex: s.z_index || 0 }))
+        // Also detect DOM elements directly as fallback
+        const textElements = document.querySelectorAll('.canvas-text-element');
+        const shapeElements = document.querySelectorAll('.canvas-shape-element');
+
+        // Build array from data sources
+        let allElements = [
+            ...slideFields.map(f => ({
+                type: 'text',
+                id: f.id,
+                label: f.sample_value || f.field_label || 'Text',
+                zIndex: f.z_index || f.zIndex || 0
+            })),
+            ...slideShapes.map(s => ({
+                type: s.type || 'shape',
+                id: s.id,
+                label: s.type || 'Shape',
+                zIndex: s.z_index || s.zIndex || 0
+            }))
         ];
+
+        // If no elements found from data, try to get from DOM
+        if (allElements.length === 0) {
+            // Get text elements from DOM
+            textElements.forEach(el => {
+                const fieldId = el.dataset.fieldId;
+                const text = el.textContent?.trim() || 'Text';
+                allElements.push({
+                    type: 'text',
+                    id: fieldId || 'dom_' + Date.now(),
+                    label: text.substring(0, 30) || 'Text',
+                    zIndex: parseInt(el.style.zIndex) || 0
+                });
+            });
+
+            // Get shape elements from DOM
+            shapeElements.forEach(el => {
+                const shapeId = el.dataset.shapeId;
+                const shapeType = el.dataset.shapeType || 'shape';
+                allElements.push({
+                    type: shapeType,
+                    id: shapeId || 'dom_shape_' + Date.now(),
+                    label: shapeType.charAt(0).toUpperCase() + shapeType.slice(1),
+                    zIndex: parseInt(el.style.zIndex) || 0
+                });
+            });
+        }
 
         if (allElements.length === 0) {
             layersList.innerHTML = '<p class="hint-text">No elements on this slide</p>';
