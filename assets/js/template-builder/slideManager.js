@@ -89,6 +89,20 @@ export class SlideManager {
         bar.style.flex = '1';
         bar.style.minWidth = '100px';
 
+        // Apply background preview based on slide background
+        if (slide.background_image) {
+            bar.style.backgroundImage = `url(${slide.background_image})`;
+            bar.style.backgroundSize = 'cover';
+            bar.style.backgroundPosition = 'center';
+            bar.style.backgroundColor = 'transparent';
+        } else if (slide.background_gradient) {
+            bar.style.background = slide.background_gradient;
+        } else if (slide.background_color && slide.background_color !== '#ffffff') {
+            bar.style.backgroundColor = slide.background_color;
+        } else {
+            bar.style.backgroundColor = '#fefce8'; // Default cream color
+        }
+
         bar.innerHTML = `
             <span class="slide-duration-label">${(duration / 1000).toFixed(1)}s</span>
         `;
@@ -138,9 +152,29 @@ export class SlideManager {
     updateThumbnail(index, slide) {
         const bars = this.slidesStrip.querySelectorAll('.slide-duration-bar, .slide-bar');
         if (bars[index]) {
-            const durationEl = bars[index].querySelector('.slide-duration-label, .slide-label');
+            const bar = bars[index];
+
+            // Update duration label
+            const durationEl = bar.querySelector('.slide-duration-label, .slide-label');
             if (durationEl) {
-                durationEl.textContent = `${(slide.duration_ms / 1000).toFixed(1)}s`;
+                durationEl.textContent = `${((slide.duration_ms || 3000) / 1000).toFixed(1)}s`;
+            }
+
+            // Update background preview
+            if (slide.background_image) {
+                bar.style.backgroundImage = `url(${slide.background_image})`;
+                bar.style.backgroundSize = 'cover';
+                bar.style.backgroundPosition = 'center';
+                bar.style.backgroundColor = 'transparent';
+            } else if (slide.background_gradient) {
+                bar.style.backgroundImage = 'none';
+                bar.style.background = slide.background_gradient;
+            } else if (slide.background_color && slide.background_color !== '#ffffff') {
+                bar.style.backgroundImage = 'none';
+                bar.style.backgroundColor = slide.background_color;
+            } else {
+                bar.style.backgroundImage = 'none';
+                bar.style.backgroundColor = '#fefce8'; // Default cream color
             }
         }
     }

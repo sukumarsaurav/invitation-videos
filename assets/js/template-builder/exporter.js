@@ -185,11 +185,8 @@ export class Exporter {
         this.previewCtx.clearRect(0, 0, width, height);
 
         // Draw background
-        this.previewCtx.fillStyle = slide.background_color || '#ffffff';
-        this.previewCtx.fillRect(0, 0, width, height);
-
-        // Draw background image if exists (cached)
         if (slide.background_image && slide._bgImage) {
+            // Background image (cached)
             this.drawImageCover(slide._bgImage, 0, 0, width, height);
         } else if (slide.background_image) {
             // Load and cache image
@@ -199,6 +196,16 @@ export class Exporter {
                 slide._bgImage = img;
             };
             img.src = slide.background_image;
+            // Draw color as fallback while loading
+            this.previewCtx.fillStyle = slide.background_color || '#ffffff';
+            this.previewCtx.fillRect(0, 0, width, height);
+        } else if (slide.background_gradient) {
+            // Draw gradient background
+            this.drawGradientBackground(slide.background_gradient, width, height);
+        } else {
+            // Solid color background
+            this.previewCtx.fillStyle = slide.background_color || '#ffffff';
+            this.previewCtx.fillRect(0, 0, width, height);
         }
 
         // Draw shapes
@@ -210,6 +217,92 @@ export class Exporter {
         // Draw texts with animations
         fieldsForSlide.forEach(field => {
             this.renderAnimatedText(field, slide.duration_ms || 3000, progress);
+        });
+    }
+
+    /**
+     * Draw a CSS gradient string on the canvas
+     * Supports linear-gradient and radial-gradient
+     */
+    drawGradientBackground(gradientStr, width, height) {
+        // Try to parse the gradient
+        if (!gradientStr) return;
+
+        // Parse linear-gradient
+        const linearMatch = gradientStr.match(/linear-gradient\(\s*(?:(\d+)deg|to\s+(\w+(?:\s+\w+)?)),?\s*(.+)\)/i);
+        if (linearMatch) {
+            let angle = 180; // default top to bottom
+            if (linearMatch[1]) {
+                angle = parseFloat(linearMatch[1]);
+            } else if (linearMatch[2]) {
+                // Convert direction words to angle
+                const direction = linearMatch[2].toLowerCase();
+                const directionMap = {
+                    'top': 0, 'right': 90, 'bottom': 180, 'left': 270,
+                    'top right': 45, 'right top': 45,
+                    'bottom right': 135, 'right bottom': 135,
+                    'bottom left': 225, 'left bottom': 225,
+                    'top left': 315, 'left top': 315
+                };
+                angle = directionMap[direction] || 180;
+            }
+
+            // Calculate start and end points based on angle
+            const rad = (angle - 90) * Math.PI / 180;
+            const x1 = width / 2 - Math.cos(rad) * width / 2;
+            const y1 = height / 2 - Math.sin(rad) * height / 2;
+            const x2 = width / 2 + Math.cos(rad) * width / 2;
+            const y2 = height / 2 + Math.sin(rad) * height / 2;
+
+            const gradient = this.previewCtx.createLinearGradient(x1, y1, x2, y2);
+
+            // Parse color stops
+            const colorStops = linearMatch[3];
+            this.addColorStops(gradient, colorStops);
+
+            this.previewCtx.fillStyle = gradient;
+            this.previewCtx.fillRect(0, 0, width, height);
+            return;
+        }
+
+        // Fallback: try to extract any hex colors and create a simple gradient
+        const hexColors = gradientStr.match(/#[0-9A-Fa-f]{6}|#[0-9A-Fa-f]{3}/g);
+        if (hexColors && hexColors.length >= 2) {
+            const gradient = this.previewCtx.createLinearGradient(0, 0, width, height);
+            hexColors.forEach((color, i) => {
+                gradient.addColorStop(i / (hexColors.length - 1), color);
+            });
+            this.previewCtx.fillStyle = gradient;
+            this.previewCtx.fillRect(0, 0, width, height);
+            return;
+        }
+
+        // Ultimate fallback: draw white
+        this.previewCtx.fillStyle = '#ffffff';
+        this.previewCtx.fillRect(0, 0, width, height);
+    }
+
+    /**
+     * Parse and add color stops to a gradient
+     */
+    addColorStops(gradient, colorStopsStr) {
+        // Split by comma but not commas inside rgb/rgba
+        const colorStopPattern = /((?:#[0-9A-Fa-f]{3,8}|rgba?\([^)]+\)|[a-z]+)(?:\s+[\d.]+%)?)/gi;
+        const matches = colorStopsStr.match(colorStopPattern);
+
+        if (!matches || matches.length === 0) return;
+
+        matches.forEach((stop, index) => {
+            const parts = stop.trim().match(/^(.+?)(?:\s+([\d.]+)%)?$/);
+            if (parts) {
+                const color = parts[1].trim();
+                const position = parts[2] ? parseFloat(parts[2]) / 100 : index / (matches.length - 1);
+                try {
+                    gradient.addColorStop(position, color);
+                } catch (e) {
+                    // Invalid color, skip
+                }
+            }
         });
     }
 

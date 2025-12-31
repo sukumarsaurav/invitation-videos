@@ -709,7 +709,7 @@
 }
 
 .slide-duration-bar:hover {
-    background: #fef9c3;
+    box-shadow: inset 0 0 0 100px rgba(255, 255, 255, 0.15);
 }
 
 .slide-duration-bar.active {
@@ -719,8 +719,12 @@
 
 .slide-duration-label {
     font-size: 0.75rem;
-    font-weight: 500;
-    color: #475569;
+    font-weight: 600;
+    color: #ffffff;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .btn-add-slide-inline {

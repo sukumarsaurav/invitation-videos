@@ -264,6 +264,13 @@ class TemplateBuilder {
             }
         }
 
+        // Update canvas toolbar color picker
+        const canvasBgColor = document.getElementById('canvas-bg-color');
+        if (canvasBgColor) {
+            // Set to slide background color (fallback to white if image/gradient)
+            canvasBgColor.value = slide.background_color || '#ffffff';
+        }
+
         // Update slide info (if element exists)
         const slideInfoEl = document.getElementById('current-slide-info');
         if (slideInfoEl) {
@@ -281,6 +288,9 @@ class TemplateBuilder {
 
         // Populate layers panel for the new slide
         this.populateLayersPanel();
+
+        // Update background info in color panel
+        this.updateBackgroundInfo();
 
         // Clear selection
         this.deselectElement();
@@ -1829,6 +1839,7 @@ class TemplateBuilder {
         currentSlide.background_gradient = gradient;
         currentSlide.background_color = null;
         currentSlide.background_image = null;
+        currentSlide.background_video = null;
 
         // Update canvas
         const canvasContainer = document.getElementById('canvas-container');
@@ -1836,8 +1847,15 @@ class TemplateBuilder {
             canvasContainer.style.background = gradient;
         }
 
+        // Re-render the canvas
+        this.canvasEditor.renderSlide(currentSlide);
+
         // Update thumbnail
         this.slideManager.updateThumbnail(this.currentSlideIndex, currentSlide);
+
+        // Refresh timeline to show new background
+        this.refreshTimeline();
+
         this.isDirty = true;
 
         // Update the info display
@@ -2064,6 +2082,7 @@ class TemplateBuilder {
         currentSlide.background_color = color;
         currentSlide.background_gradient = null;
         currentSlide.background_image = null;
+        currentSlide.background_video = null;
 
         // Update canvas
         const canvasContainer = document.getElementById('canvas-container');
@@ -2071,12 +2090,36 @@ class TemplateBuilder {
             canvasContainer.style.background = color;
         }
 
+        // Update canvas toolbar color picker
+        const canvasBgColor = document.getElementById('canvas-bg-color');
+        if (canvasBgColor) {
+            canvasBgColor.value = color;
+        }
+
+        // Re-render the canvas
+        this.canvasEditor.renderSlide(currentSlide);
+
         // Update thumbnail
         this.slideManager.updateThumbnail(this.currentSlideIndex, currentSlide);
+
+        // Refresh timeline to show new background
+        this.refreshTimeline();
+
         this.isDirty = true;
 
         // Update the info display
         this.updateBackgroundInfo();
+    }
+
+    // Update canvas toolbar color picker based on current slide
+    updateCanvasToolbarColor() {
+        const currentSlide = this.getCurrentSlide();
+        if (!currentSlide) return;
+
+        const canvasBgColor = document.getElementById('canvas-bg-color');
+        if (canvasBgColor && currentSlide.background_color && !currentSlide.background_image && !currentSlide.background_gradient) {
+            canvasBgColor.value = currentSlide.background_color;
+        }
     }
 }
 
