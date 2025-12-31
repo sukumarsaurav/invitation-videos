@@ -78,6 +78,12 @@ $router->get('/editor/{id}', function ($id) {
     include __DIR__ . '/templates/pages/editor.php';
 });
 
+// Template preview page (shows sample data animation)
+$router->get('/preview/{id}', function ($id) {
+    $_GET['id'] = $id;
+    include __DIR__ . '/templates/pages/preview.php';
+});
+
 // Checkout page
 $router->get('/checkout/{orderId}', function ($orderId) {
     $_GET['order_id'] = $orderId;
