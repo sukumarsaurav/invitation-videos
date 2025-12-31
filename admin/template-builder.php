@@ -585,10 +585,9 @@ $pageTitle = 'Template Builder: ' . $template['title'];
 
 <!-- Fixed Bottom Timeline -->
 <div class="builder-timeline" id="builder-timeline">
-    <!-- Top Row: TIMELINE label + Time Ruler + Duration -->
+    <!-- Top Row: Time Ruler + Duration -->
     <div class="timeline-header">
-        <h4>TIMELINE</h4>
-        <!-- Time Ruler integrated in header -->
+        <!-- Time Ruler (full width) -->
         <div class="timeline-ruler-inline" id="timeline-ruler">
             <div class="playhead" id="timeline-playhead" style="left: 0%;">
                 <div class="playhead-head"></div>
