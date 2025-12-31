@@ -1140,6 +1140,105 @@ class TemplateBuilder {
                 updateZoom(this.zoom - 10);
             }
         });
+
+        // ============================================
+        // TOUCH GESTURES (Mobile/Tablet)
+        // ============================================
+
+        let lastTouchDistance = 0;
+        let lastTouchCenter = { x: 0, y: 0 };
+        let isTouchPanning = false;
+
+        // Calculate distance between two touch points
+        const getTouchDistance = (touches) => {
+            if (touches.length < 2) return 0;
+            const dx = touches[0].clientX - touches[1].clientX;
+            const dy = touches[0].clientY - touches[1].clientY;
+            return Math.sqrt(dx * dx + dy * dy);
+        };
+
+        // Get center point between two touches
+        const getTouchCenter = (touches) => {
+            if (touches.length < 2) {
+                return { x: touches[0].clientX, y: touches[0].clientY };
+            }
+            return {
+                x: (touches[0].clientX + touches[1].clientX) / 2,
+                y: (touches[0].clientY + touches[1].clientY) / 2
+            };
+        };
+
+        canvasWrapper.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 2) {
+                // Pinch gesture start
+                e.preventDefault();
+                lastTouchDistance = getTouchDistance(e.touches);
+                lastTouchCenter = getTouchCenter(e.touches);
+            } else if (e.touches.length === 1) {
+                // Single finger pan start
+                isTouchPanning = true;
+                startX = e.touches[0].clientX - this.panX;
+                startY = e.touches[0].clientY - this.panY;
+            }
+        }, { passive: false });
+
+        canvasWrapper.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 2) {
+                // Pinch zoom
+                e.preventDefault();
+                const currentDistance = getTouchDistance(e.touches);
+                const currentCenter = getTouchCenter(e.touches);
+
+                if (lastTouchDistance > 0) {
+                    const scale = currentDistance / lastTouchDistance;
+                    const newZoom = this.zoom * scale;
+                    updateZoom(newZoom);
+                }
+
+                // Pan while pinching
+                this.panX += (currentCenter.x - lastTouchCenter.x) / (this.zoom / 100);
+                this.panY += (currentCenter.y - lastTouchCenter.y) / (this.zoom / 100);
+                canvasContainer.style.transform = `scale(${this.zoom / 100}) translate(${this.panX}px, ${this.panY}px)`;
+
+                lastTouchDistance = currentDistance;
+                lastTouchCenter = currentCenter;
+            } else if (e.touches.length === 1 && isTouchPanning) {
+                // Single finger pan
+                e.preventDefault();
+                this.panX = e.touches[0].clientX - startX;
+                this.panY = e.touches[0].clientY - startY;
+                canvasContainer.style.transform = `scale(${this.zoom / 100}) translate(${this.panX}px, ${this.panY}px)`;
+            }
+        }, { passive: false });
+
+        canvasWrapper.addEventListener('touchend', (e) => {
+            if (e.touches.length < 2) {
+                lastTouchDistance = 0;
+            }
+            if (e.touches.length === 0) {
+                isTouchPanning = false;
+            }
+        });
+
+        // ============================================
+        // SCROLL TO PAN (without Ctrl)
+        // ============================================
+
+        canvasWrapper.addEventListener('wheel', (e) => {
+            // Already handling Ctrl+wheel for zoom above
+            if (!e.ctrlKey && !e.metaKey) {
+                // Regular scroll = pan
+                e.preventDefault();
+                if (e.shiftKey) {
+                    // Shift + scroll = horizontal pan
+                    this.panX -= e.deltaY / 2;
+                } else {
+                    // Normal scroll = vertical pan
+                    this.panY -= e.deltaY / 2;
+                }
+                canvasContainer.style.transform = `scale(${this.zoom / 100}) translate(${this.panX}px, ${this.panY}px)`;
+            }
+        }, { passive: false });
     }
 
     setupBackgroundPanel() {
