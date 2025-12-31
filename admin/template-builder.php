@@ -425,9 +425,6 @@ $pageTitle = 'Template Builder: ' . $template['title'];
 
             <!-- Background Panel -->
             <div class="panel-view" id="panel-background">
-                <div class="panel-header">
-                    <h3>Background</h3>
-                </div>
                 <div class="panel-body">
                     <?php
                     // Fetch backgrounds from database
@@ -435,51 +432,19 @@ $pageTitle = 'Template Builder: ' . $template['title'];
                         "SELECT * FROM backgrounds WHERE is_active = 1 ORDER BY type, display_order"
                     );
 
-                    $bgColors = array_filter($allBackgrounds, fn($b) => $b['type'] === 'color');
-                    $bgGradients = array_filter($allBackgrounds, fn($b) => $b['type'] === 'gradient');
                     $bgImages = array_filter($allBackgrounds, fn($b) => $b['type'] === 'image');
                     $bgVideos = array_filter($allBackgrounds, fn($b) => $b['type'] === 'video');
                     ?>
 
-                    <!-- Background Type Tabs -->
+                    <!-- Background Type Tabs (Images and Videos only) -->
                     <div class="bg-tabs">
-                        <button type="button" class="bg-tab active" data-bg-type="colors">Colors</button>
-                        <button type="button" class="bg-tab" data-bg-type="gradients">Gradients</button>
-                        <button type="button" class="bg-tab" data-bg-type="images">Images</button>
+                        <button type="button" class="bg-tab active" data-bg-type="images">Images</button>
                         <button type="button" class="bg-tab" data-bg-type="videos">Videos</button>
                     </div>
 
-                    <!-- Colors Grid -->
-                    <div class="bg-grid-container" id="bg-colors">
-                        <div class="bg-grid scrollable">
-                            <?php foreach ($bgColors as $bg): ?>
-                                <div class="bg-item bg-color-item" data-type="color"
-                                    data-value="<?= Security::escape($bg['color_value']) ?>"
-                                    style="background: <?= Security::escape($bg['color_value']) ?>;"
-                                    title="<?= Security::escape($bg['name']) ?>">
-                                    <?php if ($bg['is_premium']): ?><span class="premium-badge">★</span><?php endif; ?>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-
-                    <!-- Gradients Grid -->
-                    <div class="bg-grid-container hidden" id="bg-gradients">
-                        <div class="bg-grid scrollable">
-                            <?php foreach ($bgGradients as $bg): ?>
-                                <div class="bg-item bg-gradient-item" data-type="gradient"
-                                    data-value="<?= Security::escape($bg['gradient_value']) ?>"
-                                    style="background: <?= Security::escape($bg['gradient_value']) ?>;"
-                                    title="<?= Security::escape($bg['name']) ?>">
-                                    <?php if ($bg['is_premium']): ?><span class="premium-badge">★</span><?php endif; ?>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-
                     <!-- Images Grid -->
-                    <div class="bg-grid-container hidden" id="bg-images">
-                        <div class="bg-grid scrollable">
+                    <div class="bg-grid-container" id="bg-images">
+                        <div class="bg-grid bg-grid-2col scrollable">
                             <?php foreach ($bgImages as $bg): ?>
                                 <div class="bg-item bg-image-item" data-type="image"
                                     data-src="<?= Security::escape($bg['file_path']) ?>"
@@ -501,7 +466,7 @@ $pageTitle = 'Template Builder: ' . $template['title'];
 
                     <!-- Videos Grid -->
                     <div class="bg-grid-container hidden" id="bg-videos">
-                        <div class="bg-grid scrollable">
+                        <div class="bg-grid bg-grid-2col scrollable">
                             <?php foreach ($bgVideos as $bg): ?>
                                 <div class="bg-item bg-video-item" data-type="video"
                                     data-src="<?= Security::escape($bg['file_path']) ?>"

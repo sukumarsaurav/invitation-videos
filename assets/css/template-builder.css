@@ -1852,6 +1852,11 @@
     padding-right: 0.25rem;
 }
 
+/* 2-column variant for background images/videos */
+.bg-grid.bg-grid-2col {
+    grid-template-columns: repeat(2, 1fr);
+}
+
 .bg-item {
     position: relative;
     aspect-ratio: 9 / 16;
