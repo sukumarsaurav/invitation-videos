@@ -299,8 +299,10 @@
 .canvas-container {
     position: relative;
     width: 270px;
+    min-width: 270px;
     /* 1080/4 */
     height: 480px;
+    min-height: 480px;
     /* 1920/4 */
     margin: 2rem 0;
     /* Equal gap at top and bottom */
@@ -312,6 +314,8 @@
     transition: transform 0.05s ease-out;
     touch-action: none;
     /* Prevent browser handling of touch gestures */
+    flex-shrink: 0;
+    /* Prevent flex from shrinking the canvas */
 }
 
 #template-canvas {
