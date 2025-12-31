@@ -315,9 +315,12 @@
 }
 
 #template-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    /* Canvas internal resolution is 1080x1920, displayed at container size */
 }
 
 .canvas-overlays {
