@@ -1553,63 +1553,219 @@ class TemplateBuilder {
         }
     }
 
-    // Setup Color and Layers Panels
+    // Setup Color and Layers Panels (now in left sidebar)
     setupPanels() {
-        const colorPanel = document.getElementById('color-panel');
-        const layersPanel = document.getElementById('layers-panel');
         const btnColorPicker = document.getElementById('canvas-bg-color');
         const btnPosition = document.getElementById('btn-position');
-        const closeColorPanel = document.getElementById('close-color-panel');
-        const closeLayersPanel = document.getElementById('close-layers-panel');
 
-        // Open Color Panel when color picker clicked
+        // When color picker in toolbar is clicked, switch to Color panel in left sidebar
         if (btnColorPicker) {
             btnColorPicker.addEventListener('click', (e) => {
                 e.preventDefault();
-                colorPanel?.classList.remove('hidden');
-                layersPanel?.classList.add('hidden');
+                this.switchToPanel('color');
             });
         }
 
-        // Open Layers Panel when Position clicked
+        // When Position button in toolbar is clicked, switch to Layers panel in left sidebar
         if (btnPosition) {
             btnPosition.addEventListener('click', () => {
-                layersPanel?.classList.remove('hidden');
-                colorPanel?.classList.add('hidden');
-                this.populateLayers();
+                this.switchToPanel('position');
+                this.populateLayersPanel();
             });
         }
 
-        // Close panels
-        closeColorPanel?.addEventListener('click', () => colorPanel?.classList.add('hidden'));
-        closeLayersPanel?.addEventListener('click', () => layersPanel?.classList.add('hidden'));
-
-        // Color swatches click
-        document.querySelectorAll('.color-swatch').forEach(swatch => {
+        // Color swatches click (panel version)
+        document.querySelectorAll('.color-swatch-panel').forEach(swatch => {
             swatch.addEventListener('click', () => {
                 const color = swatch.dataset.color;
                 this.applyBackgroundColor(color);
-                colorPanel?.classList.add('hidden');
             });
         });
 
-        // Custom color picker
-        const customColorPicker = document.getElementById('custom-color-picker');
-        customColorPicker?.addEventListener('change', (e) => {
-            this.applyBackgroundColor(e.target.value);
+        // Gradient swatches click
+        document.querySelectorAll('.gradient-swatch').forEach(swatch => {
+            swatch.addEventListener('click', () => {
+                const gradient = swatch.dataset.gradient;
+                this.applyBackgroundGradient(gradient);
+            });
         });
 
-        // Layers tabs
-        document.querySelectorAll('.layers-tab').forEach(tab => {
+        // Custom color picker (panel version)
+        const panelCustomColor = document.getElementById('panel-custom-color');
+        const panelColorHex = document.getElementById('panel-color-hex');
+        const btnApplyCustomColor = document.getElementById('btn-apply-custom-color');
+
+        panelCustomColor?.addEventListener('input', (e) => {
+            if (panelColorHex) panelColorHex.value = e.target.value;
+        });
+
+        panelColorHex?.addEventListener('input', (e) => {
+            const hex = e.target.value;
+            if (/^#[0-9A-Fa-f]{6}$/.test(hex) && panelCustomColor) {
+                panelCustomColor.value = hex;
+            }
+        });
+
+        btnApplyCustomColor?.addEventListener('click', () => {
+            const color = panelCustomColor?.value || '#7c3aed';
+            this.applyBackgroundColor(color);
+        });
+
+        // Remove background button
+        const btnRemoveBg = document.getElementById('btn-remove-bg');
+        btnRemoveBg?.addEventListener('click', () => {
+            this.removeBackground();
+        });
+
+        // Layers tabs (inline version)
+        document.querySelectorAll('.layers-tab-inline').forEach(tab => {
             tab.addEventListener('click', () => {
-                document.querySelectorAll('.layers-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.layers-tab-inline').forEach(t => t.classList.remove('active'));
                 tab.classList.add('active');
 
                 const tabName = tab.dataset.tab;
-                document.getElementById('layers-content')?.classList.toggle('hidden', tabName !== 'layers');
-                document.getElementById('arrange-content')?.classList.toggle('hidden', tabName !== 'arrange');
+                document.getElementById('panel-layers-content')?.classList.toggle('hidden', tabName !== 'layers');
+                document.getElementById('panel-arrange-content')?.classList.toggle('hidden', tabName !== 'arrange');
             });
         });
+    }
+
+    // Switch to a specific panel in the left sidebar
+    switchToPanel(panelName) {
+        const iconButtons = document.querySelectorAll('.icon-btn');
+        const panels = document.querySelectorAll('.panel-view');
+        const contentPanel = document.getElementById('content-panel');
+
+        // Switch active button
+        iconButtons.forEach(b => b.classList.remove('active'));
+        const targetBtn = document.querySelector(`.icon-btn[data-panel="${panelName}"]`);
+        if (targetBtn) targetBtn.classList.add('active');
+
+        // Switch panel
+        panels.forEach(p => p.classList.remove('active'));
+        const targetPanel = document.getElementById(`panel-${panelName}`);
+        if (targetPanel) targetPanel.classList.add('active');
+
+        // Ensure content panel is open
+        contentPanel?.classList.add('open');
+
+        // Update background info if switching to color panel
+        if (panelName === 'color') {
+            this.updateBackgroundInfo();
+        }
+    }
+
+    // Update the current background info display in color panel
+    updateBackgroundInfo() {
+        const currentSlide = this.getCurrentSlide();
+        if (!currentSlide) return;
+
+        const previewSwatch = document.getElementById('bg-preview-swatch');
+        const previewText = document.getElementById('bg-preview-text');
+        const removeBtn = document.getElementById('btn-remove-bg');
+
+        if (currentSlide.background_image) {
+            if (previewSwatch) previewSwatch.style.background = `url(${currentSlide.background_image}) center/cover`;
+            if (previewText) previewText.textContent = 'Image';
+            removeBtn?.classList.remove('hidden');
+        } else if (currentSlide.background_gradient) {
+            if (previewSwatch) previewSwatch.style.background = currentSlide.background_gradient;
+            if (previewText) previewText.textContent = 'Gradient';
+            removeBtn?.classList.remove('hidden');
+        } else {
+            const color = currentSlide.background_color || '#ffffff';
+            if (previewSwatch) previewSwatch.style.background = color;
+            if (previewText) previewText.textContent = `Color: ${color}`;
+            removeBtn?.classList.add('hidden');
+        }
+    }
+
+    // Remove background image/gradient (reset to white)
+    removeBackground() {
+        const currentSlide = this.getCurrentSlide();
+        if (!currentSlide) return;
+
+        currentSlide.background_image = null;
+        currentSlide.background_gradient = null;
+        currentSlide.background_video = null;
+        currentSlide.background_color = '#ffffff';
+
+        // Update canvas
+        const canvasContainer = document.getElementById('canvas-container');
+        if (canvasContainer) {
+            canvasContainer.style.background = '#ffffff';
+        }
+
+        // Update thumbnail
+        this.slideManager.updateThumbnail(this.currentSlideIndex, currentSlide);
+        this.isDirty = true;
+
+        // Update the info display
+        this.updateBackgroundInfo();
+
+        this.showNotification('Background removed', 'success');
+    }
+
+    // Apply background gradient to current slide
+    applyBackgroundGradient(gradient) {
+        const currentSlide = this.getCurrentSlide();
+        if (!currentSlide) return;
+
+        currentSlide.background_gradient = gradient;
+        currentSlide.background_color = null;
+        currentSlide.background_image = null;
+
+        // Update canvas
+        const canvasContainer = document.getElementById('canvas-container');
+        if (canvasContainer) {
+            canvasContainer.style.background = gradient;
+        }
+
+        // Update thumbnail
+        this.slideManager.updateThumbnail(this.currentSlideIndex, currentSlide);
+        this.isDirty = true;
+
+        // Update the info display
+        this.updateBackgroundInfo();
+    }
+
+    // Populate layers list (inline panel version)
+    populateLayersPanel() {
+        const layersList = document.getElementById('panel-layers-list');
+        if (!layersList) return;
+
+        const currentSlide = this.getCurrentSlide();
+        if (!currentSlide) {
+            layersList.innerHTML = '<div class="no-items-msg">No slide selected</div>';
+            return;
+        }
+
+        // Get fields for this slide
+        const slideFields = this.fields.filter(f => f.slide_id == currentSlide.id);
+
+        // Get shapes for this slide
+        const slideShapes = this.shapeManager?.shapes?.filter(s => s.slide_id == currentSlide.id) || [];
+
+        const allElements = [
+            ...slideFields.map(f => ({ type: 'text', id: f.id, label: f.sample_value || f.field_label || 'Text', zIndex: f.z_index || 0 })),
+            ...slideShapes.map(s => ({ type: s.shapeType || 'shape', id: s.id, label: s.shapeType || 'Shape', zIndex: s.z_index || 0 }))
+        ];
+
+        if (allElements.length === 0) {
+            layersList.innerHTML = '<p class="hint-text">No elements on this slide</p>';
+            return;
+        }
+
+        // Sort by z_index (highest first)
+        allElements.sort((a, b) => (b.zIndex || 0) - (a.zIndex || 0));
+
+        layersList.innerHTML = allElements.map(el => `
+            <div class="layer-item-inline" data-element-id="${el.id}" data-element-type="${el.type}">
+                <span class="material-symbols-outlined layer-drag-handle">drag_indicator</span>
+                <span class="material-symbols-outlined layer-icon">${el.type === 'text' ? 'title' : 'shapes'}</span>
+                <span class="layer-label">${el.label.substring(0, 25)}${el.label.length > 25 ? '...' : ''}</span>
+            </div>
+        `).join('');
     }
 
     // Populate layers list
@@ -1639,16 +1795,25 @@ class TemplateBuilder {
 
     // Apply background color to current slide
     applyBackgroundColor(color) {
-        const slide = this.slides.find(s => s.id == this.currentSlideId);
-        if (!slide) return;
+        const currentSlide = this.getCurrentSlide();
+        if (!currentSlide) return;
 
-        slide.background_color = color;
-        slide.background_gradient = null;
-        slide.background_image = null;
+        currentSlide.background_color = color;
+        currentSlide.background_gradient = null;
+        currentSlide.background_image = null;
 
-        this.renderCanvas();
-        this.renderSlidesStrip();
-        this.markDirty();
+        // Update canvas
+        const canvasContainer = document.getElementById('canvas-container');
+        if (canvasContainer) {
+            canvasContainer.style.background = color;
+        }
+
+        // Update thumbnail
+        this.slideManager.updateThumbnail(this.currentSlideIndex, currentSlide);
+        this.isDirty = true;
+
+        // Update the info display
+        this.updateBackgroundInfo();
     }
 }
 

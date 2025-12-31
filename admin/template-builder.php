@@ -143,6 +143,14 @@ $pageTitle = 'Template Builder: ' . $template['title'];
                 <span class="material-symbols-outlined">wallpaper</span>
                 <span class="icon-label">Background</span>
             </button>
+            <button class="icon-btn" data-panel="color" title="Color">
+                <span class="material-symbols-outlined">palette</span>
+                <span class="icon-label">Color</span>
+            </button>
+            <button class="icon-btn" data-panel="position" title="Layers">
+                <span class="material-symbols-outlined">layers</span>
+                <span class="icon-label">Layers</span>
+            </button>
             <button class="icon-btn" data-panel="settings" title="Slide Settings">
                 <span class="material-symbols-outlined">tune</span>
                 <span class="icon-label">Settings</span>
@@ -491,6 +499,139 @@ $pageTitle = 'Template Builder: ' . $template['title'];
                 </div>
             </div>
 
+            <!-- Color Panel (in left sidebar) -->
+            <div class="panel-view" id="panel-color">
+                <div class="panel-header">
+                    <h3>Background Color</h3>
+                </div>
+                <div class="panel-body">
+                    <!-- Current Background Info -->
+                    <div class="current-bg-section" id="current-bg-info">
+                        <span class="toolbar-label">Current Background</span>
+                        <div class="current-bg-preview" id="current-bg-preview">
+                            <div class="bg-preview-swatch" id="bg-preview-swatch"></div>
+                            <span id="bg-preview-text">Color: #ffffff</span>
+                            <button type="button" class="btn-remove-bg hidden" id="btn-remove-bg"
+                                title="Remove Background">
+                                <span class="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Default Colors -->
+                    <div class="color-section">
+                        <span class="toolbar-label">Solid Colors</span>
+                        <div class="color-grid color-grid-panel" id="panel-default-colors">
+                            <div class="color-swatch-panel" data-color="#000000" style="background: #000000"></div>
+                            <div class="color-swatch-panel" data-color="#374151" style="background: #374151"></div>
+                            <div class="color-swatch-panel" data-color="#6b7280" style="background: #6b7280"></div>
+                            <div class="color-swatch-panel" data-color="#d1d5db" style="background: #d1d5db"></div>
+                            <div class="color-swatch-panel" data-color="#f3f4f6" style="background: #f3f4f6"></div>
+                            <div class="color-swatch-panel" data-color="#ffffff"
+                                style="background: #ffffff; border: 1px solid #e5e7eb"></div>
+                            <div class="color-swatch-panel" data-color="#ef4444" style="background: #ef4444"></div>
+                            <div class="color-swatch-panel" data-color="#f97316" style="background: #f97316"></div>
+                            <div class="color-swatch-panel" data-color="#eab308" style="background: #eab308"></div>
+                            <div class="color-swatch-panel" data-color="#22c55e" style="background: #22c55e"></div>
+                            <div class="color-swatch-panel" data-color="#06b6d4" style="background: #06b6d4"></div>
+                            <div class="color-swatch-panel" data-color="#3b82f6" style="background: #3b82f6"></div>
+                            <div class="color-swatch-panel" data-color="#8b5cf6" style="background: #8b5cf6"></div>
+                            <div class="color-swatch-panel" data-color="#ec4899" style="background: #ec4899"></div>
+                            <div class="color-swatch-panel" data-color="#14b8a6" style="background: #14b8a6"></div>
+                            <div class="color-swatch-panel" data-color="#6366f1" style="background: #6366f1"></div>
+                            <div class="color-swatch-panel" data-color="#a855f7" style="background: #a855f7"></div>
+                            <div class="color-swatch-panel" data-color="#f43f5e" style="background: #f43f5e"></div>
+                        </div>
+                    </div>
+
+                    <!-- Custom Color Picker -->
+                    <div class="color-section">
+                        <span class="toolbar-label">Custom Color</span>
+                        <div class="custom-color-row">
+                            <input type="color" id="panel-custom-color" class="panel-color-input" value="#7c3aed">
+                            <input type="text" id="panel-color-hex" class="panel-hex-input" value="#7c3aed"
+                                placeholder="#000000">
+                            <button type="button" id="btn-apply-custom-color"
+                                class="btn btn-sm btn-primary">Apply</button>
+                        </div>
+                    </div>
+
+                    <!-- Gradients -->
+                    <div class="color-section">
+                        <span class="toolbar-label">Gradients</span>
+                        <div class="gradient-grid" id="panel-gradients">
+                            <div class="gradient-swatch"
+                                data-gradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                                style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)"></div>
+                            <div class="gradient-swatch"
+                                data-gradient="linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"
+                                style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"></div>
+                            <div class="gradient-swatch"
+                                data-gradient="linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)"
+                                style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)"></div>
+                            <div class="gradient-swatch"
+                                data-gradient="linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)"
+                                style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)"></div>
+                            <div class="gradient-swatch"
+                                data-gradient="linear-gradient(135deg, #fa709a 0%, #fee140 100%)"
+                                style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%)"></div>
+                            <div class="gradient-swatch"
+                                data-gradient="linear-gradient(135deg, #30cfd0 0%, #330867 100%)"
+                                style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%)"></div>
+                            <div class="gradient-swatch"
+                                data-gradient="linear-gradient(to top, #0f0c29, #302b63, #24243e)"
+                                style="background: linear-gradient(to top, #0f0c29, #302b63, #24243e)"></div>
+                            <div class="gradient-swatch" data-gradient="linear-gradient(to right, #f12711, #f5af19)"
+                                style="background: linear-gradient(to right, #f12711, #f5af19)"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Position/Layers Panel (in left sidebar) -->
+            <div class="panel-view" id="panel-position">
+                <div class="panel-header">
+                    <h3>Layers</h3>
+                </div>
+                <div class="panel-body">
+                    <!-- Tabs -->
+                    <div class="layers-tabs-inline">
+                        <button type="button" class="layers-tab-inline active" data-tab="layers">Layers</button>
+                        <button type="button" class="layers-tab-inline" data-tab="arrange">Arrange</button>
+                    </div>
+
+                    <!-- Layers Content -->
+                    <div class="layers-content-inline" id="panel-layers-content">
+                        <div class="layers-list-inline" id="panel-layers-list">
+                            <!-- Dynamically populated by JS -->
+                            <p class="hint-text">Select elements on canvas to manage layers</p>
+                        </div>
+                    </div>
+
+                    <!-- Arrange Content -->
+                    <div class="arrange-content-inline hidden" id="panel-arrange-content">
+                        <div class="arrange-buttons-inline">
+                            <button type="button" class="arrange-btn-inline" id="panel-bring-to-front"
+                                title="Bring to Front">
+                                <span class="material-symbols-outlined">flip_to_front</span> Bring to front
+                            </button>
+                            <button type="button" class="arrange-btn-inline" id="panel-bring-forward"
+                                title="Bring Forward">
+                                <span class="material-symbols-outlined">move_up</span> Bring forward
+                            </button>
+                            <button type="button" class="arrange-btn-inline" id="panel-send-backward"
+                                title="Send Backward">
+                                <span class="material-symbols-outlined">move_down</span> Send backward
+                            </button>
+                            <button type="button" class="arrange-btn-inline" id="panel-send-to-back"
+                                title="Send to Back">
+                                <span class="material-symbols-outlined">flip_to_back</span> Send to back
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Settings Panel -->
             <div class="panel-view" id="panel-settings">
                 <div class="panel-header">
@@ -597,111 +738,7 @@ $pageTitle = 'Template Builder: ' . $template['title'];
 </div>
 
 
-<!-- Color Picker Panel -->
-<div id="color-panel" class="slide-panel hidden">
-    <div class="panel-header">
-        <h3>Color</h3>
-        <button type="button" class="btn-icon" id="close-color-panel">
-            <span class="material-symbols-outlined">close</span>
-        </button>
-    </div>
-    <div class="panel-body">
-        <!-- Search -->
-        <div class="color-search">
-            <span class="material-symbols-outlined">search</span>
-            <input type="text" placeholder='Try "blue" or "#00c4cc"' id="color-search-input">
-        </div>
-
-        <!-- Document Colors -->
-        <div class="color-section">
-            <h4><span class="material-symbols-outlined">palette</span> Document colors</h4>
-            <div class="color-grid" id="document-colors">
-                <button type="button" class="color-add-btn" id="add-document-color">
-                    <span class="material-symbols-outlined">add</span>
-                </button>
-                <!-- Dynamic colors from current slide -->
-            </div>
-        </div>
-
-        <!-- Default Colors -->
-        <div class="color-section">
-            <h4><span class="material-symbols-outlined">format_color_fill</span> Default solid colors</h4>
-            <div class="color-grid color-grid-large" id="default-colors">
-                <div class="color-swatch" data-color="#000000" style="background: #000000"></div>
-                <div class="color-swatch" data-color="#374151" style="background: #374151"></div>
-                <div class="color-swatch" data-color="#6b7280" style="background: #6b7280"></div>
-                <div class="color-swatch" data-color="#d1d5db" style="background: #d1d5db"></div>
-                <div class="color-swatch" data-color="#f3f4f6" style="background: #f3f4f6"></div>
-                <div class="color-swatch" data-color="#ffffff" style="background: #ffffff; border: 1px solid #e5e7eb">
-                </div>
-                <div class="color-swatch" data-color="#ef4444" style="background: #ef4444"></div>
-                <div class="color-swatch" data-color="#f97316" style="background: #f97316"></div>
-                <div class="color-swatch" data-color="#eab308" style="background: #eab308"></div>
-                <div class="color-swatch" data-color="#22c55e" style="background: #22c55e"></div>
-                <div class="color-swatch" data-color="#06b6d4" style="background: #06b6d4"></div>
-                <div class="color-swatch" data-color="#3b82f6" style="background: #3b82f6"></div>
-                <div class="color-swatch" data-color="#8b5cf6" style="background: #8b5cf6"></div>
-                <div class="color-swatch" data-color="#ec4899" style="background: #ec4899"></div>
-                <div class="color-swatch" data-color="#14b8a6" style="background: #14b8a6"></div>
-                <div class="color-swatch" data-color="#6366f1" style="background: #6366f1"></div>
-                <div class="color-swatch" data-color="#a855f7" style="background: #a855f7"></div>
-                <div class="color-swatch" data-color="#f43f5e" style="background: #f43f5e"></div>
-            </div>
-        </div>
-
-        <!-- Custom Color Picker -->
-        <div class="color-section">
-            <h4>Custom color</h4>
-            <input type="color" id="custom-color-picker" class="custom-color-input">
-        </div>
-    </div>
-</div>
-
-<!-- Position/Layers Panel -->
-<div id="layers-panel" class="slide-panel hidden">
-    <div class="panel-header">
-        <h3>Position</h3>
-        <button type="button" class="btn-icon" id="close-layers-panel">
-            <span class="material-symbols-outlined">close</span>
-        </button>
-    </div>
-    <div class="panel-body">
-        <!-- Tabs -->
-        <div class="layers-tabs">
-            <button type="button" class="layers-tab" data-tab="arrange">Arrange</button>
-            <button type="button" class="layers-tab active" data-tab="layers">Layers</button>
-        </div>
-
-        <!-- Layers Content -->
-        <div class="layers-content" id="layers-content">
-            <div class="layers-filter">
-                <button type="button" class="filter-btn active">All</button>
-                <button type="button" class="filter-btn">Overlapping</button>
-            </div>
-            <div class="layers-list" id="layers-list">
-                <!-- Dynamically populated by JS -->
-            </div>
-        </div>
-
-        <!-- Arrange Content -->
-        <div class="arrange-content hidden" id="arrange-content">
-            <div class="arrange-buttons">
-                <button type="button" class="arrange-btn" id="bring-to-front" title="Bring to Front">
-                    <span class="material-symbols-outlined">flip_to_front</span> Bring to front
-                </button>
-                <button type="button" class="arrange-btn" id="bring-forward" title="Bring Forward">
-                    <span class="material-symbols-outlined">move_up</span> Bring forward
-                </button>
-                <button type="button" class="arrange-btn" id="send-backward" title="Send Backward">
-                    <span class="material-symbols-outlined">move_down</span> Send backward
-                </button>
-                <button type="button" class="arrange-btn" id="send-to-back" title="Send to Back">
-                    <span class="material-symbols-outlined">flip_to_back</span> Send to back
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+<!-- Removed separate right-side Color Panel and Layers Panel - they are now in left sidebar -->
 
 <!-- Preview Modal -->
 <div id="preview-modal" class="modal hidden">

@@ -2303,3 +2303,241 @@
     font-size: 1.25rem;
     color: #64748b;
 }
+
+/* ===== Color Panel (Left Sidebar) ===== */
+.color-grid-panel {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.5rem;
+}
+
+.color-swatch-panel {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.color-swatch-panel:hover {
+    transform: scale(1.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Gradient Grid */
+.gradient-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+}
+
+.gradient-swatch {
+    aspect-ratio: 1;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.15s;
+}
+
+.gradient-swatch:hover {
+    border-color: #7c3aed;
+    transform: scale(1.05);
+}
+
+/* Custom Color Row */
+.custom-color-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.panel-color-input {
+    width: 48px;
+    height: 36px;
+    padding: 0;
+    border: 2px solid #e2e8f0;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.panel-color-input::-webkit-color-swatch-wrapper {
+    padding: 2px;
+}
+
+.panel-color-input::-webkit-color-swatch {
+    border: none;
+    border-radius: 0.25rem;
+}
+
+.panel-hex-input {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-family: monospace;
+}
+
+.panel-hex-input:focus {
+    outline: none;
+    border-color: #7c3aed;
+}
+
+/* Current Background Preview */
+.current-bg-section {
+    margin-bottom: 1rem;
+}
+
+.current-bg-preview {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.bg-preview-swatch {
+    width: 40px;
+    height: 40px;
+    border-radius: 0.5rem;
+    border: 2px solid #e2e8f0;
+    flex-shrink: 0;
+}
+
+.current-bg-preview span:not(.material-symbols-outlined) {
+    flex: 1;
+    font-size: 0.875rem;
+    color: #475569;
+}
+
+.btn-remove-bg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: #fee2e2;
+    border: none;
+    border-radius: 50%;
+    color: #dc2626;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.btn-remove-bg:hover {
+    background: #fecaca;
+}
+
+.btn-remove-bg .material-symbols-outlined {
+    font-size: 1rem;
+}
+
+/* Layers Panel Inline Styles */
+.layers-tabs-inline {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+}
+
+.layers-tab-inline {
+    padding: 0.5rem 1rem;
+    background: transparent;
+    border: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #64748b;
+    cursor: pointer;
+    position: relative;
+}
+
+.layers-tab-inline.active {
+    color: #7c3aed;
+}
+
+.layers-tab-inline.active::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #7c3aed;
+}
+
+.layers-list-inline {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.layer-item-inline {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 0.75rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    cursor: grab;
+    transition: all 0.15s;
+}
+
+.layer-item-inline:hover {
+    border-color: #7c3aed;
+    background: #f5f3ff;
+}
+
+.layer-item-inline .layer-drag-handle {
+    font-size: 1rem;
+    color: #94a3b8;
+}
+
+.layer-item-inline .layer-icon {
+    font-size: 1.125rem;
+    color: #64748b;
+}
+
+.layer-item-inline .layer-label {
+    flex: 1;
+    font-size: 0.8125rem;
+    color: #374151;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.arrange-buttons-inline {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.arrange-btn-inline {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 0.75rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    font-size: 0.8125rem;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.arrange-btn-inline:hover {
+    background: #f1f5f9;
+    border-color: #7c3aed;
+}
+
+.arrange-btn-inline .material-symbols-outlined {
+    font-size: 1.125rem;
+    color: #64748b;
+}
