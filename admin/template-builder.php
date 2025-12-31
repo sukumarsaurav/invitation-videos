@@ -597,6 +597,111 @@ $pageTitle = 'Template Builder: ' . $template['title'];
 </div>
 
 
+<!-- Color Picker Panel -->
+<div id="color-panel" class="slide-panel hidden">
+    <div class="panel-header">
+        <h3>Color</h3>
+        <button type="button" class="btn-icon" id="close-color-panel">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+    </div>
+    <div class="panel-body">
+        <!-- Search -->
+        <div class="color-search">
+            <span class="material-symbols-outlined">search</span>
+            <input type="text" placeholder='Try "blue" or "#00c4cc"' id="color-search-input">
+        </div>
+
+        <!-- Document Colors -->
+        <div class="color-section">
+            <h4><span class="material-symbols-outlined">palette</span> Document colors</h4>
+            <div class="color-grid" id="document-colors">
+                <button type="button" class="color-add-btn" id="add-document-color">
+                    <span class="material-symbols-outlined">add</span>
+                </button>
+                <!-- Dynamic colors from current slide -->
+            </div>
+        </div>
+
+        <!-- Default Colors -->
+        <div class="color-section">
+            <h4><span class="material-symbols-outlined">format_color_fill</span> Default solid colors</h4>
+            <div class="color-grid color-grid-large" id="default-colors">
+                <div class="color-swatch" data-color="#000000" style="background: #000000"></div>
+                <div class="color-swatch" data-color="#374151" style="background: #374151"></div>
+                <div class="color-swatch" data-color="#6b7280" style="background: #6b7280"></div>
+                <div class="color-swatch" data-color="#d1d5db" style="background: #d1d5db"></div>
+                <div class="color-swatch" data-color="#f3f4f6" style="background: #f3f4f6"></div>
+                <div class="color-swatch" data-color="#ffffff" style="background: #ffffff; border: 1px solid #e5e7eb">
+                </div>
+                <div class="color-swatch" data-color="#ef4444" style="background: #ef4444"></div>
+                <div class="color-swatch" data-color="#f97316" style="background: #f97316"></div>
+                <div class="color-swatch" data-color="#eab308" style="background: #eab308"></div>
+                <div class="color-swatch" data-color="#22c55e" style="background: #22c55e"></div>
+                <div class="color-swatch" data-color="#06b6d4" style="background: #06b6d4"></div>
+                <div class="color-swatch" data-color="#3b82f6" style="background: #3b82f6"></div>
+                <div class="color-swatch" data-color="#8b5cf6" style="background: #8b5cf6"></div>
+                <div class="color-swatch" data-color="#ec4899" style="background: #ec4899"></div>
+                <div class="color-swatch" data-color="#14b8a6" style="background: #14b8a6"></div>
+                <div class="color-swatch" data-color="#6366f1" style="background: #6366f1"></div>
+                <div class="color-swatch" data-color="#a855f7" style="background: #a855f7"></div>
+                <div class="color-swatch" data-color="#f43f5e" style="background: #f43f5e"></div>
+            </div>
+        </div>
+
+        <!-- Custom Color Picker -->
+        <div class="color-section">
+            <h4>Custom color</h4>
+            <input type="color" id="custom-color-picker" class="custom-color-input">
+        </div>
+    </div>
+</div>
+
+<!-- Position/Layers Panel -->
+<div id="layers-panel" class="slide-panel hidden">
+    <div class="panel-header">
+        <h3>Position</h3>
+        <button type="button" class="btn-icon" id="close-layers-panel">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+    </div>
+    <div class="panel-body">
+        <!-- Tabs -->
+        <div class="layers-tabs">
+            <button type="button" class="layers-tab" data-tab="arrange">Arrange</button>
+            <button type="button" class="layers-tab active" data-tab="layers">Layers</button>
+        </div>
+
+        <!-- Layers Content -->
+        <div class="layers-content" id="layers-content">
+            <div class="layers-filter">
+                <button type="button" class="filter-btn active">All</button>
+                <button type="button" class="filter-btn">Overlapping</button>
+            </div>
+            <div class="layers-list" id="layers-list">
+                <!-- Dynamically populated by JS -->
+            </div>
+        </div>
+
+        <!-- Arrange Content -->
+        <div class="arrange-content hidden" id="arrange-content">
+            <div class="arrange-buttons">
+                <button type="button" class="arrange-btn" id="bring-to-front" title="Bring to Front">
+                    <span class="material-symbols-outlined">flip_to_front</span> Bring to front
+                </button>
+                <button type="button" class="arrange-btn" id="bring-forward" title="Bring Forward">
+                    <span class="material-symbols-outlined">move_up</span> Bring forward
+                </button>
+                <button type="button" class="arrange-btn" id="send-backward" title="Send Backward">
+                    <span class="material-symbols-outlined">move_down</span> Send backward
+                </button>
+                <button type="button" class="arrange-btn" id="send-to-back" title="Send to Back">
+                    <span class="material-symbols-outlined">flip_to_back</span> Send to back
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Preview Modal -->
 <div id="preview-modal" class="modal hidden">

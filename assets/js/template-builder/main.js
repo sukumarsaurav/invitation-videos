@@ -163,6 +163,9 @@ class TemplateBuilder {
         // Zoom and Pan controls
         this.setupZoomPan();
 
+        // Color and Layers panels
+        this.setupPanels();
+
         // Warn before leaving if unsaved
         window.addEventListener('beforeunload', (e) => {
             if (this.isDirty) {
@@ -1548,6 +1551,104 @@ class TemplateBuilder {
         if (this.slides.length > 0) {
             this.exporter.renderPreviewAtProgress(0);
         }
+    }
+
+    // Setup Color and Layers Panels
+    setupPanels() {
+        const colorPanel = document.getElementById('color-panel');
+        const layersPanel = document.getElementById('layers-panel');
+        const btnColorPicker = document.getElementById('canvas-bg-color');
+        const btnPosition = document.getElementById('btn-position');
+        const closeColorPanel = document.getElementById('close-color-panel');
+        const closeLayersPanel = document.getElementById('close-layers-panel');
+
+        // Open Color Panel when color picker clicked
+        if (btnColorPicker) {
+            btnColorPicker.addEventListener('click', (e) => {
+                e.preventDefault();
+                colorPanel?.classList.remove('hidden');
+                layersPanel?.classList.add('hidden');
+            });
+        }
+
+        // Open Layers Panel when Position clicked
+        if (btnPosition) {
+            btnPosition.addEventListener('click', () => {
+                layersPanel?.classList.remove('hidden');
+                colorPanel?.classList.add('hidden');
+                this.populateLayers();
+            });
+        }
+
+        // Close panels
+        closeColorPanel?.addEventListener('click', () => colorPanel?.classList.add('hidden'));
+        closeLayersPanel?.addEventListener('click', () => layersPanel?.classList.add('hidden'));
+
+        // Color swatches click
+        document.querySelectorAll('.color-swatch').forEach(swatch => {
+            swatch.addEventListener('click', () => {
+                const color = swatch.dataset.color;
+                this.applyBackgroundColor(color);
+                colorPanel?.classList.add('hidden');
+            });
+        });
+
+        // Custom color picker
+        const customColorPicker = document.getElementById('custom-color-picker');
+        customColorPicker?.addEventListener('change', (e) => {
+            this.applyBackgroundColor(e.target.value);
+        });
+
+        // Layers tabs
+        document.querySelectorAll('.layers-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.layers-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                const tabName = tab.dataset.tab;
+                document.getElementById('layers-content')?.classList.toggle('hidden', tabName !== 'layers');
+                document.getElementById('arrange-content')?.classList.toggle('hidden', tabName !== 'arrange');
+            });
+        });
+    }
+
+    // Populate layers list
+    populateLayers() {
+        const layersList = document.getElementById('layers-list');
+        if (!layersList) return;
+
+        const slide = this.slides.find(s => s.id == this.currentSlideId);
+        if (!slide || !slide.elements) {
+            layersList.innerHTML = '<div class="no-items-msg">No elements on this slide</div>';
+            return;
+        }
+
+        // Sort by z_index (highest first)
+        const sortedElements = [...slide.elements].sort((a, b) => (b.z_index || 0) - (a.z_index || 0));
+
+        layersList.innerHTML = sortedElements.map(el => `
+            <div class="layer-item" data-element-id="${el.id}">
+                <span class="material-symbols-outlined layer-drag-handle">drag_indicator</span>
+                <div class="layer-preview">
+                    ${el.type === 'image' ? `<img src="${el.content}" alt="">` : el.content?.substring(0, 20) || el.type}
+                </div>
+                <div class="layer-info">${el.type === 'text' ? (el.content || 'Text') : el.type}</div>
+            </div>
+        `).join('');
+    }
+
+    // Apply background color to current slide
+    applyBackgroundColor(color) {
+        const slide = this.slides.find(s => s.id == this.currentSlideId);
+        if (!slide) return;
+
+        slide.background_color = color;
+        slide.background_gradient = null;
+        slide.background_image = null;
+
+        this.renderCanvas();
+        this.renderSlidesStrip();
+        this.markDirty();
     }
 }
 
