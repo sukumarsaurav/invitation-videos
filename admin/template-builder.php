@@ -10,29 +10,32 @@ require_once __DIR__ . '/../src/Core/Security.php';
 
 $templateId = intval($_GET['id'] ?? 0);
 
-if (!$templateId) {
-    header('Location: /admin/templates.php');
-    exit;
+// Get all templates for the Design panel
+$allTemplates = Database::fetchAll("SELECT id, title, slug, thumbnail_url, category, is_active FROM templates ORDER BY created_at DESC");
+
+// Check if a template is selected
+$template = null;
+$hasSelectedTemplate = false;
+if ($templateId) {
+    $template = Database::fetchOne("SELECT * FROM templates WHERE id = ?", [$templateId]);
+    $hasSelectedTemplate = !!$template;
 }
 
-// Get template info
-$template = Database::fetchOne("SELECT * FROM templates WHERE id = ?", [$templateId]);
-if (!$template) {
-    header('Location: /admin/templates.php');
-    exit;
+// Get existing slides (only if template selected)
+$slides = [];
+$fields = [];
+if ($hasSelectedTemplate) {
+    $slides = Database::fetchAll(
+        "SELECT * FROM template_slides WHERE template_id = ? ORDER BY slide_order",
+        [$templateId]
+    );
+
+    // Get template fields with slide assignments
+    $fields = Database::fetchAll(
+        "SELECT * FROM template_fields WHERE template_id = ? ORDER BY display_order",
+        [$templateId]
+    );
 }
-
-// Get existing slides
-$slides = Database::fetchAll(
-    "SELECT * FROM template_slides WHERE template_id = ? ORDER BY slide_order",
-    [$templateId]
-);
-
-// Get template fields with slide assignments
-$fields = Database::fetchAll(
-    "SELECT * FROM template_fields WHERE template_id = ? ORDER BY display_order",
-    [$templateId]
-);
 
 // Get field presets for quick add
 $presets = Database::fetchAll(
@@ -47,7 +50,7 @@ foreach ($presets as $preset) {
 }
 
 $pendingTickets = 0;
-$pageTitle = 'Template Builder: ' . $template['title'];
+$pageTitle = $hasSelectedTemplate ? 'Template Builder: ' . $template['title'] : 'Template Builder';
 ?>
 
 <?php ob_start(); ?>
@@ -123,7 +126,11 @@ $pageTitle = 'Template Builder: ' . $template['title'];
     <div class="builder-content">
         <!-- Icon Sidebar -->
         <div class="icon-sidebar">
-            <button class="icon-btn active" data-panel="fields" title="Fields">
+            <button class="icon-btn <?= !$hasSelectedTemplate ? 'active' : '' ?>" data-panel="design" title="Templates">
+                <span class="material-symbols-outlined">design_services</span>
+                <span class="icon-label">Design</span>
+            </button>
+            <button class="icon-btn <?= $hasSelectedTemplate ? 'active' : '' ?>" data-panel="fields" title="Fields">
                 <span class="material-symbols-outlined">text_fields</span>
                 <span class="icon-label">Fields</span>
             </button>
@@ -159,8 +166,69 @@ $pageTitle = 'Template Builder: ' . $template['title'];
 
         <!-- Content Panel (slides in/out based on selection) -->
         <div class="content-panel open" id="content-panel">
+            <!-- Design Panel - Template Selection -->
+            <div class="panel-view <?= !$hasSelectedTemplate ? 'active' : '' ?>" id="panel-design">
+                <div class="panel-header">
+                    <h3>Select Template</h3>
+                </div>
+                <div class="panel-body">
+                    <?php if ($hasSelectedTemplate): ?>
+                        <div class="current-template-info"
+                            style="margin-bottom: 1rem; padding: 0.75rem; background: var(--primary-color); border-radius: 0.5rem; color: white;">
+                            <p style="font-size: 0.75rem; opacity: 0.8; margin-bottom: 0.25rem;">Currently Editing:</p>
+                            <p style="font-weight: 600;"><?= Security::escape($template['title']) ?></p>
+                        </div>
+                    <?php endif; ?>
+
+                    <div class="template-grid"
+                        style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
+                        <?php foreach ($allTemplates as $tpl): ?>
+                            <a href="/admin/template-builder.php?id=<?= $tpl['id'] ?>"
+                                class="template-card <?= $tpl['id'] == $templateId ? 'selected' : '' ?>"
+                                style="display: block; text-decoration: none; border-radius: 0.5rem; overflow: hidden; border: 2px solid <?= $tpl['id'] == $templateId ? 'var(--primary-color)' : 'var(--border-color)' ?>; background: var(--surface-color); transition: all 0.2s;">
+                                <div style="aspect-ratio: 9/16; background: #f1f5f9; overflow: hidden;">
+                                    <?php if (!empty($tpl['thumbnail_url'])): ?>
+                                        <img src="<?= Security::escape($tpl['thumbnail_url']) ?>"
+                                            alt="<?= Security::escape($tpl['title']) ?>"
+                                            style="width: 100%; height: 100%; object-fit: cover;">
+                                    <?php else: ?>
+                                        <div
+                                            style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #94a3b8;">
+                                            <span class="material-symbols-outlined"
+                                                style="font-size: 2rem;">video_library</span>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                                <div style="padding: 0.5rem;">
+                                    <p
+                                        style="font-size: 0.75rem; font-weight: 600; color: var(--text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                        <?= Security::escape($tpl['title']) ?></p>
+                                    <div
+                                        style="display: flex; align-items: center; justify-content: space-between; margin-top: 0.25rem;">
+                                        <span
+                                            style="font-size: 0.625rem; color: #64748b; text-transform: capitalize;"><?= $tpl['category'] ?></span>
+                                        <span
+                                            style="font-size: 0.625rem; padding: 0.125rem 0.375rem; border-radius: 9999px; background: <?= $tpl['is_active'] ? '#dcfce7' : '#f1f5f9' ?>; color: <?= $tpl['is_active'] ? '#16a34a' : '#64748b' ?>;"><?= $tpl['is_active'] ? 'Active' : 'Draft' ?></span>
+                                    </div>
+                                </div>
+                            </a>
+                        <?php endforeach; ?>
+
+                        <?php if (empty($allTemplates)): ?>
+                            <div style="grid-column: span 2; text-align: center; padding: 2rem; color: #64748b;">
+                                <span class="material-symbols-outlined"
+                                    style="font-size: 3rem; opacity: 0.5;">video_library</span>
+                                <p style="margin-top: 0.5rem;">No templates yet</p>
+                                <a href="/admin/templates.php?action=new"
+                                    style="color: var(--primary-color); font-weight: 600;">Create Template</a>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+
             <!-- Fields Panel -->
-            <div class="panel-view active" id="panel-fields">
+            <div class="panel-view <?= $hasSelectedTemplate ? 'active' : '' ?>" id="panel-fields">
                 <div class="panel-header">
                     <h3>Fields</h3>
                 </div>
