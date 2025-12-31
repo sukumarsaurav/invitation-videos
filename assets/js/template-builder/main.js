@@ -1516,7 +1516,7 @@ class TemplateBuilder {
                 this.refreshTimeline();
 
                 // Update color panel preview
-                this.updateColorPreview();
+                this.updateBackgroundInfo();
 
                 this.isDirty = true;
             });

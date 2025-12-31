@@ -26,8 +26,10 @@ export class Exporter {
         const startOffset = this.pausedAt || 0;
         this.startTime = performance.now() - startOffset;
 
-        document.getElementById('btn-play-preview').innerHTML =
-            '<span class="material-symbols-outlined">pause</span>';
+        const playBtn = document.getElementById('btn-play-overlay');
+        if (playBtn) {
+            playBtn.classList.add('playing');
+        }
 
         const animate = (currentTime) => {
             if (!this.isPlaying) return;
@@ -93,8 +95,10 @@ export class Exporter {
             cancelAnimationFrame(this.animationFrame);
             this.animationFrame = null;
         }
-        document.getElementById('btn-play-preview').innerHTML =
-            '<span class="material-symbols-outlined">play_arrow</span>';
+        const playBtn = document.getElementById('btn-play-overlay');
+        if (playBtn) {
+            playBtn.classList.remove('playing');
+        }
     }
 
     togglePreview() {
@@ -116,8 +120,10 @@ export class Exporter {
             cancelAnimationFrame(this.animationFrame);
             this.animationFrame = null;
         }
-        document.getElementById('btn-play-preview').innerHTML =
-            '<span class="material-symbols-outlined">play_arrow</span>';
+        const playBtn = document.getElementById('btn-play-overlay');
+        if (playBtn) {
+            playBtn.classList.remove('playing');
+        }
     }
 
     seekPreview(progressPercent) {
