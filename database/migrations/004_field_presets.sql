@@ -68,3 +68,66 @@ INSERT INTO `field_presets` (`name`, `field_name`, `field_type`, `placeholder`, 
 ('Shower Time', 'shower_time', 'time', NULL, '14:00', 'baby_shower', 'schedule', 5),
 ('Shower Venue', 'shower_venue', 'text', 'Location', 'Home Sweet Home', 'baby_shower', 'location_on', 6),
 ('Registry Link', 'registry_link', 'text', 'Gift registry URL', 'https://registry.com/baby', 'baby_shower', 'card_giftcard', 7);
+
+-- Insert default presets for Hindu Wedding (General/North)
+INSERT INTO `field_presets` (`name`, `field_name`, `field_type`, `placeholder`, `sample_value`, `category`, `icon`, `display_order`) VALUES
+('Roka Ceremony', 'roka_date', 'datetime', 'Date & Time', '2025-06-10 10:00:00', 'wedding_hindu', 'ring_volume', 1),
+('Engagement (Sagai)', 'engagement_date', 'datetime', 'Date & Time', '2025-06-12 19:00:00', 'wedding_hindu', 'diamond', 2),
+('Tilak Ceremony', 'tilak_date', 'datetime', 'Date & Time', '2025-06-13 11:00:00', 'wedding_hindu', 'blender', 3),
+('Haldi Ceremony', 'haldi_date', 'datetime', 'Date & Time', '2025-06-14 10:00:00', 'wedding_hindu', 'wb_sunny', 4),
+('Mehendi Ceremony', 'mehendi_date', 'datetime', 'Date & Time', '2025-06-14 16:00:00', 'wedding_hindu', 'brush', 5),
+('Sangeet Night', 'sangeet_date', 'datetime', 'Date & Time', '2025-06-14 20:00:00', 'wedding_hindu', 'music_note', 6),
+('Mandap Muhurat', 'mandap_muhurat', 'datetime', 'Date & Time', '2025-06-15 08:00:00', 'wedding_hindu', 'temple_hindu', 7),
+('Baraat Arrival', 'baraat_time', 'time', 'Time', '19:00', 'wedding_hindu', 'directions_bus', 8),
+('Reception Party', 'reception_date', 'datetime', 'Date & Time', '2025-06-16 19:30:00', 'wedding_hindu', 'celebration', 9);
+
+-- Insert default presets for Muslim Wedding
+INSERT INTO `field_presets` (`name`, `field_name`, `field_type`, `placeholder`, `sample_value`, `category`, `icon`, `display_order`) VALUES
+('Manjha (Haldi)', 'manjha_date', 'datetime', 'Date & Time', '2025-06-12 11:00:00', 'wedding_muslim', 'wb_sunny', 1),
+('Mehendi', 'muslim_mehendi_date', 'datetime', 'Date & Time', '2025-06-13 16:00:00', 'wedding_muslim', 'brush', 2),
+('Sanchaq', 'sanchaq_date', 'datetime', 'Date & Time', '2025-06-14 18:00:00', 'wedding_muslim', 'dry_cleaning', 3),
+('Nikah Ceremony', 'nikah_date', 'datetime', 'Date & Time', '2025-06-15 14:00:00', 'wedding_muslim', 'handshake', 4),
+('Arsi Mashaf', 'arsi_mashaf_time', 'time', 'Time', '15:00', 'wedding_muslim', 'visibility', 5),
+('Rukhsati', 'rukhsati_time', 'time', 'Time', '18:00', 'wedding_muslim', 'time_to_leave', 6),
+('Walima (Reception)', 'walima_date', 'datetime', 'Date & Time', '2025-06-16 20:00:00', 'wedding_muslim', 'restaurant', 7);
+
+-- Insert default presets for Punjabi/Sikh Wedding
+INSERT INTO `field_presets` (`name`, `field_name`, `field_type`, `placeholder`, `sample_value`, `category`, `icon`, `display_order`) VALUES
+('Roka/Thaka', 'punjabi_roka_date', 'datetime', 'Date & Time', '2025-06-10 11:00:00', 'wedding_punjabi', 'verified', 1),
+('Maiyan/Vatna', 'maiyan_date', 'datetime', 'Date & Time', '2025-06-13 10:00:00', 'wedding_punjabi', 'clean_hands', 2),
+('Jaago Night', 'jaago_date', 'datetime', 'Date & Time', '2025-06-14 19:00:00', 'wedding_punjabi', 'lightbulb', 3),
+('Chooda Ceremony', 'chooda_time', 'datetime', 'Date & Time', '2025-06-15 05:00:00', 'wedding_punjabi', 'bracelet', 4),
+('Anand Karaj', 'anand_karaj_date', 'datetime', 'Date & Time', '2025-06-15 11:00:00', 'wedding_punjabi', 'temple_sikh', 5),
+('Langar/Lunch', 'langar_time', 'time', 'Time', '13:00', 'wedding_punjabi', 'restaurant', 6),
+('Doli', 'doli_time', 'time', 'Time', '15:00', 'wedding_punjabi', 'flight_takeoff', 7);
+
+-- Insert default presets for Bihari Wedding
+INSERT INTO `field_presets` (`name`, `field_name`, `field_type`, `placeholder`, `sample_value`, `category`, `icon`, `display_order`) VALUES
+('Satyanarayan Katha', 'katha_date', 'datetime', 'Date & Time', '2025-06-12 09:00:00', 'wedding_bihari', 'menu_book', 1),
+('Cheka (Engagement)', 'cheka_date', 'datetime', 'Date & Time', '2025-06-12 18:00:00', 'wedding_bihari', 'diamond', 2),
+('Haldi (Uptan)', 'bihari_haldi_date', 'datetime', 'Date & Time', '2025-06-14 09:00:00', 'wedding_bihari', 'soap', 3),
+('Matkor Ceremony', 'matkor_date', 'datetime', 'Date & Time', '2025-06-14 17:00:00', 'wedding_bihari', 'terrain', 4),
+('Tilak', 'bihari_tilak_date', 'datetime', 'Date & Time', '2025-06-14 19:00:00', 'wedding_bihari', 'face', 5),
+('Vivah Muhurat', 'vivah_date', 'datetime', 'Date & Time', '2025-06-15 23:00:00', 'wedding_bihari', 'favorite', 6),
+('Kohbar', 'kohbar_time', 'time', 'Time', '06:00', 'wedding_bihari', 'home', 7);
+
+-- Insert default presets for Bengali Wedding
+INSERT INTO `field_presets` (`name`, `field_name`, `field_type`, `placeholder`, `sample_value`, `category`, `icon`, `display_order`) VALUES
+('Aiburobhat', 'aiburobhat_date', 'datetime', 'Date & Time', '2025-06-13 13:00:00', 'wedding_bengali', 'rice_bowl', 1),
+('Gaye Holud', 'gaye_holud_date', 'datetime', 'Date & Time', '2025-06-14 10:00:00', 'wedding_bengali', 'wb_sunny', 2),
+('Bor Jatri', 'bor_jatri_time', 'time', 'Time', '18:00', 'wedding_bengali', 'directions_walk', 3),
+('Subho Drishti', 'subho_drishti_time', 'time', 'Time', '20:00', 'wedding_bengali', 'visibility', 4),
+('Mala Bodol', 'mala_bodol_time', 'time', 'Time', '20:30', 'wedding_bengali', 'attractions', 5),
+('Sindoor Daan', 'sindoor_daan_time', 'time', 'Time', '22:00', 'wedding_bengali', 'face_retouching_natural', 6),
+('Bou Bhat', 'bou_bhat_date', 'datetime', 'Date & Time', '2025-06-16 13:00:00', 'wedding_bengali', 'restaurant_menu', 7);
+
+-- Insert default presets for Marathi Wedding
+INSERT INTO `field_presets` (`name`, `field_name`, `field_type`, `placeholder`, `sample_value`, `category`, `icon`, `display_order`) VALUES
+('Sakhar Puda', 'sakhar_puda_date', 'datetime', 'Date & Time', '2025-06-10 11:00:00', 'wedding_marathi', 'cookie', 1),
+('Kelvan', 'kelvan_date', 'datetime', 'Date & Time', '2025-06-12 12:00:00', 'wedding_marathi', 'restaurant', 2),
+('Halad Chadavne', 'halad_chadavne_date', 'datetime', 'Date & Time', '2025-06-14 10:00:00', 'wedding_marathi', 'wb_sunny', 3),
+('Simant Pujan', 'simant_pujan_time', 'datetime', 'Date & Time', '2025-06-15 09:00:00', 'wedding_marathi', 'handshake', 4),
+('Lagna Muhurat', 'lagna_muhurat', 'datetime', 'Date & Time', '2025-06-15 12:35:00', 'wedding_marathi', 'alarm', 5),
+('Saptapadi', 'saptapadi_time', 'time', 'Time', '14:00', 'wedding_marathi', 'timeline', 6),
+('Grihapravesh', 'grihapravesh_time', 'time', 'Time', '18:00', 'wedding_marathi', 'door_front', 7);
+

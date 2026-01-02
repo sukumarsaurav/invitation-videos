@@ -42,6 +42,7 @@ try {
     error_log("Razorpay Webhook: Received event type: $eventType");
 
     switch ($eventType) {
+        // Payment Events
         case 'payment.captured':
             handlePaymentCaptured($event['payload']['payment']['entity']);
             break;
@@ -54,17 +55,41 @@ try {
             handlePaymentFailed($event['payload']['payment']['entity']);
             break;
 
+        // Order Events
+        case 'order.paid':
+            handleOrderPaid($event['payload']['order']['entity'], $event['payload']['payment']['entity']);
+            break;
+
+        // Refund Events
         case 'refund.created':
+        case 'refund.processed':
             handleRefundCreated($event['payload']['refund']['entity']);
             break;
 
-        case 'order.paid':
-            handleOrderPaid($event['payload']['order']['entity'], $event['payload']['payment']['entity']);
+        case 'refund.failed':
+            error_log("Razorpay Webhook: Refund failed - " . json_encode($event['payload']['refund']['entity'] ?? []));
+            break;
+
+        // Dispute Events
+        case 'payment.dispute.created':
+        case 'payment.dispute.under_review':
+        case 'payment.dispute.action_required':
+            handleDisputeCreated($event['payload']['dispute']['entity'] ?? $event['payload']['payment']['entity']);
+            break;
+
+        case 'payment.dispute.won':
+            handleDisputeWon($event['payload']['dispute']['entity'] ?? $event['payload']['payment']['entity']);
+            break;
+
+        case 'payment.dispute.lost':
+        case 'payment.dispute.closed':
+            handleDisputeLost($event['payload']['dispute']['entity'] ?? $event['payload']['payment']['entity']);
             break;
 
         default:
             error_log("Razorpay Webhook: Unhandled event type: $eventType");
     }
+
 
     // Return success
     http_response_code(200);
@@ -234,3 +259,79 @@ function handleOrderPaid(array $razorpayOrder, array $payment): void
     // Already handled by payment.captured in most cases
     error_log("Razorpay Webhook: Order paid event for: $razorpayOrderId");
 }
+
+/**
+ * Handle dispute created/under review
+ */
+function handleDisputeCreated(array $dispute): void
+{
+    $paymentId = $dispute['payment_id'] ?? null;
+
+    if (!$paymentId) {
+        return;
+    }
+
+    $order = Database::fetchOne("SELECT * FROM orders WHERE payment_id = ?", [$paymentId]);
+
+    if ($order) {
+        Database::query(
+            "UPDATE orders SET notes = CONCAT(COALESCE(notes, ''), '\nDispute opened: ', ?) WHERE id = ?",
+            [date('Y-m-d H:i:s'), $order['id']]
+        );
+
+        error_log("Razorpay Webhook: Dispute opened for Order #{$order['id']}");
+    }
+}
+
+/**
+ * Handle dispute won
+ */
+function handleDisputeWon(array $dispute): void
+{
+    $paymentId = $dispute['payment_id'] ?? null;
+
+    if (!$paymentId) {
+        return;
+    }
+
+    $order = Database::fetchOne("SELECT * FROM orders WHERE payment_id = ?", [$paymentId]);
+
+    if ($order) {
+        Database::query(
+            "UPDATE orders SET notes = CONCAT(COALESCE(notes, ''), '\nDispute won: ', ?) WHERE id = ?",
+            [date('Y-m-d H:i:s'), $order['id']]
+        );
+
+        error_log("Razorpay Webhook: Dispute WON for Order #{$order['id']}");
+    }
+}
+
+/**
+ * Handle dispute lost
+ */
+function handleDisputeLost(array $dispute): void
+{
+    $paymentId = $dispute['payment_id'] ?? null;
+
+    if (!$paymentId) {
+        return;
+    }
+
+    $order = Database::fetchOne("SELECT * FROM orders WHERE payment_id = ?", [$paymentId]);
+
+    if ($order) {
+        // Mark order as disputed/refunded since we lost the dispute
+        Database::query(
+            "UPDATE orders SET 
+                status = 'disputed',
+                payment_status = 'disputed',
+                order_status = 'cancelled',
+                notes = CONCAT(COALESCE(notes, ''), '\nDispute LOST: ', ?)
+             WHERE id = ?",
+            [date('Y-m-d H:i:s'), $order['id']]
+        );
+
+        error_log("Razorpay Webhook: Dispute LOST for Order #{$order['id']}");
+    }
+}
+

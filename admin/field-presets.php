@@ -87,7 +87,10 @@ if ($action === 'edit' && isset($_GET['id'])) {
     $editPreset = Database::fetchOne("SELECT * FROM field_presets WHERE id = ?", [intval($_GET['id'])]);
 }
 
-$categories = ['wedding', 'birthday', 'baby_shower', 'corporate', 'anniversary', 'general'];
+$categories = [
+    'wedding', 'wedding_hindu', 'wedding_muslim', 'wedding_punjabi', 'wedding_bihari', 'wedding_bengali', 'wedding_marathi',
+    'birthday', 'baby_shower', 'corporate', 'anniversary', 'general'
+];
 $fieldTypes = ['text', 'textarea', 'date', 'time', 'datetime', 'image', 'music', 'color', 'select', 'number'];
 ?>
 

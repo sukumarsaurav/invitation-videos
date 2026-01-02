@@ -188,7 +188,8 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
                     <div>
                         <h2 class="text-2xl font-bold">Order #<?= Security::escape($viewOrder['order_number']) ?></h2>
                         <p class="text-slate-500 mt-1">Placed on
-                            <?= date('F j, Y \a\t g:i A', strtotime($viewOrder['created_at'])) ?></p>
+                            <?= date('F j, Y \a\t g:i A', strtotime($viewOrder['created_at'])) ?>
+                        </p>
                     </div>
                     <div class="flex gap-2">
                         <?php
@@ -210,7 +211,8 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
                     <div>
                         <span class="text-xs text-slate-500 uppercase">Amount</span>
                         <p class="font-bold text-lg">
-                            <?= $viewOrder['currency'] === 'INR' ? '₹' : '$' ?>    <?= number_format($viewOrder['amount'], 2) ?>
+                            <?= $viewOrder['currency'] === 'INR' ? '₹' : '$' ?>
+                            <?= number_format($viewOrder['amount'], 2) ?>
                         </p>
                     </div>
                     <div>
@@ -286,7 +288,8 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
                                         </div>
                                     <?php endif; ?>
                                     <p class="text-xs text-slate-500 mt-2 truncate capitalize">
-                                        <?= str_replace('_', ' ', $upload['field_name']) ?></p>
+                                        <?= str_replace('_', ' ', $upload['field_name']) ?>
+                                    </p>
                                     <a href="<?= Security::escape($upload['file_path']) ?>" download
                                         class="absolute top-2 right-2 p-1.5 bg-white/90 rounded-lg shadow opacity-0 group-hover:opacity-100 transition-opacity">
                                         <span class="material-symbols-outlined text-sm">download</span>
@@ -316,7 +319,8 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
                                 <div>
                                     <p class="font-bold text-green-800">Video Delivered</p>
                                     <p class="text-sm text-green-700">Uploaded on
-                                        <?= date('M j, Y', strtotime($viewOrder['video_uploaded_at'])) ?></p>
+                                        <?= date('M j, Y', strtotime($viewOrder['video_uploaded_at'])) ?>
+                                    </p>
                                     <?php if ($viewOrder['video_expires_at']): ?>
                                         <p class="text-xs text-green-600 mt-1">
                                             Expires: <?= date('M j, Y', strtotime($viewOrder['video_expires_at'])) ?>
@@ -345,32 +349,269 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
                             </a>
                         </div>
                     <?php else: ?>
-                        <!-- Upload form -->
-                        <form method="POST" enctype="multipart/form-data" class="space-y-4">
-                            <input type="hidden" name="order_id" value="<?= $viewOrder['id'] ?>">
-                            <input type="hidden" name="upload_video" value="1">
+                        <!-- Upload form with progress -->
+                        <div id="upload-container">
+                            <!-- Upload Form -->
+                            <div id="upload-form-section">
+                                <div id="upload-dropzone"
+                                    class="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center hover:border-primary/50 transition-colors cursor-pointer"
+                                    onclick="document.getElementById('video-file-input').click()">
+                                    <span class="material-symbols-outlined text-5xl text-slate-300 mb-3">cloud_upload</span>
+                                    <p class="font-medium text-slate-700 mb-2">Upload Completed Video</p>
+                                    <p class="text-sm text-slate-500 mb-4">MP4 format, max 100MB • Click or drag & drop</p>
+                                    <input type="file" id="video-file-input" accept="video/mp4,video/*" class="hidden"
+                                        onchange="handleFileSelect(this)">
+                                    <button type="button"
+                                        onclick="event.stopPropagation(); document.getElementById('video-file-input').click()"
+                                        class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg font-bold text-sm hover:bg-primary/90">
+                                        <span class="material-symbols-outlined text-lg">folder_open</span>
+                                        Choose File
+                                    </button>
+                                </div>
 
-                            <div
-                                class="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center hover:border-primary/50 transition-colors">
-                                <span class="material-symbols-outlined text-5xl text-slate-300 mb-3">cloud_upload</span>
-                                <p class="font-medium text-slate-700 mb-2">Upload Completed Video</p>
-                                <p class="text-sm text-slate-500 mb-4">MP4 format, max 100MB</p>
-                                <input type="file" name="video_file" accept="video/mp4,video/*" required
-                                    class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-primary file:text-white hover:file:bg-primary/90">
+                                <!-- Selected file preview -->
+                                <div id="file-preview" class="hidden mt-4 p-4 bg-slate-50 rounded-lg">
+                                    <div class="flex items-center gap-3">
+                                        <span class="material-symbols-outlined text-3xl text-primary">video_file</span>
+                                        <div class="flex-1 min-w-0">
+                                            <p id="file-name" class="font-medium text-slate-900 truncate"></p>
+                                            <p id="file-size" class="text-sm text-slate-500"></p>
+                                        </div>
+                                        <button type="button" onclick="clearFile()" class="p-2 hover:bg-slate-200 rounded-lg">
+                                            <span class="material-symbols-outlined text-slate-500">close</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center gap-2 text-sm text-slate-500 mt-4">
+                                    <span class="material-symbols-outlined text-lg">info</span>
+                                    Video will be available for customer download for 7 days after upload.
+                                </div>
+
+                                <button type="button" id="upload-btn" onclick="startUpload()" disabled
+                                    class="w-full mt-4 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <span class="material-symbols-outlined">upload</span>
+                                    Upload & Mark Complete
+                                </button>
                             </div>
 
-                            <div class="flex items-center gap-2 text-sm text-slate-500">
-                                <span class="material-symbols-outlined text-lg">info</span>
-                                Video will be available for customer download for 7 days after upload.
+                            <!-- Upload Progress -->
+                            <div id="upload-progress-section" class="hidden">
+                                <div class="text-center py-8">
+                                    <!-- Circular Progress -->
+                                    <div class="relative inline-flex items-center justify-center">
+                                        <svg class="w-32 h-32 transform -rotate-90">
+                                            <circle cx="64" cy="64" r="56" stroke="#e2e8f0" stroke-width="8" fill="none" />
+                                            <circle id="progress-circle" cx="64" cy="64" r="56" stroke="#7f13ec"
+                                                stroke-width="8" fill="none" stroke-linecap="round" stroke-dasharray="351.86"
+                                                stroke-dashoffset="351.86" style="transition: stroke-dashoffset 0.3s ease" />
+                                        </svg>
+                                        <div class="absolute inset-0 flex items-center justify-center">
+                                            <span id="progress-percent" class="text-3xl font-bold text-slate-900">0%</span>
+                                        </div>
+                                    </div>
+
+                                    <p id="upload-status" class="text-lg font-medium text-slate-700 mt-4">Uploading...</p>
+                                    <p id="upload-detail" class="text-sm text-slate-500 mt-1">Starting upload...</p>
+                                </div>
                             </div>
 
-                            <button type="submit"
-                                class="w-full py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
-                                <span class="material-symbols-outlined">upload</span>
-                                Upload & Mark Complete
-                            </button>
-                        </form>
+                            <!-- Upload Success -->
+                            <div id="upload-success-section" class="hidden">
+                                <div class="text-center py-8">
+                                    <div
+                                        class="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+                                        <span class="material-symbols-outlined text-4xl text-green-600">check_circle</span>
+                                    </div>
+                                    <p class="text-xl font-bold text-green-800">Upload Complete!</p>
+                                    <p class="text-sm text-slate-500 mt-2">Video has been uploaded and order marked as complete.
+                                    </p>
+                                    <button onclick="location.reload()"
+                                        class="mt-4 px-6 py-2 bg-primary text-white rounded-lg font-bold">
+                                        Refresh Page
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Upload Error -->
+                            <div id="upload-error-section" class="hidden">
+                                <div class="text-center py-8">
+                                    <div
+                                        class="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+                                        <span class="material-symbols-outlined text-4xl text-red-600">error</span>
+                                    </div>
+                                    <p class="text-xl font-bold text-red-800">Upload Failed</p>
+                                    <p id="error-message" class="text-sm text-red-600 mt-2"></p>
+                                    <button onclick="resetUpload()"
+                                        class="mt-4 px-6 py-2 bg-slate-100 text-slate-700 rounded-lg font-bold hover:bg-slate-200">
+                                        Try Again
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <script>
+                            let selectedFile = null;
+                            const orderId = <?= $viewOrder['id'] ?>;
+
+                            function handleFileSelect(input) {
+                                const file = input.files[0];
+                                if (!file) return;
+
+                                // Validate file type
+                                if (!file.type.startsWith('video/')) {
+                                    alert('Please select a video file');
+                                    return;
+                                }
+
+                                // Validate file size (100MB max)
+                                const maxSize = 100 * 1024 * 1024;
+                                if (file.size > maxSize) {
+                                    alert('File size exceeds 100MB limit');
+                                    return;
+                                }
+
+                                selectedFile = file;
+
+                                // Show preview
+                                document.getElementById('file-preview').classList.remove('hidden');
+                                document.getElementById('file-name').textContent = file.name;
+                                document.getElementById('file-size').textContent = formatFileSize(file.size);
+                                document.getElementById('upload-btn').disabled = false;
+                            }
+
+                            function clearFile() {
+                                selectedFile = null;
+                                document.getElementById('video-file-input').value = '';
+                                document.getElementById('file-preview').classList.add('hidden');
+                                document.getElementById('upload-btn').disabled = true;
+                            }
+
+                            function formatFileSize(bytes) {
+                                if (bytes < 1024) return bytes + ' B';
+                                if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+                                return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+                            }
+
+                            function startUpload() {
+                                if (!selectedFile) return;
+
+                                // Show progress section
+                                document.getElementById('upload-form-section').classList.add('hidden');
+                                document.getElementById('upload-progress-section').classList.remove('hidden');
+
+                                const formData = new FormData();
+                                formData.append('video_file', selectedFile);
+                                formData.append('order_id', orderId);
+                                formData.append('upload_video', '1');
+
+                                const xhr = new XMLHttpRequest();
+
+                                // Progress handler
+                                xhr.upload.addEventListener('progress', (e) => {
+                                    if (e.lengthComputable) {
+                                        const percent = Math.round((e.loaded / e.total) * 100);
+                                        updateProgress(percent, e.loaded, e.total);
+                                    }
+                                });
+
+                                // Complete handler
+                                xhr.addEventListener('load', () => {
+                                    if (xhr.status === 200) {
+                                        // Check if redirect (success)
+                                        if (xhr.responseURL.includes('success=video_uploaded') || xhr.status === 200) {
+                                            showSuccess();
+                                        } else {
+                                            showError('Upload completed but status update failed. Please refresh.');
+                                        }
+                                    } else {
+                                        showError('Server error: ' + xhr.status);
+                                    }
+                                });
+
+                                // Error handler
+                                xhr.addEventListener('error', () => {
+                                    showError('Network error. Please check your connection and try again.');
+                                });
+
+                                // Timeout handler
+                                xhr.addEventListener('timeout', () => {
+                                    showError('Upload timed out. The file may be too large.');
+                                });
+
+                                xhr.timeout = 300000; // 5 minutes timeout
+                                xhr.open('POST', '/admin/orders.php');
+                                xhr.send(formData);
+                            }
+
+                            function updateProgress(percent, loaded, total) {
+                                // Update percentage text
+                                document.getElementById('progress-percent').textContent = percent + '%';
+
+                                // Update circular progress
+                                const circle = document.getElementById('progress-circle');
+                                const circumference = 2 * Math.PI * 56; // 351.86
+                                const offset = circumference - (percent / 100) * circumference;
+                                circle.style.strokeDashoffset = offset;
+
+                                // Update status text
+                                document.getElementById('upload-status').textContent =
+                                    percent < 100 ? 'Uploading...' : 'Processing...';
+                                document.getElementById('upload-detail').textContent =
+                                    formatFileSize(loaded) + ' / ' + formatFileSize(total);
+                            }
+
+                            function showSuccess() {
+                                document.getElementById('upload-progress-section').classList.add('hidden');
+                                document.getElementById('upload-success-section').classList.remove('hidden');
+                            }
+
+                            function showError(message) {
+                                document.getElementById('upload-progress-section').classList.add('hidden');
+                                document.getElementById('upload-error-section').classList.remove('hidden');
+                                document.getElementById('error-message').textContent = message;
+                            }
+
+                            function resetUpload() {
+                                selectedFile = null;
+                                document.getElementById('video-file-input').value = '';
+                                document.getElementById('file-preview').classList.add('hidden');
+                                document.getElementById('upload-btn').disabled = true;
+
+                                document.getElementById('upload-error-section').classList.add('hidden');
+                                document.getElementById('upload-form-section').classList.remove('hidden');
+
+                                // Reset progress
+                                document.getElementById('progress-percent').textContent = '0%';
+                                document.getElementById('progress-circle').style.strokeDashoffset = 351.86;
+                            }
+
+                            // Drag and drop support
+                            const dropzone = document.getElementById('upload-dropzone');
+
+                            dropzone.addEventListener('dragover', (e) => {
+                                e.preventDefault();
+                                dropzone.classList.add('border-primary', 'bg-primary/5');
+                            });
+
+                            dropzone.addEventListener('dragleave', (e) => {
+                                e.preventDefault();
+                                dropzone.classList.remove('border-primary', 'bg-primary/5');
+                            });
+
+                            dropzone.addEventListener('drop', (e) => {
+                                e.preventDefault();
+                                dropzone.classList.remove('border-primary', 'bg-primary/5');
+
+                                const files = e.dataTransfer.files;
+                                if (files.length > 0) {
+                                    document.getElementById('video-file-input').files = files;
+                                    handleFileSelect(document.getElementById('video-file-input'));
+                                }
+                            });
+                        </script>
                     <?php endif; ?>
+
                 </div>
             </div>
         </div>
@@ -590,9 +831,11 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
                                     </div>
                                     <div>
                                         <p class="font-medium text-slate-900 dark:text-white">
-                                            <?= Security::escape($order['customer_name'] ?? 'Unknown') ?></p>
+                                            <?= Security::escape($order['customer_name'] ?? 'Unknown') ?>
+                                        </p>
                                         <p class="text-xs text-slate-500">
-                                            <?= Security::escape($order['customer_email'] ?? '') ?></p>
+                                            <?= Security::escape($order['customer_email'] ?? '') ?>
+                                        </p>
                                     </div>
                                 </div>
                             </td>
@@ -612,7 +855,7 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
                             </td>
                             <td class="px-6 py-4">
                                 <span class="font-bold text-slate-900 dark:text-white">
-                                    <?= $order['currency'] === 'INR' ? '₹' : '$' ?>        <?= number_format($order['amount'], 2) ?>
+                                    <?= $order['currency'] === 'INR' ? '₹' : '$' ?>         <?= number_format($order['amount'], 2) ?>
                                 </span>
                             </td>
                             <td class="px-6 py-4">
