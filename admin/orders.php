@@ -10,41 +10,92 @@ require_once __DIR__ . '/auth.php';
 // Handle video upload
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_video'])) {
     $orderId = intval($_POST['order_id']);
+    $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
 
-    if (isset($_FILES['video_file']) && $_FILES['video_file']['error'] === UPLOAD_ERR_OK) {
+    // For AJAX requests, we'll return JSON
+    if ($isAjax) {
+        header('Content-Type: application/json');
+    }
+
+    try {
+        if (!isset($_FILES['video_file'])) {
+            throw new Exception('No file uploaded');
+        }
+
+        if ($_FILES['video_file']['error'] !== UPLOAD_ERR_OK) {
+            $uploadErrors = [
+                UPLOAD_ERR_INI_SIZE => 'File exceeds server upload limit',
+                UPLOAD_ERR_FORM_SIZE => 'File exceeds form upload limit',
+                UPLOAD_ERR_PARTIAL => 'File was only partially uploaded',
+                UPLOAD_ERR_NO_FILE => 'No file was uploaded',
+                UPLOAD_ERR_NO_TMP_DIR => 'Missing temporary folder',
+                UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk',
+                UPLOAD_ERR_EXTENSION => 'Upload blocked by extension',
+            ];
+            $errorMsg = $uploadErrors[$_FILES['video_file']['error']] ?? 'Unknown upload error';
+            throw new Exception($errorMsg);
+        }
+
         $uploadDir = __DIR__ . '/../uploads/videos/' . $orderId . '/';
 
         if (!file_exists($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
+            if (!mkdir($uploadDir, 0755, true)) {
+                throw new Exception('Failed to create upload directory');
+            }
         }
 
         $fileName = 'invitation_' . time() . '.mp4';
         $filePath = $uploadDir . $fileName;
 
-        if (move_uploaded_file($_FILES['video_file']['tmp_name'], $filePath)) {
-            $videoUrl = '/uploads/videos/' . $orderId . '/' . $fileName;
-            $expiresAt = date('Y-m-d H:i:s', strtotime('+7 days'));
+        if (!move_uploaded_file($_FILES['video_file']['tmp_name'], $filePath)) {
+            throw new Exception('Failed to move uploaded file');
+        }
 
-            Database::query(
-                "UPDATE orders SET 
-                    output_video_url = ?, 
-                    video_uploaded_at = NOW(), 
-                    video_expires_at = ?, 
-                    status = 'completed',
-                    order_status = 'completed', 
-                    completed_at = NOW() 
-                WHERE id = ?",
-                [$videoUrl, $expiresAt, $orderId]
-            );
+        $videoUrl = '/uploads/videos/' . $orderId . '/' . $fileName;
+        $expiresAt = date('Y-m-d H:i:s', strtotime('+7 days'));
 
-            header('Location: /admin/orders.php?action=view&id=' . $orderId . '&success=video_uploaded');
+        $result = Database::query(
+            "UPDATE orders SET 
+                output_video_url = ?, 
+                video_uploaded_at = NOW(), 
+                video_expires_at = ?, 
+                status = 'completed',
+                order_status = 'completed', 
+                completed_at = NOW() 
+            WHERE id = ?",
+            [$videoUrl, $expiresAt, $orderId]
+        );
+
+        if ($result === false) {
+            // Rollback - delete the uploaded file
+            @unlink($filePath);
+            throw new Exception('Database update failed');
+        }
+
+        // Log success
+        error_log("Video uploaded successfully for order #$orderId: $videoUrl");
+
+        if ($isAjax) {
+            echo json_encode(['success' => true, 'message' => 'Video uploaded successfully', 'video_url' => $videoUrl]);
             exit;
         }
-    }
 
-    header('Location: /admin/orders.php?action=view&id=' . $orderId . '&error=upload_failed');
-    exit;
+        header('Location: /admin/orders.php?action=view&id=' . $orderId . '&success=video_uploaded');
+        exit;
+
+    } catch (Exception $e) {
+        error_log("Video upload error for order #$orderId: " . $e->getMessage());
+
+        if ($isAjax) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+            exit;
+        }
+
+        header('Location: /admin/orders.php?action=view&id=' . $orderId . '&error=' . urlencode($e->getMessage()));
+        exit;
+    }
 }
+
 
 // Handle status update
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
@@ -524,11 +575,20 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
                                 // Complete handler
                                 xhr.addEventListener('load', () => {
                                     if (xhr.status === 200) {
-                                        // Check if redirect (success)
-                                        if (xhr.responseURL.includes('success=video_uploaded') || xhr.status === 200) {
-                                            showSuccess();
-                                        } else {
-                                            showError('Upload completed but status update failed. Please refresh.');
+                                        try {
+                                            const response = JSON.parse(xhr.responseText);
+                                            if (response.success) {
+                                                showSuccess();
+                                            } else {
+                                                showError(response.error || 'Upload failed. Please try again.');
+                                            }
+                                        } catch (e) {
+                                            // Not JSON - might be a redirect or HTML response
+                                            if (xhr.responseText.includes('success') || xhr.responseURL.includes('success')) {
+                                                showSuccess();
+                                            } else {
+                                                showError('Unexpected server response. Please check if upload succeeded.');
+                                            }
                                         }
                                     } else {
                                         showError('Server error: ' + xhr.status);
@@ -547,7 +607,9 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
 
                                 xhr.timeout = 300000; // 5 minutes timeout
                                 xhr.open('POST', '/admin/orders.php');
+                                xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
                                 xhr.send(formData);
+
                             }
 
                             function updateProgress(percent, loaded, total) {
