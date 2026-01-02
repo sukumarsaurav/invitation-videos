@@ -115,7 +115,8 @@ $pageTitle = 'My Orders';
                                     <div>
                                         <span class="text-slate-500">Amount</span>
                                         <p class="font-bold text-slate-900 dark:text-white">
-                                            <?= $order['currency'] === 'INR' ? '₹' : '$' ?>        <?= number_format($order['amount'], 2) ?>
+                                            <?= $order['currency'] === 'INR' ? '₹' : '$' ?>
+                                            <?= number_format($order['amount'], 2) ?>
                                         </p>
                                     </div>
                                     <div>
@@ -146,8 +147,8 @@ $pageTitle = 'My Orders';
                                     </div>
                                 </div>
 
-                                <!-- Video Download Section -->
-                                <?php if ($order['output_video_url'] && ($order['order_status'] ?? '') === 'completed'): ?>
+                                <!-- Video Download Section - Show if video exists -->
+                                <?php if (!empty($order['output_video_url'])): ?>
                                     <div
                                         class="mt-4 p-3 rounded-lg <?= $videoExpired ? 'bg-red-50 border border-red-200' : 'bg-green-50 border border-green-200' ?>">
                                         <?php if ($videoExpired): ?>
@@ -162,8 +163,10 @@ $pageTitle = 'My Orders';
                                                     <span class="material-symbols-outlined">check_circle</span>
                                                     <div>
                                                         <p class="font-medium">Your video is ready!</p>
-                                                        <p class="text-sm">Download available for <?= $daysLeft ?> more
-                                                            day<?= $daysLeft !== 1 ? 's' : '' ?></p>
+                                                        <?php if ($daysLeft > 0): ?>
+                                                            <p class="text-sm">Download available for <?= $daysLeft ?> more
+                                                                day<?= $daysLeft !== 1 ? 's' : '' ?></p>
+                                                        <?php endif; ?>
                                                     </div>
                                                 </div>
                                                 <div class="flex gap-2">

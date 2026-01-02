@@ -26,8 +26,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_video'])) {
             $expiresAt = date('Y-m-d H:i:s', strtotime('+7 days'));
 
             Database::query(
-                "UPDATE orders SET output_video_url = ?, video_uploaded_at = NOW(), video_expires_at = ?, 
-                 payment_status = 'paid', order_status = 'completed', completed_at = NOW() WHERE id = ?",
+                "UPDATE orders SET 
+                    output_video_url = ?, 
+                    video_uploaded_at = NOW(), 
+                    video_expires_at = ?, 
+                    status = 'completed',
+                    order_status = 'completed', 
+                    completed_at = NOW() 
+                WHERE id = ?",
                 [$videoUrl, $expiresAt, $orderId]
             );
 
