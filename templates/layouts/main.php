@@ -2,6 +2,16 @@
 <html lang="en" class="light">
 
 <head>
+    <!-- Google Tag Manager -->
+    <script>(function (w, d, s, l, i) {
+            w[l] = w[l] || []; w[l].push({
+                'gtm.start':
+                    new Date().getTime(), event: 'gtm.js'
+            }); var f = d.getElementsByTagName(s)[0],
+                j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                    'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+        })(window, document, 'script', 'dataLayer', 'GTM-NGZWTLGW');</script>
+    <!-- End Google Tag Manager -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $pageTitle ?? 'VideoInvites' ?> - Create Stunning Video Invitations</title>
@@ -302,18 +312,20 @@
 
     <!-- Main CSS - loaded async to prevent render blocking -->
     <link rel="preload" href="/assets/css/app.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="/assets/css/app.css"></noscript>
+    <noscript>
+        <link rel="stylesheet" href="/assets/css/app.css">
+    </noscript>
 
     <!-- Material Symbols - lazy load after page is interactive -->
     <script>
-    window.addEventListener('load', function() {
-        setTimeout(function() {
-            var link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.href = 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&display=swap';
-            document.head.appendChild(link);
-        }, 100);
-    });
+        window.addEventListener('load', function () {
+            setTimeout(function () {
+                var link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&display=swap';
+                document.head.appendChild(link);
+            }, 100);
+        });
     </script>
 
     <!-- Alpine.js Collapse Plugin + Core - deferred -->
@@ -324,6 +336,10 @@
 
 <body
     class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display min-h-screen flex flex-col">
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NGZWTLGW" height="0" width="0"
+            style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
 
     <!-- Header -->
     <header
