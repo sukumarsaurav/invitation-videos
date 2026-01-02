@@ -18,79 +18,23 @@
     <link rel="manifest" href="/site.webmanifest">
     <link rel="shortcut icon" href="/favicon.ico">
 
-    <!-- Fonts -->
+    <!-- Fonts (optimized with display=swap) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&display=swap"
         rel="stylesheet">
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#7f13ec",
-                        "background-light": "#f7f6f8",
-                        "background-dark": "#191022",
-                        "surface-light": "#ffffff",
-                        "surface-dark": "#251b30",
-                    },
-                    fontFamily: {
-                        "display": ["Plus Jakarta Sans", "sans-serif"],
-                    },
-                },
-            },
-        }
-    </script>
+    <!-- Pre-compiled Tailwind CSS (replaces ~400KB CDN runtime) -->
+    <link rel="stylesheet" href="/assets/css/app.css">
 
-    <style>
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
+    <!-- Alpine.js for FAQ interactivity -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
 
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
 
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
 
-        ::-webkit-scrollbar-thumb {
-            background-color: #cbd5e1;
-            border-radius: 20px;
-        }
-
-        /* Mobile menu transitions */
-        #mobileMenu {
-            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
-            overflow: hidden;
-            max-height: 500px;
-        }
-
-        #mobileMenu.closed {
-            max-height: 0;
-            opacity: 0;
-            pointer-events: none;
-        }
-    </style>
-
-    <?php if (defined('STRIPE_PUBLIC_KEY') && STRIPE_PUBLIC_KEY): ?>
-        <script src="https://js.stripe.com/v3/"></script>
-    <?php endif; ?>
-
-    <?php if (defined('RAZORPAY_KEY_ID') && RAZORPAY_KEY_ID): ?>
-        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <?php endif; ?>
 </head>
 
 <body

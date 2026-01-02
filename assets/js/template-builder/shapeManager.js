@@ -206,8 +206,8 @@ export class ShapeManager {
     }
 
     /**
-     * Select a shape
-     */
+ * Select a shape
+ */
     selectShape(element, shape) {
         this.deselectShape();
         this.selectedShape = shape;
@@ -215,6 +215,11 @@ export class ShapeManager {
 
         // Show shape properties panel
         this.showShapeProperties(shape);
+
+        // Update animation panel
+        if (this.builder.updateAnimationPanel) {
+            this.builder.updateAnimationPanel('shape', shape);
+        }
     }
 
     /**
@@ -229,6 +234,11 @@ export class ShapeManager {
             this.selectedShape = null;
         }
         this.hideShapeProperties();
+
+        // Hide animation panel content
+        if (this.builder.hideAnimationPanelContent) {
+            this.builder.hideAnimationPanelContent();
+        }
     }
 
     /**

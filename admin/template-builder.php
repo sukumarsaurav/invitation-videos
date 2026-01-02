@@ -153,6 +153,10 @@ $pageTitle = $hasSelectedTemplate ? 'Template Builder: ' . $template['title'] : 
                 <span class="material-symbols-outlined">cloud_upload</span>
                 <span class="icon-label">Uploads</span>
             </button>
+            <button class="icon-btn" data-panel="animate" title="Animate">
+                <span class="material-symbols-outlined">animation</span>
+                <span class="icon-label">Animate</span>
+            </button>
             <button class="icon-btn" data-panel="background" title="Background">
                 <span class="material-symbols-outlined">wallpaper</span>
                 <span class="icon-label">Background</span>
@@ -514,6 +518,171 @@ $pageTitle = $hasSelectedTemplate ? 'Template Builder: ' . $template['title'] : 
                 </div>
             </div>
 
+            <!-- Animate Panel -->
+            <div class="panel-view" id="panel-animate">
+                <div class="panel-header">
+                    <h3>Animations</h3>
+                </div>
+                <div class="panel-body">
+                    <!-- Selection Hint -->
+                    <div id="animate-hint" class="animate-hint">
+                        <span class="material-symbols-outlined">touch_app</span>
+                        <p>Select a text or element on the canvas to apply animations</p>
+                    </div>
+
+                    <!-- Animation Content (shown when element is selected) -->
+                    <div id="animate-content" class="animate-content hidden">
+                        <!-- Selected Element Info -->
+                        <div class="selected-element-info" id="selected-element-info">
+                            <span class="element-type-badge" id="element-type-badge">Text</span>
+                            <span class="element-name" id="element-name">Selected Element</span>
+                        </div>
+
+                        <!-- Current Animation -->
+                        <div class="current-animation-section">
+                            <span class="toolbar-label">Current Animation</span>
+                            <div class="current-animation-display" id="current-animation-display">
+                                <span class="current-anim-name">None</span>
+                                <button type="button" class="btn-remove-anim hidden" id="btn-remove-animation" title="Remove Animation">
+                                    <span class="material-symbols-outlined">close</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Text Animations (shown for text elements) -->
+                        <div id="text-animations-section" class="animations-section">
+                            <span class="toolbar-label">Text Animations</span>
+                            <div class="animations-grid">
+                                <button type="button" class="animation-card" data-animation="typewriter">
+                                    <div class="anim-preview"><span class="anim-demo typewriter">AB|C</span></div>
+                                    <span class="anim-name">Typewriter</span>
+                                </button>
+                                <button type="button" class="animation-card" data-animation="slideUp">
+                                    <div class="anim-preview"><span class="anim-demo ascend">AB<span class="rise">C</span></span></div>
+                                    <span class="anim-name">Ascend</span>
+                                </button>
+                                <button type="button" class="animation-card" data-animation="shift">
+                                    <div class="anim-preview"><span class="anim-demo shift">AB<sup>C</sup></span></div>
+                                    <span class="anim-name">Shift</span>
+                                </button>
+                                <button type="button" class="animation-card" data-animation="merge">
+                                    <div class="anim-preview"><span class="anim-demo merge">ABC→<br>←ABC</span></div>
+                                    <span class="anim-name">Merge</span>
+                                </button>
+                                <button type="button" class="animation-card" data-animation="block">
+                                    <div class="anim-preview"><span class="anim-demo block">ABC</span></div>
+                                    <span class="anim-name">Block</span>
+                                </button>
+                                <button type="button" class="animation-card" data-animation="burst">
+                                    <div class="anim-preview"><span class="anim-demo burst">A*B*C</span></div>
+                                    <span class="anim-name">Burst</span>
+                                </button>
+                                <button type="button" class="animation-card" data-animation="bounce">
+                                    <div class="anim-preview"><span class="anim-demo bounce-text">A↑B↑C</span></div>
+                                    <span class="anim-name">Bounce</span>
+                                </button>
+                                <button type="button" class="animation-card" data-animation="roll">
+                                    <div class="anim-preview"><span class="anim-demo roll">AB~C</span></div>
+                                    <span class="anim-name">Roll</span>
+                                </button>
+                                <button type="button" class="animation-card" data-animation="skate">
+                                    <div class="anim-preview"><span class="anim-demo skate">ABC→</span></div>
+                                    <span class="anim-name">Skate</span>
+                                </button>
+                                <button type="button" class="animation-card" data-animation="spread">
+                                    <div class="anim-preview"><span class="anim-demo spread">A B C</span></div>
+                                    <span class="anim-name">Spread</span>
+                                </button>
+                                <button type="button" class="animation-card" data-animation="clarify">
+                                    <div class="anim-preview"><span class="anim-demo clarify">ABC</span></div>
+                                    <span class="anim-name">Clarify</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- General Animations (for both text and elements) -->
+                        <div id="general-animations-section" class="animations-section">
+                            <span class="toolbar-label">General</span>
+                            <div class="animations-grid">
+                                <button type="button" class="animation-card" data-animation="rise">
+                                    <div class="anim-preview"><div class="anim-box rise-box">↑</div></div>
+                                    <span class="anim-name">Rise</span>
+                                </button>
+                                <button type="button" class="animation-card" data-animation="pan">
+                                    <div class="anim-preview"><div class="anim-box pan-box">→</div></div>
+                                    <span class="anim-name">Pan</span>
+                                </button>
+                                <button type="button" class="animation-card" data-animation="fadeIn">
+                                    <div class="anim-preview"><div class="anim-box fade-box"></div></div>
+                                    <span class="anim-name">Fade</span>
+                                </button>
+                                <button type="button" class="animation-card" data-animation="pop">
+                                    <div class="anim-preview"><div class="anim-box pop-box"></div></div>
+                                    <span class="anim-name">Pop</span>
+                                </button>
+                                <button type="button" class="animation-card" data-animation="wipe">
+                                    <div class="anim-preview"><div class="anim-box wipe-box"></div></div>
+                                    <span class="anim-name">Wipe</span>
+                                </button>
+                                <button type="button" class="animation-card" data-animation="blur">
+                                    <div class="anim-preview"><div class="anim-box blur-box"></div></div>
+                                    <span class="anim-name">Blur</span>
+                                </button>
+                                <button type="button" class="animation-card" data-animation="zoomIn">
+                                    <div class="anim-preview"><div class="anim-box zoom-box">↗↙</div></div>
+                                    <span class="anim-name">Succession</span>
+                                </button>
+                                <button type="button" class="animation-card" data-animation="pulse">
+                                    <div class="anim-preview"><div class="anim-box pulse-box">◉</div></div>
+                                    <span class="anim-name">Breathe</span>
+                                </button>
+                                <button type="button" class="animation-card" data-animation="slideDown">
+                                    <div class="anim-preview"><div class="anim-box baseline-box">▬</div></div>
+                                    <span class="anim-name">Baseline</span>
+                                </button>
+                                <button type="button" class="animation-card" data-animation="slideLeft">
+                                    <div class="anim-preview"><div class="anim-box drift-box">→</div></div>
+                                    <span class="anim-name">Drift</span>
+                                </button>
+                                <button type="button" class="animation-card" data-animation="slideRight">
+                                    <div class="anim-preview"><div class="anim-box tectonic-box">→</div></div>
+                                    <span class="anim-name">Tectonic</span>
+                                </button>
+                                <button type="button" class="animation-card" data-animation="flip">
+                                    <div class="anim-preview"><div class="anim-box tumble-box">↻</div></div>
+                                    <span class="anim-name">Tumble</span>
+                                </button>
+                                <button type="button" class="animation-card" data-animation="neon">
+                                    <div class="anim-preview"><div class="anim-box neon-box">✧</div></div>
+                                    <span class="anim-name">Neon</span>
+                                </button>
+                                <button type="button" class="animation-card" data-animation="scrapbook">
+                                    <div class="anim-preview"><div class="anim-box scrapbook-box">📄</div></div>
+                                    <span class="anim-name">Scrapbook</span>
+                                </button>
+                                <button type="button" class="animation-card" data-animation="stomp">
+                                    <div class="anim-preview"><div class="anim-box stomp-box">◻</div></div>
+                                    <span class="anim-name">Stomp</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Animation Settings -->
+                        <div class="animation-settings">
+                            <span class="toolbar-label">Settings</span>
+                            <label class="property-row">
+                                <span>Duration (ms)</span>
+                                <input type="number" id="anim-duration" value="500" min="100" max="3000" step="100">
+                            </label>
+                            <label class="property-row">
+                                <span>Delay (ms)</span>
+                                <input type="number" id="anim-delay" value="0" min="0" max="5000" step="100">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Background Panel -->
             <div class="panel-view" id="panel-background">
                 <div class="panel-body">
@@ -825,7 +994,8 @@ $pageTitle = $hasSelectedTemplate ? 'Template Builder: ' . $template['title'] : 
 <div id="create-template-modal" class="modal hidden">
     <div class="modal-backdrop" onclick="closeCreateTemplateModal()"></div>
     <div class="modal-content" style="width: 400px; max-width: 90vw;">
-        <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid #334155;">
+        <div class="modal-header"
+            style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid #334155;">
             <h3 style="font-size: 1.125rem; font-weight: 600; color: #f1f5f9;">Create New Template</h3>
             <button type="button" onclick="closeCreateTemplateModal()" class="btn-icon">
                 <span class="material-symbols-outlined">close</span>
@@ -834,19 +1004,23 @@ $pageTitle = $hasSelectedTemplate ? 'Template Builder: ' . $template['title'] : 
         <form id="create-template-form">
             <div class="modal-body" style="padding: 1.5rem;">
                 <div style="margin-bottom: 1rem;">
-                    <label style="display: block; font-size: 0.875rem; font-weight: 600; color: #cbd5e1; margin-bottom: 0.5rem;">Template Name *</label>
+                    <label
+                        style="display: block; font-size: 0.875rem; font-weight: 600; color: #cbd5e1; margin-bottom: 0.5rem;">Template
+                        Name *</label>
                     <input type="text" id="new-template-name" name="name" required
                         style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #334155; background: #0f172a; color: #f1f5f9; font-size: 0.875rem;"
                         placeholder="e.g., Wedding Classic">
                 </div>
                 <div style="margin-bottom: 1rem;">
-                    <label style="display: block; font-size: 0.875rem; font-weight: 600; color: #cbd5e1; margin-bottom: 0.5rem;">Description</label>
+                    <label
+                        style="display: block; font-size: 0.875rem; font-weight: 600; color: #cbd5e1; margin-bottom: 0.5rem;">Description</label>
                     <textarea id="new-template-description" name="description" rows="3"
                         style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #334155; background: #0f172a; color: #f1f5f9; font-size: 0.875rem; resize: vertical;"
                         placeholder="Brief description of the template..."></textarea>
                 </div>
                 <div style="margin-bottom: 1rem;">
-                    <label style="display: block; font-size: 0.875rem; font-weight: 600; color: #cbd5e1; margin-bottom: 0.5rem;">Category</label>
+                    <label
+                        style="display: block; font-size: 0.875rem; font-weight: 600; color: #cbd5e1; margin-bottom: 0.5rem;">Category</label>
                     <select id="new-template-category" name="category"
                         style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #334155; background: #0f172a; color: #f1f5f9; font-size: 0.875rem;">
                         <option value="wedding">Wedding</option>
@@ -859,7 +1033,8 @@ $pageTitle = $hasSelectedTemplate ? 'Template Builder: ' . $template['title'] : 
                     </select>
                 </div>
             </div>
-            <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 0.75rem; padding: 1rem 1.5rem; border-top: 1px solid #334155;">
+            <div class="modal-footer"
+                style="display: flex; justify-content: flex-end; gap: 0.75rem; padding: 1rem 1.5rem; border-top: 1px solid #334155;">
                 <button type="button" onclick="closeCreateTemplateModal()" class="btn btn-secondary">Cancel</button>
                 <button type="submit" class="btn btn-primary" id="btn-create-template-submit">
                     <span class="material-symbols-outlined" style="font-size: 1.125rem;">add</span>

@@ -71,3 +71,4 @@ cachegrind.out.*
 
 # Keep these empty directories
 !.gitkeep
+node_modules

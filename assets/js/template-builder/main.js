@@ -178,6 +178,17 @@ class TemplateBuilder {
                 e.returnValue = '';
             }
         });
+
+        // Keyboard shortcuts (Delete/Backspace to delete selected element)
+        document.addEventListener('keydown', (e) => {
+            if ((e.key === 'Delete' || e.key === 'Backspace') && !this.isEditingText()) {
+                e.preventDefault();
+                this.deleteSelectedElement();
+            }
+        });
+
+        // Animation panel setup
+        this.setupAnimationPanel();
     }
 
     setupFieldDragDrop() {
@@ -340,6 +351,9 @@ class TemplateBuilder {
             document.getElementById('text-animation').value = field.animation_type || 'fadeIn';
             document.getElementById('text-delay').value = field.animation_delay_ms || 0;
         }
+
+        // Update animation panel
+        this.updateAnimationPanel('text', field);
     }
 
     deselectElement() {
@@ -348,6 +362,9 @@ class TemplateBuilder {
             this.selectedElement = null;
         }
         document.getElementById('text-properties').style.display = 'none';
+
+        // Hide animation content, show hint
+        this.hideAnimationPanelContent();
     }
 
     getFieldById(fieldId) {
@@ -2306,7 +2323,6 @@ class TemplateBuilder {
         this.updateBackgroundInfo();
     }
 
-    // Update canvas toolbar color picker based on current slide
     updateCanvasToolbarColor() {
         const currentSlide = this.getCurrentSlide();
         if (!currentSlide) return;
@@ -2314,6 +2330,230 @@ class TemplateBuilder {
         const canvasBgColor = document.getElementById('canvas-bg-color');
         if (canvasBgColor && currentSlide.background_color && !currentSlide.background_image && !currentSlide.background_gradient) {
             canvasBgColor.value = currentSlide.background_color;
+        }
+    }
+
+    // ===== Animation Panel Methods =====
+
+    setupAnimationPanel() {
+        const animationCards = document.querySelectorAll('.animation-card');
+        const removeBtn = document.getElementById('btn-remove-animation');
+        const durationInput = document.getElementById('anim-duration');
+        const delayInput = document.getElementById('anim-delay');
+
+        // Animation card click handler
+        animationCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const animation = card.dataset.animation;
+                this.applyAnimation(animation);
+
+                // Update selected state
+                animationCards.forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+            });
+
+            // Preview animation on hover
+            card.addEventListener('mouseenter', () => {
+                if (this.selectedElement || this.shapeManager.selectedShape) {
+                    const animation = card.dataset.animation;
+                    this.previewAnimation(animation);
+                }
+            });
+        });
+
+        // Remove animation button
+        if (removeBtn) {
+            removeBtn.addEventListener('click', () => {
+                this.applyAnimation('none');
+                document.querySelectorAll('.animation-card').forEach(c => c.classList.remove('selected'));
+            });
+        }
+
+        // Animation duration change
+        if (durationInput) {
+            durationInput.addEventListener('change', (e) => {
+                const duration = parseInt(e.target.value);
+                if (this.selectedElement) {
+                    const fieldId = this.selectedElement.dataset.fieldId;
+                    this.updateField(fieldId, { animation_duration_ms: duration });
+                } else if (this.shapeManager.selectedShape) {
+                    this.shapeManager.updateShape({ animationDuration: duration });
+                }
+                this.isDirty = true;
+            });
+        }
+
+        // Animation delay change
+        if (delayInput) {
+            delayInput.addEventListener('change', (e) => {
+                const delay = parseInt(e.target.value);
+                if (this.selectedElement) {
+                    const fieldId = this.selectedElement.dataset.fieldId;
+                    this.updateField(fieldId, { animation_delay_ms: delay });
+                } else if (this.shapeManager.selectedShape) {
+                    this.shapeManager.updateShape({ animationDelay: delay });
+                }
+                this.isDirty = true;
+            });
+        }
+    }
+
+    updateAnimationPanel(type, data) {
+        const hint = document.getElementById('animate-hint');
+        const content = document.getElementById('animate-content');
+        const typeBadge = document.getElementById('element-type-badge');
+        const nameEl = document.getElementById('element-name');
+        const textAnimsSection = document.getElementById('text-animations-section');
+        const currentAnimName = document.querySelector('.current-anim-name');
+        const removeBtn = document.getElementById('btn-remove-animation');
+        const durationInput = document.getElementById('anim-duration');
+        const delayInput = document.getElementById('anim-delay');
+
+        if (!hint || !content) return;
+
+        // Show content, hide hint
+        hint.classList.add('hidden');
+        content.classList.remove('hidden');
+
+        // Update element info
+        if (typeBadge) typeBadge.textContent = type === 'text' ? 'Text' : 'Element';
+        if (nameEl) {
+            if (type === 'text' && data) {
+                nameEl.textContent = data.field_label || data.sample_value || 'Text Element';
+            } else if (data) {
+                nameEl.textContent = data.type || 'Shape Element';
+            }
+        }
+
+        // Show/hide text animations section based on type
+        if (textAnimsSection) {
+            textAnimsSection.style.display = type === 'text' ? 'block' : 'none';
+        }
+
+        // Update current animation display
+        const currentAnimation = data?.animation_type || data?.animation || 'none';
+        if (currentAnimName) {
+            const animName = this.getAnimationDisplayName(currentAnimation);
+            currentAnimName.textContent = animName;
+        }
+        if (removeBtn) {
+            removeBtn.classList.toggle('hidden', currentAnimation === 'none');
+        }
+
+        // Update settings
+        if (durationInput) durationInput.value = data?.animation_duration_ms || 500;
+        if (delayInput) delayInput.value = data?.animation_delay_ms || 0;
+
+        // Highlight the current animation card
+        document.querySelectorAll('.animation-card').forEach(card => {
+            card.classList.toggle('selected', card.dataset.animation === currentAnimation);
+        });
+    }
+
+    hideAnimationPanelContent() {
+        const hint = document.getElementById('animate-hint');
+        const content = document.getElementById('animate-content');
+
+        if (hint) hint.classList.remove('hidden');
+        if (content) content.classList.add('hidden');
+
+        // Clear selection on cards
+        document.querySelectorAll('.animation-card').forEach(c => c.classList.remove('selected'));
+    }
+
+    applyAnimation(animation) {
+        if (this.selectedElement) {
+            const fieldId = this.selectedElement.dataset.fieldId;
+            this.updateField(fieldId, { animation_type: animation });
+            this.textEditor.renderTextElement(fieldId);
+
+            // Update current animation display
+            const currentAnimName = document.querySelector('.current-anim-name');
+            const removeBtn = document.getElementById('btn-remove-animation');
+            if (currentAnimName) currentAnimName.textContent = this.getAnimationDisplayName(animation);
+            if (removeBtn) removeBtn.classList.toggle('hidden', animation === 'none');
+
+            // Refresh timeline
+            this.refreshTimeline();
+        } else if (this.shapeManager.selectedShape) {
+            this.shapeManager.updateShape({ animation: animation });
+
+            // Update current animation display
+            const currentAnimName = document.querySelector('.current-anim-name');
+            const removeBtn = document.getElementById('btn-remove-animation');
+            if (currentAnimName) currentAnimName.textContent = this.getAnimationDisplayName(animation);
+            if (removeBtn) removeBtn.classList.toggle('hidden', animation === 'none');
+        }
+        this.isDirty = true;
+    }
+
+    previewAnimation(animation) {
+        const element = this.selectedElement ||
+            (this.shapeManager.selectedShape ?
+                document.querySelector(`[data-shape-id="${this.shapeManager.selectedShape.id}"]`) : null);
+
+        if (element && animation !== 'none') {
+            this.animations.previewAnimation(element, animation);
+        }
+    }
+
+    getAnimationDisplayName(animation) {
+        const names = {
+            'none': 'None',
+            'fadeIn': 'Fade In',
+            'fadeOut': 'Fade Out',
+            'slideUp': 'Slide Up / Ascend',
+            'slideDown': 'Slide Down / Baseline',
+            'slideLeft': 'Slide Left / Drift',
+            'slideRight': 'Slide Right / Tectonic',
+            'zoomIn': 'Zoom In / Succession',
+            'zoomOut': 'Zoom Out',
+            'bounce': 'Bounce',
+            'pulse': 'Breathe',
+            'shake': 'Shake',
+            'flip': 'Tumble',
+            'rotate': 'Rotate In',
+            'typewriter': 'Typewriter',
+            'shift': 'Shift',
+            'merge': 'Merge',
+            'block': 'Block',
+            'burst': 'Burst',
+            'roll': 'Roll',
+            'skate': 'Skate',
+            'spread': 'Spread',
+            'clarify': 'Clarify',
+            'rise': 'Rise',
+            'pan': 'Pan',
+            'pop': 'Pop',
+            'wipe': 'Wipe',
+            'blur': 'Blur',
+            'neon': 'Neon',
+            'scrapbook': 'Scrapbook',
+            'stomp': 'Stomp'
+        };
+        return names[animation] || animation;
+    }
+
+    isEditingText() {
+        const activeElement = document.activeElement;
+        const isInput = activeElement.tagName === 'INPUT' ||
+            activeElement.tagName === 'TEXTAREA' ||
+            activeElement.isContentEditable;
+        return isInput;
+    }
+
+    deleteSelectedElement() {
+        if (this.selectedElement) {
+            const fieldId = this.selectedElement.dataset.fieldId;
+            this.textEditor.removeTextFromSlide(fieldId);
+            this.selectedElement = null;
+            this.hideTextToolbar();
+            this.hideAnimationPanelContent();
+            this.populateLayersPanel();
+        } else if (this.shapeManager.selectedShape) {
+            this.shapeManager.deleteSelectedShape();
+            this.hideAnimationPanelContent();
+            this.populateLayersPanel();
         }
     }
 }

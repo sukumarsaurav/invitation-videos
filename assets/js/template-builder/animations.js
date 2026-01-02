@@ -128,6 +128,124 @@ export class Animations {
                 { offset: 0, opacity: 0, transform: 'rotate(-180deg)' },
                 { offset: 1, opacity: 1, transform: 'rotate(0)' }
             ]
+        },
+        rise: {
+            name: 'Rise',
+            keyframes: [
+                { offset: 0, opacity: 0, transform: 'translateY(50px)' },
+                { offset: 1, opacity: 1, transform: 'translateY(0)' }
+            ]
+        },
+        pan: {
+            name: 'Pan',
+            keyframes: [
+                { offset: 0, opacity: 0, transform: 'translateX(-50px)' },
+                { offset: 1, opacity: 1, transform: 'translateX(0)' }
+            ]
+        },
+        pop: {
+            name: 'Pop',
+            keyframes: [
+                { offset: 0, opacity: 0, transform: 'scale(0.8)' },
+                { offset: 0.6, transform: 'scale(1.1)' },
+                { offset: 1, opacity: 1, transform: 'scale(1)' }
+            ]
+        },
+        wipe: {
+            name: 'Wipe',
+            keyframes: [
+                { offset: 0, clipPath: 'inset(0 100% 0 0)' },
+                { offset: 1, clipPath: 'inset(0 0 0 0)' }
+            ]
+        },
+        blur: {
+            name: 'Blur',
+            keyframes: [
+                { offset: 0, opacity: 0, filter: 'blur(10px)' },
+                { offset: 1, opacity: 1, filter: 'blur(0)' }
+            ]
+        },
+        neon: {
+            name: 'Neon',
+            keyframes: [
+                { offset: 0, opacity: 0, filter: 'brightness(2) drop-shadow(0 0 10px currentColor)' },
+                { offset: 0.5, opacity: 1, filter: 'brightness(1.5) drop-shadow(0 0 20px currentColor)' },
+                { offset: 1, opacity: 1, filter: 'brightness(1) drop-shadow(0 0 5px currentColor)' }
+            ]
+        },
+        stomp: {
+            name: 'Stomp',
+            keyframes: [
+                { offset: 0, opacity: 0, transform: 'scale(2)' },
+                { offset: 0.7, opacity: 1, transform: 'scale(0.9)' },
+                { offset: 1, opacity: 1, transform: 'scale(1)' }
+            ]
+        },
+        scrapbook: {
+            name: 'Scrapbook',
+            keyframes: [
+                { offset: 0, opacity: 0, transform: 'rotate(-10deg) scale(0.8)' },
+                { offset: 0.5, transform: 'rotate(5deg) scale(1.05)' },
+                { offset: 1, opacity: 1, transform: 'rotate(0) scale(1)' }
+            ]
+        },
+        shift: {
+            name: 'Shift',
+            keyframes: [
+                { offset: 0, opacity: 0, transform: 'translateX(-20px) skewX(-10deg)' },
+                { offset: 1, opacity: 1, transform: 'translateX(0) skewX(0)' }
+            ]
+        },
+        merge: {
+            name: 'Merge',
+            keyframes: [
+                { offset: 0, opacity: 0, letterSpacing: '0.5em' },
+                { offset: 1, opacity: 1, letterSpacing: 'normal' }
+            ]
+        },
+        block: {
+            name: 'Block',
+            keyframes: [
+                { offset: 0, clipPath: 'inset(0 0 100% 0)' },
+                { offset: 1, clipPath: 'inset(0 0 0 0)' }
+            ]
+        },
+        burst: {
+            name: 'Burst',
+            keyframes: [
+                { offset: 0, opacity: 0, transform: 'scale(0)' },
+                { offset: 0.5, opacity: 1, transform: 'scale(1.3)' },
+                { offset: 1, opacity: 1, transform: 'scale(1)' }
+            ]
+        },
+        roll: {
+            name: 'Roll',
+            keyframes: [
+                { offset: 0, opacity: 0, transform: 'translateX(-100%) rotate(-360deg)' },
+                { offset: 1, opacity: 1, transform: 'translateX(0) rotate(0)' }
+            ]
+        },
+        skate: {
+            name: 'Skate',
+            keyframes: [
+                { offset: 0, opacity: 0, transform: 'translateX(-50px) skewX(-20deg)' },
+                { offset: 0.7, transform: 'translateX(10px) skewX(5deg)' },
+                { offset: 1, opacity: 1, transform: 'translateX(0) skewX(0)' }
+            ]
+        },
+        spread: {
+            name: 'Spread',
+            keyframes: [
+                { offset: 0, opacity: 0, letterSpacing: '-0.5em' },
+                { offset: 1, opacity: 1, letterSpacing: 'normal' }
+            ]
+        },
+        clarify: {
+            name: 'Clarify',
+            keyframes: [
+                { offset: 0, opacity: 0, filter: 'blur(20px)', transform: 'scale(0.9)' },
+                { offset: 1, opacity: 1, filter: 'blur(0)', transform: 'scale(1)' }
+            ]
         }
     };
 

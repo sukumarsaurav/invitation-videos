@@ -44,7 +44,15 @@ $pageTitle = 'Checkout - ' . $order['order_number'];
 
 <?php ob_start(); ?>
 
+<!-- Payment SDK Scripts (loaded only on checkout page) -->
+<?php if ($isIndian && defined('RAZORPAY_KEY_ID') && RAZORPAY_KEY_ID): ?>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<?php elseif (defined('STRIPE_PUBLIC_KEY') && STRIPE_PUBLIC_KEY): ?>
+    <script src="https://js.stripe.com/v3/"></script>
+<?php endif; ?>
+
 <div class="max-w-7xl mx-auto px-4 md:px-8 py-8">
+
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
 
         <!-- Checkout Form -->
