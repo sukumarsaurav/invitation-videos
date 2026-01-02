@@ -302,18 +302,19 @@
 
     <!-- Main CSS - loaded async to prevent render blocking -->
     <link rel="preload" href="/assets/css/app.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript>
-        <link rel="stylesheet" href="/assets/css/app.css">
-    </noscript>
+    <noscript><link rel="stylesheet" href="/assets/css/app.css"></noscript>
 
-    <!-- Material Symbols - loaded last as it's large (still from Google, but async) -->
-    <link rel="preload"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&display=swap"
-        as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript>
-        <link rel="stylesheet"
-            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&display=swap">
-    </noscript>
+    <!-- Material Symbols - lazy load after page is interactive -->
+    <script>
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            var link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&display=swap';
+            document.head.appendChild(link);
+        }, 100);
+    });
+    </script>
 
     <!-- Alpine.js - deferred -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
