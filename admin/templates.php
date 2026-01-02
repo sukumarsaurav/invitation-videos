@@ -187,6 +187,14 @@ $categories = Database::fetchAll("SELECT slug, name FROM categories WHERE is_act
 $fieldTypes = ['text', 'textarea', 'date', 'time', 'datetime', 'image', 'music', 'color', 'select', 'number'];
 $fieldGroups = ['couple_details', 'family_details', 'event_details', 'photos', 'audio', 'other'];
 
+// Fetch field presets for quick field addition
+$fieldPresets = Database::fetchAll("SELECT * FROM field_presets WHERE is_active = 1 ORDER BY category, display_order");
+$presetsByCategory = [];
+foreach ($fieldPresets as $preset) {
+    $cat = $preset['category'] ?? 'general';
+    $presetsByCategory[$cat][] = $preset;
+}
+
 // Helper function to get YouTube embed URL
 function getYouTubeEmbedUrl($url) {
     if (empty($url)) return '';
@@ -640,6 +648,32 @@ function getYouTubeEmbedUrl($url) {
             <input type="hidden" name="template_id" value="<?= $templateId ?>">
             <input type="hidden" name="field_id" id="field_id" value="">
             
+            <!-- Preset Selector -->
+            <div id="preset-selector" class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+                <label class="flex flex-col gap-2">
+                    <span class="text-sm font-medium text-blue-800 dark:text-blue-200 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-lg">auto_awesome</span>
+                        Quick Add from Presets
+                    </span>
+                    <select id="preset_select" onchange="applyPreset(this.value)" 
+                            class="h-10 px-3 rounded-lg border border-blue-200 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 text-sm">
+                        <option value="">-- Choose a preset to auto-fill --</option>
+                        <?php foreach ($presetsByCategory as $category => $presets): ?>
+                            <optgroup label="<?= ucfirst(str_replace('_', ' ', $category)) ?>">
+                                <?php foreach ($presets as $preset): ?>
+                                    <option value="<?= htmlspecialchars(json_encode($preset), ENT_QUOTES) ?>">
+                                        <?= Security::escape($preset['name']) ?> (<?= $preset['field_type'] ?>)
+                                    </option>
+                                <?php endforeach; ?>
+                            </optgroup>
+                        <?php endforeach; ?>
+                    </select>
+                    <span class="text-xs text-blue-600 dark:text-blue-400">Or fill in the fields manually below</span>
+                </label>
+            </div>
+            
+            <div class="border-t border-slate-200 dark:border-slate-700 pt-4"></div>
+            
             <label class="flex flex-col gap-2">
                 <span class="text-sm font-medium">Field Name <span class="text-slate-400 font-normal">(internal)</span></span>
                 <input type="text" name="field_name" id="field_name" required
@@ -761,7 +795,50 @@ function openFieldModal() {
     document.getElementById('field-form').reset();
     document.getElementById('field_id').value = '';
     document.querySelector('#field-form input[name="ajax_action"]').value = 'add_field';
+    document.getElementById('preset-selector').classList.remove('hidden');
+    document.getElementById('preset_select').value = '';
     document.getElementById('field-modal').classList.remove('hidden');
+}
+
+function applyPreset(presetJson) {
+    if (!presetJson) return;
+    
+    try {
+        const preset = JSON.parse(presetJson);
+        
+        // Fill in the form fields with preset values
+        document.getElementById('field_name').value = preset.field_name || '';
+        document.getElementById('field_label').value = preset.name || '';
+        document.getElementById('field_type').value = preset.field_type || 'text';
+        document.getElementById('placeholder').value = preset.placeholder || '';
+        document.getElementById('help_text').value = preset.help_text || '';
+        
+        // Set a reasonable default group based on preset category
+        const categoryToGroup = {
+            'wedding': 'couple_details',
+            'wedding_hindu': 'couple_details',
+            'wedding_muslim': 'couple_details',
+            'wedding_punjabi': 'couple_details',
+            'wedding_bihari': 'couple_details',
+            'wedding_bengali': 'couple_details',
+            'wedding_marathi': 'couple_details',
+            'birthday': 'event_details',
+            'baby_shower': 'event_details',
+            'corporate': 'event_details',
+            'anniversary': 'couple_details',
+            'general': 'other'
+        };
+        const suggestedGroup = categoryToGroup[preset.category] || 'other';
+        document.getElementById('field_group').value = suggestedGroup;
+        
+        // Visual feedback
+        const form = document.getElementById('field-form');
+        form.classList.add('ring-2', 'ring-primary/30');
+        setTimeout(() => form.classList.remove('ring-2', 'ring-primary/30'), 500);
+        
+    } catch (e) {
+        console.error('Error parsing preset:', e);
+    }
 }
 
 function closeFieldModal() {
@@ -780,6 +857,8 @@ function editField(field) {
     document.getElementById('display_order').value = field.display_order || 0;
     document.getElementById('is_required').checked = field.is_required == 1;
     document.querySelector('#field-form input[name="ajax_action"]').value = 'update_field';
+    // Hide preset selector when editing existing field
+    document.getElementById('preset-selector').classList.add('hidden');
     document.getElementById('field-modal').classList.remove('hidden');
 }
 
