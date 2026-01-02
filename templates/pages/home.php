@@ -110,17 +110,20 @@ $pageDescription = 'Create beautiful video invitations for weddings, birthdays, 
                 'religious' => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300',
             ];
 
-            foreach ($trendingTemplates as $template):
+            foreach ($trendingTemplates as $index => $template):
                 $badgeColor = $categoryBadgeColors[$template['category']] ?? 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300';
+                // First 2 images are above the fold on mobile - load eagerly
+                $isAboveFold = $index < 2;
                 ?>
                 <a href="/template/<?= Security::escape($template['slug']) ?>"
                     class="group block bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200 dark:border-slate-700 hover:border-primary/30">
                     <!-- Image -->
                     <div class="relative aspect-[4/5] overflow-hidden bg-slate-100">
                         <img src="<?= Security::escape($template['thumbnail_url'] ?? '/assets/images/placeholder.jpg') ?>"
-                             alt="<?= Security::escape($template['title']) ?>"
-                             class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                             width="300" height="375" loading="lazy" decoding="async">
+                            alt="<?= Security::escape($template['title']) ?>"
+                            class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            width="300" height="375" loading="<?= $isAboveFold ? 'eager' : 'lazy' ?>"
+                            decoding="<?= $isAboveFold ? 'sync' : 'async' ?>" <?= $isAboveFold ? 'fetchpriority="high"' : '' ?>>
 
                         <!-- Category Badge -->
                         <div class="absolute top-3 left-3">
@@ -302,12 +305,13 @@ $pageDescription = 'Create beautiful video invitations for weddings, birthdays, 
                     <article
                         class="group bg-slate-50 dark:bg-slate-800 rounded-2xl overflow-hidden hover:shadow-xl transition-all">
                         <a href="/blog/<?= Security::escape($post['slug']) ?>" class="block">
-                            <div class="aspect-video <?= $post['featured_image'] ? 'bg-slate-100' : "bg-gradient-to-br {$color[0]} {$color[1]}" ?> flex items-center justify-center relative overflow-hidden">
+                            <div
+                                class="aspect-video <?= $post['featured_image'] ? 'bg-slate-100' : "bg-gradient-to-br {$color[0]} {$color[1]}" ?> flex items-center justify-center relative overflow-hidden">
                                 <?php if ($post['featured_image']): ?>
                                     <img src="<?= Security::escape($post['featured_image']) ?>"
-                                         alt="<?= Security::escape($post['title']) ?>"
-                                         class="absolute inset-0 w-full h-full object-cover"
-                                         width="400" height="225" loading="lazy" decoding="async">
+                                        alt="<?= Security::escape($post['title']) ?>"
+                                        class="absolute inset-0 w-full h-full object-cover" width="400" height="225" loading="lazy"
+                                        decoding="async">
                                 <?php else: ?>
                                     <span class="material-symbols-outlined text-5xl text-white/80"><?= $color[2] ?></span>
                                 <?php endif; ?>
@@ -323,7 +327,8 @@ $pageDescription = 'Create beautiful video invitations for weddings, birthdays, 
                                 </h3>
                                 <?php if ($post['excerpt']): ?>
                                     <p class="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
-                                        <?= Security::escape($post['excerpt']) ?></p>
+                                        <?= Security::escape($post['excerpt']) ?>
+                                    </p>
                                 <?php endif; ?>
                                 <span
                                     class="inline-flex items-center gap-1 text-primary font-bold text-sm mt-3 group-hover:underline">

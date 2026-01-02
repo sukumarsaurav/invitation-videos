@@ -178,14 +178,18 @@ $pageTitle = 'Template Gallery';
 
             <!-- Template Grid -->
             <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-6 mb-12">
-                <?php foreach ($templates as $template): ?>
+                <?php foreach ($templates as $index => $template):
+                    // First 2 images are above the fold on mobile - load eagerly
+                    $isAboveFold = $index < 2;
+                    ?>
                     <div
                         class="group relative flex flex-col overflow-hidden rounded-xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1">
                         <div class="relative aspect-[4/5] w-full overflow-hidden bg-slate-100">
                             <img src="<?= Security::escape($template['thumbnail_url'] ?? '/assets/images/placeholder.jpg') ?>"
                                 alt="<?= Security::escape($template['title']) ?>"
                                 class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                                width="300" height="375" loading="lazy" decoding="async">
+                                width="300" height="375" loading="<?= $isAboveFold ? 'eager' : 'lazy' ?>"
+                                decoding="<?= $isAboveFold ? 'sync' : 'async' ?>" <?= $isAboveFold ? 'fetchpriority="high"' : '' ?>>
 
                             <!-- Play Button Overlay -->
                             <div

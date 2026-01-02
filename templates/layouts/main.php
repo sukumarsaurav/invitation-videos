@@ -18,29 +18,311 @@
     <link rel="manifest" href="/site.webmanifest">
     <link rel="shortcut icon" href="/favicon.ico">
 
-    <!-- Critical Resource Preloading for LCP -->
-    <link rel="preload" href="/assets/css/app.css" as="style">
+    <!-- Critical CSS Inline - Immediate render without blocking -->
+    <style>
+        /* Critical CSS for above-the-fold content */
+        *,
+        ::after,
+        ::before {
+            box-sizing: border-box;
+            border: 0 solid #e5e7eb
+        }
+
+        html {
+            line-height: 1.5;
+            -webkit-text-size-adjust: 100%;
+            font-family: Plus Jakarta Sans, ui-sans-serif, system-ui, sans-serif
+        }
+
+        body {
+            margin: 0;
+            line-height: inherit;
+            background-color: #f8fafc;
+            color: #0f172a;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column
+        }
+
+        img,
+        video {
+            max-width: 100%;
+            height: auto;
+            display: block
+        }
+
+        .font-display {
+            font-family: Plus Jakarta Sans, ui-sans-serif, system-ui, sans-serif
+        }
+
+        .bg-background-light {
+            background-color: #f8fafc
+        }
+
+        .text-slate-900 {
+            color: #0f172a
+        }
+
+        .min-h-screen {
+            min-height: 100vh
+        }
+
+        .flex {
+            display: flex
+        }
+
+        .flex-col {
+            flex-direction: column
+        }
+
+        .items-center {
+            align-items: center
+        }
+
+        .justify-between {
+            justify-content: space-between
+        }
+
+        .gap-2 {
+            gap: .5rem
+        }
+
+        .gap-4 {
+            gap: 1rem
+        }
+
+        .px-4 {
+            padding-left: 1rem;
+            padding-right: 1rem
+        }
+
+        .py-4 {
+            padding-top: 1rem;
+            padding-bottom: 1rem
+        }
+
+        .h-16 {
+            height: 4rem
+        }
+
+        .max-w-7xl {
+            max-width: 80rem
+        }
+
+        .mx-auto {
+            margin-left: auto;
+            margin-right: auto
+        }
+
+        .sticky {
+            position: sticky
+        }
+
+        .top-0 {
+            top: 0
+        }
+
+        .z-50 {
+            z-index: 50
+        }
+
+        .bg-white {
+            background-color: #fff
+        }
+
+        .border-b {
+            border-bottom-width: 1px
+        }
+
+        .border-slate-200 {
+            border-color: #e2e8f0
+        }
+
+        .shadow-sm {
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, .05)
+        }
+
+        .rounded-lg {
+            border-radius: .5rem
+        }
+
+        .rounded-xl {
+            border-radius: .75rem
+        }
+
+        .rounded-2xl {
+            border-radius: 1rem
+        }
+
+        .font-bold {
+            font-weight: 700
+        }
+
+        .text-lg {
+            font-size: 1.125rem;
+            line-height: 1.75rem
+        }
+
+        .text-xl {
+            font-size: 1.25rem;
+            line-height: 1.75rem
+        }
+
+        .text-sm {
+            font-size: .875rem;
+            line-height: 1.25rem
+        }
+
+        .hidden {
+            display: none
+        }
+
+        .block {
+            display: block
+        }
+
+        .w-full {
+            width: 100%
+        }
+
+        .h-full {
+            height: 100%
+        }
+
+        .object-cover {
+            object-fit: cover
+        }
+
+        .overflow-hidden {
+            overflow: hidden
+        }
+
+        .absolute {
+            position: absolute
+        }
+
+        .relative {
+            position: relative
+        }
+
+        .inset-0 {
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0
+        }
+
+        .aspect-\[4\/5\] {
+            aspect-ratio: 4/5
+        }
+
+        .grid {
+            display: grid
+        }
+
+        .grid-cols-2 {
+            grid-template-columns: repeat(2, minmax(0, 1fr))
+        }
+
+        .gap-6 {
+            gap: 1.5rem
+        }
+
+        .p-4 {
+            padding: 1rem
+        }
+
+        .mb-4 {
+            margin-bottom: 1rem
+        }
+
+        .mb-6 {
+            margin-bottom: 1.5rem
+        }
+
+        .text-primary {
+            color: #7f13ec
+        }
+
+        .bg-primary {
+            background-color: #7f13ec
+        }
+
+        .text-white {
+            color: #fff
+        }
+
+        @media(min-width:640px) {
+            .sm\:px-6 {
+                padding-left: 1.5rem;
+                padding-right: 1.5rem
+            }
+        }
+
+        @media(min-width:768px) {
+            .md\:grid-cols-3 {
+                grid-template-columns: repeat(3, minmax(0, 1fr))
+            }
+        }
+
+        @media(min-width:1024px) {
+            .lg\:flex {
+                display: flex
+            }
+
+            .lg\:hidden {
+                display: none
+            }
+
+            .lg\:px-8 {
+                padding-left: 2rem;
+                padding-right: 2rem
+            }
+        }
+
+        /* Loading state for fonts */
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined', sans-serif;
+            font-size: 24px;
+            display: inline-block;
+            width: 24px;
+            height: 24px
+        }
+    </style>
+
+    <!-- Preconnect to external origins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
     <link rel="dns-prefetch" href="https://fonts.gstatic.com">
-    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 
-    <!-- Fonts (optimized with display=swap) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&display=swap"
-        rel="stylesheet">
+    <!-- Main CSS - loaded async to prevent render blocking -->
+    <link rel="preload" href="/assets/css/app.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="/assets/css/app.css">
+    </noscript>
 
-    <!-- Pre-compiled Tailwind CSS (replaces ~400KB CDN runtime) -->
-    <link rel="stylesheet" href="/assets/css/app.css">
+    <!-- Fonts - loaded async with font-display:swap -->
+    <link rel="preload"
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+    </noscript>
 
-    <!-- Alpine.js for FAQ interactivity -->
+    <!-- Material Symbols - loaded last as it's large -->
+    <link rel="preload"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&display=swap"
+        as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&display=swap">
+    </noscript>
+
+    <!-- Alpine.js - deferred -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
-
-
 
 </head>
 
@@ -57,7 +339,7 @@
                     <!-- Logo -->
                     <a href="/" class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                         <img src="/assets/images/logo.png" alt="<?= APP_NAME ?? 'InvitationVideos' ?>"
-                            class="h-9 sm:h-10 w-auto" width="40" height="40" loading="eager">
+                            class="h-9 sm:h-10 w-auto" width="40" height="40" loading="eager" fetchpriority="high">
                         <h2 class="text-lg sm:text-xl font-bold leading-tight tracking-tight">
                             <?= APP_NAME ?? 'VideoInvites' ?>
                         </h2>
@@ -106,7 +388,8 @@
                                 class="flex items-center gap-2 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                                 <?php if ($userAvatar): ?>
                                     <img src="<?= Security::escape($userAvatar) ?>" alt="Profile"
-                                        class="w-9 h-9 rounded-full object-cover border-2 border-primary/20" width="36" height="36">
+                                        class="w-9 h-9 rounded-full object-cover border-2 border-primary/20" width="36"
+                                        height="36">
                                 <?php else: ?>
                                     <div
                                         class="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">
@@ -403,12 +686,14 @@
                             <!-- Razorpay -->
                             <div
                                 class="bg-white dark:bg-slate-800 rounded-lg px-3 py-2 border border-slate-200 dark:border-slate-700">
-                                <img src="/assets/images/razorpay-dark.png" alt="Razorpay" class="h-5 w-auto" width="80" height="20" loading="lazy">
+                                <img src="/assets/images/razorpay-dark.png" alt="Razorpay" class="h-5 w-auto" width="80"
+                                    height="20" loading="lazy">
                             </div>
                             <!-- UPI -->
                             <div
                                 class="bg-white dark:bg-slate-800 rounded-lg px-3 py-2 border border-slate-200 dark:border-slate-700">
-                                <img src="/assets/images/upi_logo.png" alt="UPI" class="h-5 w-auto" width="40" height="20" loading="lazy">
+                                <img src="/assets/images/upi_logo.png" alt="UPI" class="h-5 w-auto" width="40"
+                                    height="20" loading="lazy">
                             </div>
                             <!-- PayPal -->
                             <div
@@ -487,7 +772,7 @@
             }
             currentAudio = new Audio(url);
             currentAudio.play();
-    }
+        }
     </script>
 
 </body>
