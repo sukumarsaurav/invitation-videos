@@ -290,12 +290,15 @@
         }
     </style>
 
-    <!-- Preconnect to external origins -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Self-hosted fonts - preload for fast text rendering -->
+    <link rel="preload" href="/assets/fonts/plus-jakarta-sans-variable.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/assets/css/fonts.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="/assets/css/fonts.css">
+    </noscript>
+
+    <!-- Preconnect for CDN -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
-    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
 
     <!-- Main CSS - loaded async to prevent render blocking -->
     <link rel="preload" href="/assets/css/app.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -303,16 +306,7 @@
         <link rel="stylesheet" href="/assets/css/app.css">
     </noscript>
 
-    <!-- Fonts - loaded async with font-display:swap -->
-    <link rel="preload"
-        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
-        as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript>
-        <link rel="stylesheet"
-            href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
-    </noscript>
-
-    <!-- Material Symbols - loaded last as it's large -->
+    <!-- Material Symbols - loaded last as it's large (still from Google, but async) -->
     <link rel="preload"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&display=swap"
         as="style" onload="this.onload=null;this.rel='stylesheet'">
