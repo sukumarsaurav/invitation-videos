@@ -396,16 +396,12 @@
                             <!-- Razorpay -->
                             <div
                                 class="bg-white dark:bg-slate-800 rounded-lg px-3 py-2 border border-slate-200 dark:border-slate-700">
-                                <svg class="h-6 w-auto" viewBox="0 0 124 36" xmlns="http://www.w3.org/2000/svg">
-                                    <path fill="#3395FF"
-                                        d="M6.6 0L0 36h7.32L8.94 27h7.74l1.62 9h7.32L19.02 0H6.6zm6.3 20.7H8.34l3.06-16.2h.9l.6 16.2zM39.96 0h-7.32L27.06 28.8h-3.6L27.36 0h-7.32L13.92 36h17.76c4.32 0 7.74-3.42 8.28-7.74V28.2L39.96 0zm24.48 0h-7.32L51.54 28.8h-3.6L51.84 0h-7.32L38.4 36h17.76c4.32 0 7.74-3.42 8.28-7.74V28.2L64.44 0zM82.38 0h-7.2L69.6 28.8h-3.6L69.9 0h-7.32L56.46 36h17.76c4.32 0 7.74-3.42 8.28-7.74V28.2L82.38 0z" />
-                                </svg>
+                                <img src="/assets/images/razorpay-dark.png" alt="Razorpay" class="h-5 w-auto">
                             </div>
                             <!-- UPI -->
                             <div
                                 class="bg-white dark:bg-slate-800 rounded-lg px-3 py-2 border border-slate-200 dark:border-slate-700">
-                                <span
-                                    class="text-sm font-bold bg-gradient-to-r from-green-600 to-orange-500 bg-clip-text text-transparent">UPI</span>
+                                <img src="/assets/images/upi_logo.png" alt="UPI" class="h-5 w-auto">
                             </div>
                             <!-- PayPal -->
                             <div

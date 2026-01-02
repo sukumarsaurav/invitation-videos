@@ -119,11 +119,15 @@ $pageTitle = 'Checkout - ' . $order['order_number'];
                 <?php if ($isIndian): ?>
                     <!-- Razorpay for India -->
                     <div class="text-center py-6">
-                        <p class="text-slate-600 mb-4">You will be redirected to Razorpay's secure payment page</p>
-                        <div class="flex justify-center gap-4 items-center">
-                            <img src="/assets/images/razorpay-logo.png" alt="Razorpay" class="h-8">
+                        <p class="text-slate-600 dark:text-slate-400 mb-4">You will be redirected to Razorpay's secure
+                            payment page</p>
+                        <div class="flex justify-center gap-4 items-center flex-wrap">
+                            <img src="/assets/images/razorpay.png" alt="Razorpay" class="h-8">
                             <span class="text-slate-400">|</span>
-                            <span class="text-sm text-slate-500">UPI • Cards • NetBanking • Wallets</span>
+                            <div class="flex items-center gap-2">
+                                <img src="/assets/images/upi_logo.png" alt="UPI" class="h-6">
+                                <span class="text-sm text-slate-500">• Cards • NetBanking • Wallets</span>
+                            </div>
                         </div>
                     </div>
                 <?php else: ?>
