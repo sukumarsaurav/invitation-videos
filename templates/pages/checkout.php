@@ -122,10 +122,10 @@ $pageTitle = 'Checkout - ' . $order['order_number'];
                         <p class="text-slate-600 dark:text-slate-400 mb-4">You will be redirected to Razorpay's secure
                             payment page</p>
                         <div class="flex justify-center gap-4 items-center flex-wrap">
-                            <img src="/assets/images/razorpay.png" alt="Razorpay" class="h-8">
+                            <img src="/assets/images/razorpay.png" alt="Razorpay" class="h-8" width="100" height="32">
                             <span class="text-slate-400">|</span>
                             <div class="flex items-center gap-2">
-                                <img src="/assets/images/upi_logo.png" alt="UPI" class="h-6">
+                                <img src="/assets/images/upi_logo.png" alt="UPI" class="h-6" width="48" height="24">
                                 <span class="text-sm text-slate-500">• Cards • NetBanking • Wallets</span>
                             </div>
                         </div>
@@ -150,8 +150,10 @@ $pageTitle = 'Checkout - ' . $order['order_number'];
                     <h3 class="text-lg font-bold mb-4">Order Summary</h3>
 
                     <div class="flex gap-4 mb-6">
-                        <div class="w-24 h-16 shrink-0 rounded-lg bg-cover bg-center shadow-sm"
-                            style="background-image: url('<?= Security::escape($order['thumbnail_url'] ?? '') ?>');">
+                        <div class="w-24 h-16 shrink-0 rounded-lg bg-slate-100 shadow-sm overflow-hidden">
+                            <img src="<?= Security::escape($order['thumbnail_url'] ?? '/assets/images/placeholder.jpg') ?>"
+                                 alt="<?= Security::escape($order['template_title']) ?>"
+                                 class="w-full h-full object-cover" width="96" height="64" loading="eager">
                         </div>
                         <div class="flex flex-col justify-center">
                             <h4 class="text-sm font-bold text-slate-900 dark:text-white leading-tight">

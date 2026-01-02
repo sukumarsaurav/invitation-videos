@@ -83,9 +83,9 @@ $pageTitle = 'My Orders';
                         <div class="flex flex-col sm:flex-row gap-4">
                             <!-- Thumbnail -->
                             <div class="w-full sm:w-32 h-48 sm:h-44 flex-shrink-0 rounded-lg overflow-hidden bg-slate-100">
-                                <div class="w-full h-full bg-cover bg-center"
-                                    style="background-image: url('<?= Security::escape($order['thumbnail_url'] ?? '/assets/images/placeholder.jpg') ?>');">
-                                </div>
+                                <img src="<?= Security::escape($order['thumbnail_url'] ?? '/assets/images/placeholder.jpg') ?>"
+                                    alt="<?= Security::escape($order['template_title'] ?? 'Video Invitation') ?>"
+                                    class="w-full h-full object-cover" width="128" height="176" loading="lazy" decoding="async">
                             </div>
 
                             <!-- Order Details -->

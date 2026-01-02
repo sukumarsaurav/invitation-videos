@@ -58,6 +58,85 @@ RewriteRule ^ index.php [L]
     </If>
 </FilesMatch>
 
+# ============================================
+# PERFORMANCE OPTIMIZATIONS
+# ============================================
+
+# Enable GZIP Compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css
+    AddOutputFilterByType DEFLATE text/javascript application/javascript application/x-javascript
+    AddOutputFilterByType DEFLATE application/json application/xml application/rss+xml
+    AddOutputFilterByType DEFLATE image/svg+xml
+    AddOutputFilterByType DEFLATE application/font-woff application/font-woff2
+    
+    # Compress by file extension
+    <FilesMatch "\.(html|css|js|json|xml|svg|txt|php)$">
+        SetOutputFilter DEFLATE
+    </FilesMatch>
+</IfModule>
+
+# Browser Caching with Expires Headers
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault "access plus 1 month"
+    
+    # HTML - short cache
+    ExpiresByType text/html "access plus 0 seconds"
+    
+    # CSS and JavaScript - 1 year
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType text/javascript "access plus 1 year"
+    
+    # Images - 1 year
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/x-icon "access plus 1 year"
+    ExpiresByType image/vnd.microsoft.icon "access plus 1 year"
+    
+    # Fonts - 1 year
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType application/font-woff "access plus 1 year"
+    ExpiresByType application/font-woff2 "access plus 1 year"
+    ExpiresByType font/ttf "access plus 1 year"
+    ExpiresByType font/otf "access plus 1 year"
+    ExpiresByType application/vnd.ms-fontobject "access plus 1 year"
+    
+    # JSON and XML - no cache
+    ExpiresByType application/json "access plus 0 seconds"
+    ExpiresByType application/xml "access plus 0 seconds"
+</IfModule>
+
+# Cache-Control Headers
+<IfModule mod_headers.c>
+    # Cache static assets for 1 year
+    <FilesMatch "\.(css|js|woff|woff2|ttf|otf|eot)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+    
+    <FilesMatch "\.(jpg|jpeg|png|gif|webp|svg|ico)$">
+        Header set Cache-Control "public, max-age=31536000"
+    </FilesMatch>
+    
+    # HTML/PHP files - no cache
+    <FilesMatch "\.(html|php)$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
+    </FilesMatch>
+    
+    # Keep-Alive for better performance
+    Header set Connection keep-alive
+</IfModule>
+
+# ETags Configuration
+FileETag MTime Size
+
 # PHP settings (if allowed by host)
 <IfModule mod_php.c>
     php_value upload_max_filesize 10M

@@ -18,6 +18,13 @@
     <link rel="manifest" href="/site.webmanifest">
     <link rel="shortcut icon" href="/favicon.ico">
 
+    <!-- Critical Resource Preloading for LCP -->
+    <link rel="preload" href="/assets/css/app.css" as="style">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+
     <!-- Fonts (optimized with display=swap) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -50,7 +57,7 @@
                     <!-- Logo -->
                     <a href="/" class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                         <img src="/assets/images/logo.png" alt="<?= APP_NAME ?? 'InvitationVideos' ?>"
-                            class="h-9 sm:h-10 w-auto">
+                            class="h-9 sm:h-10 w-auto" width="40" height="40" loading="eager">
                         <h2 class="text-lg sm:text-xl font-bold leading-tight tracking-tight">
                             <?= APP_NAME ?? 'VideoInvites' ?>
                         </h2>
@@ -99,7 +106,7 @@
                                 class="flex items-center gap-2 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                                 <?php if ($userAvatar): ?>
                                     <img src="<?= Security::escape($userAvatar) ?>" alt="Profile"
-                                        class="w-9 h-9 rounded-full object-cover border-2 border-primary/20">
+                                        class="w-9 h-9 rounded-full object-cover border-2 border-primary/20" width="36" height="36">
                                 <?php else: ?>
                                     <div
                                         class="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">
@@ -253,7 +260,7 @@
                 <div class="col-span-2 sm:col-span-3 lg:col-span-1">
                     <div class="flex items-center gap-2 mb-4">
                         <img src="/assets/images/logo.png" alt="<?= APP_NAME ?? 'InvitationVideos' ?>"
-                            class="h-8 w-auto">
+                            class="h-8 w-auto" width="32" height="32" loading="lazy">
                         <span class="font-bold text-lg"><?= APP_NAME ?? 'VideoInvites' ?></span>
                     </div>
                     <p class="text-sm text-slate-500 mb-4">Create stunning video invitations for your special occasions.
@@ -396,12 +403,12 @@
                             <!-- Razorpay -->
                             <div
                                 class="bg-white dark:bg-slate-800 rounded-lg px-3 py-2 border border-slate-200 dark:border-slate-700">
-                                <img src="/assets/images/razorpay-dark.png" alt="Razorpay" class="h-5 w-auto">
+                                <img src="/assets/images/razorpay-dark.png" alt="Razorpay" class="h-5 w-auto" width="80" height="20" loading="lazy">
                             </div>
                             <!-- UPI -->
                             <div
                                 class="bg-white dark:bg-slate-800 rounded-lg px-3 py-2 border border-slate-200 dark:border-slate-700">
-                                <img src="/assets/images/upi_logo.png" alt="UPI" class="h-5 w-auto">
+                                <img src="/assets/images/upi_logo.png" alt="UPI" class="h-5 w-auto" width="40" height="20" loading="lazy">
                             </div>
                             <!-- PayPal -->
                             <div
@@ -480,7 +487,7 @@
             }
             currentAudio = new Audio(url);
             currentAudio.play();
-        }
+    }
     </script>
 
 </body>

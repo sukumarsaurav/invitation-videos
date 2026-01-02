@@ -87,7 +87,8 @@ $pageDescription = 'Tips, ideas, and inspiration for your video invitations. Wed
                                         <?php if ($post['featured_image']): ?>
                                             <img src="<?= Security::escape($post['featured_image']) ?>"
                                                 alt="<?= Security::escape($post['title']) ?>"
-                                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                width="640" height="360" loading="lazy" decoding="async">
                                         <?php else: ?>
                                             <div class="w-full h-full flex items-center justify-center text-slate-400">
                                                 <span class="material-symbols-outlined text-6xl">article</span>
@@ -196,8 +197,13 @@ $pageDescription = 'Tips, ideas, and inspiration for your video invitations. Wed
                                 <li>
                                     <a href="/blog/<?= Security::escape($recent['slug']) ?>"
                                         class="flex items-start gap-3 group">
-                                        <div class="w-16 h-12 rounded-lg bg-slate-100 bg-cover bg-center flex-shrink-0"
-                                            style="background-image: url('<?= Security::escape($recent['featured_image'] ?? '') ?>');">
+                                        <div class="w-16 h-12 rounded-lg bg-slate-100 flex-shrink-0 overflow-hidden">
+                                            <?php if ($recent['featured_image']): ?>
+                                                <img src="<?= Security::escape($recent['featured_image']) ?>"
+                                                    alt="<?= Security::escape($recent['title']) ?>"
+                                                    class="w-full h-full object-cover" width="64" height="48" loading="lazy"
+                                                    decoding="async">
+                                            <?php endif; ?>
                                         </div>
                                         <div>
                                             <p

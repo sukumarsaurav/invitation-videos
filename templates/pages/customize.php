@@ -321,7 +321,8 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                     <div
                         class="relative aspect-[4/5] sm:aspect-[9/14] lg:aspect-[4/5] w-full max-w-lg mx-auto rounded-2xl overflow-hidden shadow-2xl bg-slate-200">
                         <img src="<?= Security::escape($template['thumbnail_url'] ?? '/assets/images/placeholder.jpg') ?>"
-                            alt="<?= Security::escape($template['title']) ?>" class="w-full h-full object-cover">
+                            alt="<?= Security::escape($template['title']) ?>" class="w-full h-full object-cover" width="512"
+                            height="640" loading="eager">
 
                         <!-- Play Button Overlay -->
                         <?php if (!empty($template['preview_video_url'])): ?>
@@ -467,7 +468,8 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                     class="bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-lg border border-slate-200 dark:border-slate-800">
                     <div class="relative aspect-[4/5] w-full bg-slate-200">
                         <img src="<?= Security::escape($template['thumbnail_url'] ?? '/assets/images/placeholder.jpg') ?>"
-                            alt="<?= Security::escape($template['title']) ?>" class="w-full h-full object-cover">
+                            alt="<?= Security::escape($template['title']) ?>" class="w-full h-full object-cover" width="300"
+                            height="375" loading="lazy" decoding="async">
                         <div
                             class="absolute top-3 right-3 bg-black/60 backdrop-blur-sm text-white text-xs font-bold px-2 py-1 rounded">
                             <?= $template['duration_seconds'] ?>s
