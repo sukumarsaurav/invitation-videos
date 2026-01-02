@@ -170,13 +170,12 @@ $pageTitle = 'My Orders';
                                                     </div>
                                                 </div>
                                                 <div class="flex gap-2">
-                                                    <a href="<?= Security::escape($order['output_video_url']) ?>"
-                                                        class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white font-bold text-sm rounded-lg hover:bg-green-700 transition-colors"
-                                                        download>
+                                                    <a href="/api/download-video.php?order_id=<?= (int) $order['id'] ?>"
+                                                        class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white font-bold text-sm rounded-lg hover:bg-green-700 transition-colors">
                                                         <span class="material-symbols-outlined text-lg">download</span>
                                                         Download
                                                     </a>
-                                                    <a href="<?= Security::escape($order['output_video_url']) ?>"
+                                                    <a href="/api/download-video.php?order_id=<?= (int) $order['id'] ?>&preview=1"
                                                         class="inline-flex items-center gap-2 px-4 py-2 border border-green-300 text-green-700 font-medium text-sm rounded-lg hover:bg-green-100 transition-colors"
                                                         target="_blank">
                                                         <span class="material-symbols-outlined text-lg">play_circle</span>

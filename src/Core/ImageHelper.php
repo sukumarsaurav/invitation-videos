@@ -186,4 +186,253 @@ class ImageHelper
 
         return 'data:image/svg+xml,' . rawurlencode($svg);
     }
+
+    /**
+     * Compress and optimize an uploaded image
+     * 
+     * @param string $sourcePath Path to the original image
+     * @param string $destPath Path to save the compressed image
+     * @param int $maxWidth Maximum width (default 800px for thumbnails)
+     * @param int $maxHeight Maximum height (default 1200px for 9:16 aspect ratio)
+     * @param int $quality JPEG/WebP quality (0-100, default 85)
+     * @param bool $convertToWebP Whether to convert to WebP format
+     * @return array ['success' => bool, 'path' => string, 'size_before' => int, 'size_after' => int, 'error' => string]
+     */
+    public static function compressImage(
+        string $sourcePath,
+        string $destPath,
+        int $maxWidth = 800,
+        int $maxHeight = 1200,
+        int $quality = 85,
+        bool $convertToWebP = true
+    ): array {
+        $result = [
+            'success' => false,
+            'path' => $destPath,
+            'size_before' => 0,
+            'size_after' => 0,
+            'error' => ''
+        ];
+
+        // Check if source file exists
+        if (!file_exists($sourcePath)) {
+            $result['error'] = 'Source file not found';
+            return $result;
+        }
+
+        $result['size_before'] = filesize($sourcePath);
+
+        // Get image info
+        $imageInfo = getimagesize($sourcePath);
+        if ($imageInfo === false) {
+            $result['error'] = 'Invalid image file';
+            return $result;
+        }
+
+        $originalWidth = $imageInfo[0];
+        $originalHeight = $imageInfo[1];
+        $mimeType = $imageInfo['mime'];
+
+        // Create image resource based on type
+        $sourceImage = null;
+        switch ($mimeType) {
+            case 'image/jpeg':
+                $sourceImage = imagecreatefromjpeg($sourcePath);
+                break;
+            case 'image/png':
+                $sourceImage = imagecreatefrompng($sourcePath);
+                break;
+            case 'image/gif':
+                $sourceImage = imagecreatefromgif($sourcePath);
+                break;
+            case 'image/webp':
+                if (function_exists('imagecreatefromwebp')) {
+                    $sourceImage = imagecreatefromwebp($sourcePath);
+                }
+                break;
+            default:
+                $result['error'] = 'Unsupported image format: ' . $mimeType;
+                return $result;
+        }
+
+        if (!$sourceImage) {
+            $result['error'] = 'Failed to create image resource';
+            return $result;
+        }
+
+        // Calculate new dimensions while maintaining aspect ratio
+        $ratio = min($maxWidth / $originalWidth, $maxHeight / $originalHeight);
+
+        // Only resize if image is larger than max dimensions
+        if ($ratio < 1) {
+            $newWidth = (int) round($originalWidth * $ratio);
+            $newHeight = (int) round($originalHeight * $ratio);
+        } else {
+            $newWidth = $originalWidth;
+            $newHeight = $originalHeight;
+        }
+
+        // Create new image with proper dimensions
+        $destImage = imagecreatetruecolor($newWidth, $newHeight);
+
+        // Preserve transparency for PNG/WebP
+        if ($mimeType === 'image/png' || $mimeType === 'image/webp') {
+            imagealphablending($destImage, false);
+            imagesavealpha($destImage, true);
+            $transparent = imagecolorallocatealpha($destImage, 0, 0, 0, 127);
+            imagefilledrectangle($destImage, 0, 0, $newWidth, $newHeight, $transparent);
+        }
+
+        // Resize image with high quality resampling
+        imagecopyresampled(
+            $destImage,
+            $sourceImage,
+            0,
+            0,
+            0,
+            0,
+            $newWidth,
+            $newHeight,
+            $originalWidth,
+            $originalHeight
+        );
+
+        // Determine output format and save
+        $outputPath = $destPath;
+        $saved = false;
+
+        if ($convertToWebP && function_exists('imagewebp')) {
+            // Change extension to .webp
+            $pathInfo = pathinfo($destPath);
+            $outputPath = $pathInfo['dirname'] . '/' . $pathInfo['filename'] . '.webp';
+            $saved = imagewebp($destImage, $outputPath, $quality);
+        }
+
+        // Fallback to JPEG if WebP failed or not requested
+        if (!$saved) {
+            $pathInfo = pathinfo($destPath);
+            $ext = strtolower($pathInfo['extension'] ?? 'jpg');
+
+            if ($ext === 'png' && ($mimeType === 'image/png')) {
+                // For PNG, use PNG compression (0-9, where 9 is max compression)
+                $pngQuality = (int) round((100 - $quality) / 11.1);
+                $saved = imagepng($destImage, $destPath, $pngQuality);
+                $outputPath = $destPath;
+            } else {
+                // Default to JPEG
+                $outputPath = $pathInfo['dirname'] . '/' . $pathInfo['filename'] . '.jpg';
+                $saved = imagejpeg($destImage, $outputPath, $quality);
+            }
+        }
+
+        // Clean up
+        imagedestroy($sourceImage);
+        imagedestroy($destImage);
+
+        if ($saved && file_exists($outputPath)) {
+            $result['success'] = true;
+            $result['path'] = $outputPath;
+            $result['size_after'] = filesize($outputPath);
+        } else {
+            $result['error'] = 'Failed to save compressed image';
+        }
+
+        return $result;
+    }
+
+    /**
+     * Process thumbnail upload with compression
+     * 
+     * @param array $file $_FILES['thumbnail'] array
+     * @param string $uploadDir Directory to save the thumbnail
+     * @param string $prefix Filename prefix (e.g., 'template_')
+     * @param int $maxWidth Maximum width
+     * @param int $maxHeight Maximum height
+     * @return array ['success' => bool, 'url' => string, 'error' => string, 'compression_stats' => array]
+     */
+    public static function processThumbnailUpload(
+        array $file,
+        string $uploadDir,
+        string $prefix = 'thumb_',
+        int $maxWidth = 800,
+        int $maxHeight = 1200
+    ): array {
+        $result = [
+            'success' => false,
+            'url' => '',
+            'error' => '',
+            'compression_stats' => []
+        ];
+
+        // Validate upload
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        $maxSize = 10 * 1024 * 1024; // 10MB max for original (will be compressed)
+
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            $uploadErrors = [
+                UPLOAD_ERR_INI_SIZE => 'File exceeds server upload limit',
+                UPLOAD_ERR_FORM_SIZE => 'File exceeds form limit',
+                UPLOAD_ERR_PARTIAL => 'File partially uploaded',
+                UPLOAD_ERR_NO_FILE => 'No file uploaded',
+                UPLOAD_ERR_NO_TMP_DIR => 'Missing temp folder',
+                UPLOAD_ERR_CANT_WRITE => 'Failed to write file',
+                UPLOAD_ERR_EXTENSION => 'Upload blocked by extension',
+            ];
+            $result['error'] = $uploadErrors[$file['error']] ?? 'Unknown upload error';
+            return $result;
+        }
+
+        if (!in_array($file['type'], $allowedTypes)) {
+            $result['error'] = 'Invalid file type. Allowed: JPEG, PNG, GIF, WebP';
+            return $result;
+        }
+
+        if ($file['size'] > $maxSize) {
+            $result['error'] = 'File too large. Maximum 10MB';
+            return $result;
+        }
+
+        // Create upload directory if needed
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        // Generate unique filename
+        $filename = $prefix . time() . '_' . uniqid();
+        $tempDest = $uploadDir . $filename . '_temp.' . pathinfo($file['name'], PATHINFO_EXTENSION);
+
+        // Move uploaded file to temp location
+        if (!move_uploaded_file($file['tmp_name'], $tempDest)) {
+            $result['error'] = 'Failed to move uploaded file';
+            return $result;
+        }
+
+        // Compress the image
+        $finalDest = $uploadDir . $filename . '.webp';
+        $compression = self::compressImage($tempDest, $finalDest, $maxWidth, $maxHeight, 85, true);
+
+        // Delete temp file
+        @unlink($tempDest);
+
+        if (!$compression['success']) {
+            $result['error'] = 'Compression failed: ' . $compression['error'];
+            return $result;
+        }
+
+        // Calculate compression ratio
+        $compressionRatio = $compression['size_before'] > 0
+            ? round((1 - $compression['size_after'] / $compression['size_before']) * 100, 1)
+            : 0;
+
+        $result['success'] = true;
+        $result['url'] = str_replace($uploadDir, '', $compression['path']);
+        $result['compression_stats'] = [
+            'original_size' => $compression['size_before'],
+            'compressed_size' => $compression['size_after'],
+            'compression_ratio' => $compressionRatio . '%',
+            'format' => pathinfo($compression['path'], PATHINFO_EXTENSION)
+        ];
+
+        return $result;
+    }
 }

@@ -66,24 +66,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_action'])) {
     }
 }
 
-// Handle thumbnail upload
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['thumbnail'])) {
-    $file = $_FILES['thumbnail'];
-    $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    $maxSize = 5 * 1024 * 1024; // 5MB
+// Handle thumbnail upload with compression
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['thumbnail']) && $_FILES['thumbnail']['error'] === UPLOAD_ERR_OK) {
+    require_once __DIR__ . '/../src/Core/ImageHelper.php';
     
-    if ($file['error'] === UPLOAD_ERR_OK && in_array($file['type'], $allowedTypes) && $file['size'] <= $maxSize) {
-        $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
-        $filename = 'template_' . time() . '_' . uniqid() . '.' . $ext;
-        $uploadDir = __DIR__ . '/../uploads/templates/';
+    $uploadDir = __DIR__ . '/../uploads/templates/';
+    
+    // Process and compress the thumbnail
+    $result = ImageHelper::processThumbnailUpload(
+        $_FILES['thumbnail'],
+        $uploadDir,
+        'template_',
+        800,   // Max width
+        1200   // Max height (9:16 aspect ratio)
+    );
+    
+    if ($result['success']) {
+        $_POST['thumbnail_url'] = '/uploads/templates/' . basename($result['url']);
         
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
+        // Log compression stats for debugging
+        if (!empty($result['compression_stats'])) {
+            $stats = $result['compression_stats'];
+            error_log(sprintf(
+                "Thumbnail compressed: %s -> %s (%s reduction, format: %s)",
+                number_format($stats['original_size'] / 1024, 1) . 'KB',
+                number_format($stats['compressed_size'] / 1024, 1) . 'KB',
+                $stats['compression_ratio'],
+                $stats['format']
+            ));
         }
-        
-        if (move_uploaded_file($file['tmp_name'], $uploadDir . $filename)) {
-            $_POST['thumbnail_url'] = '/uploads/templates/' . $filename;
-        }
+    } else {
+        // Log error but don't fail the entire form submission
+        error_log("Thumbnail compression failed: " . $result['error']);
     }
 }
 

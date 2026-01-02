@@ -57,32 +57,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ($bgType === 'video' && in_array($ext, $allowedVid));
 
                 if ($isValid) {
-                    $filename = 'bg_' . time() . '_' . uniqid() . '.' . $ext;
-                    $targetPath = $uploadDir . $filename;
+                    if ($bgType === 'image') {
+                        // Compress image uploads
+                        require_once __DIR__ . '/../src/Core/ImageHelper.php';
 
-                    if (move_uploaded_file($_FILES['bg_file']['tmp_name'], $targetPath)) {
-                        $filePath = '/assets/backgrounds/' . $filename;
+                        $result = ImageHelper::processThumbnailUpload(
+                            $_FILES['bg_file'],
+                            $uploadDir,
+                            'bg_',
+                            1920,  // Max width for backgrounds
+                            1080   // Max height for backgrounds
+                        );
+
+                        if ($result['success']) {
+                            $filePath = '/assets/backgrounds/' . basename($result['url']);
+                        } else {
+                            $error = 'Failed to process image: ' . $result['error'];
+                        }
                     } else {
-                        $error = 'Failed to upload file';
+                        // Video - just move without compression
+                        $filename = 'bg_' . time() . '_' . uniqid() . '.' . $ext;
+                        $targetPath = $uploadDir . $filename;
+
+                        if (move_uploaded_file($_FILES['bg_file']['tmp_name'], $targetPath)) {
+                            $filePath = '/assets/backgrounds/' . $filename;
+                        } else {
+                            $error = 'Failed to upload file';
+                        }
                     }
                 } else {
                     $error = 'Invalid file type. Images: jpg, png, webp, gif. Videos: mp4, webm, mov';
                 }
             }
 
-            // Handle thumbnail for videos
+            // Handle thumbnail for videos (with compression)
             if ($bgType === 'video' && !empty($_FILES['thumbnail']['name'])) {
+                require_once __DIR__ . '/../src/Core/ImageHelper.php';
+
                 $thumbDir = __DIR__ . '/../assets/backgrounds/thumbs/';
                 if (!file_exists($thumbDir)) {
                     mkdir($thumbDir, 0755, true);
                 }
 
-                $ext = strtolower(pathinfo($_FILES['thumbnail']['name'], PATHINFO_EXTENSION));
-                if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) {
-                    $thumbname = 'thumb_' . time() . '_' . uniqid() . '.' . $ext;
-                    if (move_uploaded_file($_FILES['thumbnail']['tmp_name'], $thumbDir . $thumbname)) {
-                        $thumbnailPath = '/assets/backgrounds/thumbs/' . $thumbname;
-                    }
+                $result = ImageHelper::processThumbnailUpload(
+                    $_FILES['thumbnail'],
+                    $thumbDir,
+                    'thumb_',
+                    800,   // Max width for thumbnails
+                    450    // Max height for thumbnails (16:9 aspect)
+                );
+
+                if ($result['success']) {
+                    $thumbnailPath = '/assets/backgrounds/thumbs/' . basename($result['url']);
                 }
             }
 
@@ -204,7 +230,8 @@ if ($action === 'edit' && isset($_GET['id'])) {
                             onchange="toggleBgFields()">
                             <?php foreach ($types as $t): ?>
                                 <option value="<?= $t ?>" <?= ($editBg['type'] ?? 'image') === $t ? 'selected' : '' ?>>
-                                    <?= ucfirst($t) ?></option>
+                                    <?= ucfirst($t) ?>
+                                </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -213,7 +240,8 @@ if ($action === 'edit' && isset($_GET['id'])) {
                         <select name="category" class="w-full px-3 py-2 border rounded-lg">
                             <?php foreach ($categories as $c): ?>
                                 <option value="<?= $c ?>" <?= ($editBg['category'] ?? 'custom') === $c ? 'selected' : '' ?>>
-                                    <?= ucfirst($c) ?></option>
+                                    <?= ucfirst($c) ?>
+                                </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
