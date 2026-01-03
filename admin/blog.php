@@ -243,7 +243,7 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
                         </button>
                     </div>
 
-                    <div class="flex items-center gap-1">
+                    <div class="flex items-center gap-1 border-r border-slate-200 pr-2 mr-2">
                         <button type="button" onclick="execCmd('removeFormat')" class="toolbar-btn"
                             title="Clear Formatting">
                             <span class="material-symbols-outlined text-lg">format_clear</span>
@@ -251,6 +251,44 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
                         <button type="button" onclick="toggleSource()" class="toolbar-btn" title="View HTML Source">
                             <span class="material-symbols-outlined text-lg">code</span>
                         </button>
+                    </div>
+
+                    <!-- Layouts Dropdown -->
+                    <div class="relative">
+                        <button type="button" onclick="toggleLayoutMenu()" class="toolbar-btn flex items-center gap-1"
+                            title="Insert Layout Block">
+                            <span class="material-symbols-outlined text-lg">view_column</span>
+                            <span class="text-xs">Layouts</span>
+                            <span class="material-symbols-outlined text-sm">expand_more</span>
+                        </button>
+                        <div id="layout-menu"
+                            class="hidden absolute top-full left-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-50 min-w-[180px]">
+                            <button type="button" onclick="insertImageTextBlock()"
+                                class="w-full px-4 py-2 text-left text-sm hover:bg-slate-50 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-lg text-slate-500">image</span>
+                                Image + Text
+                            </button>
+                            <button type="button" onclick="insertTwoColumnBlock()"
+                                class="w-full px-4 py-2 text-left text-sm hover:bg-slate-50 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-lg text-slate-500">view_column</span>
+                                Two Columns
+                            </button>
+                            <button type="button" onclick="insertCalloutBlock('info')"
+                                class="w-full px-4 py-2 text-left text-sm hover:bg-slate-50 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-lg text-blue-500">info</span>
+                                Info Callout
+                            </button>
+                            <button type="button" onclick="insertCalloutBlock('tip')"
+                                class="w-full px-4 py-2 text-left text-sm hover:bg-slate-50 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-lg text-green-500">lightbulb</span>
+                                Tip Callout
+                            </button>
+                            <button type="button" onclick="insertCalloutBlock('warning')"
+                                class="w-full px-4 py-2 text-left text-sm hover:bg-slate-50 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-lg text-amber-500">warning</span>
+                                Warning Callout
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div class="p-4">
@@ -470,6 +508,50 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
             border-radius: 8px;
             margin: 1em 0;
         }
+
+        /* Layout Block Styles */
+        #visual-editor .blog-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            border: 2px dashed #e2e8f0;
+            border-radius: 8px;
+            background: #f8fafc;
+        }
+
+        #visual-editor .blog-col {
+            flex: 1 1 280px;
+            min-width: 0;
+        }
+
+        #visual-editor .blog-col img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+        }
+
+        #visual-editor .blog-callout {
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+        }
+
+        #visual-editor .blog-callout-info {
+            background: #e0f2fe;
+            border-left: 4px solid #0ea5e9;
+        }
+
+        #visual-editor .blog-callout-tip {
+            background: #dcfce7;
+            border-left: 4px solid #22c55e;
+        }
+
+        #visual-editor .blog-callout-warning {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+        }
     </style>
     <script>
         const visualEditor = document.getElementById('visual-editor');
@@ -491,6 +573,87 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
             document.execCommand(command, false, value);
             visualEditor.focus();
             syncContent();
+        }
+        
+        // ========== Layout Block Functions ==========
+        
+        // Toggle layout menu dropdown
+        function toggleLayoutMenu() {
+            const menu = document.getElementById('layout-menu');
+            menu.classList.toggle('hidden');
+            
+            // Close when clicking outside
+            if (!menu.classList.contains('hidden')) {
+                setTimeout(() => {
+                    document.addEventListener('click', closeLayoutMenuOnClick, { once: true });
+                }, 10);
+            }
+        }
+        
+        function closeLayoutMenuOnClick(e) {
+            const menu = document.getElementById('layout-menu');
+            if (!e.target.closest('#layout-menu')) {
+                menu.classList.add('hidden');
+            }
+        }
+        
+        // Insert HTML at cursor position
+        function insertHTMLAtCursor(html) {
+            visualEditor.focus();
+            document.execCommand('insertHTML', false, html);
+            syncContent();
+            document.getElementById('layout-menu').classList.add('hidden');
+        }
+        
+        // Insert Image + Text block
+        function insertImageTextBlock() {
+            const html = `
+                <div class="blog-row" contenteditable="false">
+                    <div class="blog-col" contenteditable="true">
+                        <p><em>Click here to add image or drag an image here...</em></p>
+                    </div>
+                    <div class="blog-col" contenteditable="true">
+                        <h3>Your Heading</h3>
+                        <p>Write your text content here. This column will stack below the image on mobile devices.</p>
+                    </div>
+                </div>
+                <p></p>
+            `;
+            insertHTMLAtCursor(html);
+        }
+        
+        // Insert Two Column block
+        function insertTwoColumnBlock() {
+            const html = `
+                <div class="blog-row" contenteditable="false">
+                    <div class="blog-col" contenteditable="true">
+                        <h3>Column 1</h3>
+                        <p>Enter content for the first column here.</p>
+                    </div>
+                    <div class="blog-col" contenteditable="true">
+                        <h3>Column 2</h3>
+                        <p>Enter content for the second column here.</p>
+                    </div>
+                </div>
+                <p></p>
+            `;
+            insertHTMLAtCursor(html);
+        }
+        
+        // Insert Callout block
+        function insertCalloutBlock(type) {
+            const icons = {
+                'info': '💡',
+                'tip': '✅',
+                'warning': '⚠️'
+            };
+            const html = `
+                <div class="blog-callout blog-callout-${type}">
+                    <p><strong>${icons[type]} ${type.charAt(0).toUpperCase() + type.slice(1)}:</strong> Write your important message here.</p>
+                </div>
+                <p></p>
+            `;
+            insertHTMLAtCursor(html);
         }
 
         // Insert link
@@ -579,7 +742,7 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
                 previewContainer.classList.add('hidden');
             }
         }
-        
+
         // Clear featured image
         function clearFeaturedImage() {
             document.getElementById('featured-image-url').value = '';

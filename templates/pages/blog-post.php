@@ -285,6 +285,65 @@ $shareUrl = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HT
     .prose li {
         margin-bottom: 0.5em;
     }
+
+    /* Layout Block Styles - Responsive */
+    .prose .blog-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+
+    .prose .blog-col {
+        flex: 1 1 300px;
+        min-width: 0;
+    }
+
+    .prose .blog-col img {
+        width: 100%;
+        height: auto;
+        border-radius: 0.75rem;
+        object-fit: cover;
+    }
+
+    .prose .blog-callout {
+        padding: 1.25rem 1.5rem;
+        border-radius: 0.75rem;
+        margin: 2rem 0;
+    }
+
+    .prose .blog-callout p {
+        margin-bottom: 0;
+    }
+
+    .prose .blog-callout-info {
+        background: #e0f2fe;
+        border-left: 4px solid #0ea5e9;
+        color: #0c4a6e;
+    }
+
+    .prose .blog-callout-tip {
+        background: #dcfce7;
+        border-left: 4px solid #22c55e;
+        color: #14532d;
+    }
+
+    .prose .blog-callout-warning {
+        background: #fef3c7;
+        border-left: 4px solid #f59e0b;
+        color: #78350f;
+    }
+
+    /* Stack columns on mobile */
+    @media (max-width: 640px) {
+        .prose .blog-row {
+            flex-direction: column;
+        }
+
+        .prose .blog-col {
+            flex: 1 1 100%;
+        }
+    }
 </style>
 
 <?php
