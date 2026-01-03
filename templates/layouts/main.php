@@ -173,6 +173,12 @@
             flex-direction: column
         }
 
+        /* Fix Chrome H1UserAgentFontSizeInSection deprecation */
+        h1 {
+            font-size: 2em;
+            margin: 0.67em 0
+        }
+
         img,
         video {
             max-width: 100%;
