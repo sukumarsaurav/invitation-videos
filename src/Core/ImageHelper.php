@@ -437,4 +437,149 @@ class ImageHelper
 
         return $result;
     }
+
+    /**
+     * Generate multiple sized versions of a thumbnail for responsive srcset
+     * 
+     * @param string $sourcePath Full path to the original image
+     * @param string $uploadDir Directory to save resized images
+     * @param string $baseFilename Base filename without extension
+     * @param array $widths Array of widths to generate (default: 315, 472, 630)
+     * @param int $quality Compression quality (0-100)
+     * @return array ['success' => bool, 'variants' => ['315' => '/path/to/file.webp', ...], 'error' => string]
+     */
+    public static function generateResponsiveThumbnails(
+        string $sourcePath,
+        string $uploadDir,
+        string $baseFilename,
+        array $widths = [315, 472, 630],
+        int $quality = 70
+    ): array {
+        $result = [
+            'success' => false,
+            'variants' => [],
+            'error' => ''
+        ];
+
+        if (!file_exists($sourcePath)) {
+            $result['error'] = 'Source image not found';
+            return $result;
+        }
+
+        // Get original image dimensions
+        $imageInfo = getimagesize($sourcePath);
+        if ($imageInfo === false) {
+            $result['error'] = 'Invalid image file';
+            return $result;
+        }
+
+        $originalWidth = $imageInfo[0];
+        $originalHeight = $imageInfo[1];
+        $aspectRatio = $originalHeight / $originalWidth;
+
+        foreach ($widths as $width) {
+            // Skip if width is larger than original
+            if ($width > $originalWidth) {
+                continue;
+            }
+
+            $height = (int) round($width * $aspectRatio);
+            $variantFilename = $baseFilename . '-' . $width . 'w.webp';
+            $variantPath = $uploadDir . $variantFilename;
+
+            $compression = self::compressImage(
+                $sourcePath,
+                $variantPath,
+                $width,
+                $height,
+                $quality,
+                true // Convert to WebP
+            );
+
+            if ($compression['success']) {
+                $result['variants'][$width] = '/uploads/templates/' . $variantFilename;
+            }
+        }
+
+        if (!empty($result['variants'])) {
+            $result['success'] = true;
+        } else {
+            $result['error'] = 'Failed to generate any responsive variants';
+        }
+
+        return $result;
+    }
+
+    /**
+     * Generate an img tag with srcset for responsive template thumbnails
+     * 
+     * @param string $thumbnailUrl The main thumbnail URL
+     * @param string $alt Alt text
+     * @param bool $eager Load eagerly (for above-fold images)
+     * @param bool $priority High priority (for LCP images)
+     * @param string $class Additional CSS classes
+     * @return string HTML img element with srcset
+     */
+    public static function responsiveThumbnail(
+        string $thumbnailUrl,
+        string $alt,
+        bool $eager = false,
+        bool $priority = false,
+        string $class = ''
+    ): string {
+        // Get base path and filename
+        $pathInfo = pathinfo($thumbnailUrl);
+        $dir = $pathInfo['dirname'];
+        $filename = $pathInfo['filename'];
+        $basePath = rtrim($dir, '/') . '/' . $filename;
+
+        // Check for responsive variants
+        $docRoot = $_SERVER['DOCUMENT_ROOT'] ?? '';
+        $srcset = [];
+        $widths = [315, 472, 630];
+        $largestVariant = $thumbnailUrl; // Fallback to original
+
+        foreach ($widths as $width) {
+            $variantPath = $basePath . '-' . $width . 'w.webp';
+            $fullPath = $docRoot . $variantPath;
+
+            if (file_exists($fullPath)) {
+                $srcset[] = htmlspecialchars($variantPath, ENT_QUOTES, 'UTF-8') . ' ' . $width . 'w';
+                $largestVariant = $variantPath;
+            }
+        }
+
+        // If no variants exist, fall back to original
+        if (empty($srcset)) {
+            $srcset[] = htmlspecialchars($thumbnailUrl, ENT_QUOTES, 'UTF-8') . ' 630w';
+            $largestVariant = $thumbnailUrl;
+        }
+
+        $loading = $eager ? 'eager' : 'lazy';
+        $decoding = $eager ? 'sync' : 'async';
+        $fetchpriority = $priority ? ' fetchpriority="high"' : '';
+
+        // Escape values
+        $src = htmlspecialchars($largestVariant, ENT_QUOTES, 'UTF-8');
+        $alt = htmlspecialchars($alt, ENT_QUOTES, 'UTF-8');
+        $class = htmlspecialchars($class, ENT_QUOTES, 'UTF-8');
+        $srcsetAttr = implode(', ', $srcset);
+
+        // sizes: on small screens (2-col grid), each image is ~50vw
+        // on medium (3-col grid), ~33vw; on large (4-col grid), ~25vw  
+        $sizes = '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw';
+
+        return sprintf(
+            '<img src="%s" srcset="%s" sizes="%s" alt="%s" class="%s" width="300" height="375" loading="%s" decoding="%s"%s>',
+            $src,
+            $srcsetAttr,
+            $sizes,
+            $alt,
+            $class,
+            $loading,
+            $decoding,
+            $fetchpriority
+        );
+    }
 }
+

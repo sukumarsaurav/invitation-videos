@@ -93,6 +93,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['thumbnail']) && $_FI
     if ($result['success']) {
         $_POST['thumbnail_url'] = '/uploads/templates/' . basename($result['url']);
         
+        // Generate responsive variants for srcset
+        $baseFilename = pathinfo(basename($result['url']), PATHINFO_FILENAME);
+        $mainImagePath = $uploadDir . basename($result['url']);
+        
+        $responsiveResult = ImageHelper::generateResponsiveThumbnails(
+            $mainImagePath,
+            $uploadDir,
+            $baseFilename,
+            [315, 472, 630],
+            70
+        );
+        
+        if ($responsiveResult['success']) {
+            error_log(sprintf(
+                "Generated %d responsive variants for template thumbnail",
+                count($responsiveResult['variants'])
+            ));
+        }
+        
         // Delete old thumbnail only if:
         // 1. We have a valid template ID (editing, not creating)
         // 2. Old URL exists and came from the database
@@ -103,6 +122,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['thumbnail']) && $_FI
             if (file_exists($oldFilePath) && is_file($oldFilePath)) {
                 @unlink($oldFilePath);
                 error_log("Deleted old thumbnail for template {$templateId}: " . $oldFilePath);
+            }
+            
+            // Also delete old responsive variants
+            $oldPathInfo = pathinfo($oldThumbnailUrl);
+            $oldBasename = $oldPathInfo['filename'];
+            foreach ([315, 472, 630] as $width) {
+                $oldVariant = __DIR__ . '/../uploads/templates/' . $oldBasename . '-' . $width . 'w.webp';
+                if (file_exists($oldVariant)) {
+                    @unlink($oldVariant);
+                }
             }
         }
         
