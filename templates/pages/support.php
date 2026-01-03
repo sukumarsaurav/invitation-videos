@@ -7,6 +7,7 @@ require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../src/Core/Security.php';
 
 $pageTitle = 'Support';
+$metaDescription = 'Get help with your video invitation order. Submit a support ticket, chat on WhatsApp, or browse FAQs. We respond within 2-4 hours.';
 $success = $_SESSION['success'] ?? null;
 unset($_SESSION['success']);
 

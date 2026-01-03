@@ -7,6 +7,7 @@ require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../src/Core/Security.php';
 
 $pageTitle = 'Refund Policy';
+$metaDescription = 'VideoInvites refund policy - full refunds before work begins, partial refunds during production, and free revisions after delivery.';
 ?>
 
 <?php ob_start(); ?>

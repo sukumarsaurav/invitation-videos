@@ -7,6 +7,7 @@ require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../src/Core/Security.php';
 
 $pageTitle = 'Frequently Asked Questions';
+$metaDescription = 'Find answers to common questions about video invitations - how they work, delivery times, payment options, revisions, and more.';
 
 // FAQ data
 $faqs = [

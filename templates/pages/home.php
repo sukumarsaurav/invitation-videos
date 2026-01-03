@@ -29,7 +29,7 @@ $blogPosts = Database::fetchAll(
 );
 
 $pageTitle = 'Create Stunning Video Invitations | InvitationVideos';
-$pageDescription = 'Create beautiful video invitations for weddings, birthdays, baby showers, and more. Choose from stunning templates and customize with your details.';
+$metaDescription = 'Create beautiful video invitations for weddings, birthdays, baby showers, and more. Choose from stunning templates and customize with your details.';
 ?>
 
 <?php ob_start(); ?>

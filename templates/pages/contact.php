@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../src/Core/Security.php';
 
 $pageTitle = 'Contact Us';
+$metaDescription = 'Get in touch with VideoInvites support. We respond within 24 hours to help with orders, customizations, and any questions about video invitations.';
 
 // Handle form submission
 $success = $_SESSION['success'] ?? null;
