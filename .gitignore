@@ -40,7 +40,6 @@ Desktop.ini
 *.tmp
 
 # PHP specific
-/composer.lock
 *.phar
 
 # Debug and profiling
