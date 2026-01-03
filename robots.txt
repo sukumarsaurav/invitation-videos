@@ -12,7 +12,16 @@ Disallow: /config/
 Disallow: /database/
 Disallow: /src/
 Disallow: /vendor/
-Disallow: /uploads/
+
+# Allow template images for search engines
+Allow: /uploads/templates/*.jpeg
+Allow: /uploads/templates/*.jpg
+Allow: /uploads/templates/*.png
+Allow: /uploads/templates/*.webp
+
+# Block other uploads
+Disallow: /uploads/orders/
+Disallow: /uploads/users/
 
 # Block user-specific pages
 Disallow: /my-orders

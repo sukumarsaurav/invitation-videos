@@ -33,6 +33,8 @@
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
+      "name": "Invitation Videos",
+      "alternateName": "InvitationVideos",
       "url": "https://invitationvideos.com/",
       "potentialAction": {
         "@type": "SearchAction",

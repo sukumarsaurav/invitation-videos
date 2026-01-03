@@ -189,6 +189,88 @@ $metaDescription = 'Create beautiful video invitations for weddings, birthdays, 
     </div>
 </section>
 
+<!-- Why Choose Invitation Videos (SEO Content) -->
+<section class="py-12 bg-gradient-to-br from-primary/5 to-purple-500/5 dark:from-primary/10 dark:to-purple-500/10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <div class="text-center mb-10">
+            <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-3">Why Choose Invitation Videos?</h2>
+            <p class="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">Discover why thousands of customers trust us to create their perfect video invitations for weddings, birthdays, and special occasions.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            <!-- Feature 1 -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                    <span class="material-symbols-outlined text-2xl text-primary">high_quality</span>
+                </div>
+                <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-2">Full HD Quality Videos</h3>
+                <p class="text-sm text-slate-600 dark:text-slate-400">All our video invitations are rendered in stunning 1080p Full HD quality. Your invitation will look crystal clear on any device - from smartphones to large TV screens at your event venue.</p>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-4">
+                    <span class="material-symbols-outlined text-2xl text-emerald-500">schedule</span>
+                </div>
+                <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-2">Quick Turnaround Time</h3>
+                <p class="text-sm text-slate-600 dark:text-slate-400">Receive your customized video invitation within 24-48 hours. Need it faster? Our rush delivery option ensures you get your video within hours for those last-minute celebrations.</p>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                <div class="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center mb-4">
+                    <span class="material-symbols-outlined text-2xl text-amber-500">brush</span>
+                </div>
+                <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-2">Professional Design Templates</h3>
+                <p class="text-sm text-slate-600 dark:text-slate-400">Choose from our extensive library of professionally designed templates crafted by expert motion graphics designers. From elegant wedding invitations to fun birthday animations.</p>
+            </div>
+
+            <!-- Feature 4 -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                <div class="w-12 h-12 rounded-xl bg-rose-500/10 flex items-center justify-center mb-4">
+                    <span class="material-symbols-outlined text-2xl text-rose-500">share</span>
+                </div>
+                <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-2">Easy Sharing on WhatsApp</h3>
+                <p class="text-sm text-slate-600 dark:text-slate-400">Our videos are optimized for WhatsApp, Instagram, and Facebook sharing. The perfect file size ensures your invitation reaches all your guests without compression or quality loss.</p>
+            </div>
+
+            <!-- Feature 5 -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mb-4">
+                    <span class="material-symbols-outlined text-2xl text-blue-500">support_agent</span>
+                </div>
+                <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-2">Dedicated Customer Support</h3>
+                <p class="text-sm text-slate-600 dark:text-slate-400">Our friendly support team is available to help you with any questions or revisions. We offer one free revision per order to ensure your invitation is exactly how you envisioned.</p>
+            </div>
+
+            <!-- Feature 6 -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                <div class="w-12 h-12 rounded-xl bg-teal-500/10 flex items-center justify-center mb-4">
+                    <span class="material-symbols-outlined text-2xl text-teal-500">verified</span>
+                </div>
+                <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-2">100% Satisfaction Guarantee</h3>
+                <p class="text-sm text-slate-600 dark:text-slate-400">We stand behind our work with a complete satisfaction guarantee. If you're not happy with your video after revisions, we'll provide a full refund - no questions asked.</p>
+            </div>
+        </div>
+
+        <!-- Additional SEO Content -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-sm border border-slate-200 dark:border-slate-700">
+            <h3 class="font-bold text-xl text-slate-900 dark:text-white mb-4">The Perfect Video Invitation for Every Occasion</h3>
+            <div class="prose prose-slate dark:prose-invert max-w-none">
+                <p class="text-slate-600 dark:text-slate-400 mb-4">
+                    At Invitation Videos, we believe that every celebration deserves a memorable beginning. Our video invitations transform the traditional way of inviting guests into an immersive, emotional experience. Whether you're planning an intimate wedding ceremony, a grand birthday bash, a heartwarming baby shower, or a corporate event, our professionally crafted video invitations set the perfect tone for your special day.
+                </p>
+                <p class="text-slate-600 dark:text-slate-400 mb-4">
+                    Our collection includes templates for Indian weddings featuring traditional elements like mandaps, mehendi designs, and festive colors. We also offer contemporary minimalist designs for modern celebrations, elegant save-the-date videos, and vibrant party invitations that capture the excitement of your upcoming event.
+                </p>
+                <p class="text-slate-600 dark:text-slate-400">
+                    The process is simple: browse our template gallery, select the design that speaks to you, enter your event details including names, dates, venue information, and photos, and we'll create a stunning animated video that you can share with all your loved ones. Your video invitation becomes a keepsake that guests will remember long after your event concludes.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- FAQ Section -->
 <section class="py-12 bg-slate-50 dark:bg-slate-800/50">
     <div class="max-w-4xl mx-auto px-4 sm:px-6">
