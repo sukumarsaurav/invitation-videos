@@ -3,13 +3,17 @@
 
 RewriteEngine On
 
+# Force non-www (SEO: Canonical domain)
+RewriteCond %{HTTP_HOST} ^www\.invitationvideos\.com [NC]
+RewriteRule ^(.*)$ https://invitationvideos.com/$1 [L,R=301]
+
+# Force HTTPS
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
 # Handle Authorization Header
 RewriteCond %{HTTP:Authorization} .
 RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
-
-# Force HTTPS (uncomment for production)
-# RewriteCond %{HTTPS} off
-# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
 # Remove trailing slash (except for actual directories with index files)
 RewriteCond %{REQUEST_FILENAME} !-f

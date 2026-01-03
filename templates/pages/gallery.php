@@ -55,7 +55,44 @@ $categories = [
 // Cultural traditions
 $traditions = ['Hindu', 'Muslim', 'Christian', 'Sikh', 'Jewish', 'Chinese', 'Western'];
 
-$pageTitle = 'Template Gallery';
+// SEO: Dynamic page titles and meta descriptions based on filters
+$categoryTitles = [
+    'wedding' => 'Wedding Video Invitation Templates',
+    'birthday' => 'Birthday Video Invitation Templates',
+    'corporate' => 'Corporate Event Video Templates',
+    'baby_shower' => 'Baby Shower Video Invitation Templates',
+    'anniversary' => 'Anniversary Video Invitation Templates',
+    'holi' => 'Holi Festival Video Invitations',
+    'diwali' => 'Diwali Festival Video Invitations',
+    'graduation' => 'Graduation Video Invitation Templates',
+    'farewell' => 'Farewell Party Video Invitations',
+    'holidays' => 'Holiday Video Invitation Templates',
+    'housewarming' => 'Housewarming Video Invitation Templates',
+    'parties' => 'Party Video Invitation Templates',
+    'religious' => 'Religious Event Video Invitations',
+    'save_the_date' => 'Save the Date Video Templates',
+];
+
+$traditionTitles = [
+    'hindu' => 'Hindu Wedding Video Invitations',
+    'muslim' => 'Muslim Wedding Video Invitations',
+    'christian' => 'Christian Wedding Video Invitations',
+    'sikh' => 'Sikh Wedding Video Invitations',
+    'jewish' => 'Jewish Wedding Video Invitations',
+    'chinese' => 'Chinese Wedding Video Invitations',
+    'western' => 'Western Wedding Video Invitations',
+];
+
+if ($category && isset($categoryTitles[$category])) {
+    $pageTitle = $categoryTitles[$category];
+    $metaDescription = "Browse our beautiful collection of {$categoryTitles[$category]}. Easy customization, professional quality, instant download. Create your perfect invitation today!";
+} elseif ($tradition && isset($traditionTitles[strtolower($tradition)])) {
+    $pageTitle = $traditionTitles[strtolower($tradition)];
+    $metaDescription = "Beautiful {$traditionTitles[strtolower($tradition)]} templates. Culturally authentic designs with easy customization. Download and share your perfect invitation.";
+} else {
+    $pageTitle = 'Video Invitation Templates - All Categories';
+    $metaDescription = 'Browse our stunning collection of video invitation templates for weddings, birthdays, anniversaries, and special events. Easy customization, instant download.';
+}
 ?>
 
 <?php ob_start(); ?>

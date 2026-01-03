@@ -41,9 +41,58 @@
     <title><?= $finalTitle ?></title>
 
     <!-- SEO Meta Tags -->
-    <meta name="description"
-        content="<?= $metaDescription ?? 'Create stunning video invitations for weddings, birthdays, and special events. Easy customization, professional quality.' ?>">
+    <?php
+    // Generate canonical URL (always use non-www, remove trailing slash except for homepage)
+    $canonicalPath = strtok($_SERVER['REQUEST_URI'], '?');
+    $canonicalPath = rtrim($canonicalPath, '/');
+    if (empty($canonicalPath)) {
+        $canonicalPath = '/';
+    }
+    $canonicalUrl = 'https://invitationvideos.com' . $canonicalPath;
+
+    // Include important query params for category/filter pages
+    $seoParams = [];
+    if (!empty($_GET['category'])) {
+        $seoParams['category'] = $_GET['category'];
+    }
+    if (!empty($_GET['tradition'])) {
+        $seoParams['tradition'] = $_GET['tradition'];
+    }
+    if (!empty($seoParams)) {
+        $canonicalUrl .= '?' . http_build_query($seoParams);
+    }
+
+    // Default OG image
+    $defaultOgImage = 'https://invitationvideos.com/assets/images/og-default.jpg';
+    $ogImageUrl = $ogImage ?? $defaultOgImage;
+
+    // Default meta description
+    $defaultDescription = 'Create stunning video invitations for weddings, birthdays, and special events. Easy customization, professional quality.';
+    $finalDescription = $metaDescription ?? $defaultDescription;
+    ?>
+    <meta name="description" content="<?= htmlspecialchars($finalDescription) ?>">
     <meta name="author" content="Sukumar Saurav - NeoWebX.com">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="<?= $canonicalUrl ?>">
+
+    <!-- Open Graph Tags (Facebook, LinkedIn, etc.) -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<?= $canonicalUrl ?>">
+    <meta property="og:title" content="<?= htmlspecialchars($finalTitle) ?>">
+    <meta property="og:description" content="<?= htmlspecialchars($finalDescription) ?>">
+    <meta property="og:image" content="<?= $ogImageUrl ?>">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:site_name" content="InvitationVideos">
+    <meta property="og:locale" content="en_US">
+
+    <!-- Twitter Card Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@invitationvids">
+    <meta name="twitter:title" content="<?= htmlspecialchars($finalTitle) ?>">
+    <meta name="twitter:description" content="<?= htmlspecialchars($finalDescription) ?>">
+    <meta name="twitter:image" content="<?= $ogImageUrl ?>">
 
     <!-- Favicon -->
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
@@ -656,8 +705,6 @@
                     <h4 class="font-bold mb-4">Product</h4>
                     <ul class="space-y-2 text-sm text-slate-500">
                         <li><a href="/templates" class="hover:text-primary transition-colors">All Templates</a></li>
-                        <li><a href="/pricing" class="hover:text-primary transition-colors">Pricing</a></li>
-                        <li><a href="/features" class="hover:text-primary transition-colors">Features</a></li>
                         <li><a href="/blog" class="hover:text-primary transition-colors">Blog</a></li>
                     </ul>
                 </div>

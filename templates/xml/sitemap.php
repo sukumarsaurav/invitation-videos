@@ -84,6 +84,67 @@ echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
 
     <?php
     // ===================
+// CATEGORY PAGES (SEO Landing Pages)
+// ===================
+    $categoryPages = [
+        ['url' => '/templates?category=wedding', 'priority' => '0.9'],
+        ['url' => '/templates?category=birthday', 'priority' => '0.85'],
+        ['url' => '/templates?category=anniversary', 'priority' => '0.85'],
+        ['url' => '/templates?category=baby_shower', 'priority' => '0.85'],
+        ['url' => '/templates?category=corporate', 'priority' => '0.85'],
+        ['url' => '/templates?category=holi', 'priority' => '0.8'],
+        ['url' => '/templates?category=diwali', 'priority' => '0.8'],
+        ['url' => '/templates?category=graduation', 'priority' => '0.8'],
+        ['url' => '/templates?category=farewell', 'priority' => '0.8'],
+        ['url' => '/templates?category=holidays', 'priority' => '0.8'],
+        ['url' => '/templates?category=housewarming', 'priority' => '0.8'],
+        ['url' => '/templates?category=parties', 'priority' => '0.8'],
+        ['url' => '/templates?category=religious', 'priority' => '0.8'],
+        ['url' => '/templates?category=save_the_date', 'priority' => '0.8'],
+    ];
+
+    foreach ($categoryPages as $page): ?>
+        <url>
+            <loc>
+                <?= htmlspecialchars($baseUrl . $page['url']) ?>
+            </loc>
+            <lastmod>
+                <?= $today ?>
+            </lastmod>
+            <changefreq>weekly</changefreq>
+            <priority><?= $page['priority'] ?></priority>
+        </url>
+    <?php endforeach; ?>
+
+    <?php
+    // ===================
+// TRADITION PAGES (Cultural Wedding SEO)
+// ===================
+    $traditionPages = [
+        ['url' => '/templates?tradition=hindu', 'priority' => '0.85'],
+        ['url' => '/templates?tradition=muslim', 'priority' => '0.85'],
+        ['url' => '/templates?tradition=christian', 'priority' => '0.85'],
+        ['url' => '/templates?tradition=sikh', 'priority' => '0.85'],
+        ['url' => '/templates?tradition=jewish', 'priority' => '0.8'],
+        ['url' => '/templates?tradition=chinese', 'priority' => '0.8'],
+        ['url' => '/templates?tradition=western', 'priority' => '0.8'],
+    ];
+
+    foreach ($traditionPages as $page): ?>
+        <url>
+            <loc>
+                <?= htmlspecialchars($baseUrl . $page['url']) ?>
+            </loc>
+            <lastmod>
+                <?= $today ?>
+            </lastmod>
+            <changefreq>weekly</changefreq>
+            <priority><?= $page['priority'] ?></priority>
+        </url>
+    <?php endforeach; ?>
+
+    <?php
+    // ===================
 // DYNAMIC TEMPLATES FROM DATABASE
 // ===================
     try {
