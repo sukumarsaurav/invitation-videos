@@ -1,0 +1,35 @@
+# InvitationVideos.com
+
+> Create stunning video invitations for weddings, birthdays, anniversaries, and special events.
+
+## About
+
+InvitationVideos is a platform for creating personalized video invitations. Users can browse templates, customize them with their own text, photos, and music, and download professional-quality invitation videos.
+
+## Main Features
+
+- Video invitation templates for weddings, birthdays, baby showers, anniversaries, and corporate events
+- Easy online customization with text, photos, and music
+- Cultural tradition templates (Hindu, Muslim, Christian, Sikh, Jewish, Chinese, Western)
+- Instant download after purchase
+- Mobile-friendly video format for WhatsApp sharing
+
+## Key Pages
+
+- Home: https://invitationvideos.com/
+- Templates: https://invitationvideos.com/templates
+- Wedding Invitations: https://invitationvideos.com/templates?category=wedding
+- Birthday Invitations: https://invitationvideos.com/templates?category=birthday
+- Baby Shower Invitations: https://invitationvideos.com/templates?category=baby_shower
+- Anniversary Invitations: https://invitationvideos.com/templates?category=anniversary
+- Corporate Event Videos: https://invitationvideos.com/templates?category=corporate
+- Blog: https://invitationvideos.com/blog
+- Support: https://invitationvideos.com/support
+- Contact: https://invitationvideos.com/contact
+- FAQ: https://invitationvideos.com/faq
+
+## Contact
+
+- Website: https://invitationvideos.com
+- Support: https://invitationvideos.com/support
+- Email: support@invitationvideos.com
