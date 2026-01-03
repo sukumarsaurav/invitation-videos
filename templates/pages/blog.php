@@ -12,15 +12,15 @@ $perPage = 12;
 $offset = ($page - 1) * $perPage;
 
 $category = $_GET['category'] ?? '';
-$whereClause = "WHERE status = 'published'";
+$whereClause = "WHERE p.status = 'published'";
 $params = [];
 
 if ($category) {
-    $whereClause .= " AND category = ?";
+    $whereClause .= " AND p.category = ?";
     $params[] = $category;
 }
 
-$totalPosts = Database::fetchOne("SELECT COUNT(*) as c FROM blog_posts $whereClause", $params)['c'] ?? 0;
+$totalPosts = Database::fetchOne("SELECT COUNT(*) as c FROM blog_posts p $whereClause", $params)['c'] ?? 0;
 $totalPages = ceil($totalPosts / $perPage);
 
 $posts = Database::fetchAll(
@@ -34,15 +34,15 @@ $posts = Database::fetchAll(
 
 // Get categories for sidebar
 $categories = Database::fetchAll(
-    "SELECT category, COUNT(*) as count FROM blog_posts 
-     WHERE status = 'published' AND category IS NOT NULL AND category != '' 
-     GROUP BY category ORDER BY count DESC"
+    "SELECT p.category, COUNT(*) as count FROM blog_posts p 
+     WHERE p.status = 'published' AND p.category IS NOT NULL AND p.category != '' 
+     GROUP BY p.category ORDER BY count DESC"
 );
 
 // Get featured/recent posts for sidebar
 $recentPosts = Database::fetchAll(
-    "SELECT id, title, slug, featured_image, published_at FROM blog_posts 
-     WHERE status = 'published' ORDER BY published_at DESC LIMIT 5"
+    "SELECT p.id, p.title, p.slug, p.featured_image, p.published_at FROM blog_posts p 
+     WHERE p.status = 'published' ORDER BY p.published_at DESC LIMIT 5"
 );
 
 $pageTitle = 'Blog - Video Invitation Tips & Inspiration' . ($category ? ' | ' . ucfirst($category) : '') . ' | Invitation Videos';
