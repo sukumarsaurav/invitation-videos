@@ -72,17 +72,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['thumbnail']) && $_FI
     
     $uploadDir = __DIR__ . '/../uploads/templates/';
     
-    // Process and compress the thumbnail
+    // Get existing thumbnail URL to delete after successful upload
+    $oldThumbnailUrl = $_POST['thumbnail_url'] ?? '';
+    
+    // Process and compress the thumbnail with aggressive settings for ~40KB target
     $result = ImageHelper::processThumbnailUpload(
         $_FILES['thumbnail'],
         $uploadDir,
         'template_',
-        800,   // Max width
-        1200   // Max height (9:16 aspect ratio)
+        600,   // Reduced max width for smaller file
+        900,   // Reduced max height (maintains 9:16 ratio)
+        70     // Lower quality for smaller files (~40KB target)
     );
     
     if ($result['success']) {
         $_POST['thumbnail_url'] = '/uploads/templates/' . basename($result['url']);
+        
+        // Delete old thumbnail if it exists and is different from new one
+        if (!empty($oldThumbnailUrl) && $oldThumbnailUrl !== $_POST['thumbnail_url']) {
+            $oldFilePath = __DIR__ . '/..' . $oldThumbnailUrl;
+            if (file_exists($oldFilePath) && is_file($oldFilePath)) {
+                @unlink($oldFilePath);
+                error_log("Deleted old thumbnail: " . $oldFilePath);
+            }
+        }
         
         // Log compression stats for debugging
         if (!empty($result['compression_stats'])) {

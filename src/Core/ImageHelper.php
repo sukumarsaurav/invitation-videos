@@ -348,6 +348,7 @@ class ImageHelper
      * @param string $prefix Filename prefix (e.g., 'template_')
      * @param int $maxWidth Maximum width
      * @param int $maxHeight Maximum height
+     * @param int $quality Compression quality (0-100, default 85)
      * @return array ['success' => bool, 'url' => string, 'error' => string, 'compression_stats' => array]
      */
     public static function processThumbnailUpload(
@@ -355,7 +356,8 @@ class ImageHelper
         string $uploadDir,
         string $prefix = 'thumb_',
         int $maxWidth = 800,
-        int $maxHeight = 1200
+        int $maxHeight = 1200,
+        int $quality = 85
     ): array {
         $result = [
             'success' => false,
@@ -407,9 +409,9 @@ class ImageHelper
             return $result;
         }
 
-        // Compress the image
+        // Compress the image with specified quality
         $finalDest = $uploadDir . $filename . '.webp';
-        $compression = self::compressImage($tempDest, $finalDest, $maxWidth, $maxHeight, 85, true);
+        $compression = self::compressImage($tempDest, $finalDest, $maxWidth, $maxHeight, $quality, true);
 
         // Delete temp file
         @unlink($tempDest);
