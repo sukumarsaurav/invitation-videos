@@ -72,8 +72,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['thumbnail']) && $_FI
     
     $uploadDir = __DIR__ . '/../uploads/templates/';
     
-    // Get existing thumbnail URL to delete after successful upload
-    $oldThumbnailUrl = $_POST['thumbnail_url'] ?? '';
+    // Get existing thumbnail URL from DATABASE (not POST) to safely delete after successful upload
+    // This prevents accidentally deleting another template's image
+    $oldThumbnailUrl = '';
+    if ($templateId > 0) {
+        $existingTemplate = Database::fetchOne("SELECT thumbnail_url FROM templates WHERE id = ?", [$templateId]);
+        $oldThumbnailUrl = $existingTemplate['thumbnail_url'] ?? '';
+    }
     
     // Process and compress the thumbnail with aggressive settings for ~40KB target
     $result = ImageHelper::processThumbnailUpload(
@@ -88,12 +93,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['thumbnail']) && $_FI
     if ($result['success']) {
         $_POST['thumbnail_url'] = '/uploads/templates/' . basename($result['url']);
         
-        // Delete old thumbnail if it exists and is different from new one
-        if (!empty($oldThumbnailUrl) && $oldThumbnailUrl !== $_POST['thumbnail_url']) {
+        // Delete old thumbnail only if:
+        // 1. We have a valid template ID (editing, not creating)
+        // 2. Old URL exists and came from the database
+        // 3. Old URL is different from new URL
+        // 4. File actually exists
+        if ($templateId > 0 && !empty($oldThumbnailUrl) && $oldThumbnailUrl !== $_POST['thumbnail_url']) {
             $oldFilePath = __DIR__ . '/..' . $oldThumbnailUrl;
             if (file_exists($oldFilePath) && is_file($oldFilePath)) {
                 @unlink($oldFilePath);
-                error_log("Deleted old thumbnail: " . $oldFilePath);
+                error_log("Deleted old thumbnail for template {$templateId}: " . $oldFilePath);
             }
         }
         
