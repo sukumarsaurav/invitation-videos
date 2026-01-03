@@ -45,8 +45,8 @@ $recentPosts = Database::fetchAll(
      WHERE status = 'published' ORDER BY published_at DESC LIMIT 5"
 );
 
-$pageTitle = 'Blog - Video Invitation Tips & Inspiration' . ($category ? ' | ' . ucfirst($category) : '') . ' | VideoInvites';
-$metaDescription = 'Discover expert tips, trends, and inspiration for creating stunning video invitations. Wedding tips, birthday ideas, and more from the VideoInvites blog.';
+$pageTitle = 'Blog - Video Invitation Tips & Inspiration' . ($category ? ' | ' . ucfirst($category) : '') . ' | Invitation Videos';
+$metaDescription = 'Discover expert tips, trends, and inspiration for creating stunning video invitations. Wedding tips, birthday ideas, and more from the Invitation Videos blog.';
 ?>
 
 <?php ob_start(); ?>

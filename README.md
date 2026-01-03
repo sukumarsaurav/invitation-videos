@@ -15,7 +15,7 @@ A lightweight, secure PHP web application for designing and selling video invita
 ## 📁 Project Structure
 
 ```
-Videoinvites/
+InvitationVideos/
 ├── admin/              # Admin panel pages
 │   ├── layouts/        # Admin layout templates
 │   ├── dashboard.php   # Dashboard with stats
@@ -61,8 +61,8 @@ Videoinvites/
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/videoinvites.git
-   cd videoinvites
+   git clone https://github.com/yourusername/invitationvideos.git
+   cd invitationvideos
    ```
 
 2. **Install dependencies**
@@ -83,7 +83,7 @@ Videoinvites/
 
 5. **Import database schema**
    ```bash
-   mysql -u root -p videoinvites < database/schema.sql
+   mysql -u root -p invitationvideos < database/schema.sql
    ```
 
 6. **Create uploads directory**

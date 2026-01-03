@@ -1,6 +1,6 @@
 <?php
 /**
- * VideoInvites - Razorpay Payment Service
+ * Invitation Videos - Razorpay Payment Service
  * 
  * Handles all Razorpay payment operations for Indian customers (INR)
  */

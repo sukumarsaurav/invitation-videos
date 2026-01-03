@@ -5,7 +5,7 @@
  * Handles sending transactional emails using PHPMailer.
  */
 
-namespace VideoInvites\Services;
+namespace InvitationVideos\Services;
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;

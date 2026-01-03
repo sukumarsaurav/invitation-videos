@@ -1,6 +1,6 @@
 <?php
 /**
- * VideoInvites - Dynamic Form Renderer
+ * Invitation Videos - Dynamic Form Renderer
  * 
  * Renders template-specific customization forms based on database field definitions
  */

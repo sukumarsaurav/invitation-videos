@@ -543,7 +543,8 @@ $pageTitle = $hasSelectedTemplate ? 'Template Builder: ' . $template['title'] : 
                             <span class="toolbar-label">Current Animation</span>
                             <div class="current-animation-display" id="current-animation-display">
                                 <span class="current-anim-name">None</span>
-                                <button type="button" class="btn-remove-anim hidden" id="btn-remove-animation" title="Remove Animation">
+                                <button type="button" class="btn-remove-anim hidden" id="btn-remove-animation"
+                                    title="Remove Animation">
                                     <span class="material-symbols-outlined">close</span>
                                 </button>
                             </div>
@@ -558,7 +559,8 @@ $pageTitle = $hasSelectedTemplate ? 'Template Builder: ' . $template['title'] : 
                                     <span class="anim-name">Typewriter</span>
                                 </button>
                                 <button type="button" class="animation-card" data-animation="slideUp">
-                                    <div class="anim-preview"><span class="anim-demo ascend">AB<span class="rise">C</span></span></div>
+                                    <div class="anim-preview"><span class="anim-demo ascend">AB<span
+                                                class="rise">C</span></span></div>
                                     <span class="anim-name">Ascend</span>
                                 </button>
                                 <button type="button" class="animation-card" data-animation="shift">
@@ -605,63 +607,93 @@ $pageTitle = $hasSelectedTemplate ? 'Template Builder: ' . $template['title'] : 
                             <span class="toolbar-label">General</span>
                             <div class="animations-grid">
                                 <button type="button" class="animation-card" data-animation="rise">
-                                    <div class="anim-preview"><div class="anim-box rise-box">↑</div></div>
+                                    <div class="anim-preview">
+                                        <div class="anim-box rise-box">↑</div>
+                                    </div>
                                     <span class="anim-name">Rise</span>
                                 </button>
                                 <button type="button" class="animation-card" data-animation="pan">
-                                    <div class="anim-preview"><div class="anim-box pan-box">→</div></div>
+                                    <div class="anim-preview">
+                                        <div class="anim-box pan-box">→</div>
+                                    </div>
                                     <span class="anim-name">Pan</span>
                                 </button>
                                 <button type="button" class="animation-card" data-animation="fadeIn">
-                                    <div class="anim-preview"><div class="anim-box fade-box"></div></div>
+                                    <div class="anim-preview">
+                                        <div class="anim-box fade-box"></div>
+                                    </div>
                                     <span class="anim-name">Fade</span>
                                 </button>
                                 <button type="button" class="animation-card" data-animation="pop">
-                                    <div class="anim-preview"><div class="anim-box pop-box"></div></div>
+                                    <div class="anim-preview">
+                                        <div class="anim-box pop-box"></div>
+                                    </div>
                                     <span class="anim-name">Pop</span>
                                 </button>
                                 <button type="button" class="animation-card" data-animation="wipe">
-                                    <div class="anim-preview"><div class="anim-box wipe-box"></div></div>
+                                    <div class="anim-preview">
+                                        <div class="anim-box wipe-box"></div>
+                                    </div>
                                     <span class="anim-name">Wipe</span>
                                 </button>
                                 <button type="button" class="animation-card" data-animation="blur">
-                                    <div class="anim-preview"><div class="anim-box blur-box"></div></div>
+                                    <div class="anim-preview">
+                                        <div class="anim-box blur-box"></div>
+                                    </div>
                                     <span class="anim-name">Blur</span>
                                 </button>
                                 <button type="button" class="animation-card" data-animation="zoomIn">
-                                    <div class="anim-preview"><div class="anim-box zoom-box">↗↙</div></div>
+                                    <div class="anim-preview">
+                                        <div class="anim-box zoom-box">↗↙</div>
+                                    </div>
                                     <span class="anim-name">Succession</span>
                                 </button>
                                 <button type="button" class="animation-card" data-animation="pulse">
-                                    <div class="anim-preview"><div class="anim-box pulse-box">◉</div></div>
+                                    <div class="anim-preview">
+                                        <div class="anim-box pulse-box">◉</div>
+                                    </div>
                                     <span class="anim-name">Breathe</span>
                                 </button>
                                 <button type="button" class="animation-card" data-animation="slideDown">
-                                    <div class="anim-preview"><div class="anim-box baseline-box">▬</div></div>
+                                    <div class="anim-preview">
+                                        <div class="anim-box baseline-box">▬</div>
+                                    </div>
                                     <span class="anim-name">Baseline</span>
                                 </button>
                                 <button type="button" class="animation-card" data-animation="slideLeft">
-                                    <div class="anim-preview"><div class="anim-box drift-box">→</div></div>
+                                    <div class="anim-preview">
+                                        <div class="anim-box drift-box">→</div>
+                                    </div>
                                     <span class="anim-name">Drift</span>
                                 </button>
                                 <button type="button" class="animation-card" data-animation="slideRight">
-                                    <div class="anim-preview"><div class="anim-box tectonic-box">→</div></div>
+                                    <div class="anim-preview">
+                                        <div class="anim-box tectonic-box">→</div>
+                                    </div>
                                     <span class="anim-name">Tectonic</span>
                                 </button>
                                 <button type="button" class="animation-card" data-animation="flip">
-                                    <div class="anim-preview"><div class="anim-box tumble-box">↻</div></div>
+                                    <div class="anim-preview">
+                                        <div class="anim-box tumble-box">↻</div>
+                                    </div>
                                     <span class="anim-name">Tumble</span>
                                 </button>
                                 <button type="button" class="animation-card" data-animation="neon">
-                                    <div class="anim-preview"><div class="anim-box neon-box">✧</div></div>
+                                    <div class="anim-preview">
+                                        <div class="anim-box neon-box">✧</div>
+                                    </div>
                                     <span class="anim-name">Neon</span>
                                 </button>
                                 <button type="button" class="animation-card" data-animation="scrapbook">
-                                    <div class="anim-preview"><div class="anim-box scrapbook-box">📄</div></div>
+                                    <div class="anim-preview">
+                                        <div class="anim-box scrapbook-box">📄</div>
+                                    </div>
                                     <span class="anim-name">Scrapbook</span>
                                 </button>
                                 <button type="button" class="animation-card" data-animation="stomp">
-                                    <div class="anim-preview"><div class="anim-box stomp-box">◻</div></div>
+                                    <div class="anim-preview">
+                                        <div class="anim-box stomp-box">◻</div>
+                                    </div>
                                     <span class="anim-name">Stomp</span>
                                 </button>
                             </div>
@@ -1102,7 +1134,7 @@ $pageTitle = $hasSelectedTemplate ? 'Template Builder: ' . $template['title'] : 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $pageTitle ?> - VideoInvites Admin</title>
+    <title><?= $pageTitle ?> - Invitation Videos Admin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet"

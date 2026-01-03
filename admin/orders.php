@@ -8,7 +8,7 @@ require_once __DIR__ . '/../src/Core/Security.php';
 require_once __DIR__ . '/../src/Services/EmailService.php';
 require_once __DIR__ . '/auth.php';
 
-use VideoInvites\Services\EmailService;
+use InvitationVideos\Services\EmailService;
 
 // Handle video upload
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_video'])) {

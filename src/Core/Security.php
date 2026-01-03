@@ -1,6 +1,6 @@
 <?php
 /**
- * VideoInvites - Security Utilities
+ * Invitation Videos - Security Utilities
  * 
  * XSS prevention, CSRF protection, input sanitization
  */

@@ -1,6 +1,6 @@
 <?php
 /**
- * VideoInvites - Database Connection
+ * Invitation Videos - Database Connection
  * 
  * PDO wrapper with prepared statement support
  */

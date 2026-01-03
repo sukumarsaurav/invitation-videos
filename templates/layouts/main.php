@@ -18,9 +18,9 @@
     {
       "@context": "https://schema.org",
       "@type": "Organization",
-      "name": "<?php echo APP_NAME ?? 'VideoInvites'; ?>",
-      "url": "<?php echo (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST']; ?>",
-      "logo": "<?php echo (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST']; ?>/assets/images/logo.png",
+      "name": "<?php echo APP_NAME ?? 'InvitationVideos'; ?>",
+      "url": "https://invitationvideos.com",
+      "logo": "https://invitationvideos.com/assets/images/logo.png",
       "sameAs": [
         "<?= SOCIAL_FACEBOOK ?>",
         "<?= SOCIAL_INSTAGRAM ?>",
@@ -29,13 +29,39 @@
       ]
     }
     </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "url": "https://invitationvideos.com/",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://invitationvideos.com/templates?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "serviceType": "Invitation Video Maker",
+      "provider": {
+        "@type": "Organization",
+        "name": "InvitationVideos",
+        "url": "https://invitationvideos.com"
+      },
+      "areaServed": "Worldwide",
+      "description": "Create stunning Full HD invitation videos for weddings, birthdays, and special events using professional templates."
+    }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <?php
     // Smart Title Logic
-    $finalTitle = $pageTitle ?? 'VideoInvites - Create Stunning Video Invitations';
-    if (isset($pageTitle) && strpos($pageTitle, 'VideoInvites') === false) {
-        $finalTitle .= ' | VideoInvites';
+    $finalTitle = $pageTitle ?? 'Invitation Videos - Create Stunning Video Invitations';
+    if (isset($pageTitle) && strpos($pageTitle, 'Invitation Videos') === false) {
+        $finalTitle .= ' | Invitation Videos';
     }
     ?>
     <title><?= $finalTitle ?></title>
@@ -426,7 +452,7 @@
                         <img src="/assets/images/logo.png" alt="<?= APP_NAME ?? 'InvitationVideos' ?>"
                             class="h-9 sm:h-10 w-auto" width="40" height="40" loading="eager" fetchpriority="high">
                         <h2 class="text-lg sm:text-xl font-bold leading-tight tracking-tight">
-                            <?= APP_NAME ?? 'VideoInvites' ?>
+                            <?= APP_NAME ?? 'Invitation Videos' ?>
                         </h2>
                     </a>
 
@@ -629,7 +655,7 @@
                     <div class="flex items-center gap-2 mb-4">
                         <img src="/assets/images/logo.png" alt="<?= APP_NAME ?? 'InvitationVideos' ?>"
                             class="h-8 w-auto" width="32" height="32" loading="lazy">
-                        <span class="font-bold text-lg"><?= APP_NAME ?? 'VideoInvites' ?></span>
+                        <span class="font-bold text-lg"><?= APP_NAME ?? 'Invitation Videos' ?></span>
                     </div>
                     <p class="text-sm text-slate-500 mb-4">Create stunning video invitations for your special occasions.
                     </p>
@@ -667,35 +693,38 @@
                         <li><a href="/templates?category=wedding"
                                 class="hover:text-primary transition-colors flex items-center gap-1.5">
                                 <span class="material-symbols-outlined text-base text-rose-500">favorite</span> Wedding
+                                Invitation Videos
                             </a></li>
                         <li><a href="/templates?category=birthday"
                                 class="hover:text-primary transition-colors flex items-center gap-1.5">
                                 <span class="material-symbols-outlined text-base text-amber-500">cake</span> Birthday
+                                Video Invites
                             </a></li>
                         <li><a href="/templates?category=corporate"
                                 class="hover:text-primary transition-colors flex items-center gap-1.5">
                                 <span class="material-symbols-outlined text-base text-blue-500">business_center</span>
-                                Corporate
+                                Corporate Video Invitations
                             </a></li>
                         <li><a href="/templates?category=baby_shower"
                                 class="hover:text-primary transition-colors flex items-center gap-1.5">
                                 <span class="material-symbols-outlined text-base text-teal-500">child_care</span> Baby
-                                Shower
+                                Shower Videos
                             </a></li>
                         <li><a href="/templates?category=anniversary"
                                 class="hover:text-primary transition-colors flex items-center gap-1.5">
                                 <span class="material-symbols-outlined text-base text-purple-500">celebration</span>
-                                Anniversary
+                                Anniversary Video Invites
                             </a></li>
                         <li><a href="/templates?category=holi"
                                 class="hover:text-primary transition-colors flex items-center gap-1.5">
                                 <span class="material-symbols-outlined text-base text-pink-500">palette</span> Holi
+                                Invitation Videos
                             </a></li>
                         <li><a href="/templates?category=diwali"
                                 class="hover:text-primary transition-colors flex items-center gap-1.5">
                                 <span
                                     class="material-symbols-outlined text-base text-orange-500">local_fire_department</span>
-                                Diwali
+                                Diwali Video Invitations
                             </a></li>
                     </ul>
                 </div>
@@ -807,7 +836,7 @@
                 <!-- Copyright -->
                 <div
                     class="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-500 pt-6 border-t border-slate-100 dark:border-slate-800">
-                    <p>&copy; <?= date('Y') ?> <?= APP_NAME ?? 'VideoInvites' ?>. All rights reserved.</p>
+                    <p>&copy; <?= date('Y') ?> <?= APP_NAME ?? 'Invitation Videos' ?>. All rights reserved.</p>
                     <p class="text-xs">Made with <span class="text-red-500">❤</span> in India | Developed by <a
                             href="https://neowebx.com" target="_blank" rel="noopener"
                             class="text-primary hover:underline font-medium">NeoWebX.com</a></p>

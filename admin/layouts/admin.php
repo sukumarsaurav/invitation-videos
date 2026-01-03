@@ -8,7 +8,7 @@ require_once __DIR__ . '/../auth.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $pageTitle ?? 'Admin Panel' ?> - VideoInvites</title>
+    <title><?= $pageTitle ?? 'Admin Panel' ?> - Invitation Videos</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -114,7 +114,7 @@ require_once __DIR__ . '/../auth.php';
                             <span class="material-symbols-outlined">movie_edit</span>
                         </div>
                         <div class="flex flex-col">
-                            <h1 class="text-lg font-bold leading-tight"><?= APP_NAME ?? 'VideoInvites' ?></h1>
+                            <h1 class="text-lg font-bold leading-tight"><?= APP_NAME ?? 'Invitation Videos' ?></h1>
                             <p class="text-slate-500 text-xs font-medium">Admin Panel</p>
                         </div>
                     </div>

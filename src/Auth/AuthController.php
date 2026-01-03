@@ -9,7 +9,7 @@ require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../Core/Security.php';
 require_once __DIR__ . '/../Services/EmailService.php';
 
-use VideoInvites\Services\EmailService;
+use InvitationVideos\Services\EmailService;
 
 class AuthController
 {

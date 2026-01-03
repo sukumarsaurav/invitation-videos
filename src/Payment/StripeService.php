@@ -1,6 +1,6 @@
 <?php
 /**
- * VideoInvites - Stripe Payment Service
+ * Invitation Videos - Stripe Payment Service
  * 
  * Handles all Stripe payment operations for global customers (USD)
  */

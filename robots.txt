@@ -1,4 +1,4 @@
-# VideoInvites - Robots.txt
+# Invitation Videos - Robots.txt
 # Controls search engine crawler access
 
 User-agent: *

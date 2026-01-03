@@ -1,4 +1,4 @@
--- VideoInvites Database Schema
+-- Invitation Videos Database Schema
 -- MySQL 8.0+
 
 SET NAMES utf8mb4;
@@ -412,7 +412,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- SAMPLE DATA: Admin User
 -- =====================
 INSERT INTO `users` (`email`, `password_hash`, `name`, `role`, `status`) VALUES
-('admin@videoinvites.com', '$2y$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4rdZD5iLNKlQjlGy', 'Admin User', 'admin', 'active');
+('admin@invitationvideos.com', '$2y$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4rdZD5iLNKlQjlGy', 'Admin User', 'admin', 'active');
 -- Password: admin123 (change this!)
 
 -- =====================

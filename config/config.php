@@ -1,6 +1,6 @@
 <?php
 /**
- * VideoInvites - Application Configuration
+ * Invitation Videos - Application Configuration
  * 
  * This file loads environment variables and defines application constants.
  * Sensitive credentials should be stored in .env file (never commit to git!)
@@ -71,7 +71,7 @@ define('APP_URL', env('APP_URL', 'https://invitationvideos.com'));
 
 define('DB_HOST', env('DB_HOST', 'localhost'));
 define('DB_PORT', env('DB_PORT', '3306'));
-define('DB_DATABASE', env('DB_DATABASE', 'videoinvites'));
+define('DB_DATABASE', env('DB_DATABASE', 'invitationvideos'));
 define('DB_USERNAME', env('DB_USERNAME', 'root'));
 define('DB_PASSWORD', env('DB_PASSWORD', ''));
 define('DB_CHARSET', 'utf8mb4');
@@ -117,7 +117,7 @@ define('ALLOWED_VIDEO_TYPES', ['video/mp4', 'video/webm', 'video/quicktime']);
 // =============================================================================
 
 define('CSRF_TOKEN_NAME', env('CSRF_TOKEN_NAME', 'csrf_token'));
-define('SESSION_NAME', env('SESSION_NAME', 'videoinvites_session'));
+define('SESSION_NAME', env('SESSION_NAME', 'invitationvideos_session'));
 define('SESSION_LIFETIME', (int) env('SESSION_LIFETIME', 8 * 60 * 60)); // 8 hours
 define('PASSWORD_COST', 12); // bcrypt cost factor
 
@@ -130,7 +130,7 @@ define('MAIL_HOST', env('MAIL_HOST', 'smtp.mailtrap.io'));
 define('MAIL_PORT', (int) env('MAIL_PORT', 587));
 define('MAIL_USERNAME', env('MAIL_USERNAME', ''));
 define('MAIL_PASSWORD', env('MAIL_PASSWORD', ''));
-define('MAIL_FROM_ADDRESS', env('MAIL_FROM_ADDRESS', 'noreply@videoinvites.com'));
+define('MAIL_FROM_ADDRESS', env('MAIL_FROM_ADDRESS', 'noreply@invitationvideos.com'));
 define('MAIL_FROM_NAME', env('MAIL_FROM_NAME', APP_NAME));
 
 // =============================================================================

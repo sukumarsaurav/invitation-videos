@@ -68,15 +68,15 @@ $metaDescription = 'Create beautiful video invitations for weddings, birthdays, 
             ];
 
             foreach ($allCategories as $cat): ?>
-                <a href="/templates?category=<?= $cat['slug'] ?>"
-                    class="group flex flex-col items-center p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:shadow-lg hover:border-primary/30 transition-all">
-                    <div
-                        class="w-14 h-14 rounded-xl <?= $cat['bg'] ?> flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                        <span class="material-symbols-outlined text-2xl <?= $cat['color'] ?>"><?= $cat['icon'] ?></span>
-                    </div>
-                    <span
-                        class="font-semibold text-sm text-slate-900 dark:text-white text-center"><?= $cat['name'] ?></span>
-                </a>
+                        <a href="/templates?category=<?= $cat['slug'] ?>"
+                            class="group flex flex-col items-center p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:shadow-lg hover:border-primary/30 transition-all">
+                            <div
+                                class="w-14 h-14 rounded-xl <?= $cat['bg'] ?> flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                <span class="material-symbols-outlined text-2xl <?= $cat['color'] ?>"><?= $cat['icon'] ?></span>
+                            </div>
+                            <span
+                                class="font-semibold text-sm text-slate-900 dark:text-white text-center"><?= $cat['name'] ?></span>
+                        </a>
             <?php endforeach; ?>
         </div>
     </div>
@@ -115,36 +115,36 @@ $metaDescription = 'Create beautiful video invitations for weddings, birthdays, 
                 // First 2 images are above the fold on mobile - load eagerly
                 $isAboveFold = $index < 2;
                 ?>
-                <a href="/template/<?= Security::escape($template['slug']) ?>"
-                    class="group block bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200 dark:border-slate-700 hover:border-primary/30">
-                    <!-- Image -->
-                    <div class="relative aspect-[4/5] overflow-hidden bg-slate-100">
-                        <img src="<?= Security::escape($template['thumbnail_url'] ?? '/assets/images/placeholder.jpg') ?>"
-                            alt="<?= Security::escape($template['title']) ?>"
-                            class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                            width="300" height="375" loading="<?= $isAboveFold ? 'eager' : 'lazy' ?>"
-                            decoding="<?= $isAboveFold ? 'sync' : 'async' ?>" <?= $isAboveFold ? 'fetchpriority="high"' : '' ?>>
+                        <a href="/template/<?= Security::escape($template['slug']) ?>"
+                            class="group block bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200 dark:border-slate-700 hover:border-primary/30">
+                            <!-- Image -->
+                            <div class="relative aspect-[4/5] overflow-hidden bg-slate-100">
+                                <img src="<?= Security::escape($template['thumbnail_url'] ?? '/assets/images/placeholder.jpg') ?>"
+                                    alt="<?= Security::escape($template['title']) ?>"
+                                    class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                    width="300" height="375" loading="<?= $isAboveFold ? 'eager' : 'lazy' ?>"
+                                    decoding="<?= $isAboveFold ? 'sync' : 'async' ?>" <?= $isAboveFold ? 'fetchpriority="high"' : '' ?>>
 
-                        <!-- Category Badge -->
-                        <div class="absolute top-3 left-3">
-                            <span class="px-3 py-1 rounded-full text-xs font-bold <?= $badgeColor ?>">
-                                <?= ucfirst(str_replace('_', ' ', $template['category'])) ?>
-                            </span>
-                        </div>
-                    </div>
+                                <!-- Category Badge -->
+                                <div class="absolute top-3 left-3">
+                                    <span class="px-3 py-1 rounded-full text-xs font-bold <?= $badgeColor ?>">
+                                        <?= ucfirst(str_replace('_', ' ', $template['category'])) ?>
+                                    </span>
+                                </div>
+                            </div>
 
-                    <!-- Content -->
-                    <div class="p-4">
-                        <h3
-                            class="font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors truncate">
-                            <?= Security::escape($template['title']) ?>
-                        </h3>
-                        <p
-                            class="text-sm <?= $template['price_usd'] > 0 ? 'text-primary font-bold' : 'text-green-600 font-bold' ?>">
-                            <?= $template['price_usd'] > 0 ? '$' . number_format($template['price_usd'], 2) : 'Free' ?>
-                        </p>
-                    </div>
-                </a>
+                            <!-- Content -->
+                            <div class="p-4">
+                                <h3
+                                    class="font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors truncate">
+                                    <?= Security::escape($template['title']) ?>
+                                </h3>
+                                <p
+                                    class="text-sm <?= $template['price_usd'] > 0 ? 'text-primary font-bold' : 'text-green-600 font-bold' ?>">
+                                    <?= $template['price_usd'] > 0 ? '$' . number_format($template['price_usd'], 2) : 'Free' ?>
+                                </p>
+                            </div>
+                        </a>
             <?php endforeach; ?>
         </div>
     </div>
@@ -280,67 +280,67 @@ $metaDescription = 'Create beautiful video invitations for weddings, birthdays, 
 
 <!-- Blog/Tips Section for SEO -->
 <?php if (!empty($blogPosts)): ?>
-    <section class="py-12 bg-white dark:bg-slate-900">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6">
-            <div class="flex items-center justify-between mb-8">
-                <div>
-                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2">Tips & Inspiration</h2>
-                    <p class="text-slate-600 dark:text-slate-400">Ideas to make your invitations unforgettable</p>
-                </div>
-                <a href="/blog" class="text-primary font-bold hover:underline flex items-center gap-1">
-                    View All <span class="material-symbols-outlined text-base">arrow_forward</span>
-                </a>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <?php
-                $colors = [
-                    ['from-rose-400', 'to-pink-500', 'favorite'],
-                    ['from-amber-400', 'to-orange-500', 'cake'],
-                    ['from-teal-400', 'to-cyan-500', 'child_care']
-                ];
-                foreach ($blogPosts as $i => $post):
-                    $color = $colors[$i % count($colors)];
-                    ?>
-                    <article
-                        class="group bg-slate-50 dark:bg-slate-800 rounded-2xl overflow-hidden hover:shadow-xl transition-all">
-                        <a href="/blog/<?= Security::escape($post['slug']) ?>" class="block">
-                            <div
-                                class="aspect-video <?= $post['featured_image'] ? 'bg-slate-100' : "bg-gradient-to-br {$color[0]} {$color[1]}" ?> flex items-center justify-center relative overflow-hidden">
-                                <?php if ($post['featured_image']): ?>
-                                    <img src="<?= Security::escape($post['featured_image']) ?>"
-                                        alt="<?= Security::escape($post['title']) ?>"
-                                        class="absolute inset-0 w-full h-full object-cover" width="400" height="225" loading="lazy"
-                                        decoding="async">
-                                <?php else: ?>
-                                    <span class="material-symbols-outlined text-5xl text-white/80"><?= $color[2] ?></span>
-                                <?php endif; ?>
-                            </div>
-                            <div class="p-5">
-                                <?php if ($post['category']): ?>
-                                    <span
-                                        class="text-xs font-bold text-primary uppercase tracking-wide"><?= Security::escape($post['category']) ?></span>
-                                <?php endif; ?>
-                                <h3
-                                    class="font-bold text-lg text-slate-900 dark:text-white mt-2 mb-2 group-hover:text-primary transition-colors line-clamp-2">
-                                    <?= Security::escape($post['title']) ?>
-                                </h3>
-                                <?php if ($post['excerpt']): ?>
-                                    <p class="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
-                                        <?= Security::escape($post['excerpt']) ?>
-                                    </p>
-                                <?php endif; ?>
-                                <span
-                                    class="inline-flex items-center gap-1 text-primary font-bold text-sm mt-3 group-hover:underline">
-                                    Read More <span class="material-symbols-outlined text-base">arrow_forward</span>
-                                </span>
-                            </div>
+            <section class="py-12 bg-white dark:bg-slate-900">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6">
+                    <div class="flex items-center justify-between mb-8">
+                        <div>
+                            <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2">Tips & Inspiration</h2>
+                            <p class="text-slate-600 dark:text-slate-400">Ideas to make your invitations unforgettable</p>
+                        </div>
+                        <a href="/blog" class="text-primary font-bold hover:underline flex items-center gap-1">
+                            View All <span class="material-symbols-outlined text-base">arrow_forward</span>
                         </a>
-                    </article>
-                <?php endforeach; ?>
-            </div>
-        </div>
-    </section>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <?php
+                        $colors = [
+                            ['from-rose-400', 'to-pink-500', 'favorite'],
+                            ['from-amber-400', 'to-orange-500', 'cake'],
+                            ['from-teal-400', 'to-cyan-500', 'child_care']
+                        ];
+                        foreach ($blogPosts as $i => $post):
+                            $color = $colors[$i % count($colors)];
+                            ?>
+                                    <article
+                                        class="group bg-slate-50 dark:bg-slate-800 rounded-2xl overflow-hidden hover:shadow-xl transition-all">
+                                        <a href="/blog/<?= Security::escape($post['slug']) ?>" class="block">
+                                            <div
+                                                class="aspect-video <?= $post['featured_image'] ? 'bg-slate-100' : "bg-gradient-to-br {$color[0]} {$color[1]}" ?> flex items-center justify-center relative overflow-hidden">
+                                                <?php if ($post['featured_image']): ?>
+                                                            <img src="<?= Security::escape($post['featured_image']) ?>"
+                                                                alt="<?= Security::escape($post['title']) ?>"
+                                                                class="absolute inset-0 w-full h-full object-cover" width="400" height="225" loading="lazy"
+                                                                decoding="async">
+                                                <?php else: ?>
+                                                            <span class="material-symbols-outlined text-5xl text-white/80"><?= $color[2] ?></span>
+                                                <?php endif; ?>
+                                            </div>
+                                            <div class="p-5">
+                                                <?php if ($post['category']): ?>
+                                                            <span
+                                                                class="text-xs font-bold text-primary uppercase tracking-wide"><?= Security::escape($post['category']) ?></span>
+                                                <?php endif; ?>
+                                                <h3
+                                                    class="font-bold text-lg text-slate-900 dark:text-white mt-2 mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                                                    <?= Security::escape($post['title']) ?>
+                                                </h3>
+                                                <?php if ($post['excerpt']): ?>
+                                                            <p class="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
+                                                                <?= Security::escape($post['excerpt']) ?>
+                                                            </p>
+                                                <?php endif; ?>
+                                                <span
+                                                    class="inline-flex items-center gap-1 text-primary font-bold text-sm mt-3 group-hover:underline">
+                                                    Read More <span class="material-symbols-outlined text-base">arrow_forward</span>
+                                                </span>
+                                            </div>
+                                        </a>
+                                    </article>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </section>
 <?php endif; ?>
 
 <!-- CTA Section -->

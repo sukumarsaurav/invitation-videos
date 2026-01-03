@@ -1,5 +1,5 @@
 -- Add discounted price columns to templates table
--- Run: mysql -u root -p videoinvites < database/migrations/add_discounts.sql
+-- Run: mysql -u root -p invitationvideos < database/migrations/add_discounts.sql
 
 ALTER TABLE templates 
 ADD COLUMN discounted_price_usd DECIMAL(10,2) DEFAULT NULL AFTER price_inr,

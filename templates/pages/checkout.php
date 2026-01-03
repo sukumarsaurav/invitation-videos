@@ -337,7 +337,7 @@ $pageTitle = 'Checkout - ' . $order['order_number'];
             key: key_id,
             amount: amount * 100,
             currency: 'INR',
-            name: 'VideoInvites',
+            name: 'Invitation Videos',
             description: 'Video Invitation',
             order_id: razorpay_order_id,
             handler: function (response) {

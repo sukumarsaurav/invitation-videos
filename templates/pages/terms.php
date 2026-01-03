@@ -7,7 +7,7 @@ require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../src/Core/Security.php';
 
 $pageTitle = 'Terms of Service';
-$metaDescription = 'VideoInvites terms of service - user responsibilities, intellectual property, order processing, payments, and liability information.';
+$metaDescription = 'Invitation Videos terms of service - user responsibilities, intellectual property, order processing, payments, and liability information.';
 ?>
 
 <?php ob_start(); ?>

@@ -7,7 +7,7 @@ require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../src/Core/Security.php';
 
 $pageTitle = 'Privacy Policy';
-$metaDescription = 'VideoInvites privacy policy - learn how we collect, use, and protect your personal information and uploaded content for video invitations.';
+$metaDescription = 'Invitation Videos privacy policy - learn how we collect, use, and protect your personal information and uploaded content for video invitations.';
 ?>
 
 <?php ob_start(); ?>

@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>
-        <?= $appName ?? 'VideoInvites' ?>
+        <?= $appName ?? 'Invitation Videos' ?>
     </title>
     <!--[if mso]>
     <style type="text/css">
@@ -32,7 +32,7 @@
                         <td align="center" style="padding: 24px 0;">
                             <a href="<?= $appUrl ?? '#' ?>" style="text-decoration: none;">
                                 <img src="<?= ($appUrl ?? '') ?>/assets/images/logo.png"
-                                    alt="<?= $appName ?? 'VideoInvites' ?>" width="48" height="48"
+                                    alt="<?= $appName ?? 'Invitation Videos' ?>" width="48" height="48"
                                     style="border: 0; display: block;">
                             </a>
                         </td>
@@ -88,7 +88,7 @@
                             <p style="margin: 24px 0 8px; font-size: 14px; color: #64748b;">
                                 ©
                                 <?= date('Y') ?>
-                                <?= $appName ?? 'VideoInvites' ?>. All rights reserved.
+                                <?= $appName ?? 'Invitation Videos' ?>. All rights reserved.
                             </p>
                             <p style="margin: 0; font-size: 12px; color: #94a3b8;">
                                 You received this email because you have an account with us.

@@ -1,6 +1,6 @@
 <?php
 /**
- * VideoInvites - Lightweight Router
+ * Invitation Videos - Lightweight Router
  * 
  * Simple routing system with middleware support
  */

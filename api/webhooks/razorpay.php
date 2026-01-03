@@ -15,7 +15,7 @@ require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../src/Payment/RazorpayService.php';
 require_once __DIR__ . '/../../src/Services/EmailService.php';
 
-use VideoInvites\Services\EmailService;
+use InvitationVideos\Services\EmailService;
 
 // Set headers for webhook
 header('Content-Type: application/json');

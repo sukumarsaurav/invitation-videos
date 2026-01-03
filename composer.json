@@ -1,5 +1,5 @@
 {
-    "name": "videoinvites/app",
+    "name": "invitationvideos/app",
     "description": "Video Invitation Services Platform",
     "type": "project",
     "license": "proprietary",
@@ -15,7 +15,7 @@
     },
     "autoload": {
         "psr-4": {
-            "VideoInvites\\": "src/"
+            "InvitationVideos\\": "src/"
         }
     },
     "scripts": {
