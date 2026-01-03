@@ -145,9 +145,10 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
             <!-- Title -->
             <div
                 class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
-                <input type="text" name="title" value="<?= Security::escape($post['title'] ?? '') ?>" required
+                <input type="text" name="title" id="post-title" value="<?= Security::escape($post['title'] ?? '') ?>"
+                    required
                     class="w-full text-2xl font-bold border-none focus:ring-0 p-0 bg-transparent placeholder:text-slate-400"
-                    placeholder="Post title...">
+                    placeholder="Post title..." oninput="generateSlugFromTitle()">
             </div>
 
             <!-- Slug -->
@@ -156,9 +157,10 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
                 <label class="text-xs text-slate-500 uppercase font-bold mb-1 block">URL Slug</label>
                 <div class="flex items-center gap-2">
                     <span class="text-slate-400 text-sm">/blog/</span>
-                    <input type="text" name="slug" value="<?= Security::escape($post['slug'] ?? '') ?>"
+                    <input type="text" name="slug" id="post-slug" value="<?= Security::escape($post['slug'] ?? '') ?>"
                         class="flex-1 text-sm border-none focus:ring-0 p-0 bg-transparent" placeholder="post-url-slug">
                 </div>
+                <p class="text-xs text-slate-400 mt-1">Auto-generated from title. Edit to customize.</p>
             </div>
 
             <!-- Excerpt -->
@@ -557,6 +559,34 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
         const visualEditor = document.getElementById('visual-editor');
         const sourceEditor = document.getElementById('source-editor');
         let isSourceMode = false;
+        let slugManuallyEdited = <?= ($post && !empty($post['slug'])) ? 'true' : 'false' ?>;
+
+        // Generate slug from title
+        function generateSlugFromTitle() {
+            // Don't overwrite if user has manually edited the slug
+            if (slugManuallyEdited) return;
+
+            const title = document.getElementById('post-title').value;
+            const slug = title
+                .toLowerCase()
+                .trim()
+                .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+                .replace(/\s+/g, '-')          // Replace spaces with hyphens
+                .replace(/-+/g, '-')           // Replace multiple hyphens with single
+                .replace(/^-|-$/g, '');        // Remove leading/trailing hyphens
+
+            document.getElementById('post-slug').value = slug;
+        }
+
+        // Track if user manually edits the slug
+        document.addEventListener('DOMContentLoaded', function () {
+            const slugInput = document.getElementById('post-slug');
+            if (slugInput) {
+                slugInput.addEventListener('input', function () {
+                    slugManuallyEdited = true;
+                });
+            }
+        });
 
         // Sync visual editor content to hidden textarea
         function syncContent() {
@@ -574,14 +604,14 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
             visualEditor.focus();
             syncContent();
         }
-        
+
         // ========== Layout Block Functions ==========
-        
+
         // Toggle layout menu dropdown
         function toggleLayoutMenu() {
             const menu = document.getElementById('layout-menu');
             menu.classList.toggle('hidden');
-            
+
             // Close when clicking outside
             if (!menu.classList.contains('hidden')) {
                 setTimeout(() => {
@@ -589,14 +619,14 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
                 }, 10);
             }
         }
-        
+
         function closeLayoutMenuOnClick(e) {
             const menu = document.getElementById('layout-menu');
             if (!e.target.closest('#layout-menu')) {
                 menu.classList.add('hidden');
             }
         }
-        
+
         // Insert HTML at cursor position
         function insertHTMLAtCursor(html) {
             visualEditor.focus();
@@ -604,7 +634,7 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
             syncContent();
             document.getElementById('layout-menu').classList.add('hidden');
         }
-        
+
         // Insert Image + Text block
         function insertImageTextBlock() {
             const html = `
@@ -621,7 +651,7 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
             `;
             insertHTMLAtCursor(html);
         }
-        
+
         // Insert Two Column block
         function insertTwoColumnBlock() {
             const html = `
@@ -639,7 +669,7 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
             `;
             insertHTMLAtCursor(html);
         }
-        
+
         // Insert Callout block
         function insertCalloutBlock(type) {
             const icons = {
