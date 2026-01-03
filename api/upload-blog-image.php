@@ -8,12 +8,14 @@
 
 header('Content-Type: application/json');
 
+require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../src/Core/Security.php';
 require_once __DIR__ . '/../src/Core/ImageHelper.php';
 
-// Start session for authentication check
+// Start session with same name as admin pages
 if (session_status() === PHP_SESSION_NONE) {
+    session_name(SESSION_NAME);
     session_start();
 }
 
