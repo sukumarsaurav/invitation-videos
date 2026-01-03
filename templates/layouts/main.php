@@ -20,7 +20,7 @@
       "@type": "Organization",
       "name": "<?php echo APP_NAME ?? 'InvitationVideos'; ?>",
       "url": "https://invitationvideos.com",
-      "logo": "https://invitationvideos.com/assets/images/logo.png",
+      "logo": "https://invitationvideos.com/assets/images/inivitationVideoslogo.png",
       "sameAs": [
         "<?= SOCIAL_FACEBOOK ?>",
         "<?= SOCIAL_INSTAGRAM ?>",
@@ -447,7 +447,7 @@
                 <div class="flex items-center gap-6 lg:gap-8 flex-1">
                     <!-- Logo -->
                     <a href="/" class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                        <img src="/assets/images/logo.png" alt="<?= APP_NAME ?? 'InvitationVideos' ?>"
+                        <img src="/assets/images/inivitationVideoslogo.png" alt="<?= APP_NAME ?? 'InvitationVideos' ?>"
                             class="h-9 sm:h-10 w-auto" width="40" height="40" loading="eager" fetchpriority="high">
                         <h2 class="text-lg sm:text-xl font-bold leading-tight tracking-tight">
                             <?= APP_NAME ?? 'Invitation Videos' ?>
@@ -651,7 +651,7 @@
                 <!-- Brand -->
                 <div class="col-span-2 sm:col-span-3 lg:col-span-1">
                     <div class="flex items-center gap-2 mb-4">
-                        <img src="/assets/images/logo.png" alt="<?= APP_NAME ?? 'InvitationVideos' ?>"
+                        <img src="/assets/images/inivitationVideoslogo.png" alt="<?= APP_NAME ?? 'InvitationVideos' ?>"
                             class="h-8 w-auto" width="32" height="32" loading="lazy">
                         <span class="font-bold text-lg"><?= APP_NAME ?? 'Invitation Videos' ?></span>
                     </div>
