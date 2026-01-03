@@ -377,9 +377,17 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
 
                 <!-- Preview -->
                 <div id="featured-preview-container"
-                    class="mt-3 aspect-video rounded-lg overflow-hidden bg-slate-100 <?= ($post && $post['featured_image']) ? '' : 'hidden' ?>">
-                    <img id="featured-preview-img" src="<?= Security::escape($post['featured_image'] ?? '') ?>" alt=""
-                        class="w-full h-full object-cover">
+                    class="mt-3 relative rounded-lg overflow-hidden bg-slate-100 <?= ($post && $post['featured_image']) ? '' : 'hidden' ?>">
+                    <div class="aspect-video">
+                        <img id="featured-preview-img" src="<?= Security::escape($post['featured_image'] ?? '') ?>" alt=""
+                            class="w-full h-full object-cover">
+                    </div>
+                    <!-- Remove Button -->
+                    <button type="button" onclick="clearFeaturedImage()"
+                        class="absolute top-2 right-2 p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-lg transition-colors"
+                        title="Remove image">
+                        <span class="material-symbols-outlined text-lg">close</span>
+                    </button>
                 </div>
             </div>
 
@@ -571,6 +579,14 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
                 previewContainer.classList.add('hidden');
             }
         }
+        
+        // Clear featured image
+        function clearFeaturedImage() {
+            document.getElementById('featured-image-url').value = '';
+            document.getElementById('featured-preview-container').classList.add('hidden');
+            document.getElementById('featured-preview-img').src = '';
+            document.getElementById('featured-compression-stats').classList.add('hidden');
+        }
 
         // ========== Image Insert Modal ==========
 
@@ -703,7 +719,7 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
     <div id="image-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
         <!-- Backdrop -->
         <div class="absolute inset-0 bg-black/50" onclick="closeImageModal()"></div>
-        
+
         <!-- Modal Content -->
         <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
             <!-- Header -->
@@ -713,32 +729,32 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
-            
+
             <!-- Tabs -->
             <div class="flex gap-2 px-6 pt-4">
-                <button type="button" id="modal-tab-upload" onclick="switchModalTab('upload')" 
+                <button type="button" id="modal-tab-upload" onclick="switchModalTab('upload')"
                     class="px-4 py-2 rounded-lg text-sm font-medium bg-primary text-white transition-colors">
                     Upload
                 </button>
-                <button type="button" id="modal-tab-url" onclick="switchModalTab('url')" 
+                <button type="button" id="modal-tab-url" onclick="switchModalTab('url')"
                     class="px-4 py-2 rounded-lg text-sm font-medium bg-slate-100 transition-colors">
                     URL
                 </button>
             </div>
-            
+
             <!-- Upload Pane -->
             <div id="modal-pane-upload" class="p-6">
                 <div class="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors"
                     ondragover="event.preventDefault(); this.classList.add('border-primary', 'bg-primary/5');"
-                    ondragleave="this.classList.remove('border-primary', 'bg-primary/5');"
-                    ondrop="handleModalDrop(event)"
+                    ondragleave="this.classList.remove('border-primary', 'bg-primary/5');" ondrop="handleModalDrop(event)"
                     onclick="document.getElementById('modal-file-input').click()">
                     <span class="material-symbols-outlined text-4xl text-slate-400 mb-2">cloud_upload</span>
                     <p class="text-sm text-slate-500">Drag & drop or click to upload</p>
                     <p class="text-xs text-slate-400 mt-1">Auto-compressed to WebP</p>
                 </div>
-                <input type="file" id="modal-file-input" accept="image/*" class="hidden" onchange="uploadModalImage(this.files[0])">
-                
+                <input type="file" id="modal-file-input" accept="image/*" class="hidden"
+                    onchange="uploadModalImage(this.files[0])">
+
                 <!-- Upload Progress -->
                 <div id="modal-upload-progress" class="hidden mt-4">
                     <div class="flex items-center gap-2 text-sm text-slate-600">
@@ -746,32 +762,33 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
                         <span>Uploading & compressing...</span>
                     </div>
                 </div>
-                
+
                 <!-- Compression Stats -->
-                <div id="modal-upload-stats" class="hidden mt-4 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
+                <div id="modal-upload-stats"
+                    class="hidden mt-4 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
                     <span class="material-symbols-outlined text-base align-middle mr-1">check_circle</span>
                     <span id="modal-stats-text"></span>
                 </div>
             </div>
-            
+
             <!-- URL Pane -->
             <div id="modal-pane-url" class="p-6 hidden">
                 <label class="block text-sm font-medium mb-2">Image URL</label>
-                <input type="url" id="modal-image-url-direct" 
-                    class="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm"
-                    placeholder="https://..." oninput="document.getElementById('modal-image-url').value = this.value">
+                <input type="url" id="modal-image-url-direct"
+                    class="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm" placeholder="https://..."
+                    oninput="document.getElementById('modal-image-url').value = this.value">
             </div>
-            
+
             <!-- Hidden URL field shared between tabs -->
             <input type="hidden" id="modal-image-url" value="">
-            
+
             <!-- Footer -->
             <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
-                <button type="button" onclick="closeImageModal()" 
+                <button type="button" onclick="closeImageModal()"
                     class="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 rounded-lg transition-colors">
                     Cancel
                 </button>
-                <button type="button" onclick="insertImageFromModal()" 
+                <button type="button" onclick="insertImageFromModal()"
                     class="px-4 py-2 text-sm font-bold text-white bg-primary hover:bg-primary/90 rounded-lg transition-colors">
                     Insert Image
                 </button>
