@@ -5,7 +5,10 @@
 
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../src/Core/Security.php';
+require_once __DIR__ . '/../src/Services/EmailService.php';
 require_once __DIR__ . '/auth.php';
+
+use VideoInvites\Services\EmailService;
 
 // Handle video upload
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_video'])) {
@@ -74,6 +77,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_video'])) {
 
         // Log success
         error_log("Video uploaded successfully for order #$orderId: $videoUrl");
+
+        // Send order completed email
+        try {
+            $orderData = Database::fetchOne(
+                "SELECT o.*, t.title as template_title FROM orders o LEFT JOIN templates t ON o.template_id = t.id WHERE o.id = ?",
+                [$orderId]
+            );
+            $userData = Database::fetchOne("SELECT * FROM users WHERE id = ?", [$orderData['user_id']]);
+
+            if ($orderData && $userData) {
+                $orderData['output_video_url'] = $videoUrl;
+                $orderData['video_expires_at'] = $expiresAt;
+                EmailService::sendOrderCompletedEmail($orderData, $userData);
+            }
+        } catch (Exception $emailError) {
+            error_log("Order completed email failed for order #$orderId: " . $emailError->getMessage());
+        }
 
         if ($isAjax) {
             echo json_encode(['success' => true, 'message' => 'Video uploaded successfully', 'video_url' => $videoUrl]);

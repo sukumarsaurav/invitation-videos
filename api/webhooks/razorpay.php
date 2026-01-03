@@ -13,6 +13,9 @@ ob_start();
 
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../src/Payment/RazorpayService.php';
+require_once __DIR__ . '/../../src/Services/EmailService.php';
+
+use VideoInvites\Services\EmailService;
 
 // Set headers for webhook
 header('Content-Type: application/json');
@@ -151,8 +154,21 @@ function handlePaymentCaptured(array $payment): void
 
         error_log("Razorpay Webhook: Order #{$order['id']} marked as paid");
 
-        // TODO: Send confirmation email
-        // TODO: Start video rendering
+        // Send payment confirmation email
+        try {
+            $user = Database::fetchOne("SELECT * FROM users WHERE id = ?", [$order['user_id']]);
+            $orderWithTemplate = Database::fetchOne(
+                "SELECT o.*, t.title as template_title FROM orders o LEFT JOIN templates t ON o.template_id = t.id WHERE o.id = ?",
+                [$order['id']]
+            );
+            $orderWithTemplate['paid_at'] = date('Y-m-d H:i:s');
+
+            if ($user && $orderWithTemplate) {
+                EmailService::sendPaymentReceivedEmail($orderWithTemplate, $user);
+            }
+        } catch (Exception $emailError) {
+            error_log("Payment email failed for Order #{$order['id']}: " . $emailError->getMessage());
+        }
     }
 }
 

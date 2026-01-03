@@ -7,6 +7,9 @@
 
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../Core/Security.php';
+require_once __DIR__ . '/../Services/EmailService.php';
+
+use VideoInvites\Services\EmailService;
 
 class AuthController
 {
@@ -136,6 +139,13 @@ class AuthController
         $_SESSION['user_logged_in_at'] = time();
 
         $_SESSION['success'] = 'Account created successfully!';
+
+        // Send welcome email
+        try {
+            EmailService::sendWelcomeEmail($email, $name);
+        } catch (Exception $e) {
+            error_log('Welcome email failed: ' . $e->getMessage());
+        }
 
         // Redirect to intended URL or home
         $redirect = $_SESSION['redirect_url'] ?? '/';
