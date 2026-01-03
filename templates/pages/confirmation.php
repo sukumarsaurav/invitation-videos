@@ -34,6 +34,28 @@ $pageTitle = 'Order Confirmed - ' . $order['order_number'];
 
 <?php ob_start(); ?>
 
+<!-- GA4 DataLayer: Purchase Event -->
+<script>
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ ecommerce: null }); // Clear the previous ecommerce object
+    window.dataLayer.push({
+        'event': 'purchase',
+        'ecommerce': {
+            'transaction_id': '<?= $order['order_number'] ?>',
+            'value': <?= number_format($order['amount'], 2, '.', '') ?>,
+            'currency': '<?= $order['currency'] ?>',
+            'payment_type': '<?= ucfirst($order['payment_gateway'] ?? 'card') ?>',
+            'items': [{
+                'item_id': '<?= $order['template_id'] ?>',
+                'item_name': '<?= addslashes($order['template_title']) ?>',
+                'price': <?= number_format($order['amount'], 2, '.', '') ?>,
+                'quantity': 1,
+                'item_category': 'Video Invitation'
+            }]
+        }
+    });
+</script>
+
 <div class="min-h-[70vh] flex items-center justify-center px-4 py-12">
     <div class="max-w-lg w-full text-center">
 

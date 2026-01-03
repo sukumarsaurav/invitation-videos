@@ -44,6 +44,28 @@ $pageTitle = 'Checkout - ' . $order['order_number'];
 
 <?php ob_start(); ?>
 
+<!-- GA4 DataLayer: Begin Checkout Event -->
+<script>
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ ecommerce: null }); // Clear the previous ecommerce object
+    window.dataLayer.push({
+        'event': 'begin_checkout',
+        'ecommerce': {
+            'currency': '<?= $order['currency'] ?>',
+            'value': <?= number_format($order['amount'], 2, '.', '') ?>,
+            'items': [{
+                'item_id': '<?= $order['template_id'] ?>',
+                'item_name': '<?= addslashes($order['template_title']) ?>',
+                'price': <?= number_format($order['amount'], 2, '.', '') ?>,
+                'quantity': 1,
+                'item_category': 'Video Invitation'
+            }]
+        },
+        'order_id': '<?= $order['order_number'] ?>',
+        'payment_gateway': '<?= $gateway ?>'
+    });
+</script>
+
 <!-- Payment SDK Scripts (loaded only on checkout page) -->
 <?php if ($isIndian && defined('RAZORPAY_KEY_ID') && RAZORPAY_KEY_ID): ?>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
@@ -152,8 +174,8 @@ $pageTitle = 'Checkout - ' . $order['order_number'];
                     <div class="flex gap-4 mb-6">
                         <div class="w-24 h-16 shrink-0 rounded-lg bg-slate-100 shadow-sm overflow-hidden">
                             <img src="<?= Security::escape($order['thumbnail_url'] ?? '/assets/images/placeholder.jpg') ?>"
-                                 alt="<?= Security::escape($order['template_title']) ?>"
-                                 class="w-full h-full object-cover" width="96" height="64" loading="eager">
+                                alt="<?= Security::escape($order['template_title']) ?>"
+                                class="w-full h-full object-cover" width="96" height="64" loading="eager">
                         </div>
                         <div class="flex flex-col justify-center">
                             <h4 class="text-sm font-bold text-slate-900 dark:text-white leading-tight">
