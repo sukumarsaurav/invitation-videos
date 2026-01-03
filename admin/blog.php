@@ -136,7 +136,7 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
         </a>
     </div>
 
-    <form method="POST" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <form method="POST" enctype="multipart/form-data" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <input type="hidden" name="action" value="save_post">
         <input type="hidden" name="id" value="<?= $post['id'] ?? 0 ?>">
 
@@ -234,7 +234,7 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
                         <button type="button" onclick="insertLink()" class="toolbar-btn" title="Insert Link">
                             <span class="material-symbols-outlined text-lg">link</span>
                         </button>
-                        <button type="button" onclick="insertImage()" class="toolbar-btn" title="Insert Image">
+                        <button type="button" onclick="openImageModal()" class="toolbar-btn" title="Insert Image">
                             <span class="material-symbols-outlined text-lg">image</span>
                         </button>
                         <button type="button" onclick="execCmd('formatBlock', '<blockquote>')" class="toolbar-btn"
@@ -334,14 +334,53 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
                     <span class="material-symbols-outlined text-primary">image</span>
                     Featured Image
                 </h3>
-                <input type="url" name="featured_image" value="<?= Security::escape($post['featured_image'] ?? '') ?>"
-                    class="w-full h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 text-sm"
-                    placeholder="https://...">
-                <?php if ($post && $post['featured_image']): ?>
-                    <div class="mt-3 aspect-video rounded-lg overflow-hidden bg-slate-100">
-                        <img src="<?= Security::escape($post['featured_image']) ?>" alt="" class="w-full h-full object-cover">
+
+                <!-- Upload Zone -->
+                <div id="featured-upload-zone"
+                    class="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors mb-3"
+                    ondragover="event.preventDefault(); this.classList.add('border-primary', 'bg-primary/5');"
+                    ondragleave="this.classList.remove('border-primary', 'bg-primary/5');"
+                    ondrop="handleFeaturedDrop(event)" onclick="document.getElementById('featured-file-input').click()">
+                    <span class="material-symbols-outlined text-3xl text-slate-400 mb-2">cloud_upload</span>
+                    <p class="text-sm text-slate-500">Drop image here or click to upload</p>
+                    <p class="text-xs text-slate-400 mt-1">Auto-compressed to WebP format</p>
+                </div>
+                <input type="file" id="featured-file-input" accept="image/*" class="hidden"
+                    onchange="uploadFeaturedImage(this.files[0])">
+
+                <!-- Upload Progress -->
+                <div id="featured-upload-progress" class="hidden mb-3">
+                    <div class="flex items-center gap-2 text-sm text-slate-600">
+                        <div class="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full"></div>
+                        <span>Uploading & compressing...</span>
                     </div>
-                <?php endif; ?>
+                </div>
+
+                <!-- Compression Stats -->
+                <div id="featured-compression-stats"
+                    class="hidden mb-3 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
+                    <span class="material-symbols-outlined text-base align-middle mr-1">check_circle</span>
+                    <span id="featured-stats-text"></span>
+                </div>
+
+                <!-- OR divider -->
+                <div class="flex items-center gap-3 my-3">
+                    <div class="flex-1 h-px bg-slate-200"></div>
+                    <span class="text-xs text-slate-400 uppercase">or enter URL</span>
+                    <div class="flex-1 h-px bg-slate-200"></div>
+                </div>
+
+                <input type="url" name="featured_image" id="featured-image-url"
+                    value="<?= Security::escape($post['featured_image'] ?? '') ?>"
+                    class="w-full h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 text-sm"
+                    placeholder="https://..." onchange="updateFeaturedPreview()">
+
+                <!-- Preview -->
+                <div id="featured-preview-container"
+                    class="mt-3 aspect-video rounded-lg overflow-hidden bg-slate-100 <?= ($post && $post['featured_image']) ? '' : 'hidden' ?>">
+                    <img id="featured-preview-img" src="<?= Security::escape($post['featured_image'] ?? '') ?>" alt=""
+                        class="w-full h-full object-cover">
+                </div>
             </div>
 
             <!-- SEO -->
@@ -377,46 +416,75 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
             color: #64748b;
             transition: all 0.15s;
         }
+
         .toolbar-btn:hover {
             background: #e2e8f0;
             color: #7f13ec;
         }
-        #visual-editor h2 { font-size: 1.5em; font-weight: bold; margin: 1em 0 0.5em; }
-        #visual-editor h3 { font-size: 1.25em; font-weight: bold; margin: 1em 0 0.5em; }
-        #visual-editor p { margin-bottom: 1em; }
-        #visual-editor ul, #visual-editor ol { margin: 1em 0; padding-left: 2em; }
-        #visual-editor blockquote { 
-            border-left: 4px solid #7f13ec; 
-            padding-left: 1em; 
+
+        #visual-editor h2 {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 1em 0 0.5em;
+        }
+
+        #visual-editor h3 {
+            font-size: 1.25em;
+            font-weight: bold;
+            margin: 1em 0 0.5em;
+        }
+
+        #visual-editor p {
+            margin-bottom: 1em;
+        }
+
+        #visual-editor ul,
+        #visual-editor ol {
+            margin: 1em 0;
+            padding-left: 2em;
+        }
+
+        #visual-editor blockquote {
+            border-left: 4px solid #7f13ec;
+            padding-left: 1em;
             margin: 1em 0;
             color: #64748b;
             font-style: italic;
         }
-        #visual-editor a { color: #7f13ec; text-decoration: underline; }
-        #visual-editor img { max-width: 100%; border-radius: 8px; margin: 1em 0; }
+
+        #visual-editor a {
+            color: #7f13ec;
+            text-decoration: underline;
+        }
+
+        #visual-editor img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin: 1em 0;
+        }
     </style>
     <script>
         const visualEditor = document.getElementById('visual-editor');
         const sourceEditor = document.getElementById('source-editor');
         let isSourceMode = false;
-        
+
         // Sync visual editor content to hidden textarea
         function syncContent() {
             sourceEditor.value = visualEditor.innerHTML;
         }
-        
+
         // Sync source editor to visual editor
         function syncFromSource() {
             visualEditor.innerHTML = sourceEditor.value;
         }
-        
+
         // Execute formatting command
         function execCmd(command, value = null) {
             document.execCommand(command, false, value);
             visualEditor.focus();
             syncContent();
         }
-        
+
         // Insert link
         function insertLink() {
             const url = prompt('Enter URL:', 'https://');
@@ -424,7 +492,180 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
                 execCmd('createLink', url);
             }
         }
-        
+
+        // ========== Image Upload Functions ==========
+
+        // Upload featured image
+        async function uploadFeaturedImage(file) {
+            if (!file) return;
+
+            const uploadZone = document.getElementById('featured-upload-zone');
+            const progress = document.getElementById('featured-upload-progress');
+            const stats = document.getElementById('featured-compression-stats');
+            const statsText = document.getElementById('featured-stats-text');
+            const urlInput = document.getElementById('featured-image-url');
+            const previewContainer = document.getElementById('featured-preview-container');
+            const previewImg = document.getElementById('featured-preview-img');
+
+            // Show progress
+            uploadZone.classList.add('hidden');
+            progress.classList.remove('hidden');
+            stats.classList.add('hidden');
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const response = await fetch('/api/upload-blog-image.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Update URL input
+                    urlInput.value = result.url;
+
+                    // Show preview
+                    previewImg.src = result.url;
+                    previewContainer.classList.remove('hidden');
+
+                    // Show compression stats
+                    const originalKB = (result.compression.original_size / 1024).toFixed(1);
+                    const compressedKB = (result.compression.compressed_size / 1024).toFixed(1);
+                    statsText.textContent = `Compressed: ${originalKB}KB → ${compressedKB}KB (${result.compression.savings} saved)`;
+                    stats.classList.remove('hidden');
+                } else {
+                    alert('Upload failed: ' + result.error);
+                }
+            } catch (error) {
+                alert('Upload failed: ' + error.message);
+            }
+
+            // Hide progress, show upload zone
+            progress.classList.add('hidden');
+            uploadZone.classList.remove('hidden');
+        }
+
+        // Handle drag and drop for featured image
+        function handleFeaturedDrop(event) {
+            event.preventDefault();
+            event.target.classList.remove('border-primary', 'bg-primary/5');
+            const file = event.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                uploadFeaturedImage(file);
+            }
+        }
+
+        // Update featured image preview from URL
+        function updateFeaturedPreview() {
+            const url = document.getElementById('featured-image-url').value;
+            const previewContainer = document.getElementById('featured-preview-container');
+            const previewImg = document.getElementById('featured-preview-img');
+
+            if (url) {
+                previewImg.src = url;
+                previewContainer.classList.remove('hidden');
+            } else {
+                previewContainer.classList.add('hidden');
+            }
+        }
+
+        // ========== Image Insert Modal ==========
+
+        function openImageModal() {
+            document.getElementById('image-modal').classList.remove('hidden');
+            document.getElementById('modal-image-url').value = '';
+            document.getElementById('modal-upload-stats').classList.add('hidden');
+            switchModalTab('upload');
+        }
+
+        function closeImageModal() {
+            document.getElementById('image-modal').classList.add('hidden');
+        }
+
+        function switchModalTab(tab) {
+            const uploadTab = document.getElementById('modal-tab-upload');
+            const urlTab = document.getElementById('modal-tab-url');
+            const uploadPane = document.getElementById('modal-pane-upload');
+            const urlPane = document.getElementById('modal-pane-url');
+
+            if (tab === 'upload') {
+                uploadTab.classList.add('bg-primary', 'text-white');
+                uploadTab.classList.remove('bg-slate-100');
+                urlTab.classList.remove('bg-primary', 'text-white');
+                urlTab.classList.add('bg-slate-100');
+                uploadPane.classList.remove('hidden');
+                urlPane.classList.add('hidden');
+            } else {
+                urlTab.classList.add('bg-primary', 'text-white');
+                urlTab.classList.remove('bg-slate-100');
+                uploadTab.classList.remove('bg-primary', 'text-white');
+                uploadTab.classList.add('bg-slate-100');
+                urlPane.classList.remove('hidden');
+                uploadPane.classList.add('hidden');
+            }
+        }
+
+        async function uploadModalImage(file) {
+            if (!file) return;
+
+            const progress = document.getElementById('modal-upload-progress');
+            const stats = document.getElementById('modal-upload-stats');
+            const statsText = document.getElementById('modal-stats-text');
+            const urlInput = document.getElementById('modal-image-url');
+
+            progress.classList.remove('hidden');
+            stats.classList.add('hidden');
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const response = await fetch('/api/upload-blog-image.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    urlInput.value = result.url;
+
+                    const originalKB = (result.compression.original_size / 1024).toFixed(1);
+                    const compressedKB = (result.compression.compressed_size / 1024).toFixed(1);
+                    statsText.textContent = `${originalKB}KB → ${compressedKB}KB (${result.compression.savings} saved)`;
+                    stats.classList.remove('hidden');
+                } else {
+                    alert('Upload failed: ' + result.error);
+                }
+            } catch (error) {
+                alert('Upload failed: ' + error.message);
+            }
+
+            progress.classList.add('hidden');
+        }
+
+        function handleModalDrop(event) {
+            event.preventDefault();
+            event.target.classList.remove('border-primary', 'bg-primary/5');
+            const file = event.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                uploadModalImage(file);
+            }
+        }
+
+        function insertImageFromModal() {
+            const url = document.getElementById('modal-image-url').value;
+            if (url) {
+                execCmd('insertImage', url);
+                closeImageModal();
+            } else {
+                alert('Please upload an image or enter a URL');
+            }
+        }
+
         // Insert image
         function insertImage() {
             const url = prompt('Enter image URL:', 'https://');
@@ -432,7 +673,7 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
                 execCmd('insertImage', url);
             }
         }
-        
+
         // Toggle between visual and source mode
         function toggleSource() {
             isSourceMode = !isSourceMode;
@@ -446,17 +687,97 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
                 visualEditor.classList.remove('hidden');
             }
         }
-        
+
         // Sync content on form submit
-        document.querySelector('form').addEventListener('submit', function() {
+        document.querySelector('form').addEventListener('submit', function () {
             if (!isSourceMode) {
                 syncContent();
             }
         });
-        
+
         // Initialize - sync content on load
         syncContent();
     </script>
+
+    <!-- Image Insert Modal -->
+    <div id="image-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/50" onclick="closeImageModal()"></div>
+        
+        <!-- Modal Content -->
+        <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
+            <!-- Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+                <h3 class="font-bold text-lg">Insert Image</h3>
+                <button onclick="closeImageModal()" class="p-1 hover:bg-slate-100 rounded-lg transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="flex gap-2 px-6 pt-4">
+                <button type="button" id="modal-tab-upload" onclick="switchModalTab('upload')" 
+                    class="px-4 py-2 rounded-lg text-sm font-medium bg-primary text-white transition-colors">
+                    Upload
+                </button>
+                <button type="button" id="modal-tab-url" onclick="switchModalTab('url')" 
+                    class="px-4 py-2 rounded-lg text-sm font-medium bg-slate-100 transition-colors">
+                    URL
+                </button>
+            </div>
+            
+            <!-- Upload Pane -->
+            <div id="modal-pane-upload" class="p-6">
+                <div class="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors"
+                    ondragover="event.preventDefault(); this.classList.add('border-primary', 'bg-primary/5');"
+                    ondragleave="this.classList.remove('border-primary', 'bg-primary/5');"
+                    ondrop="handleModalDrop(event)"
+                    onclick="document.getElementById('modal-file-input').click()">
+                    <span class="material-symbols-outlined text-4xl text-slate-400 mb-2">cloud_upload</span>
+                    <p class="text-sm text-slate-500">Drag & drop or click to upload</p>
+                    <p class="text-xs text-slate-400 mt-1">Auto-compressed to WebP</p>
+                </div>
+                <input type="file" id="modal-file-input" accept="image/*" class="hidden" onchange="uploadModalImage(this.files[0])">
+                
+                <!-- Upload Progress -->
+                <div id="modal-upload-progress" class="hidden mt-4">
+                    <div class="flex items-center gap-2 text-sm text-slate-600">
+                        <div class="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full"></div>
+                        <span>Uploading & compressing...</span>
+                    </div>
+                </div>
+                
+                <!-- Compression Stats -->
+                <div id="modal-upload-stats" class="hidden mt-4 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
+                    <span class="material-symbols-outlined text-base align-middle mr-1">check_circle</span>
+                    <span id="modal-stats-text"></span>
+                </div>
+            </div>
+            
+            <!-- URL Pane -->
+            <div id="modal-pane-url" class="p-6 hidden">
+                <label class="block text-sm font-medium mb-2">Image URL</label>
+                <input type="url" id="modal-image-url-direct" 
+                    class="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm"
+                    placeholder="https://..." oninput="document.getElementById('modal-image-url').value = this.value">
+            </div>
+            
+            <!-- Hidden URL field shared between tabs -->
+            <input type="hidden" id="modal-image-url" value="">
+            
+            <!-- Footer -->
+            <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
+                <button type="button" onclick="closeImageModal()" 
+                    class="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 rounded-lg transition-colors">
+                    Cancel
+                </button>
+                <button type="button" onclick="insertImageFromModal()" 
+                    class="px-4 py-2 text-sm font-bold text-white bg-primary hover:bg-primary/90 rounded-lg transition-colors">
+                    Insert Image
+                </button>
+            </div>
+        </div>
+    </div>
 
 <?php else: ?>
     <!-- List View -->
