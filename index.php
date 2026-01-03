@@ -41,6 +41,11 @@ $router->get('/', function () {
     include __DIR__ . '/templates/pages/home.php';
 });
 
+// XML Sitemap (SEO)
+$router->get('/sitemap.xml', function () {
+    include __DIR__ . '/templates/xml/sitemap.php';
+});
+
 // My Orders (user order history)
 $router->get('/my-orders', function () {
     include __DIR__ . '/templates/pages/my-orders.php';
@@ -105,6 +110,40 @@ $router->get('/blog', function () {
 $router->get('/blog/{slug}', function ($slug) {
     $_GET['slug'] = $slug;
     include __DIR__ . '/templates/pages/blog-post.php';
+});
+
+// ===================
+// SERVICE PAGES (SEO)
+// ===================
+
+// Wedding Invitation Video
+$router->get('/wedding-invitation-video', function () {
+    include __DIR__ . '/templates/pages/service-wedding.php';
+});
+
+// Birthday Video Invitation
+$router->get('/birthday-video-invitation-maker', function () {
+    include __DIR__ . '/templates/pages/service-birthday.php';
+});
+
+// Baby Shower Video Invitation
+$router->get('/baby-shower-invitation-video', function () {
+    include __DIR__ . '/templates/pages/service-baby-shower.php';
+});
+
+// Save The Date Video
+$router->get('/save-the-date-video-maker', function () {
+    include __DIR__ . '/templates/pages/service-save-the-date.php';
+});
+
+// WhatsApp Invitation Video (Niche 1)
+$router->get('/whatsapp-wedding-invitation-video', function () {
+    include __DIR__ . '/templates/pages/service-whatsapp.php';
+});
+
+// Roka Ceremony Invitation (Niche 2)
+$router->get('/roka-ceremony-invitation-video', function () {
+    include __DIR__ . '/templates/pages/service-roka.php';
 });
 
 // ===================

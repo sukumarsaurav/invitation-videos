@@ -157,6 +157,53 @@ $shareUrl = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HT
     </div>
 </article>
 
+<!-- Internal Linking CTA -->
+<div class="max-w-4xl mx-auto px-4 mb-16">
+    <?php
+    // Determine CTA based on category or default to Wedding
+    $ctaLink = '/wedding-invitation-video';
+    $ctaTitle = 'Create Your Wedding Invitation Video';
+    $ctaDesc = 'Choose from hundreds of stunning wedding templates and create your video in minutes.';
+    $ctaBtn = 'Create Wedding Invite';
+
+    // Map categories to new service pages
+    $categoryLower = strtolower($post['category'] ?? '');
+
+    if (strpos($categoryLower, 'birth') !== false) {
+        $ctaLink = '/birthday-video-invitation-maker';
+        $ctaTitle = 'Planning a Birthday Party?';
+        $ctaDesc = 'Create a fun and exciting birthday video invitation that will get everyone talking!';
+        $ctaBtn = 'Create Birthday Invite';
+    } elseif (strpos($categoryLower, 'baby') !== false || strpos($categoryLower, 'shower') !== false) {
+        $ctaLink = '/baby-shower-invitation-video';
+        $ctaTitle = 'Is it a Boy or Girl?';
+        $ctaDesc = 'Announce the big news with our adorable Baby Shower and Gender Reveal video templates.';
+        $ctaBtn = 'Create Baby Shower Invite';
+    } elseif (strpos($categoryLower, 'save') !== false || strpos($categoryLower, 'date') !== false) {
+        $ctaLink = '/save-the-date-video-maker';
+        $ctaTitle = 'Announce Your Date in Style';
+        $ctaDesc = 'Send a Save the Date video that tells your love story before the formal invitation.';
+        $ctaBtn = 'Create Save the Date';
+    } elseif (strpos($categoryLower, 'roka') !== false) {
+        $ctaLink = '/roka-ceremony-invitation-video';
+        $ctaTitle = 'Roka Ceremony Coming Up?';
+        $ctaDesc = 'Invite your loved ones to bless your union with a traditional Roka ceremony video card.';
+        $ctaBtn = 'Create Roka Invite';
+    }
+    ?>
+
+    <div
+        class="bg-gradient-to-r from-primary/10 to-purple-500/10 rounded-2xl p-8 md:p-12 text-center border border-primary/20">
+        <h3 class="text-2xl md:text-3xl font-bold text-slate-900 mb-4"><?= $ctaTitle ?></h3>
+        <p class="text-lg text-slate-600 mb-8 max-w-2xl mx-auto"><?= $ctaDesc ?></p>
+        <a href="<?= $ctaLink ?>"
+            class="inline-flex items-center gap-2 px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/30 hover:bg-primary/90 hover:scale-105 transition-all">
+            <?= $ctaBtn ?>
+            <span class="material-symbols-outlined">arrow_forward</span>
+        </a>
+    </div>
+</div>
+
 <!-- Related Posts -->
 <?php if (!empty($relatedPosts)): ?>
     <section class="bg-slate-50 py-12 md:py-16">

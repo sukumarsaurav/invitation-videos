@@ -134,6 +134,16 @@ define('MAIL_FROM_ADDRESS', env('MAIL_FROM_ADDRESS', 'noreply@videoinvites.com')
 define('MAIL_FROM_NAME', env('MAIL_FROM_NAME', APP_NAME));
 
 // =============================================================================
+// Social Media Configuration (SEO & Footer)
+// =============================================================================
+
+define('SOCIAL_FACEBOOK', env('SOCIAL_FACEBOOK', '#'));
+define('SOCIAL_INSTAGRAM', env('SOCIAL_INSTAGRAM', '#'));
+define('SOCIAL_TWITTER', env('SOCIAL_TWITTER', '#'));
+define('SOCIAL_YOUTUBE', env('SOCIAL_YOUTUBE', '#'));
+define('SOCIAL_LINKEDIN', env('SOCIAL_LINKEDIN', '#'));
+
+// =============================================================================
 // Error Handling
 // =============================================================================
 

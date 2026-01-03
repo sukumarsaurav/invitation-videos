@@ -1,0 +1,26 @@
+# VideoInvites - Robots.txt
+# Controls search engine crawler access
+
+User-agent: *
+Allow: /
+
+# Block admin and sensitive directories
+Disallow: /admin/
+Disallow: /api/
+Disallow: /checkout/
+Disallow: /config/
+Disallow: /database/
+Disallow: /src/
+Disallow: /vendor/
+Disallow: /uploads/
+
+# Block user-specific pages
+Disallow: /my-orders
+Disallow: /my-tickets
+Disallow: /profile
+Disallow: /login
+Disallow: /register
+Disallow: /logout
+
+# Sitemap location (UPDATE THIS TO YOUR PRODUCTION DOMAIN)
+Sitemap: https://invitationvideos.com/sitemap.xml
