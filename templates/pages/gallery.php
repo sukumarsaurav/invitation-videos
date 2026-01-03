@@ -213,6 +213,53 @@ if ($category && isset($categoryTitles[$category])) {
                 </div>
             </div>
 
+            <?php
+            // SEO Content: Category and Tradition Descriptions
+            $categoryDescriptions = [
+                'wedding' => 'Create the perfect first impression with our stunning wedding invitation videos. From elegant save-the-date animations to grand reception announcements, our wedding video templates capture the romance and joy of your special day. Each template is professionally designed with beautiful typography, smooth transitions, and customizable elements for names, dates, and venue details.',
+                'birthday' => 'Make birthday celebrations unforgettable with animated video invitations that bring excitement and joy. Our birthday invitation videos feature vibrant designs for all ages – from playful kids\' party themes to sophisticated adult celebration templates. Add photos, custom messages, and your choice of music to create an invitation that sets the perfect party mood.',
+                'baby_shower' => 'Announce the arrival of your little one with adorable baby shower invitation videos. Our collection includes sweet animations for both boy and girl celebrations, gender reveal announcements, and sprinkle party invites. Each video invitation template features gentle colors, cute graphics, and space for all your event details.',
+                'anniversary' => 'Celebrate years of love and togetherness with beautiful anniversary invitation videos. Whether it\'s a milestone 25th silver anniversary or a golden 50th celebration, our video templates help you invite guests in a memorable way. Share your journey with photo montages and heartfelt messages.',
+                'corporate' => 'Elevate your corporate events with professional video invitations that make a lasting impression. Our business-ready templates are perfect for conferences, product launches, team celebrations, and networking events. Clean designs, customizable branding elements, and sophisticated animations reflect your company\'s professionalism.',
+                'graduation' => 'Mark academic achievements with inspiring graduation invitation videos. From high school to university ceremonies, our templates celebrate this important milestone with pride. Include graduation photos, ceremony details, and party information in one beautiful animated invitation.',
+                'housewarming' => 'Welcome guests to your new home with charming housewarming invitation videos. Our templates feature cozy home-themed animations that perfectly set the tone for your celebration. Share your excitement about your new space and invite loved ones to help you make it a home.',
+                'parties' => 'Get the party started with dynamic video invitations that build excitement for any celebration. From cocktail parties to themed events, our party invitation videos feature energetic animations, bold designs, and space for all your event details. Make your guests eager to RSVP yes!',
+                'religious' => 'Honor sacred traditions with respectful and beautiful religious event invitation videos. Our collection includes templates for christenings, bar/bat mitzvahs, first communions, and other spiritual celebrations. Each design incorporates appropriate symbols and elegant styling.',
+                'farewell' => 'Say goodbye in style with heartfelt farewell invitation videos. Whether it\'s a retirement party, going-away celebration, or fond farewell, our templates help you gather loved ones for one last memorable gathering. Add photos and personal messages to make it special.',
+                'holidays' => 'Spread festive cheer with holiday invitation videos for all seasonal celebrations. From Christmas parties to New Year\'s Eve bashes, our templates capture the spirit of each holiday with themed animations, colors, and music. Create invitations that put guests in a celebratory mood.',
+                'save_the_date' => 'Give your guests advance notice with elegant save-the-date video invitations. Our animated templates create anticipation for your upcoming wedding or event. Include essential details like date, location, and a preview of what\'s to come in a beautifully designed video format.',
+                'diwali' => 'Light up your Diwali celebration invitations with stunning video templates featuring diyas, rangoli, and festive fireworks. Our Diwali invitation videos capture the joy and brightness of the Festival of Lights, perfect for puja ceremonies, family gatherings, and Diwali parties.',
+                'holi' => 'Celebrate the Festival of Colors with vibrant Holi invitation videos bursting with gulaal splashes and joyful animations. Our templates capture the playful spirit of Holi, perfect for inviting friends and family to join your colorful celebration.',
+            ];
+
+            $traditionDescriptions = [
+                'hindu' => 'Embrace the richness of Hindu wedding traditions with our culturally authentic video invitations. Our Hindu wedding invitation videos feature beautiful elements like mandaps, kalash, paisley patterns, and traditional motifs. Perfect for Mehendi, Sangeet, Haldi, and main wedding ceremony invitations.',
+                'muslim' => 'Honor Islamic traditions with elegant Muslim wedding invitation videos. Our templates incorporate beautiful Arabic calligraphy, crescent moon motifs, and sophisticated designs suitable for Nikah ceremonies and Walima celebrations. Each video invitation maintains cultural respect while celebrating your union.',
+                'christian' => 'Celebrate your Christian wedding with graceful video invitations featuring crosses, church imagery, and elegant floral designs. Our templates are perfect for church weddings, rehearsal dinners, and reception celebrations. Share your faith and love through beautifully animated invitations.',
+                'sikh' => 'Honor Sikh traditions with video invitations featuring Khanda symbols, Gurudwara imagery, and vibrant Punjabi designs. Our Sikh wedding invitation videos are perfect for Anand Karaj ceremonies and all pre-wedding celebrations. Capture the joy and spirituality of your special day.',
+                'jewish' => 'Celebrate Jewish traditions with elegant video invitations featuring Star of David, Chuppah imagery, and traditional motifs. Our templates are perfect for Jewish weddings, Bar/Bat Mitzvahs, and holiday celebrations. Each design honors your heritage with beautiful animations.',
+                'chinese' => 'Embrace Chinese traditions with auspicious video invitations featuring lucky symbols, red and gold themes, and traditional motifs. Our Chinese wedding invitation videos are perfect for tea ceremonies and banquet celebrations. Include Double Happiness symbols and elegant calligraphy.',
+                'western' => 'Create timeless elegance with our contemporary Western wedding invitation videos. Featuring classic designs, romantic typography, and sophisticated animations, our templates are perfect for modern celebrations. From rustic charm to black-tie elegance, find your perfect style.',
+            ];
+
+            $pageDescription = '';
+            if ($category && isset($categoryDescriptions[$category])) {
+                $pageDescription = $categoryDescriptions[$category];
+            } elseif ($tradition && isset($traditionDescriptions[strtolower($tradition)])) {
+                $pageDescription = $traditionDescriptions[strtolower($tradition)];
+            } else {
+                $pageDescription = 'Browse our extensive collection of professionally designed video invitation templates. From elegant wedding announcements to vibrant birthday parties, our invitation videos help you create memorable first impressions. Each template is fully customizable with your event details, photos, and music – making it easy to create stunning video invitations that your guests will love.';
+            }
+            ?>
+
+            <?php if ($pageDescription): ?>
+                <div class="mb-8 max-w-3xl">
+                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
+                        <?= htmlspecialchars($pageDescription) ?>
+                    </p>
+                </div>
+            <?php endif; ?>
+
             <!-- Template Grid -->
             <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-6 mb-12">
                 <?php foreach ($templates as $index => $template):

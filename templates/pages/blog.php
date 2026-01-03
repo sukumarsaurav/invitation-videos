@@ -62,6 +62,20 @@ $metaDescription = 'Discover expert tips, trends, and inspiration for creating s
     </div>
 </section>
 
+<!-- Blog Introduction Section -->
+<section class="py-8 bg-white dark:bg-slate-900">
+    <div class="max-w-4xl mx-auto text-center px-4">
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+            Welcome to the Invitation Videos blog – your ultimate resource for creating memorable video invitations. 
+            Discover expert tips on designing stunning wedding invitation videos, birthday celebration announcements, 
+            baby shower invites, and corporate event videos. Our comprehensive guides cover everything from choosing 
+            the perfect template to personalizing your video invitation with photos, music, and custom text. Whether 
+            you're planning an intimate gathering or a grand celebration, our blog provides inspiration and practical 
+            advice to help your invitation videos stand out and impress your guests.
+        </p>
+    </div>
+</section>
+
 <!-- Main Content -->
 <section class="py-12 md:py-16 bg-slate-50">
     <div class="max-w-6xl mx-auto px-4">

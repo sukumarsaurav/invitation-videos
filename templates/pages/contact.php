@@ -90,6 +90,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </p>
     </div>
 
+    <!-- Service Description -->
+    <div
+        class="mb-10 p-6 bg-gradient-to-r from-primary/5 to-purple-500/5 dark:from-primary/10 dark:to-purple-500/10 rounded-2xl max-w-4xl mx-auto">
+        <h2 class="font-bold text-lg text-slate-900 dark:text-white mb-3 text-center">How Can We Help?</h2>
+        <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed text-center">
+            At Invitation Videos, we're committed to helping you create the perfect video invitation for your
+            special occasion. Whether you need assistance choosing the right template, have questions about
+            customization options, or need support with your order, our dedicated team is here to help. We
+            specialize in creating beautiful, high-quality video invitations for weddings, birthdays, baby
+            showers, anniversaries, and corporate events. Our expert designers craft each video with attention
+            to detail, ensuring your invitation makes a memorable impression on every guest. Reach out today
+            and let us help bring your vision to life.
+        </p>
+    </div>
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Contact Info Cards -->
         <div class="space-y-6">
