@@ -401,10 +401,6 @@
 
     <!-- Self-hosted fonts - preload for fast text rendering -->
     <link rel="preload" href="/assets/fonts/plus-jakarta-sans-variable.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/assets/css/fonts.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript>
-        <link rel="stylesheet" href="/assets/css/fonts.css">
-    </noscript>
 
     <!-- Preconnect for CDN -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>

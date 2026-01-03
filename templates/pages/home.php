@@ -28,8 +28,8 @@ $blogPosts = Database::fetchAll(
      ORDER BY published_at DESC LIMIT 3"
 );
 
-$pageTitle = 'Create Stunning Video Invitations | InvitationVideos';
-$metaDescription = 'Create beautiful video invitations for weddings, birthdays, baby showers, and more. Choose from stunning templates and customize with your details.';
+$pageTitle = 'Create Stunning Video Invitations | Free Templates';
+$metaDescription = 'Create beautiful video invitations for weddings, birthdays, baby showers, and more. Browse stunning templates, customize with your details, and share via WhatsApp.';
 ?>
 
 <?php ob_start(); ?>
