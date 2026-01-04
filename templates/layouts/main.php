@@ -432,6 +432,14 @@
             display: none !important
         }
 
+        /* Footer content - always visible on desktop (>= 769px) */
+        @media(min-width:769px) {
+            .footer-content,
+            .footer-content[x-cloak] {
+                display: block !important
+            }
+        }
+
         /* Loading state for fonts - stable dimensions to prevent CLS */
         .material-symbols-outlined {
             font-family: 'Material Symbols Outlined', sans-serif;
@@ -792,7 +800,7 @@
         </div>
 
         <!-- Footer Content (collapsible on mobile < 769px, always visible on sm and above) -->
-        <div id="footerContent" class="hidden sm:block" x-show="footerOpen" x-collapse.duration.300ms>
+        <div id="footerContent" class="footer-content" x-show="footerOpen" x-cloak x-collapse.duration.300ms>
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8">
                     <!-- Brand -->
@@ -1051,7 +1059,7 @@
             }
             currentAudio = new Audio(url);
             currentAudio.play();
-        }
+    }
     </script>
 
 </body>
