@@ -3,31 +3,73 @@
  * Checkout Page
  * 
  * Handles payment with Stripe (Global) or Razorpay (India)
+ * Supports both draft_token (new flow) and order_id (legacy pending orders)
  */
 
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../src/Core/Security.php';
+require_once __DIR__ . '/../../src/Services/DraftOrderService.php';
 
-$orderId = intval($_GET['order_id'] ?? 0);
+use InvitationVideos\Services\DraftOrderService;
 
-if (!$orderId) {
+// Determine if we're working with a draft token or legacy order_id
+$identifier = $_GET['order_id'] ?? '';
+$isDraft = false;
+$order = null;
+$draftToken = null;
+
+// Check if identifier looks like a draft token (32 hex chars) or numeric order_id
+if (strlen($identifier) === 32 && ctype_xdigit($identifier)) {
+    // It's a draft token
+    $draftToken = $identifier;
+    $isDraft = true;
+    $draftService = new DraftOrderService();
+    $draft = $draftService->getDraftByToken($draftToken);
+
+    if ($draft) {
+        // Convert draft to order-like array for template compatibility
+        $order = [
+            'id' => $draft['id'],
+            'draft_token' => $draftToken,
+            'order_number' => 'DRAFT-' . strtoupper(substr($draftToken, 0, 8)),
+            'user_id' => $draft['user_id'],
+            'template_id' => $draft['template_id'],
+            'amount' => $draft['amount'],
+            'currency' => $draft['currency'],
+            'customization_data' => $draft['customization_data'],
+            'promo_code_id' => $draft['promo_code_id'],
+            'discount_amount' => $draft['discount_amount'],
+            'status' => 'pending',
+            'template_title' => $draft['template_title'],
+            'thumbnail_url' => $draft['thumbnail_url'],
+            'is_draft' => true
+        ];
+    }
+} else {
+    // Legacy: numeric order_id for existing pending orders
+    $orderId = intval($identifier);
+    if ($orderId) {
+        $order = Database::fetchOne(
+            "SELECT o.*, t.title as template_title, t.thumbnail_url 
+             FROM orders o 
+             JOIN templates t ON o.template_id = t.id 
+             WHERE o.id = ? AND o.status = 'pending'",
+            [$orderId]
+        );
+        if ($order) {
+            $order['is_draft'] = false;
+        }
+    }
+}
+
+if (!$order) {
     header('Location: /templates');
     exit;
 }
 
-// Get order details
-$order = Database::fetchOne(
-    "SELECT o.*, t.title as template_title, t.thumbnail_url 
-     FROM orders o 
-     JOIN templates t ON o.template_id = t.id 
-     WHERE o.id = ?",
-    [$orderId]
-);
-
-if (!$order || $order['status'] !== 'pending') {
-    header('Location: /templates');
-    exit;
-}
+// For display and JS purposes
+$orderId = $order['id'];
+$orderIdentifier = $isDraft ? $draftToken : $orderId;
 
 // Get user info
 $user = [];
@@ -103,6 +145,10 @@ $pageTitle = 'Checkout - ' . $order['order_number'];
                 <form id="checkout-form" class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <?= Security::csrfField() ?>
                     <input type="hidden" name="order_id" value="<?= $orderId ?>">
+                    <?php if ($isDraft): ?>
+                        <input type="hidden" name="draft_token" value="<?= Security::escape($draftToken) ?>">
+                        <input type="hidden" name="is_draft" value="1">
+                    <?php endif; ?>
                     <input type="hidden" name="gateway" value="<?= $gateway ?>">
 
                     <label class="flex flex-col gap-2">
@@ -256,6 +302,9 @@ $pageTitle = 'Checkout - ' . $order['order_number'];
 
 <script>
     const orderId = <?= $orderId ?>;
+    const orderIdentifier = '<?= $orderIdentifier ?>';
+    const isDraft = <?= $isDraft ? 'true' : 'false' ?>;
+    const draftToken = <?= $isDraft ? "'" . $draftToken . "'" : 'null' ?>;
     const gateway = '<?= $gateway ?>';
     const amount = <?= $order['amount'] ?>;
     const currency = '<?= $order['currency'] ?>';
@@ -265,6 +314,7 @@ $pageTitle = 'Checkout - ' . $order['order_number'];
         const stripe = Stripe('<?= STRIPE_PUBLIC_KEY ?>');
         const elements = stripe.elements();
         const cardElement = elements.create('card', {
+
             style: {
                 base: {
                     fontSize: '16px',
@@ -303,7 +353,11 @@ $pageTitle = 'Checkout - ' . $order['order_number'];
         const response = await fetch('/api/create-payment-intent', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ order_id: orderId })
+            body: JSON.stringify({
+                order_id: orderId,
+                draft_token: draftToken,
+                is_draft: isDraft
+            })
         });
 
         const { client_secret, error } = await response.json();
@@ -326,7 +380,11 @@ $pageTitle = 'Checkout - ' . $order['order_number'];
         const response = await fetch('/api/create-razorpay-order', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ order_id: orderId })
+            body: JSON.stringify({
+                order_id: orderId,
+                draft_token: draftToken,
+                is_draft: isDraft
+            })
         });
 
         const { razorpay_order_id, key_id, error } = await response.json();

@@ -109,48 +109,78 @@ try {
  */
 function handlePaymentCaptured(array $payment): void
 {
+    require_once __DIR__ . '/../../src/Services/DraftOrderService.php';
+
     $razorpayOrderId = $payment['order_id'] ?? null;
     $razorpayPaymentId = $payment['id'] ?? null;
+    $notes = $payment['notes'] ?? [];
 
     if (!$razorpayOrderId) {
         error_log("Razorpay Webhook: No order_id in payment");
         return;
     }
 
-    // Find order by Razorpay order ID
+    // First, try to find existing order by Razorpay order ID
     $order = Database::fetchOne(
         "SELECT * FROM orders WHERE razorpay_order_id = ?",
         [$razorpayOrderId]
     );
 
     if (!$order) {
-        // Try to find by notes/metadata
-        $notes = $payment['notes'] ?? [];
+        // Try to find by notes/metadata (legacy orders)
         $orderId = $notes['order_id'] ?? null;
-
         if ($orderId) {
             $order = Database::fetchOne("SELECT * FROM orders WHERE id = ?", [$orderId]);
         }
     }
 
-    if ($order) {
-        Database::query(
-            "UPDATE orders SET 
-                status = 'paid',
-                payment_status = 'paid',
-                order_status = 'queued',
-                payment_id = ?,
-                payment_gateway = 'razorpay',
-                paid_at = NOW()
-             WHERE id = ? AND (status IN ('pending', 'processing') OR payment_status = 'pending')",
-            [$razorpayPaymentId, $order['id']]
-        );
+    // If still no order, check if it's a draft order
+    if (!$order) {
+        $draftService = new \InvitationVideos\Services\DraftOrderService();
+        $draft = $draftService->getDraftByRazorpayOrderId($razorpayOrderId);
 
-        // Increment template purchase count
-        Database::query(
-            "UPDATE templates SET purchase_count = purchase_count + 1 WHERE id = ?",
-            [$order['template_id']]
-        );
+        if (!$draft) {
+            // Also check by draft_token in notes
+            $draftToken = $notes['draft_token'] ?? null;
+            if ($draftToken) {
+                $draft = $draftService->getDraftByToken($draftToken);
+            }
+        }
+
+        if ($draft) {
+            // Convert draft to real order
+            $orderId = $draftService->convertToOrder($draft, $razorpayPaymentId, 'razorpay');
+            error_log("Razorpay Webhook: Converted draft #{$draft['id']} to order #{$orderId}");
+
+            // Fetch the newly created order for email
+            $order = Database::fetchOne("SELECT * FROM orders WHERE id = ?", [$orderId]);
+        }
+    }
+
+    if ($order) {
+        // If order exists but hasn't been marked as paid yet (for legacy orders)
+        if ($order['payment_status'] !== 'paid') {
+            Database::query(
+                "UPDATE orders SET 
+                    status = 'paid',
+                    payment_status = 'paid',
+                    order_status = 'queued',
+                    payment_id = ?,
+                    payment_gateway = 'razorpay',
+                    paid_at = NOW()
+                 WHERE id = ? AND (status IN ('pending', 'processing') OR payment_status = 'pending')",
+                [$razorpayPaymentId, $order['id']]
+            );
+
+            // Increment template purchase count (only if not already done during draft conversion)
+            // Draft conversion already increments, but legacy orders need this
+            if (empty($notes['draft_token'])) {
+                Database::query(
+                    "UPDATE templates SET purchase_count = purchase_count + 1 WHERE id = ?",
+                    [$order['template_id']]
+                );
+            }
+        }
 
         error_log("Razorpay Webhook: Order #{$order['id']} marked as paid");
 
@@ -169,8 +199,11 @@ function handlePaymentCaptured(array $payment): void
         } catch (Exception $emailError) {
             error_log("Payment email failed for Order #{$order['id']}: " . $emailError->getMessage());
         }
+    } else {
+        error_log("Razorpay Webhook: Could not find order or draft for razorpay_order_id: $razorpayOrderId");
     }
 }
+
 
 /**
  * Handle payment authorized (needs capture for non-auto-capture)

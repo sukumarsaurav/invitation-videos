@@ -68,20 +68,36 @@ try {
 function createStripePaymentIntent(array $input): void
 {
     require_once __DIR__ . '/../../src/Payment/StripeService.php';
+    require_once __DIR__ . '/../../src/Services/DraftOrderService.php';
 
+    $isDraft = !empty($input['is_draft']);
+    $draftToken = $input['draft_token'] ?? null;
     $orderId = intval($input['order_id'] ?? 0);
 
-    if (!$orderId) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Order ID required']);
-        return;
-    }
+    $order = null;
+    $draftId = null;
 
-    // Get order (check both old and new status columns for migration compatibility)
-    $order = Database::fetchOne(
-        "SELECT * FROM orders WHERE id = ? AND (status = 'pending' OR payment_status = 'pending')",
-        [$orderId]
-    );
+    if ($isDraft && $draftToken) {
+        // Fetch from draft_orders
+        $draftService = new \InvitationVideos\Services\DraftOrderService();
+        $draft = $draftService->getDraftByToken($draftToken);
+
+        if ($draft) {
+            $draftId = $draft['id'];
+            $order = [
+                'id' => $draft['id'],
+                'amount' => $draft['amount'],
+                'template_id' => $draft['template_id'],
+                'order_number' => 'DRAFT-' . strtoupper(substr($draftToken, 0, 8)),
+            ];
+        }
+    } else {
+        // Legacy: fetch from orders table
+        $order = Database::fetchOne(
+            "SELECT * FROM orders WHERE id = ? AND (status = 'pending' OR payment_status = 'pending')",
+            [$orderId]
+        );
+    }
 
     if (!$order) {
         http_response_code(404);
@@ -91,13 +107,21 @@ function createStripePaymentIntent(array $input): void
 
     // Create payment intent
     $stripeService = new StripeService();
+    $metadata = [
+        'template_id' => $order['template_id'],
+    ];
+
+    if ($isDraft && $draftToken) {
+        $metadata['draft_token'] = $draftToken;
+        $metadata['draft_id'] = $draftId;
+    } else {
+        $metadata['order_id'] = $order['id'];
+        $metadata['order_number'] = $order['order_number'];
+    }
+
     $result = $stripeService->createPaymentIntent(
         floatval($order['amount']),
-        [
-            'order_id' => $order['id'],
-            'order_number' => $order['order_number'],
-            'template_id' => $order['template_id'],
-        ]
+        $metadata
     );
 
     if (!$result['success']) {
@@ -107,10 +131,14 @@ function createStripePaymentIntent(array $input): void
     }
 
     // Store payment intent ID
-    Database::query(
-        "UPDATE orders SET payment_id = ? WHERE id = ?",
-        [$result['payment_intent_id'], $orderId]
-    );
+    if ($isDraft && $draftId) {
+        $draftService->updatePaymentReference($draftId, 'stripe', $result['payment_intent_id']);
+    } else {
+        Database::query(
+            "UPDATE orders SET payment_id = ? WHERE id = ?",
+            [$result['payment_intent_id'], $orderId]
+        );
+    }
 
     echo json_encode([
         'client_secret' => $result['client_secret'],
@@ -118,29 +146,64 @@ function createStripePaymentIntent(array $input): void
     ]);
 }
 
+
 /**
  * Create Razorpay Order
  */
 function createRazorpayOrder(array $input): void
 {
     require_once __DIR__ . '/../../src/Payment/RazorpayService.php';
+    require_once __DIR__ . '/../../src/Services/DraftOrderService.php';
 
+    $isDraft = !empty($input['is_draft']);
+    $draftToken = $input['draft_token'] ?? null;
     $orderId = intval($input['order_id'] ?? 0);
 
-    if (!$orderId) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Order ID required']);
-        return;
-    }
+    $order = null;
+    $draftId = null;
+    $customerInfo = ['name' => '', 'email' => '', 'phone' => ''];
 
-    // Get order (check both old and new status columns for migration compatibility)
-    $order = Database::fetchOne(
-        "SELECT o.*, u.name as customer_name, u.email as customer_email, u.phone as customer_phone
-         FROM orders o
-         LEFT JOIN users u ON o.user_id = u.id
-         WHERE o.id = ? AND (o.status = 'pending' OR o.payment_status = 'pending')",
-        [$orderId]
-    );
+    if ($isDraft && $draftToken) {
+        // Fetch from draft_orders
+        $draftService = new \InvitationVideos\Services\DraftOrderService();
+        $draft = $draftService->getDraftByToken($draftToken);
+
+        if ($draft) {
+            $draftId = $draft['id'];
+            $order = [
+                'id' => $draft['id'],
+                'amount' => $draft['amount'],
+                'template_id' => $draft['template_id'],
+                'order_number' => 'DRAFT-' . strtoupper(substr($draftToken, 0, 8)),
+                'razorpay_order_id' => null,
+            ];
+
+            // Get customer info if user_id exists
+            if ($draft['user_id']) {
+                $user = Database::fetchOne("SELECT name, email, phone FROM users WHERE id = ?", [$draft['user_id']]);
+                if ($user) {
+                    $customerInfo = ['name' => $user['name'] ?? '', 'email' => $user['email'] ?? '', 'phone' => $user['phone'] ?? ''];
+                }
+            }
+        }
+    } else {
+        // Legacy: fetch from orders table
+        $order = Database::fetchOne(
+            "SELECT o.*, u.name as customer_name, u.email as customer_email, u.phone as customer_phone
+             FROM orders o
+             LEFT JOIN users u ON o.user_id = u.id
+             WHERE o.id = ? AND (o.status = 'pending' OR o.payment_status = 'pending')",
+            [$orderId]
+        );
+
+        if ($order) {
+            $customerInfo = [
+                'name' => $order['customer_name'] ?? '',
+                'email' => $order['customer_email'] ?? '',
+                'phone' => $order['customer_phone'] ?? ''
+            ];
+        }
+    }
 
     if (!$order) {
         http_response_code(404);
@@ -148,14 +211,23 @@ function createRazorpayOrder(array $input): void
         return;
     }
 
-    // Create Razorpay order
+    // Create Razorpay order with metadata
     $razorpayService = new RazorpayService();
+    $metadata = [
+        'template_id' => $order['template_id'],
+    ];
+
+    if ($isDraft && $draftToken) {
+        $metadata['draft_token'] = $draftToken;
+        $metadata['draft_id'] = $draftId;
+    } else {
+        $metadata['order_id'] = $order['id'];
+        $metadata['order_number'] = $order['order_number'] ?? 'ORD-' . $order['id'];
+    }
+
     $result = $razorpayService->createOrder(
         floatval($order['amount']),
-        [
-            'order_id' => $order['id'],
-            'order_number' => $order['order_number'] ?? 'ORD-' . $order['id'],
-        ]
+        $metadata
     );
 
     if (!$result['success']) {
@@ -165,19 +237,20 @@ function createRazorpayOrder(array $input): void
     }
 
     // Store Razorpay order ID
-    Database::query(
-        "UPDATE orders SET razorpay_order_id = ? WHERE id = ?",
-        [$result['order_id'], $orderId]
-    );
+    if ($isDraft && $draftId) {
+        $draftService->updatePaymentReference($draftId, 'razorpay', $result['order_id']);
+    } else {
+        Database::query(
+            "UPDATE orders SET razorpay_order_id = ? WHERE id = ?",
+            [$result['order_id'], $orderId]
+        );
+    }
 
-    // Get checkout options - merge order data with Razorpay result
+    // Get checkout options
+    $razorpayService = new RazorpayService();
     $checkoutOptions = $razorpayService->getCheckoutOptions(
         array_merge($order, ['razorpay_order_id' => $result['order_id']]),
-        [
-            'name' => $order['customer_name'] ?? '',
-            'email' => $order['customer_email'] ?? '',
-            'phone' => $order['customer_phone'] ?? '',
-        ]
+        $customerInfo
     );
 
     echo json_encode([
@@ -185,8 +258,11 @@ function createRazorpayOrder(array $input): void
         'key_id' => RAZORPAY_KEY_ID,
         'amount' => $result['amount'],
         'checkout_options' => $checkoutOptions,
+        'is_draft' => $isDraft,
+        'draft_token' => $draftToken,
     ]);
 }
+
 
 /**
  * Verify Razorpay Payment

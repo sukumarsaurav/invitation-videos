@@ -139,8 +139,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: /template/' . $templateSlug . '?step=' . $nextStep);
             exit;
         } else {
-            // Final step - create order
-            // Ensure user is logged in before creating order
+            // Final step - create draft order (not real order until payment succeeds)
+            // Ensure user is logged in before creating draft
             if (empty($_SESSION['user_id'])) {
                 // Store customization data and redirect to login
                 $_SESSION['checkout_redirect'] = '/template/' . $templateSlug . '?step=' . $step;
@@ -171,28 +171,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
-            // Determine currency
+            // Determine currency and amount
             $userCountry = $_SESSION['user_country'] ?? 'US';
             $currency = ($userCountry === 'IN') ? 'INR' : 'USD';
             $amount = ($currency === 'INR') ? $template['price_inr'] : $template['price_usd'];
 
-            // Create order
-            $orderNumber = 'ORD-' . strtoupper(substr(uniqid(), -8));
-            $sql = "INSERT INTO orders (order_number, user_id, template_id, amount, currency, customization_data, status) 
-                    VALUES (?, ?, ?, ?, ?, ?, 'pending')";
+            // Use discounted price if available
+            if ($currency === 'INR' && !empty($template['discounted_price_inr'])) {
+                $amount = $template['discounted_price_inr'];
+            } elseif ($currency === 'USD' && !empty($template['discounted_price_usd'])) {
+                $amount = $template['discounted_price_usd'];
+            }
 
-            Database::query($sql, [
-                $orderNumber,
-                $_SESSION['user_id'],
+            // Create draft order (real order will be created after payment success)
+            require_once __DIR__ . '/../../src/Services/DraftOrderService.php';
+            $draftService = new \InvitationVideos\Services\DraftOrderService();
+
+            $draft = $draftService->createDraft(
                 $templateId,
                 $amount,
                 $currency,
-                json_encode($allData)
-            ]);
+                $allData,
+                $_SESSION['user_id']
+            );
 
-            $orderId = Database::lastInsertId();
+            $draftId = $draft['id'];
+            $draftToken = $draft['draft_token'];
 
-            // Handle file uploads
+            // Handle file uploads - save to draft_order_uploads
             foreach ($_FILES as $fieldName => $file) {
                 if (!empty($file['tmp_name'])) {
                     $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
@@ -200,12 +206,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $filePath = UPLOAD_PATH . $storedFilename;
 
                     if (move_uploaded_file($file['tmp_name'], $filePath)) {
-                        $fileType = strpos($file['type'], 'audio') !== false ? 'music' : 'image';
-                        Database::query(
-                            "INSERT INTO order_uploads (order_id, field_name, file_type, original_filename, stored_filename, file_path, mime_type, file_size) 
-                             VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                            [$orderId, $fieldName, $fileType, $file['name'], $storedFilename, $filePath, $file['type'], $file['size']]
-                        );
+                        $draftService->addUpload($draftId, $fieldName, $file, $filePath);
                     }
                 }
             }
@@ -214,9 +215,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             unset($_SESSION['customize_data']);
             unset($_SESSION['customize_template']);
 
-            // Redirect to checkout
-            header('Location: /checkout/' . $orderId);
+            // Redirect to checkout with draft token
+            header('Location: /checkout/' . $draftToken);
             exit;
+
         }
     }
 }
@@ -426,214 +428,214 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                         $selectedLang = $_SESSION['selected_language'] ?? 'en';
                         foreach ($languages as $lang):
                             ?>
-                                    <button type="button"
-                                        class="lang-btn px-3 py-2 rounded-lg border-2 text-center transition-all <?= $selectedLang === $lang['code'] ? 'border-primary bg-primary/5 ring-2 ring-primary/20' : 'border-slate-200 dark:border-slate-700 hover:border-primary/50' ?>"
-                                        data-lang="<?= $lang['code'] ?>" data-name="<?= $lang['name'] ?>"
-                                        data-native="<?= $lang['native'] ?>">
-                                        <span
-                                            class="block text-sm font-bold <?= $selectedLang === $lang['code'] ? 'text-primary' : 'text-slate-700 dark:text-slate-300' ?>"><?= $lang['native'] ?></span>
-                                        <span class="block text-xs text-slate-500"><?= $lang['name'] ?></span>
-                                    </button>
-                            <?php endforeach; ?>
-                        </div>
+                            <button type="button"
+                                class="lang-btn px-3 py-2 rounded-lg border-2 text-center transition-all <?= $selectedLang === $lang['code'] ? 'border-primary bg-primary/5 ring-2 ring-primary/20' : 'border-slate-200 dark:border-slate-700 hover:border-primary/50' ?>"
+                                data-lang="<?= $lang['code'] ?>" data-name="<?= $lang['name'] ?>"
+                                data-native="<?= $lang['native'] ?>">
+                                <span
+                                    class="block text-sm font-bold <?= $selectedLang === $lang['code'] ? 'text-primary' : 'text-slate-700 dark:text-slate-300' ?>"><?= $lang['native'] ?></span>
+                                <span class="block text-xs text-slate-500"><?= $lang['name'] ?></span>
+                            </button>
+                        <?php endforeach; ?>
+                    </div>
 
-                        <!-- Translation Mode Indicator -->
-                        <div id="translation-info" class="mt-3 hidden">
-                            <div class="flex items-center gap-2 text-sm">
-                                <span class="material-symbols-outlined text-amber-500 text-lg">translate</span>
-                                <span id="translation-mode-text" class="text-slate-600"></span>
-                                <span id="translation-price-badge"
-                                    class="hidden px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full text-xs font-bold">+₹99</span>
+                    <!-- Translation Mode Indicator -->
+                    <div id="translation-info" class="mt-3 hidden">
+                        <div class="flex items-center gap-2 text-sm">
+                            <span class="material-symbols-outlined text-amber-500 text-lg">translate</span>
+                            <span id="translation-mode-text" class="text-slate-600"></span>
+                            <span id="translation-price-badge"
+                                class="hidden px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full text-xs font-bold">+₹99</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Trust badges -->
+                <div class="flex items-center gap-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                    <div class="flex items-center gap-2 text-sm text-slate-500">
+                        <span class="material-symbols-outlined text-lg">verified_user</span>
+                        <span>Secure Payment</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-sm text-slate-500">
+                        <span class="material-symbols-outlined text-lg">support_agent</span>
+                        <span>24/7 Support</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Templates Section -->
+        <?php if (!empty($relatedTemplates)): ?>
+            <div class="mt-16 pt-8 border-t border-slate-200 dark:border-slate-700">
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">Related Templates</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <?php foreach ($relatedTemplates as $related): ?>
+                        <a href="/template/<?= Security::escape($related['slug']) ?>" class="group block">
+                            <div
+                                class="relative aspect-[9/16] rounded-xl overflow-hidden bg-slate-100 shadow-md group-hover:shadow-xl transition-shadow">
+                                <img src="<?= Security::escape($related['thumbnail_url'] ?? '/assets/images/placeholder.jpg') ?>"
+                                    alt="<?= Security::escape($related['title']) ?>"
+                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                    loading="lazy">
+                                <div class="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+                                    <p class="text-white font-semibold text-sm truncate"><?= Security::escape($related['title']) ?>
+                                    </p>
+                                    <p class="text-white/80 text-xs template-price"
+                                        data-usd="<?= !empty($related['discounted_price_usd']) ? $related['discounted_price_usd'] : $related['price_usd'] ?>"
+                                        data-inr="<?= !empty($related['discounted_price_inr']) ? $related['discounted_price_inr'] : ($related['price_inr'] ?? 0) ?>">
+                                        $<?= number_format(!empty($related['discounted_price_usd']) ? $related['discounted_price_usd'] : $related['price_usd'], 0) ?>
+                                    </p>
+                                </div>
+                                <div
+                                    class="absolute top-2 right-2 bg-black/60 backdrop-blur-sm text-white text-xs font-medium px-2 py-1 rounded">
+                                    <?= $related['duration_seconds'] ?>s
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    <!-- Trust badges -->
-                    <div class="flex items-center gap-4 pt-4 border-t border-slate-200 dark:border-slate-700">
-                        <div class="flex items-center gap-2 text-sm text-slate-500">
-                            <span class="material-symbols-outlined text-lg">verified_user</span>
-                            <span>Secure Payment</span>
-                        </div>
-                        <div class="flex items-center gap-2 text-sm text-slate-500">
-                            <span class="material-symbols-outlined text-lg">support_agent</span>
-                            <span>24/7 Support</span>
-                        </div>
-                    </div>
+                        </a>
+                    <?php endforeach; ?>
                 </div>
             </div>
+        <?php endif; ?>
 
-            <!-- Related Templates Section -->
-            <?php if (!empty($relatedTemplates)): ?>
-                    <div class="mt-16 pt-8 border-t border-slate-200 dark:border-slate-700">
-                        <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">Related Templates</h2>
-                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                            <?php foreach ($relatedTemplates as $related): ?>
-                                    <a href="/template/<?= Security::escape($related['slug']) ?>" class="group block">
-                                        <div
-                                            class="relative aspect-[9/16] rounded-xl overflow-hidden bg-slate-100 shadow-md group-hover:shadow-xl transition-shadow">
-                                            <img src="<?= Security::escape($related['thumbnail_url'] ?? '/assets/images/placeholder.jpg') ?>"
-                                                alt="<?= Security::escape($related['title']) ?>"
-                                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                                loading="lazy">
-                                            <div class="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
-                                                <p class="text-white font-semibold text-sm truncate"><?= Security::escape($related['title']) ?>
-                                                </p>
-                                                <p class="text-white/80 text-xs template-price"
-                                                    data-usd="<?= !empty($related['discounted_price_usd']) ? $related['discounted_price_usd'] : $related['price_usd'] ?>"
-                                                    data-inr="<?= !empty($related['discounted_price_inr']) ? $related['discounted_price_inr'] : ($related['price_inr'] ?? 0) ?>">
-                                                    $<?= number_format(!empty($related['discounted_price_usd']) ? $related['discounted_price_usd'] : $related['price_usd'], 0) ?>
-                                                </p>
-                                            </div>
-                                            <div
-                                                class="absolute top-2 right-2 bg-black/60 backdrop-blur-sm text-white text-xs font-medium px-2 py-1 rounded">
-                                                <?= $related['duration_seconds'] ?>s
-                                            </div>
-                                        </div>
-                                    </a>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-            <?php endif; ?>
-
-            <!-- Fixed Bottom Bar for Mobile (up to lg breakpoint) -->
-            <div
-                class="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
-                <div class="flex items-center justify-between gap-4 max-w-7xl mx-auto">
-                    <div class="flex-1">
-                        <p class="text-xs text-slate-500">Starting at</p>
-                        <p class="text-lg font-black text-slate-900 dark:text-white template-price"
-                            data-usd="<?= $template['price_usd'] ?>" data-inr="<?= $template['price_inr'] ?? 0 ?>">
-                            $<?= number_format($template['price_usd'], 0) ?>
-                        </p>
-                    </div>
-                    <a href="/template/<?= Security::escape($templateSlug) ?>?step=<?= $availableSteps[0] ?? 1 ?>"
-                        class="flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all">
-                        <span>Customize</span>
-                        <span class="material-symbols-outlined text-lg">arrow_forward</span>
-                    </a>
+        <!-- Fixed Bottom Bar for Mobile (up to lg breakpoint) -->
+        <div
+            class="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
+            <div class="flex items-center justify-between gap-4 max-w-7xl mx-auto">
+                <div class="flex-1">
+                    <p class="text-xs text-slate-500">Starting at</p>
+                    <p class="text-lg font-black text-slate-900 dark:text-white template-price"
+                        data-usd="<?= $template['price_usd'] ?>" data-inr="<?= $template['price_inr'] ?? 0 ?>">
+                        $<?= number_format($template['price_usd'], 0) ?>
+                    </p>
                 </div>
+                <a href="/template/<?= Security::escape($templateSlug) ?>?step=<?= $availableSteps[0] ?? 1 ?>"
+                    class="flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all">
+                    <span>Customize</span>
+                    <span class="material-symbols-outlined text-lg">arrow_forward</span>
+                </a>
             </div>
+        </div>
 
-            <!-- Spacer for fixed bottom bar on mobile -->
-            <div class="h-24 lg:hidden"></div>
+        <!-- Spacer for fixed bottom bar on mobile -->
+        <div class="h-24 lg:hidden"></div>
 
     <?php else: ?>
-            <!-- ==================== CUSTOMIZATION STEPS ==================== -->
+        <!-- ==================== CUSTOMIZATION STEPS ==================== -->
 
-            <div class="max-w-3xl mx-auto">
+        <div class="max-w-3xl mx-auto">
 
-                <!-- Form Section -->
+            <!-- Form Section -->
 
-                <!-- Progress Indicator (only show if more than 1 step) -->
-                <?php if ($totalSteps > 1): ?>
-                        <div class="space-y-4">
-                            <div
-                                class="flex flex-col gap-3 bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-200 dark:border-slate-800">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-3">
-                                        <div class="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                                            <span class="material-symbols-outlined"><?= $stepIcons[$step] ?? 'edit' ?></span>
-                                        </div>
-                                        <div>
-                                            <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Step
-                                                <?= $currentStepIndex + 1 ?> of <?= $totalSteps ?>
-                                            </p>
-                                            <h2 class="font-bold text-slate-900 dark:text-white">
-                                                <?= $stepTitles[$step] ?? 'Details' ?>
-                                            </h2>
-                                        </div>
-                                    </div>
-                                    <span class="text-primary font-bold"><?= $progressPercent ?>%</span>
+            <!-- Progress Indicator (only show if more than 1 step) -->
+            <?php if ($totalSteps > 1): ?>
+                <div class="space-y-4">
+                    <div
+                        class="flex flex-col gap-3 bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-200 dark:border-slate-800">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                                    <span class="material-symbols-outlined"><?= $stepIcons[$step] ?? 'edit' ?></span>
                                 </div>
-                                <div class="rounded-full bg-slate-200 dark:bg-slate-700 h-2 overflow-hidden">
-                                    <div class="h-full rounded-full bg-primary transition-all duration-500"
-                                        style="width: <?= $progressPercent ?>%;"></div>
-                                </div>
-
-                                <!-- Step Dots -->
-                                <div class="flex items-center justify-between pt-2">
-                                    <?php foreach ($availableSteps as $idx => $s): ?>
-                                            <div class="flex items-center gap-2 <?= $idx < count($availableSteps) - 1 ? 'flex-1' : '' ?>">
-                                                <div
-                                                    class="size-8 rounded-full flex items-center justify-center text-sm font-bold transition-all
-                                <?= $s < $step ? 'bg-green-500 text-white' : ($s === $step ? 'bg-primary text-white' : 'bg-slate-200 text-slate-500') ?>">
-                                                    <?php if ($s < $step): ?>
-                                                            <span class="material-symbols-outlined text-sm">check</span>
-                                                    <?php else: ?>
-                                                            <?= $idx + 1 ?>
-                                                    <?php endif; ?>
-                                                </div>
-                                                <?php if ($idx < count($availableSteps) - 1): ?>
-                                                        <div class="flex-1 h-0.5 <?= $s < $step ? 'bg-green-500' : 'bg-slate-200 dark:bg-slate-700' ?>">
-                                                        </div>
-                                                <?php endif; ?>
-                                            </div>
-                                    <?php endforeach; ?>
+                                <div>
+                                    <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Step
+                                        <?= $currentStepIndex + 1 ?> of <?= $totalSteps ?>
+                                    </p>
+                                    <h2 class="font-bold text-slate-900 dark:text-white">
+                                        <?= $stepTitles[$step] ?? 'Details' ?>
+                                    </h2>
                                 </div>
                             </div>
+                            <span class="text-primary font-bold"><?= $progressPercent ?>%</span>
                         </div>
-                <?php endif; ?>
-
-                <?php if (!empty($errors['general'])): ?>
-                        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
-                            <span class="material-symbols-outlined">error</span>
-                            <?= Security::escape($errors['general']) ?>
+                        <div class="rounded-full bg-slate-200 dark:bg-slate-700 h-2 overflow-hidden">
+                            <div class="h-full rounded-full bg-primary transition-all duration-500"
+                                style="width: <?= $progressPercent ?>%;"></div>
                         </div>
-                <?php endif; ?>
 
-                <!-- Form -->
-                <form id="customize-form" method="POST" enctype="multipart/form-data" class="space-y-6">
-                    <?= Security::csrfField() ?>
-                    <input type="hidden" name="user_timezone" id="user_timezone" value="">
-
-                    <?= $formRenderer->renderByGroups($templateId, $stepGroups[$step] ?? [], $storedValues) ?>
-
-                    <!-- Navigation Buttons -->
-                    <div class="flex items-center justify-between gap-4 pt-6 border-t border-slate-200 dark:border-slate-700">
-                        <?php if ($currentStepIndex > 0): ?>
-                                <a href="/template/<?= Security::escape($templateSlug) ?>?step=<?= $availableSteps[$currentStepIndex - 1] ?>"
-                                    class="hidden md:flex items-center gap-2 px-6 py-3 rounded-lg border border-slate-200 dark:border-slate-700 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                                    <span class="material-symbols-outlined">arrow_back</span>
-                                    Back
-                                </a>
-                        <?php else: ?>
-                                <a href="/template/<?= Security::escape($templateSlug) ?>"
-                                    class="hidden md:flex items-center gap-2 px-6 py-3 rounded-lg border border-slate-200 dark:border-slate-700 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                                    <span class="material-symbols-outlined">arrow_back</span>
-                                    Back
-                                </a>
-                        <?php endif; ?>
-
-                        <button type="submit"
-                            class="hidden md:flex flex-1 sm:flex-initial items-center justify-center gap-2 px-8 py-3 rounded-lg bg-primary text-white font-bold hover:bg-primary/90 shadow-lg shadow-primary/25 transition-colors">
-                            <?php if ($currentStepIndex < $totalSteps - 1): ?>
-                                    <span>Next Step</span>
-                                    <span class="material-symbols-outlined">arrow_forward</span>
-                            <?php else: ?>
-                                    <span>Continue to Checkout</span>
-                                    <span class="material-symbols-outlined">shopping_cart</span>
-                            <?php endif; ?>
-                        </button>
+                        <!-- Step Dots -->
+                        <div class="flex items-center justify-between pt-2">
+                            <?php foreach ($availableSteps as $idx => $s): ?>
+                                <div class="flex items-center gap-2 <?= $idx < count($availableSteps) - 1 ? 'flex-1' : '' ?>">
+                                    <div
+                                        class="size-8 rounded-full flex items-center justify-center text-sm font-bold transition-all
+                                <?= $s < $step ? 'bg-green-500 text-white' : ($s === $step ? 'bg-primary text-white' : 'bg-slate-200 text-slate-500') ?>">
+                                        <?php if ($s < $step): ?>
+                                            <span class="material-symbols-outlined text-sm">check</span>
+                                        <?php else: ?>
+                                            <?= $idx + 1 ?>
+                                        <?php endif; ?>
+                                    </div>
+                                    <?php if ($idx < count($availableSteps) - 1): ?>
+                                        <div class="flex-1 h-0.5 <?= $s < $step ? 'bg-green-500' : 'bg-slate-200 dark:bg-slate-700' ?>">
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
                     </div>
-                </form>
-            </div>
+                </div>
+            <?php endif; ?>
 
-            <!-- Fixed Bottom Bar for Mobile (customize steps) -->
-            <div
-                class="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
-                <button type="submit" form="customize-form"
-                    class="w-full flex items-center justify-center gap-2 px-8 py-3 rounded-lg bg-primary text-white font-bold hover:bg-primary/90 shadow-lg shadow-primary/25 transition-colors">
-                    <?php if ($currentStepIndex < $totalSteps - 1): ?>
+            <?php if (!empty($errors['general'])): ?>
+                <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
+                    <span class="material-symbols-outlined">error</span>
+                    <?= Security::escape($errors['general']) ?>
+                </div>
+            <?php endif; ?>
+
+            <!-- Form -->
+            <form id="customize-form" method="POST" enctype="multipart/form-data" class="space-y-6">
+                <?= Security::csrfField() ?>
+                <input type="hidden" name="user_timezone" id="user_timezone" value="">
+
+                <?= $formRenderer->renderByGroups($templateId, $stepGroups[$step] ?? [], $storedValues) ?>
+
+                <!-- Navigation Buttons -->
+                <div class="flex items-center justify-between gap-4 pt-6 border-t border-slate-200 dark:border-slate-700">
+                    <?php if ($currentStepIndex > 0): ?>
+                        <a href="/template/<?= Security::escape($templateSlug) ?>?step=<?= $availableSteps[$currentStepIndex - 1] ?>"
+                            class="hidden md:flex items-center gap-2 px-6 py-3 rounded-lg border border-slate-200 dark:border-slate-700 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                            <span class="material-symbols-outlined">arrow_back</span>
+                            Back
+                        </a>
+                    <?php else: ?>
+                        <a href="/template/<?= Security::escape($templateSlug) ?>"
+                            class="hidden md:flex items-center gap-2 px-6 py-3 rounded-lg border border-slate-200 dark:border-slate-700 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                            <span class="material-symbols-outlined">arrow_back</span>
+                            Back
+                        </a>
+                    <?php endif; ?>
+
+                    <button type="submit"
+                        class="hidden md:flex flex-1 sm:flex-initial items-center justify-center gap-2 px-8 py-3 rounded-lg bg-primary text-white font-bold hover:bg-primary/90 shadow-lg shadow-primary/25 transition-colors">
+                        <?php if ($currentStepIndex < $totalSteps - 1): ?>
                             <span>Next Step</span>
                             <span class="material-symbols-outlined">arrow_forward</span>
-                    <?php else: ?>
+                        <?php else: ?>
                             <span>Continue to Checkout</span>
                             <span class="material-symbols-outlined">shopping_cart</span>
-                    <?php endif; ?>
-                </button>
-            </div>
+                        <?php endif; ?>
+                    </button>
+                </div>
+            </form>
+        </div>
 
-            <!-- Spacer for fixed bottom bar on mobile -->
-            <div class="h-20 md:hidden"></div>
+        <!-- Fixed Bottom Bar for Mobile (customize steps) -->
+        <div
+            class="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
+            <button type="submit" form="customize-form"
+                class="w-full flex items-center justify-center gap-2 px-8 py-3 rounded-lg bg-primary text-white font-bold hover:bg-primary/90 shadow-lg shadow-primary/25 transition-colors">
+                <?php if ($currentStepIndex < $totalSteps - 1): ?>
+                    <span>Next Step</span>
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                <?php else: ?>
+                    <span>Continue to Checkout</span>
+                    <span class="material-symbols-outlined">shopping_cart</span>
+                <?php endif; ?>
+            </button>
+        </div>
+
+        <!-- Spacer for fixed bottom bar on mobile -->
+        <div class="h-20 md:hidden"></div>
 
     <?php endif; ?>
 
@@ -786,46 +788,46 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                 });
             });
         }
-        
+
         // Language selector handlers
         initLanguageSelector();
     });
-    
+
     // Language Selection Logic
     function initLanguageSelector() {
         const langBtns = document.querySelectorAll('.lang-btn');
         const translationInfo = document.getElementById('translation-info');
         const translationModeText = document.getElementById('translation-mode-text');
         const translationPriceBadge = document.getElementById('translation-price-badge');
-        
+
         let selectedLang = '<?= $_SESSION['selected_language'] ?? 'en' ?>';
         let translationMode = '<?= $_SESSION['translation_mode'] ?? 'self' ?>';
-        
+
         langBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', function () {
                 const langCode = this.dataset.lang;
                 const langName = this.dataset.name;
                 const langNative = this.dataset.native;
-                
+
                 // If selecting same language, do nothing
                 if (langCode === selectedLang) return;
-                
+
                 // If English selected, just update - no modal needed
                 if (langCode === 'en') {
                     updateLanguageSelection(langCode, 'self', langNative, langName);
                     saveLanguageToSession(langCode, 'self');
                     return;
                 }
-                
+
                 // Show translation choice modal for non-English
                 showTranslationModal(langCode, langName, langNative);
             });
         });
-        
+
         function updateLanguageSelection(langCode, mode, nativeText, langName) {
             selectedLang = langCode;
             translationMode = mode;
-            
+
             // Update button states
             langBtns.forEach(btn => {
                 const isSelected = btn.dataset.lang === langCode;
@@ -838,7 +840,7 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                 btn.querySelector('span:first-child').classList.toggle('text-primary', isSelected);
                 btn.querySelector('span:first-child').classList.toggle('text-slate-700', !isSelected);
             });
-            
+
             // Update translation info display
             if (langCode === 'en') {
                 translationInfo.classList.add('hidden');
@@ -853,33 +855,33 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                     updatePriceDisplay(true);
                 }
             }
-            
+
             // Update price if needed
             if (mode === 'self' || langCode === 'en') {
                 updatePriceDisplay(false);
             }
-            
+
             // Update thumbnail gallery (if language-specific thumbnails exist)
             updateThumbnailGallery(langCode);
         }
-        
+
         function updatePriceDisplay(addTranslationFee) {
             const priceElements = document.querySelectorAll('.template-price');
             const translationFeeINR = 99;
             const translationFeeUSD = 1.99;
-            
+
             priceElements.forEach(el => {
                 let usd = parseFloat(el.dataset.usd) || 0;
                 let inr = parseFloat(el.dataset.inr) || 0;
-                
+
                 if (addTranslationFee) {
                     usd += translationFeeUSD;
                     inr += translationFeeINR;
                 }
-                
+
                 const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
                 const isIndianUser = userTimezone.includes('Kolkata') || userTimezone.includes('Calcutta');
-                
+
                 if (isIndianUser && inr > 0) {
                     el.textContent = '₹' + Math.round(inr).toLocaleString('en-IN');
                 } else {
@@ -887,7 +889,7 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                 }
             });
         }
-        
+
         function updateThumbnailGallery(langCode) {
             // AJAX call to fetch thumbnails for selected language
             fetch(`/api/template/<?= $templateId ?>/thumbnails?lang=${langCode}`)
@@ -906,7 +908,7 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                     console.log('No language-specific thumbnails found');
                 });
         }
-        
+
         function saveLanguageToSession(langCode, mode) {
             fetch('/api/set-language', {
                 method: 'POST',
@@ -919,8 +921,8 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                 })
             });
         }
-        
-        window.showTranslationModal = function(langCode, langName, langNative) {
+
+        window.showTranslationModal = function (langCode, langName, langNative) {
             const modal = document.createElement('div');
             modal.id = 'translation-modal';
             modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm';
@@ -961,27 +963,27 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                     </div>
                 </div>
             `;
-            
+
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) closeTranslationModal();
             });
-            
+
             document.body.appendChild(modal);
             document.body.style.overflow = 'hidden';
         };
-        
-        window.closeTranslationModal = function() {
+
+        window.closeTranslationModal = function () {
             const modal = document.getElementById('translation-modal');
             if (modal) {
                 modal.remove();
                 document.body.style.overflow = '';
             }
         };
-        
-        window.confirmTranslationChoice = function(langCode, langName, langNative) {
+
+        window.confirmTranslationChoice = function (langCode, langName, langNative) {
             const modal = document.getElementById('translation-modal');
             const selectedMode = modal.querySelector('input[name="translation_mode"]:checked').value;
-            
+
             updateLanguageSelection(langCode, selectedMode, langNative, langName);
             saveLanguageToSession(langCode, selectedMode);
             closeTranslationModal();

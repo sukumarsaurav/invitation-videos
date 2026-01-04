@@ -78,42 +78,71 @@ try {
  */
 function handlePaymentSuccess(array $paymentIntent): void
 {
-    $orderId = $paymentIntent['metadata']['order_id'] ?? null;
+    require_once __DIR__ . '/../../src/Services/DraftOrderService.php';
 
-    if (!$orderId) {
-        error_log("Stripe Webhook: No order_id in payment intent metadata");
-        return;
+    $metadata = $paymentIntent['metadata'] ?? [];
+    $orderId = $metadata['order_id'] ?? null;
+    $draftToken = $metadata['draft_token'] ?? null;
+    $draftId = $metadata['draft_id'] ?? null;
+    $paymentId = $paymentIntent['id'];
+
+    $order = null;
+
+    // Check if this is a draft order first
+    if ($draftToken) {
+        $draftService = new \InvitationVideos\Services\DraftOrderService();
+        $draft = $draftService->getDraftByToken($draftToken);
+
+        if (!$draft && $draftId) {
+            // Fall back to payment intent stored in draft
+            $draft = $draftService->getDraftByStripePaymentIntent($paymentId);
+        }
+
+        if ($draft) {
+            // Convert draft to real order
+            $orderId = $draftService->convertToOrder($draft, $paymentId, 'stripe');
+            error_log("Stripe Webhook: Converted draft to order #$orderId");
+
+            // Fetch the newly created order
+            $order = Database::fetchOne("SELECT * FROM orders WHERE id = ?", [$orderId]);
+        }
     }
 
-    // Update order status (both old and new columns)
-    Database::query(
-        "UPDATE orders SET 
-            status = 'paid',
-            payment_status = 'paid',
-            order_status = 'queued',
-            payment_id = ?,
-            payment_gateway = 'stripe',
-            paid_at = NOW()
-         WHERE id = ? AND (status = 'pending' OR payment_status = 'pending')",
-        [$paymentIntent['id'], $orderId]
-    );
+    // Legacy flow: look up by order_id in metadata
+    if (!$order && $orderId) {
+        $order = Database::fetchOne("SELECT * FROM orders WHERE id = ?", [$orderId]);
 
-    // Get order details
-    $order = Database::fetchOne("SELECT * FROM orders WHERE id = ?", [$orderId]);
+        if ($order && $order['payment_status'] !== 'paid') {
+            // Update order status (both old and new columns)
+            Database::query(
+                "UPDATE orders SET 
+                    status = 'paid',
+                    payment_status = 'paid',
+                    order_status = 'queued',
+                    payment_id = ?,
+                    payment_gateway = 'stripe',
+                    paid_at = NOW()
+                 WHERE id = ? AND (status = 'pending' OR payment_status = 'pending')",
+                [$paymentId, $orderId]
+            );
+
+            // Increment template purchase count
+            Database::query(
+                "UPDATE templates SET purchase_count = purchase_count + 1 WHERE id = ?",
+                [$order['template_id']]
+            );
+        }
+    }
 
     if ($order) {
-        // Increment template purchase count
-        Database::query(
-            "UPDATE templates SET purchase_count = purchase_count + 1 WHERE id = ?",
-            [$order['template_id']]
-        );
-
+        error_log("Stripe Webhook: Order #{$order['id']} marked as paid");
         // TODO: Send confirmation email to customer
         // TODO: Start video rendering process
-
-        error_log("Stripe Webhook: Order #$orderId marked as paid");
+    } else {
+        error_log("Stripe Webhook: No order or draft found for payment intent: $paymentId");
     }
 }
+
 
 /**
  * Handle failed payment
