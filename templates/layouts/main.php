@@ -850,13 +850,15 @@
         <?= $content ?? '' ?>
     </main>
 
-    <!-- Floating Help Button - Hidden on mobile for gallery pages -->
-    <a href="/support"
-        class="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 bg-primary text-white font-bold rounded-full shadow-xl shadow-primary/30 hover:bg-primary/90 hover:scale-105 transition-all group <?= ($hideFooterOnMobile ?? false) ? 'hidden sm:flex' : '' ?>"
-        title="Need help?">
-        <span class="material-symbols-outlined text-xl">support_agent</span>
-        <span class="hidden sm:group-hover:inline whitespace-nowrap text-sm">Need Help?</span>
-    </a>
+    <!-- Floating Help Button - Only on landing page -->
+    <?php if (($isHomePage ?? false)): ?>
+        <a href="/support"
+            class="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 bg-primary text-white font-bold rounded-full shadow-xl shadow-primary/30 hover:bg-primary/90 hover:scale-105 transition-all group"
+            title="Need help?">
+            <span class="material-symbols-outlined text-xl">support_agent</span>
+            <span class="hidden sm:group-hover:inline whitespace-nowrap text-sm">Need Help?</span>
+        </a>
+    <?php endif; ?>
 
     <!-- Footer - Can be hidden on mobile for specific pages like gallery -->
     <footer

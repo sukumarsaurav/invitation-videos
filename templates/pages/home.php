@@ -31,6 +31,7 @@ $blogPosts = Database::fetchAll(
 
 $pageTitle = 'Create Stunning Video Invitations | Free Templates';
 $metaDescription = 'Create beautiful video invitations for weddings, birthdays, baby showers, and more. Browse stunning templates, customize with your details, and share via WhatsApp.';
+$isHomePage = true;  // For floating help button display
 ?>
 
 <?php ob_start(); ?>
