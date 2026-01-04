@@ -29,6 +29,42 @@ $blogPosts = Database::fetchAll(
      ORDER BY published_at DESC LIMIT 3"
 );
 
+// Fetch CMS settings for hero and categories
+$heroImageDesktop = '';
+$heroImageMobile = '';
+$heroTitle = 'Create Beautiful <span class="text-primary">Invitation Videos</span>';
+$heroSubtitle = 'Stunning video invitations for weddings, birthdays, and special events. Easy to customize, ready to share.';
+$categoryDisplayMode = 'icon';
+
+try {
+    $cmsRows = Database::fetchAll("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('hero_image_desktop', 'hero_image_mobile', 'hero_title', 'hero_subtitle', 'category_display_mode')");
+    if ($cmsRows) {
+        foreach ($cmsRows as $row) {
+            switch ($row['setting_key']) {
+                case 'hero_image_desktop':
+                    $heroImageDesktop = $row['setting_value'] ?? '';
+                    break;
+                case 'hero_image_mobile':
+                    $heroImageMobile = $row['setting_value'] ?? '';
+                    break;
+                case 'hero_title':
+                    if (!empty($row['setting_value']))
+                        $heroTitle = $row['setting_value'];
+                    break;
+                case 'hero_subtitle':
+                    if (!empty($row['setting_value']))
+                        $heroSubtitle = $row['setting_value'];
+                    break;
+                case 'category_display_mode':
+                    $categoryDisplayMode = $row['setting_value'] ?? 'icon';
+                    break;
+            }
+        }
+    }
+} catch (Exception $e) {
+    // Settings table may not exist yet, use defaults
+}
+
 $pageTitle = 'Create Stunning Video Invitations | Free Templates';
 $metaDescription = 'Create beautiful video invitations for weddings, birthdays, baby showers, and more. Browse stunning templates, customize with your details, and share via WhatsApp.';
 $isHomePage = true;  // For floating help button display
@@ -93,7 +129,7 @@ $isHomePage = true;  // For floating help button display
         } catch (Exception $e) {
             // Fallback to hardcoded if table doesn't exist
         }
-        
+
         // Fallback hardcoded categories if database is empty
         if (empty($dbCategories)) {
             $allCategories = [
@@ -112,7 +148,7 @@ $isHomePage = true;  // For floating help button display
             ];
         } else {
             // Map database categories to display format
-            $allCategories = array_map(function($cat) {
+            $allCategories = array_map(function ($cat) {
                 $color = $cat['color'] ?? '#7f13ec';
                 return [
                     'slug' => $cat['slug'],
@@ -142,14 +178,14 @@ $isHomePage = true;  // For floating help button display
                     <?php foreach ($row1Categories as $cat): ?>
                         <a href="/templates?category=<?= $cat['slug'] ?>"
                             class="flex flex-col items-center w-14 flex-shrink-0">
-                            <div class="w-14 h-14 rounded-xl <?= $cat['bg'] ?> flex items-center justify-center mb-1 overflow-hidden">
+                            <div
+                                class="w-14 h-14 rounded-xl <?= $cat['bg'] ?> flex items-center justify-center mb-1 overflow-hidden">
                                 <?php if ($showImages && !empty($cat['image_url'])): ?>
-                                    <img src="<?= htmlspecialchars($cat['image_url']) ?>" 
-                                         alt="<?= htmlspecialchars($cat['name']) ?>" 
-                                         class="w-full h-full object-cover">
+                                    <img src="<?= htmlspecialchars($cat['image_url']) ?>"
+                                        alt="<?= htmlspecialchars($cat['name']) ?>" class="w-full h-full object-cover">
                                 <?php else: ?>
-                                    <span class="material-symbols-outlined text-2xl" 
-                                          style="color: <?= htmlspecialchars($cat['color']) ?>"><?= $cat['icon'] ?></span>
+                                    <span class="material-symbols-outlined text-2xl"
+                                        style="color: <?= htmlspecialchars($cat['color']) ?>"><?= $cat['icon'] ?></span>
                                 <?php endif; ?>
                             </div>
                             <span
@@ -162,14 +198,14 @@ $isHomePage = true;  // For floating help button display
                     <?php foreach ($row2Categories as $cat): ?>
                         <a href="/templates?category=<?= $cat['slug'] ?>"
                             class="flex flex-col items-center w-14 flex-shrink-0">
-                            <div class="w-14 h-14 rounded-xl <?= $cat['bg'] ?> flex items-center justify-center mb-1 overflow-hidden">
+                            <div
+                                class="w-14 h-14 rounded-xl <?= $cat['bg'] ?> flex items-center justify-center mb-1 overflow-hidden">
                                 <?php if ($showImages && !empty($cat['image_url'])): ?>
-                                    <img src="<?= htmlspecialchars($cat['image_url']) ?>" 
-                                         alt="<?= htmlspecialchars($cat['name']) ?>" 
-                                         class="w-full h-full object-cover">
+                                    <img src="<?= htmlspecialchars($cat['image_url']) ?>"
+                                        alt="<?= htmlspecialchars($cat['name']) ?>" class="w-full h-full object-cover">
                                 <?php else: ?>
-                                    <span class="material-symbols-outlined text-2xl" 
-                                          style="color: <?= htmlspecialchars($cat['color']) ?>"><?= $cat['icon'] ?></span>
+                                    <span class="material-symbols-outlined text-2xl"
+                                        style="color: <?= htmlspecialchars($cat['color']) ?>"><?= $cat['icon'] ?></span>
                                 <?php endif; ?>
                             </div>
                             <span
@@ -188,12 +224,11 @@ $isHomePage = true;  // For floating help button display
                     <div
                         class="w-14 h-14 rounded-xl <?= $cat['bg'] ?> flex items-center justify-center mb-3 group-hover:scale-110 transition-transform overflow-hidden">
                         <?php if ($showImages && !empty($cat['image_url'])): ?>
-                            <img src="<?= htmlspecialchars($cat['image_url']) ?>" 
-                                 alt="<?= htmlspecialchars($cat['name']) ?>" 
-                                 class="w-full h-full object-cover">
+                            <img src="<?= htmlspecialchars($cat['image_url']) ?>" alt="<?= htmlspecialchars($cat['name']) ?>"
+                                class="w-full h-full object-cover">
                         <?php else: ?>
-                            <span class="material-symbols-outlined text-2xl" 
-                                  style="color: <?= htmlspecialchars($cat['color']) ?>"><?= $cat['icon'] ?></span>
+                            <span class="material-symbols-outlined text-2xl"
+                                style="color: <?= htmlspecialchars($cat['color']) ?>"><?= $cat['icon'] ?></span>
                         <?php endif; ?>
                     </div>
                     <span
