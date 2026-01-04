@@ -39,6 +39,22 @@ if (!$template) {
 $templateId = $template['id'];
 $templateSlug = $template['slug'];
 
+// Fetch gallery images for this template
+$galleryImages = Database::fetchAll(
+    "SELECT * FROM template_images WHERE template_id = ? ORDER BY display_order",
+    [$templateId]
+);
+
+// Fetch related templates (same category, excluding current)
+$relatedTemplates = Database::fetchAll(
+    "SELECT id, title, slug, thumbnail_url, price_usd, price_inr, discounted_price_usd, discounted_price_inr, duration_seconds 
+     FROM templates 
+     WHERE category = ? AND id != ? AND is_active = 1 
+     ORDER BY purchase_count DESC, created_at DESC 
+     LIMIT 4",
+    [$template['category'], $templateId]
+);
+
 // Initialize form renderer
 $formRenderer = new DynamicFormRenderer();
 $groupedFields = $formRenderer->getFields($templateId);
@@ -232,7 +248,89 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-            <!-- Left: Template Info -->
+            <!-- Left: Image Gallery -->
+            <div class="lg:col-span-7 xl:col-span-7">
+                <div class="sticky top-24">
+                    <div class="flex gap-3">
+                        <!-- Thumbnail Strip -->
+                        <?php if (!empty($galleryImages) || !empty($template['thumbnail_url'])): ?>
+                            <div class="hidden sm:flex flex-col gap-2 w-16 shrink-0">
+                                <!-- Primary Thumbnail -->
+                                <button type="button"
+                                    class="gallery-thumb aspect-[9/16] rounded-lg overflow-hidden border-2 border-primary ring-2 ring-primary/20 bg-slate-100 transition-all"
+                                    data-full-src="<?= Security::escape($template['thumbnail_url'] ?? '/assets/images/placeholder.jpg') ?>">
+                                    <img src="<?= Security::escape($template['thumbnail_url'] ?? '/assets/images/placeholder.jpg') ?>"
+                                        alt="<?= Security::escape($template['title']) ?>" class="w-full h-full object-cover">
+                                </button>
+
+                                <!-- Gallery Thumbnails -->
+                                <?php foreach ($galleryImages as $img): ?>
+                                    <button type="button"
+                                        class="gallery-thumb aspect-[9/16] rounded-lg overflow-hidden border-2 border-transparent hover:border-primary/50 bg-slate-100 transition-all"
+                                        data-full-src="<?= Security::escape($img['image_url']) ?>">
+                                        <img src="<?= Security::escape($img['image_url']) ?>" alt="Gallery preview"
+                                            class="w-full h-full object-cover">
+                                    </button>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+
+                        <!-- Main Preview Image -->
+                        <div class="flex-1">
+                            <div
+                                class="relative aspect-[4/5] sm:aspect-[9/14] lg:aspect-[4/5] w-full rounded-2xl overflow-hidden shadow-2xl bg-slate-200">
+                                <img id="main-preview"
+                                    src="<?= Security::escape($template['thumbnail_url'] ?? '/assets/images/placeholder.jpg') ?>"
+                                    alt="<?= Security::escape($template['title']) ?>"
+                                    class="w-full h-full object-cover transition-opacity duration-300" width="512"
+                                    height="640" loading="eager">
+
+                                <!-- Play Button Overlay -->
+                                <?php if (!empty($template['preview_video_url'])): ?>
+                                    <div id="play-video-btn"
+                                        data-video-url="<?= htmlspecialchars($template['preview_video_url'], ENT_QUOTES, 'UTF-8') ?>"
+                                        class="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-colors cursor-pointer group">
+                                        <div
+                                            class="size-20 rounded-full bg-white/30 backdrop-blur-md flex items-center justify-center text-white border border-white/50 shadow-lg group-hover:scale-110 transition-transform">
+                                            <span class="material-symbols-outlined text-4xl">play_arrow</span>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+
+                                <!-- Duration Badge -->
+                                <div
+                                    class="absolute bottom-4 right-4 bg-black/70 backdrop-blur-sm text-white text-sm font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+                                    <span class="material-symbols-outlined text-lg">schedule</span>
+                                    <?= $template['duration_seconds'] ?>s
+                                </div>
+                            </div>
+
+                            <!-- Mobile Thumbnail Strip -->
+                            <?php if (!empty($galleryImages)): ?>
+                                <div class="flex sm:hidden gap-2 mt-3 overflow-x-auto pb-2">
+                                    <button type="button"
+                                        class="gallery-thumb shrink-0 w-14 aspect-[9/16] rounded-lg overflow-hidden border-2 border-primary ring-2 ring-primary/20 bg-slate-100"
+                                        data-full-src="<?= Security::escape($template['thumbnail_url'] ?? '/assets/images/placeholder.jpg') ?>">
+                                        <img src="<?= Security::escape($template['thumbnail_url'] ?? '/assets/images/placeholder.jpg') ?>"
+                                            alt="<?= Security::escape($template['title']) ?>"
+                                            class="w-full h-full object-cover">
+                                    </button>
+                                    <?php foreach ($galleryImages as $img): ?>
+                                        <button type="button"
+                                            class="gallery-thumb shrink-0 w-14 aspect-[9/16] rounded-lg overflow-hidden border-2 border-transparent hover:border-primary/50 bg-slate-100"
+                                            data-full-src="<?= Security::escape($img['image_url']) ?>">
+                                            <img src="<?= Security::escape($img['image_url']) ?>" alt="Gallery preview"
+                                                class="w-full h-full object-cover">
+                                        </button>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Template Info -->
             <div class="lg:col-span-5 xl:col-span-5 space-y-6">
 
                 <!-- Title & Category -->
@@ -314,38 +412,41 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Right: Template Preview -->
-            <div class="lg:col-span-7 xl:col-span-7">
-                <div class="sticky top-24">
-                    <div
-                        class="relative aspect-[4/5] sm:aspect-[9/14] lg:aspect-[4/5] w-full max-w-lg mx-auto rounded-2xl overflow-hidden shadow-2xl bg-slate-200">
-                        <img src="<?= Security::escape($template['thumbnail_url'] ?? '/assets/images/placeholder.jpg') ?>"
-                            alt="<?= Security::escape($template['title']) ?>" class="w-full h-full object-cover" width="512"
-                            height="640" loading="eager">
-
-                        <!-- Play Button Overlay -->
-                        <?php if (!empty($template['preview_video_url'])): ?>
-                            <div id="play-video-btn"
-                                data-video-url="<?= htmlspecialchars($template['preview_video_url'], ENT_QUOTES, 'UTF-8') ?>"
-                                class="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-colors cursor-pointer group">
+        <!-- Related Templates Section -->
+        <?php if (!empty($relatedTemplates)): ?>
+            <div class="mt-16 pt-8 border-t border-slate-200 dark:border-slate-700">
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">Related Templates</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <?php foreach ($relatedTemplates as $related): ?>
+                        <a href="/template/<?= Security::escape($related['slug']) ?>" class="group block">
+                            <div
+                                class="relative aspect-[9/16] rounded-xl overflow-hidden bg-slate-100 shadow-md group-hover:shadow-xl transition-shadow">
+                                <img src="<?= Security::escape($related['thumbnail_url'] ?? '/assets/images/placeholder.jpg') ?>"
+                                    alt="<?= Security::escape($related['title']) ?>"
+                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                    loading="lazy">
+                                <div class="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+                                    <p class="text-white font-semibold text-sm truncate"><?= Security::escape($related['title']) ?>
+                                    </p>
+                                    <p class="text-white/80 text-xs">
+                                        <?php
+                                        $displayPrice = !empty($related['discounted_price_usd']) ? $related['discounted_price_usd'] : $related['price_usd'];
+                                        echo '$' . number_format($displayPrice, 0);
+                                        ?>
+                                    </p>
+                                </div>
                                 <div
-                                    class="size-20 rounded-full bg-white/30 backdrop-blur-md flex items-center justify-center text-white border border-white/50 shadow-lg group-hover:scale-110 transition-transform">
-                                    <span class="material-symbols-outlined text-4xl">play_arrow</span>
+                                    class="absolute top-2 right-2 bg-black/60 backdrop-blur-sm text-white text-xs font-medium px-2 py-1 rounded">
+                                    <?= $related['duration_seconds'] ?>s
                                 </div>
                             </div>
-                        <?php endif; ?>
-
-                        <!-- Duration Badge -->
-                        <div
-                            class="absolute bottom-4 right-4 bg-black/70 backdrop-blur-sm text-white text-sm font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5">
-                            <span class="material-symbols-outlined text-lg">schedule</span>
-                            <?= $template['duration_seconds'] ?>s
-                        </div>
-                    </div>
+                        </a>
+                    <?php endforeach; ?>
                 </div>
             </div>
-        </div>
+        <?php endif; ?>
 
     <?php else: ?>
         <!-- ==================== CUSTOMIZATION STEPS ==================== -->
@@ -602,6 +703,34 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                 if (videoUrl) {
                     openVideoModal(videoUrl);
                 }
+            });
+        }
+
+        // Gallery thumbnail click handlers
+        var thumbs = document.querySelectorAll('.gallery-thumb');
+        var mainPreview = document.getElementById('main-preview');
+
+        if (thumbs.length && mainPreview) {
+            thumbs.forEach(function (thumb) {
+                thumb.addEventListener('click', function () {
+                    var fullSrc = this.getAttribute('data-full-src');
+                    if (fullSrc) {
+                        // Fade transition
+                        mainPreview.style.opacity = '0.5';
+                        setTimeout(function () {
+                            mainPreview.src = fullSrc;
+                            mainPreview.style.opacity = '1';
+                        }, 150);
+
+                        // Update active state for all thumbs
+                        thumbs.forEach(function (t) {
+                            t.classList.remove('border-primary', 'ring-2', 'ring-primary/20');
+                            t.classList.add('border-transparent');
+                        });
+                        this.classList.remove('border-transparent');
+                        this.classList.add('border-primary', 'ring-2', 'ring-primary/20');
+                    }
+                });
             });
         }
     });

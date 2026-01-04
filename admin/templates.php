@@ -63,6 +63,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_action'])) {
             Database::query("DELETE FROM template_fields WHERE id = ?", [intval($_POST['field_id'])]);
             echo json_encode(['success' => true]);
             exit;
+            
+        case 'delete_gallery_image':
+            $imageId = intval($_POST['image_id'] ?? 0);
+            $image = Database::fetchOne("SELECT image_url FROM template_images WHERE id = ?", [$imageId]);
+            if ($image) {
+                // Delete from database
+                Database::query("DELETE FROM template_images WHERE id = ?", [$imageId]);
+                // Delete file from disk
+                $filePath = __DIR__ . '/..' . $image['image_url'];
+                if (file_exists($filePath) && is_file($filePath)) {
+                    @unlink($filePath);
+                }
+            }
+            echo json_encode(['success' => true]);
+            exit;
+            
+        case 'update_gallery_order':
+            $order = json_decode($_POST['order'] ?? '[]', true);
+            if (is_array($order)) {
+                foreach ($order as $position => $imageId) {
+                    Database::query("UPDATE template_images SET display_order = ? WHERE id = ?", [$position, intval($imageId)]);
+                }
+            }
+            echo json_encode(['success' => true]);
+            exit;
     }
 }
 
@@ -152,6 +177,67 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['thumbnail']) && $_FI
     }
 }
 
+// Handle gallery image upload (AJAX)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['gallery_image']) && $_FILES['gallery_image']['error'] === UPLOAD_ERR_OK) {
+    header('Content-Type: application/json');
+    
+    if (!Security::validateCSRFToken($_POST[CSRF_TOKEN_NAME] ?? '')) {
+        echo json_encode(['success' => false, 'error' => 'Invalid security token']);
+        exit;
+    }
+    
+    $galleryTemplateId = intval($_POST['template_id'] ?? 0);
+    if ($galleryTemplateId <= 0) {
+        echo json_encode(['success' => false, 'error' => 'Invalid template ID']);
+        exit;
+    }
+    
+    require_once __DIR__ . '/../src/Core/ImageHelper.php';
+    
+    $uploadDir = __DIR__ . '/../uploads/templates/gallery/';
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0755, true);
+    }
+    
+    // Process and compress the gallery image
+    $result = ImageHelper::processThumbnailUpload(
+        $_FILES['gallery_image'],
+        $uploadDir,
+        'gallery_',
+        800,   // Max width for gallery images
+        1200,  // Max height
+        75     // Quality
+    );
+    
+    if ($result['success']) {
+        $imageUrl = '/uploads/templates/gallery/' . basename($result['url']);
+        
+        // Get current max display order
+        $maxOrder = Database::fetchOne(
+            "SELECT MAX(display_order) as max_order FROM template_images WHERE template_id = ?",
+            [$galleryTemplateId]
+        );
+        $displayOrder = ($maxOrder['max_order'] ?? -1) + 1;
+        
+        // Insert into database
+        Database::query(
+            "INSERT INTO template_images (template_id, image_url, display_order) VALUES (?, ?, ?)",
+            [$galleryTemplateId, $imageUrl, $displayOrder]
+        );
+        $imageId = Database::lastInsertId();
+        
+        echo json_encode([
+            'success' => true, 
+            'image_id' => $imageId,
+            'image_url' => $imageUrl,
+            'display_order' => $displayOrder
+        ]);
+    } else {
+        echo json_encode(['success' => false, 'error' => $result['error'] ?? 'Upload failed']);
+    }
+    exit;
+}
+
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['form_action'])) {
     if (!Security::validateCSRFToken($_POST[CSRF_TOKEN_NAME] ?? '')) {
@@ -225,9 +311,14 @@ if ($action === 'edit' && $templateId) {
 
 // Get template fields for field editor
 $templateFields = [];
+$galleryImages = [];
 if ($templateId) {
     $templateFields = Database::fetchAll(
         "SELECT * FROM template_fields WHERE template_id = ? ORDER BY display_order",
+        [$templateId]
+    );
+    $galleryImages = Database::fetchAll(
+        "SELECT * FROM template_images WHERE template_id = ? ORDER BY display_order",
         [$templateId]
     );
 }
@@ -681,6 +772,44 @@ function getYouTubeEmbedUrl($url) {
             </div>
         </div>
         
+        <?php if ($action === 'edit' && $templateId): ?>
+        <!-- Gallery Images -->
+        <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold">Gallery Images</h3>
+                <button type="button" onclick="document.getElementById('gallery-input').click()" 
+                        class="flex items-center gap-1 text-primary text-sm font-bold hover:underline">
+                    <span class="material-symbols-outlined text-lg">add_photo_alternate</span>
+                    Add Image
+                </button>
+            </div>
+            <input type="file" id="gallery-input" accept="image/*" class="hidden" onchange="uploadGalleryImage(this)">
+            
+            <div id="gallery-container" class="grid grid-cols-3 gap-2">
+                <?php foreach ($galleryImages as $img): ?>
+                <div class="relative group aspect-[9/16] rounded-lg overflow-hidden bg-slate-100" data-image-id="<?= $img['id'] ?>">
+                    <img src="<?= Security::escape($img['image_url']) ?>" 
+                         alt="Gallery image" 
+                         class="w-full h-full object-cover">
+                    <button type="button" 
+                            onclick="deleteGalleryImage(<?= $img['id'] ?>)"
+                            class="absolute top-1 right-1 size-6 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <span class="material-symbols-outlined text-sm">close</span>
+                    </button>
+                </div>
+                <?php endforeach; ?>
+                
+                <?php if (empty($galleryImages)): ?>
+                <div id="no-gallery-msg" class="col-span-3 text-center py-6 text-slate-400">
+                    <span class="material-symbols-outlined text-3xl">collections</span>
+                    <p class="text-sm mt-1">No gallery images yet</p>
+                </div>
+                <?php endif; ?>
+            </div>
+            <p class="text-xs text-slate-400 mt-3">Add multiple preview images for the template. These will be shown as a gallery on the template detail page.</p>
+        </div>
+        <?php endif; ?>
+        
     </div>
 </form>
 
@@ -950,6 +1079,85 @@ document.getElementById('field-form')?.addEventListener('submit', async function
         alert(result.error || 'Error saving field');
     }
 });
+
+// Gallery Image Functions
+async function uploadGalleryImage(input) {
+    if (!input.files || !input.files[0]) return;
+    
+    const formData = new FormData();
+    formData.append('gallery_image', input.files[0]);
+    formData.append('template_id', '<?= $templateId ?>');
+    formData.append('<?= CSRF_TOKEN_NAME ?>', '<?= Security::generateCSRFToken() ?>');
+    
+    try {
+        const response = await fetch(window.location.href, {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+            // Remove "no images" message if present
+            const noMsg = document.getElementById('no-gallery-msg');
+            if (noMsg) noMsg.remove();
+            
+            // Add new image to gallery
+            const container = document.getElementById('gallery-container');
+            const div = document.createElement('div');
+            div.className = 'relative group aspect-[9/16] rounded-lg overflow-hidden bg-slate-100';
+            div.dataset.imageId = result.image_id;
+            div.innerHTML = `
+                <img src="${result.image_url}" alt="Gallery image" class="w-full h-full object-cover">
+                <button type="button" onclick="deleteGalleryImage(${result.image_id})"
+                        class="absolute top-1 right-1 size-6 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <span class="material-symbols-outlined text-sm">close</span>
+                </button>
+            `;
+            container.appendChild(div);
+        } else {
+            alert(result.error || 'Failed to upload image');
+        }
+    } catch (err) {
+        alert('Upload error: ' + err.message);
+    }
+    
+    // Reset input
+    input.value = '';
+}
+
+async function deleteGalleryImage(imageId) {
+    if (!confirm('Delete this gallery image?')) return;
+    
+    const formData = new FormData();
+    formData.append('ajax_action', 'delete_gallery_image');
+    formData.append('image_id', imageId);
+    formData.append('<?= CSRF_TOKEN_NAME ?>', '<?= Security::generateCSRFToken() ?>');
+    
+    try {
+        const response = await fetch(window.location.href, {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+            document.querySelector(`[data-image-id="${imageId}"]`).remove();
+            
+            // Show "no images" message if container is empty
+            const container = document.getElementById('gallery-container');
+            if (container.children.length === 0) {
+                container.innerHTML = `
+                    <div id="no-gallery-msg" class="col-span-3 text-center py-6 text-slate-400">
+                        <span class="material-symbols-outlined text-3xl">collections</span>
+                        <p class="text-sm mt-1">No gallery images yet</p>
+                    </div>
+                `;
+            }
+        }
+    } catch (err) {
+        alert('Delete error: ' + err.message);
+    }
+}
 </script>
 
 <?php endif; ?>
