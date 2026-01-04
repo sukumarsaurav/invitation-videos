@@ -552,11 +552,16 @@
                         </h2>
                     </a>
 
-                    <?php if (($isGalleryPage ?? false) && ($currentCategory ?? null) && isset($galleryCategories[$currentCategory])): ?>
-                        <!-- Mobile: Category Name after logo -->
-                        <span class="sm:hidden text-sm font-bold text-slate-900 dark:text-white truncate">
-                            <?= $galleryCategories[$currentCategory]['name'] ?>
-                        </span>
+                    <?php if (($isGalleryPage ?? false) && !empty($galleryCategories)): ?>
+                        <!-- Mobile: Title + Count after logo -->
+                        <div class="sm:hidden flex flex-col">
+                            <span class="text-sm font-bold text-slate-900 dark:text-white truncate">
+                                <?= ($currentCategory ?? null) && isset($galleryCategories[$currentCategory])
+                                    ? $galleryCategories[$currentCategory]['name']
+                                    : 'All Templates' ?>
+                            </span>
+                            <span class="text-xs text-slate-500"><?= $galleryTotalTemplates ?? 0 ?> Items</span>
+                        </div>
                     <?php endif; ?>
 
                     <!-- Desktop Navigation - Categories directly after logo -->

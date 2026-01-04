@@ -10,6 +10,7 @@ $hideFooterOnMobile = true;
 $isGalleryPage = true;
 $currentCategory = $_GET['category'] ?? null;
 $galleryCategories = [];
+$galleryTotalTemplates = 0;
 
 // Get filters
 $category = $_GET['category'] ?? null;
@@ -71,6 +72,7 @@ $allCategories = [
 
 // Pass categories to layout for mobile header
 $galleryCategories = $allCategories;
+$galleryTotalTemplates = $totalTemplates;
 
 // Cultural traditions
 $traditions = ['Hindu', 'Muslim', 'Christian', 'Sikh', 'Jewish', 'Chinese', 'Western'];
@@ -248,10 +250,12 @@ if ($category && isset($categoryTitles[$category])) {
             <!-- Load More Trigger with Skeleton Placeholders -->
             <?php if ($hasMore): ?>
                 <div id="load-more-trigger" class="py-4">
-                    <div id="loading-skeletons" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+                    <div id="loading-skeletons"
+                        class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
                         <!-- Skeleton Cards -->
                         <?php for ($i = 0; $i < 4; $i++): ?>
-                            <div class="animate-pulse bg-white dark:bg-slate-900 rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-800">
+                            <div
+                                class="animate-pulse bg-white dark:bg-slate-900 rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-800">
                                 <div class="aspect-[4/5] bg-slate-200 dark:bg-slate-700"></div>
                                 <div class="p-3 sm:p-4">
                                     <div class="h-4 bg-slate-200 dark:bg-slate-700 rounded w-3/4 mb-2"></div>
