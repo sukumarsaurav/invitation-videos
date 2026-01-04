@@ -278,7 +278,7 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                         <!-- Main Preview Image -->
                         <div class="flex-1">
                             <div
-                                class="relative aspect-[4/5] sm:aspect-[9/14] lg:aspect-[4/5] w-full rounded-2xl overflow-hidden shadow-2xl bg-slate-200">
+                                class="relative aspect-[9/16] sm:aspect-[9/14] lg:aspect-[3/4] w-full lg:max-h-[65vh] rounded-2xl overflow-hidden shadow-2xl bg-slate-200">
                                 <img id="main-preview"
                                     src="<?= Security::escape($template['thumbnail_url'] ?? '/assets/images/placeholder.jpg') ?>"
                                     alt="<?= Security::escape($template['title']) ?>"
@@ -391,8 +391,8 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                     </li>
                 </ul>
 
-                <!-- CTA Button -->
-                <div class="flex flex-col sm:flex-row gap-3 pt-4">
+                <!-- CTA Button (hidden on mobile, shown on md+) -->
+                <div class="hidden md:flex flex-col sm:flex-row gap-3 pt-4">
                     <a href="/template/<?= Security::escape($templateSlug) ?>?step=<?= $availableSteps[0] ?? 1 ?>"
                         class="flex-1 flex items-center justify-center gap-2 px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all text-lg">
                         <span>Customize Now</span>
@@ -447,6 +447,31 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                 </div>
             </div>
         <?php endif; ?>
+
+        <!-- Fixed Bottom Bar for Mobile (up to md breakpoint) -->
+        <div
+            class="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
+            <div class="flex items-center justify-between gap-4 max-w-7xl mx-auto">
+                <div class="flex-1">
+                    <p class="text-xs text-slate-500">Starting at</p>
+                    <p class="text-lg font-black text-slate-900 dark:text-white">
+                        $<?= number_format($template['price_usd'], 0) ?>
+                        <?php if ($template['price_inr']): ?>
+                            <span class="text-sm font-normal text-slate-400">/
+                                ₹<?= number_format($template['price_inr'], 0) ?></span>
+                        <?php endif; ?>
+                    </p>
+                </div>
+                <a href="/template/<?= Security::escape($templateSlug) ?>?step=<?= $availableSteps[0] ?? 1 ?>"
+                    class="flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all">
+                    <span>Customize</span>
+                    <span class="material-symbols-outlined text-lg">arrow_forward</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Spacer for fixed bottom bar on mobile -->
+        <div class="h-24 md:hidden"></div>
 
     <?php else: ?>
         <!-- ==================== CUSTOMIZATION STEPS ==================== -->
