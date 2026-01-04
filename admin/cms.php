@@ -90,6 +90,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Save hero text
             setSetting('hero_title', $_POST['hero_title'] ?? '');
             setSetting('hero_subtitle', $_POST['hero_subtitle'] ?? '');
+            setSetting('hero_button_text', $_POST['hero_button_text'] ?? '');
+            setSetting('hero_button_link', $_POST['hero_button_link'] ?? '');
 
             if (!$error) {
                 $success = 'Hero section updated successfully!';
@@ -166,6 +168,8 @@ $settings = [
     'hero_image_mobile' => getSetting('hero_image_mobile', ''),
     'hero_title' => getSetting('hero_title', 'Create Beautiful <span class="text-primary">Invitation Videos</span>'),
     'hero_subtitle' => getSetting('hero_subtitle', 'Stunning video invitations for weddings, birthdays, and special events. Easy to customize, ready to share.'),
+    'hero_button_text' => getSetting('hero_button_text', 'Browse Templates'),
+    'hero_button_link' => getSetting('hero_button_link', '/templates'),
     'theme_primary_color' => getSetting('theme_primary_color', '#7f13ec'),
     'theme_text_primary' => getSetting('theme_text_primary', '#0f172a'),
     'theme_text_secondary' => getSetting('theme_text_secondary', '#64748b'),
@@ -316,6 +320,27 @@ $currentTab = $_GET['tab'] ?? 'hero';
                                 <label class="block text-sm font-medium text-slate-700 mb-2">Hero Subtitle</label>
                                 <textarea name="hero_subtitle" rows="2"
                                     class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary"><?= Security::escape($settings['hero_subtitle']) ?></textarea>
+                            </div>
+
+                            <hr class="border-slate-200">
+
+                            <!-- Hero Button -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Button Text</label>
+                                    <input type="text" name="hero_button_text"
+                                        value="<?= Security::escape($settings['hero_button_text']) ?>"
+                                        placeholder="e.g. Browse Templates"
+                                        class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                                    <p class="text-xs text-slate-400 mt-1">Leave empty to hide button</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Button Link</label>
+                                    <input type="text" name="hero_button_link"
+                                        value="<?= Security::escape($settings['hero_button_link']) ?>"
+                                        placeholder="e.g. /templates"
+                                        class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                                </div>
                             </div>
                         </div>
 

@@ -32,12 +32,14 @@ $blogPosts = Database::fetchAll(
 // Fetch CMS settings for hero and categories
 $heroImageDesktop = '';
 $heroImageMobile = '';
-$heroTitle = 'Create Beautiful <span class="text-primary">Invitation Videos</span>';
-$heroSubtitle = 'Stunning video invitations for weddings, birthdays, and special events. Easy to customize, ready to share.';
+$heroTitle = '';
+$heroSubtitle = '';
+$heroButtonText = '';
+$heroButtonLink = '';
 $categoryDisplayMode = 'icon';
 
 try {
-    $cmsRows = Database::fetchAll("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('hero_image_desktop', 'hero_image_mobile', 'hero_title', 'hero_subtitle', 'category_display_mode')");
+    $cmsRows = Database::fetchAll("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('hero_image_desktop', 'hero_image_mobile', 'hero_title', 'hero_subtitle', 'hero_button_text', 'hero_button_link', 'category_display_mode')");
     if ($cmsRows) {
         foreach ($cmsRows as $row) {
             switch ($row['setting_key']) {
@@ -48,12 +50,16 @@ try {
                     $heroImageMobile = $row['setting_value'] ?? '';
                     break;
                 case 'hero_title':
-                    if (!empty($row['setting_value']))
-                        $heroTitle = $row['setting_value'];
+                    $heroTitle = $row['setting_value'] ?? '';
                     break;
                 case 'hero_subtitle':
-                    if (!empty($row['setting_value']))
-                        $heroSubtitle = $row['setting_value'];
+                    $heroSubtitle = $row['setting_value'] ?? '';
+                    break;
+                case 'hero_button_text':
+                    $heroButtonText = $row['setting_value'] ?? '';
+                    break;
+                case 'hero_button_link':
+                    $heroButtonLink = $row['setting_value'] ?? '';
                     break;
                 case 'category_display_mode':
                     $categoryDisplayMode = $row['setting_value'] ?? 'icon';
@@ -110,11 +116,13 @@ $isHomePage = true;  // For floating help button display
                 <?= htmlspecialchars($heroSubtitle) ?>
             </p>
         <?php endif; ?>
-        <a href="/templates"
-            class="inline-flex items-center gap-2 bg-primary text-white font-bold px-6 py-3 sm:px-8 sm:py-4 rounded-xl shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all text-sm sm:text-base">
-            <span>Browse Templates</span>
-            <span class="material-symbols-outlined">arrow_forward</span>
-        </a>
+        <?php if (($hasTitleText || $hasSubtitleText) && !empty($heroButtonText)): ?>
+            <a href="<?= htmlspecialchars($heroButtonLink ?: '/templates') ?>"
+                class="inline-flex items-center gap-2 bg-primary text-white font-bold px-6 py-3 sm:px-8 sm:py-4 rounded-xl shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all text-sm sm:text-base">
+                <span><?= htmlspecialchars($heroButtonText) ?></span>
+                <span class="material-symbols-outlined">arrow_forward</span>
+            </a>
+        <?php endif; ?>
     </div>
 </section>
 
