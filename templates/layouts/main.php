@@ -703,7 +703,8 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
             color: var(--footer-text-color, inherit);
         }
 
-        footer a:hover {
+        footer a:hover,
+        footer a.hover\:text-primary:hover {
             color: var(--footer-hover-color, var(--color-primary)) !important;
         }
 
@@ -711,6 +712,12 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
         footer .text-slate-600,
         footer .text-slate-700 {
             color: var(--footer-text-color) !important;
+        }
+
+        /* Footer divider uses footer text color */
+        footer .border-t {
+            border-color: var(--footer-text-color) !important;
+            opacity: 0.3;
         }
     </style>
 
@@ -1419,10 +1426,10 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
                     </div>
                 </div>
             </div>
-            
+
             <!-- Full-width divider -->
             <div class="border-t border-slate-200 dark:border-slate-800 mt-8"></div>
-            
+
             <!-- Bottom Section: Copyright & Payment -->
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div class="flex flex-col sm:flex-row items-start justify-between gap-6">
@@ -1431,25 +1438,27 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
                         <p class="text-sm" style="color: var(--footer-text-color);">&copy; <?= date('Y') ?>
                             <?= APP_NAME ?? 'InvitationVideos' ?>. All rights reserved.
                         </p>
-                        <p class="text-xs" style="color: var(--footer-text-color); opacity: 0.7;">Made with <span class="text-red-500">❤</span> in India |
+                        <p class="text-xs" style="color: var(--footer-text-color); opacity: 0.7;">Made with <span
+                                class="text-red-500">❤</span> in India |
                             Developed by <a href="https://neowebx.com" target="_blank" rel="noopener"
                                 class="text-primary hover:underline font-medium">NeoWebX.com</a></p>
                     </div>
 
                     <!-- Right: Payment Icons -->
                     <div class="flex flex-col items-end gap-2">
-                        <span class="text-xs uppercase tracking-wide" style="color: var(--footer-text-color);">Payment secured by</span>
-                        <div class="flex items-center gap-3 flex-wrap justify-end">
+                        <span class="text-xs uppercase tracking-wide" style="color: var(--footer-text-color);">Payment
+                            secured by</span>
+                        <div class="flex items-center gap-2 flex-wrap justify-end">
                             <img src="/assets/images/ivitationvideos-200x120.webp" alt="Visa"
-                                class="h-6 sm:h-8 w-auto object-contain bg-white" width="60" height="36" loading="lazy">
+                                class="h-6 sm:h-8 w-auto object-contain bg-white rounded-sm p-1" width="60" height="36" loading="lazy">
                             <img src="/assets/images/ivitationvideos-razorpay-.webp" alt="Razorpay"
-                                class="h-6 sm:h-8 w-auto object-contain bg-white" width="80" height="36" loading="lazy">
+                                class="h-6 sm:h-8 w-auto object-contain bg-white rounded-sm p-1" width="80" height="36" loading="lazy">
                             <img src="/assets/images/ivitationvideos-Payment6-200x120.webp" alt="PayPal"
-                                class="h-6 sm:h-8 w-auto object-contain bg-white" width="50" height="36" loading="lazy">
+                                class="h-6 sm:h-8 w-auto object-contain bg-white rounded-sm p-1" width="50" height="36" loading="lazy">
                             <img src="/assets/images/ivitationvideos-mastercard-200x120.webp" alt="MasterCard"
-                                class="h-6 sm:h-8 w-auto object-contain bg-white" width="50" height="36" loading="lazy">
+                                class="h-6 sm:h-8 w-auto object-contain bg-white rounded-sm p-1" width="50" height="36" loading="lazy">
                             <img src="/assets/images/ivitationvideos-upi_logo.webp" alt="UPI"
-                                class="h-6 sm:h-8 w-auto object-contain bg-white" width="50" height="36" loading="lazy">
+                                class="h-6 sm:h-8 w-auto object-contain bg-white rounded-sm p-1" width="50" height="36" loading="lazy">
                         </div>
                     </div>
                 </div>
