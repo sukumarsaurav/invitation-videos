@@ -1051,7 +1051,8 @@ try {
     <!-- Footer - Can be hidden on mobile for specific pages like gallery -->
     <footer
         class="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 mt-auto <?= ($hideFooterOnMobile ?? false) ? 'hidden sm:block' : '' ?>"
-        x-data="{ footerOpen: false }">
+        x-data="{ footerOpen: window.innerWidth >= 769 }"
+        x-init="window.addEventListener('resize', () => { if (window.innerWidth >= 769) footerOpen = true })">
         <!-- Mobile Footer Toggle Bar (visible only on small screens < 769px) -->
         <div class="sm:hidden">
             <button @click="footerOpen = !footerOpen"
