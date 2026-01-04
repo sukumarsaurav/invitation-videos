@@ -528,12 +528,6 @@
                             aria-label="Back to home">
                             <span class="material-symbols-outlined text-2xl">arrow_back</span>
                         </a>
-                        <!-- Desktop: Regular Menu Button -->
-                        <button onclick="openMobileDrawer()"
-                            class="hidden sm:block lg:hidden p-2 -ml-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
-                            aria-label="Open menu">
-                            <span class="material-symbols-outlined text-2xl">menu</span>
-                        </button>
                     <?php elseif ($isTemplateDetailPage ?? false): ?>
                         <!-- Mobile: Back Arrow (Template detail pages) -->
                         <a href="<?= $templateBackUrl ?? '/templates' ?>"
