@@ -853,62 +853,52 @@
 
             <!-- Payment Methods & Copyright -->
             <div class="border-t border-slate-200 dark:border-slate-800 mt-8 pt-8">
-                <!-- Payment Gateway Icons -->
+                <!-- Payment Gateway Section -->
+                <div class="flex flex-col items-center mb-8">
+                    <h4 class="text-lg font-semibold text-slate-700 dark:text-slate-300 tracking-wide mb-6">YOUR PAYMENTS ARE SECURE VIA</h4>
+                    <div class="flex items-center gap-4 sm:gap-6 flex-wrap justify-center">
+                        <!-- PayPal (Visa) -->
+                        <img src="/assets/images/ivitationvideos-200x120.webp" alt="PayPal" class="h-8 sm:h-10 w-auto object-contain" width="80" height="48" loading="lazy">
+                        <!-- Razorpay -->
+                        <img src="/assets/images/ivitationvideos-razorpay-.webp" alt="Razorpay" class="h-8 sm:h-10 w-auto object-contain" width="100" height="48" loading="lazy">
+                        <!-- Maestro -->
+                        <img src="/assets/images/ivitationvideos-Payment6-200x120.webp" alt="Maestro" class="h-8 sm:h-10 w-auto object-contain" width="60" height="48" loading="lazy">
+                        <!-- MasterCard -->
+                        <img src="/assets/images/ivitationvideos-mastercard-200x120.webp" alt="MasterCard" class="h-8 sm:h-10 w-auto object-contain" width="60" height="48" loading="lazy">
+                        <!-- UPI -->
+                        <img src="/assets/images/ivitationvideos-upi_logo.webp" alt="UPI" class="h-8 sm:h-10 w-auto object-contain" width="60" height="48" loading="lazy">
+                    </div>
+                </div>
+
+                <!-- Social & Trust Section -->
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-6 mb-6">
                     <div class="flex flex-col items-center sm:items-start gap-2">
-                        <span class="text-sm font-medium text-slate-600 dark:text-slate-400">Secure Payment
-                            Methods</span>
-                        <div class="flex items-center gap-3 flex-wrap justify-center sm:justify-start">
-                            <!-- Visa -->
-                            <div
-                                class="bg-white dark:bg-slate-800 rounded-lg px-3 py-2 border border-slate-200 dark:border-slate-700">
-                                <svg class="h-6 w-auto" viewBox="0 0 780 500" xmlns="http://www.w3.org/2000/svg">
-                                    <path fill="#1434CB"
-                                        d="M293.2 348.7l33.4-195.8h53.4l-33.4 195.8zM540.5 159.1c-10.6-4-27.1-8.3-47.8-8.3-52.7 0-89.8 26.5-90.1 64.5-.3 28.1 26.5 43.8 46.8 53.1 20.8 9.5 27.8 15.6 27.7 24.1-.1 13-16.6 19-32 19-21.3 0-32.7-3-50.2-10.3l-6.9-3.1-7.5 43.8c12.5 5.5 35.6 10.2 59.5 10.4 56 0 92.4-26.1 92.8-66.8.2-22.3-14-39.2-44.8-53.2-18.6-9.1-30.1-15.1-30-24.3 0-8.1 9.7-16.8 30.6-16.8 17.4-.3 30.1 3.5 39.9 7.5l4.8 2.2 7.2-41.8M651.1 152.9h-41.2c-12.8 0-22.4 3.5-28 16.2l-79.3 179.5h56s9.2-24.1 11.2-29.4c6.1 0 60.5.1 68.3.1 1.6 6.9 6.5 29.3 6.5 29.3h49.5l-43-195.7zm-65.6 126.4c4.4-11.3 21.3-54.7 21.3-54.7-.3.5 4.4-11.3 7.1-18.7l3.6 16.9s10.2 46.9 12.4 56.5h-44.4zM214.4 152.9l-52.2 133.5-5.6-27c-9.7-31.2-39.8-65-73.5-82l47.7 171.1h56.4l83.8-195.6h-56.6" />
-                                    <path fill="#F9A533"
-                                        d="M131.9 152.9H46.2l-.7 4c66.9 16.2 111.2 55.3 129.6 102.2l-18.7-89.8c-3.2-12.4-12.6-16-24.5-16.4" />
+                        <span class="text-sm font-medium text-slate-600 dark:text-slate-400">FOLLOW US ON:</span>
+                        <div class="flex items-center gap-3">
+                            <a href="<?= SOCIAL_FACEBOOK ?>" target="_blank" rel="noopener noreferrer"
+                                class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-primary hover:text-white transition-colors" aria-label="Facebook">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/>
                                 </svg>
-                            </div>
-                            <!-- Mastercard -->
-                            <div
-                                class="bg-white dark:bg-slate-800 rounded-lg px-3 py-2 border border-slate-200 dark:border-slate-700">
-                                <svg class="h-6 w-auto" viewBox="0 0 780 500" xmlns="http://www.w3.org/2000/svg">
-                                    <circle fill="#EB001B" cx="250" cy="250" r="150" />
-                                    <circle fill="#F79E1B" cx="530" cy="250" r="150" />
-                                    <path fill="#FF5F00"
-                                        d="M325 127.5c-35.4 28.5-58.1 72.1-58.1 121s22.7 92.6 58.1 121c35.4-28.5 58.1-72.1 58.1-121s-22.7-92.5-58.1-121z" />
+                            </a>
+                            <a href="<?= SOCIAL_INSTAGRAM ?>" target="_blank" rel="noopener noreferrer"
+                                class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-primary hover:text-white transition-colors" aria-label="Instagram">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
                                 </svg>
-                            </div>
-                            <!-- Stripe -->
-                            <div
-                                class="bg-white dark:bg-slate-800 rounded-lg px-3 py-2 border border-slate-200 dark:border-slate-700">
-                                <svg class="h-6 w-auto" viewBox="0 0 60 25" xmlns="http://www.w3.org/2000/svg">
-                                    <path fill="#635BFF"
-                                        d="M59.64 14.28c0-4.77-2.31-8.55-6.73-8.55-4.44 0-7.13 3.78-7.13 8.52 0 5.62 3.17 8.49 7.72 8.49 2.22 0 3.9-.5 5.17-1.21v-3.75c-1.27.64-2.73 1.04-4.57 1.04-1.81 0-3.41-.64-3.62-2.82h9.12c0-.24.04-1.21.04-1.72zm-9.22-1.77c0-2.1 1.28-2.97 2.45-2.97 1.14 0 2.34.87 2.34 2.97h-4.79zm-10.14-6.78c-1.82 0-2.99.86-3.64 1.45l-.24-1.15h-4.1v21.76l4.66-.99.01-5.28c.67.49 1.65 1.17 3.28 1.17 3.32 0 6.34-2.67 6.34-8.56-.01-5.39-3.08-8.4-6.31-8.4zm-1.11 12.91c-1.09 0-1.73-.39-2.18-.87l-.02-6.86c.48-.53 1.14-.9 2.2-.9 1.68 0 2.84 1.89 2.84 4.31 0 2.47-1.14 4.32-2.84 4.32zm-14.23-14.01l4.67-.99V.01l-4.67.99v3.63zm0 1.4h4.67v16.02h-4.67V6.03zM17.64 7.43l-.3-1.4h-4.04v16.02h4.66v-10.9c1.1-1.44 2.96-1.17 3.54-.97V6.03c-.6-.23-2.79-.64-3.86 1.4zm-11.4-2.15C2.57 4.53.52 6.35.52 9.47v.63H0v3.6h.52v12.35h4.66V13.7h2.27v-3.6H5.18v-.68c0-1.08.45-1.69 1.49-1.69.75 0 1.31.15 1.75.32V4.66C7.72 4.44 7.01 4.28 5.85 4.28h.39c0-.37 0-.74 0-1z" />
+                            </a>
+                            <a href="<?= SOCIAL_YOUTUBE ?>" target="_blank" rel="noopener noreferrer"
+                                class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-primary hover:text-white transition-colors" aria-label="YouTube">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/>
                                 </svg>
-                            </div>
-                            <!-- Razorpay -->
-                            <div
-                                class="bg-white dark:bg-slate-800 rounded-lg px-3 py-2 border border-slate-200 dark:border-slate-700">
-                                <img src="/assets/images/razorpay-dark.png" alt="Razorpay" class="h-5 w-auto" width="80"
-                                    height="20" loading="lazy">
-                            </div>
-                            <!-- UPI -->
-                            <div
-                                class="bg-white dark:bg-slate-800 rounded-lg px-3 py-2 border border-slate-200 dark:border-slate-700">
-                                <img src="/assets/images/upi_logo.png" alt="UPI" class="h-5 w-auto" width="40"
-                                    height="20" loading="lazy">
-                            </div>
-                            <!-- PayPal -->
-                            <div
-                                class="bg-white dark:bg-slate-800 rounded-lg px-3 py-2 border border-slate-200 dark:border-slate-700">
-                                <svg class="h-6 w-auto" viewBox="0 0 124 33" xmlns="http://www.w3.org/2000/svg">
-                                    <path fill="#253B80"
-                                        d="M46.211 6.749h-6.839a.95.95 0 0 0-.939.802l-2.766 17.537a.57.57 0 0 0 .564.658h3.265a.95.95 0 0 0 .939-.803l.746-4.73a.95.95 0 0 1 .938-.803h2.165c4.505 0 7.105-2.18 7.784-6.5.306-1.89.013-3.375-.872-4.415-.972-1.142-2.696-1.746-4.985-1.746zM47 13.154c-.374 2.454-2.249 2.454-4.062 2.454h-1.032l.724-4.583a.57.57 0 0 1 .563-.481h.473c1.235 0 2.4 0 3.002.704.359.42.469 1.044.332 1.906zM66.654 13.075h-3.275a.57.57 0 0 0-.563.481l-.145.916-.229-.332c-.709-1.029-2.29-1.373-3.868-1.373-3.619 0-6.71 2.741-7.312 6.586-.313 1.918.132 3.752 1.22 5.031.998 1.176 2.426 1.666 4.125 1.666 2.916 0 4.533-1.875 4.533-1.875l-.146.91a.57.57 0 0 0 .562.66h2.95a.95.95 0 0 0 .939-.803l1.77-11.209a.568.568 0 0 0-.561-.658zm-4.565 6.374c-.316 1.871-1.801 3.127-3.695 3.127-.951 0-1.711-.305-2.199-.883-.484-.574-.668-1.391-.514-2.301.295-1.855 1.805-3.152 3.67-3.152.93 0 1.686.309 2.184.892.499.589.697 1.411.554 2.317zM84.096 13.075h-3.291a.954.954 0 0 0-.787.417l-4.539 6.686-1.924-6.425a.953.953 0 0 0-.912-.678h-3.234a.57.57 0 0 0-.541.754l3.625 10.638-3.408 4.811a.57.57 0 0 0 .465.9h3.287a.949.949 0 0 0 .781-.408l10.946-15.8a.57.57 0 0 0-.468-.895z" />
-                                    <path fill="#179BD7"
-                                        d="M94.992 6.749h-6.84a.95.95 0 0 0-.938.802l-2.766 17.537a.569.569 0 0 0 .562.658h3.51a.665.665 0 0 0 .656-.562l.785-4.971a.95.95 0 0 1 .938-.803h2.164c4.506 0 7.105-2.18 7.785-6.5.307-1.89.012-3.375-.873-4.415-.971-1.142-2.694-1.746-4.983-1.746zm.789 6.405c-.373 2.454-2.248 2.454-4.062 2.454h-1.031l.725-4.583a.568.568 0 0 1 .562-.481h.473c1.234 0 2.4 0 3.002.704.359.42.468 1.044.331 1.906zM115.434 13.075h-3.273a.567.567 0 0 0-.562.481l-.145.916-.23-.332c-.709-1.029-2.289-1.373-3.867-1.373-3.619 0-6.709 2.741-7.311 6.586-.312 1.918.131 3.752 1.219 5.031 1 1.176 2.426 1.666 4.125 1.666 2.916 0 4.533-1.875 4.533-1.875l-.146.91a.57.57 0 0 0 .564.66h2.949a.95.95 0 0 0 .938-.803l1.771-11.209a.571.571 0 0 0-.565-.658zm-4.565 6.374c-.314 1.871-1.801 3.127-3.695 3.127-.949 0-1.711-.305-2.199-.883-.484-.574-.666-1.391-.514-2.301.297-1.855 1.805-3.152 3.67-3.152.93 0 1.686.309 2.184.892.501.589.699 1.411.554 2.317zM119.295 7.23l-2.807 17.858a.569.569 0 0 0 .562.658h2.822c.469 0 .867-.34.939-.803l2.768-17.536a.57.57 0 0 0-.562-.659h-3.16a.571.571 0 0 0-.562.482z" />
+                            </a>
+                            <a href="<?= SOCIAL_TWITTER ?>" target="_blank" rel="noopener noreferrer"
+                                class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-primary hover:text-white transition-colors" aria-label="Twitter">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                                 </svg>
-                            </div>
+                            </a>
                         </div>
                     </div>
 
