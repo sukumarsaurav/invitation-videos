@@ -29,6 +29,16 @@ $blogPosts = Database::fetchAll(
      ORDER BY published_at DESC LIMIT 3"
 );
 
+// Fetch CMS homepage sections
+$homepageSections = [];
+try {
+    $homepageSections = Database::fetchAll(
+        "SELECT * FROM homepage_sections WHERE is_active = 1 ORDER BY display_order ASC"
+    ) ?? [];
+} catch (Exception $e) {
+    // Table may not exist yet
+}
+
 // Fetch CMS settings for hero and categories
 $heroImageDesktop = '';
 $heroImageMobile = '';
@@ -265,75 +275,184 @@ $isHomePage = true;  // For floating help button display
     </div>
 </section>
 
-<!-- Popular Templates -->
-<section class="py-12 bg-slate-50 dark:bg-slate-800/50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6">
-        <div class="flex items-start sm:items-center justify-between mb-8 flex-col sm:flex-row gap-4">
-            <div>
-                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2">Popular Templates</h2>
-                <p class="text-slate-600 dark:text-slate-400">Discover trending designs for your next event.</p>
-            </div>
-            <a href="/templates"
-                class="flex items-center gap-2 text-primary font-bold hover:underline whitespace-nowrap">
-                View All Templates
-                <span class="material-symbols-outlined">arrow_forward</span>
-            </a>
-        </div>
+<?php
+// =====================================================
+// Dynamic Homepage Sections from CMS
+// =====================================================
+if (!empty($homepageSections)):
+    foreach ($homepageSections as $sectionIndex => $section):
+        // Build the template query based on section filters
+        $sectionQuery = "SELECT * FROM templates WHERE is_active = 1";
+        $sectionParams = [];
 
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
-            <?php
-            $categoryBadgeColors = [
-                'wedding' => 'bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300',
-                'birthday' => 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300',
-                'baby_shower' => 'bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-300',
-                'corporate' => 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300',
-                'anniversary' => 'bg-pink-100 text-pink-700 dark:bg-pink-900/50 dark:text-pink-300',
-                'parties' => 'bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300',
-                'graduation' => 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300',
-                'religious' => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300',
-            ];
+        if (!empty($section['category_slug'])) {
+            $sectionQuery .= " AND category = ?";
+            $sectionParams[] = $section['category_slug'];
+        }
+        if (!empty($section['subcategory'])) {
+            $sectionQuery .= " AND subcategory = ?";
+            $sectionParams[] = $section['subcategory'];
+        }
 
-            foreach ($trendingTemplates as $index => $template):
-                $badgeColor = $categoryBadgeColors[$template['category']] ?? 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300';
-                // First 2 images are above the fold on mobile - load eagerly
-                $isAboveFold = $index < 2;
-                ?>
-                <a href="/template/<?= Security::escape($template['slug']) ?>"
-                    class="group block bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200 dark:border-slate-700 hover:border-primary/30">
-                    <!-- Image -->
-                    <div class="relative aspect-[4/5] overflow-hidden bg-slate-100">
-                        <?= ImageHelper::responsiveThumbnail(
-                            $template['thumbnail_url'] ?? '/assets/images/placeholder.jpg',
-                            $template['title'],
-                            $isAboveFold,
-                            $isAboveFold,
-                            'absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105'
-                        ) ?>
+        $sectionQuery .= " ORDER BY purchase_count DESC, created_at DESC LIMIT ?";
+        $sectionParams[] = intval($section['template_count'] ?? 4);
 
-                        <!-- Category Badge -->
-                        <div class="absolute top-3 left-3">
-                            <span class="px-3 py-1 rounded-full text-xs font-bold <?= $badgeColor ?>">
-                                <?= ucfirst(str_replace('_', ' ', $template['category'])) ?>
-                            </span>
+        $sectionTemplates = Database::fetchAll($sectionQuery, $sectionParams) ?? [];
+
+        // Skip if no templates found
+        if (empty($sectionTemplates))
+            continue;
+
+        // Read SVG content if exists
+        $svgContent = '';
+        if (!empty($section['banner_svg_url'])) {
+            $svgPath = __DIR__ . '/../../' . ltrim($section['banner_svg_url'], '/');
+            if (file_exists($svgPath)) {
+                $svgContent = file_get_contents($svgPath);
+            }
+        }
+        ?>
+
+        <!-- CMS Section: <?= Security::escape($section['section_title']) ?> -->
+        <section class="relative overflow-hidden">
+            <!-- Header Banner -->
+            <div class="relative py-6 sm:py-8" style="background-color: <?= Security::escape($section['banner_bg_color']) ?>">
+                <!-- SVG Pattern Background -->
+                <?php if ($svgContent): ?>
+                    <div class="absolute inset-0 opacity-30 pointer-events-none overflow-hidden">
+                        <div class="absolute inset-0 flex items-center justify-center" style="transform: scale(1.5);">
+                            <?= $svgContent ?>
                         </div>
                     </div>
+                <?php endif; ?>
 
-                    <!-- Content -->
-                    <div class="p-4">
-                        <h3
-                            class="font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors truncate">
-                            <?= Security::escape($template['title']) ?>
-                        </h3>
-                        <p
-                            class="text-sm <?= $template['price_usd'] > 0 ? 'text-primary font-bold' : 'text-green-600 font-bold' ?>">
-                            <?= $template['price_usd'] > 0 ? '$' . number_format($template['price_usd'], 2) : 'Free' ?>
-                        </p>
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+                    <div class="flex items-center justify-between">
+                        <!-- Title (Left) -->
+                        <h2 class="text-2xl sm:text-3xl md:text-4xl font-light italic"
+                            style="color: <?= Security::escape($section['title_color']) ?>; font-family: 'Georgia', serif;">
+                            <?= Security::escape($section['section_title']) ?>
+                        </h2>
+
+                        <!-- Category Image (Right) -->
+                        <?php if (!empty($section['banner_image_url'])): ?>
+                            <div class="hidden sm:block h-24 md:h-32">
+                                <img src="<?= Security::escape($section['banner_image_url']) ?>"
+                                    alt="<?= Security::escape($section['section_title']) ?>" class="h-full w-auto object-contain">
+                            </div>
+                        <?php endif; ?>
                     </div>
+                </div>
+            </div>
+
+            <!-- Template Grid Container -->
+            <div class="py-6 sm:py-8" style="background-color: <?= Security::escape($section['grid_bg_color']) ?>">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6">
+                    <div
+                        class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-<?= min(intval($section['template_count']), 4) ?> lg:grid-cols-<?= intval($section['template_count']) ?> gap-4 sm:gap-6">
+                        <?php foreach ($sectionTemplates as $tplIndex => $template): ?>
+                            <a href="/template/<?= Security::escape($template['slug']) ?>"
+                                class="group block bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200/50">
+                                <!-- Image -->
+                                <div class="relative aspect-[4/5] overflow-hidden bg-slate-100">
+                                    <?= ImageHelper::responsiveThumbnail(
+                                        $template['thumbnail_url'] ?? '/assets/images/placeholder.jpg',
+                                        $template['title'],
+                                        $sectionIndex === 0 && $tplIndex < 2,
+                                        $sectionIndex === 0 && $tplIndex < 2,
+                                        'absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105'
+                                    ) ?>
+                                </div>
+
+                                <!-- Content -->
+                                <div class="p-4">
+                                    <h3
+                                        class="font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors truncate text-sm sm:text-base">
+                                        <?= Security::escape($template['title']) ?>
+                                    </h3>
+                                    <p
+                                        class="text-sm <?= $template['price_usd'] > 0 ? 'text-slate-700 dark:text-slate-300' : 'text-green-600 font-bold' ?>">
+                                        <?= $template['price_usd'] > 0 ? '₹' . number_format($template['price_inr'], 0) : 'Free' ?>
+                                    </p>
+                                </div>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <?php
+    endforeach;
+endif;
+
+// Fallback: Show Popular Templates if no CMS sections exist
+if (empty($homepageSections)):
+    ?>
+    <!-- Popular Templates (Fallback) -->
+    <section class="py-12 bg-slate-50 dark:bg-slate-800/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="flex items-start sm:items-center justify-between mb-8 flex-col sm:flex-row gap-4">
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2">Popular Templates</h2>
+                    <p class="text-slate-600 dark:text-slate-400">Discover trending designs for your next event.</p>
+                </div>
+                <a href="/templates"
+                    class="flex items-center gap-2 text-primary font-bold hover:underline whitespace-nowrap">
+                    View All Templates
+                    <span class="material-symbols-outlined">arrow_forward</span>
                 </a>
-            <?php endforeach; ?>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+                <?php
+                $categoryBadgeColors = [
+                    'wedding' => 'bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300',
+                    'birthday' => 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300',
+                    'baby_shower' => 'bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-300',
+                    'corporate' => 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300',
+                    'anniversary' => 'bg-pink-100 text-pink-700 dark:bg-pink-900/50 dark:text-pink-300',
+                    'parties' => 'bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300',
+                    'graduation' => 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300',
+                    'religious' => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300',
+                ];
+
+                foreach ($trendingTemplates as $index => $template):
+                    $badgeColor = $categoryBadgeColors[$template['category']] ?? 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300';
+                    $isAboveFold = $index < 2;
+                    ?>
+                    <a href="/template/<?= Security::escape($template['slug']) ?>"
+                        class="group block bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200 dark:border-slate-700 hover:border-primary/30">
+                        <div class="relative aspect-[4/5] overflow-hidden bg-slate-100">
+                            <?= ImageHelper::responsiveThumbnail(
+                                $template['thumbnail_url'] ?? '/assets/images/placeholder.jpg',
+                                $template['title'],
+                                $isAboveFold,
+                                $isAboveFold,
+                                'absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105'
+                            ) ?>
+                            <div class="absolute top-3 left-3">
+                                <span class="px-3 py-1 rounded-full text-xs font-bold <?= $badgeColor ?>">
+                                    <?= ucfirst(str_replace('_', ' ', $template['category'])) ?>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <h3
+                                class="font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors truncate">
+                                <?= Security::escape($template['title']) ?>
+                            </h3>
+                            <p
+                                class="text-sm <?= $template['price_usd'] > 0 ? 'text-primary font-bold' : 'text-green-600 font-bold' ?>">
+                                <?= $template['price_usd'] > 0 ? '$' . number_format($template['price_usd'], 2) : 'Free' ?>
+                            </p>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            </div>
         </div>
-    </div>
-</section>
+    </section>
+<?php endif; ?>
 
 <!-- How It Works -->
 <section id="how-it-works" class="py-12" style="background-color: var(--footer-bg-color, #ffffff);">

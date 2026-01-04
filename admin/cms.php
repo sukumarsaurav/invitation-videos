@@ -33,7 +33,8 @@ function setSetting($key, $value, $type = 'string')
 $uploadDirs = [
     __DIR__ . '/../uploads/cms',
     __DIR__ . '/../uploads/cms/hero',
-    __DIR__ . '/../uploads/cms/categories'
+    __DIR__ . '/../uploads/cms/categories',
+    __DIR__ . '/../uploads/cms/sections'
 ];
 foreach ($uploadDirs as $dir) {
     if (!is_dir($dir)) {
@@ -157,6 +158,124 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
+        // Homepage Section - Save/Update
+        if ($action === 'save_section') {
+            $sectionId = intval($_POST['section_id'] ?? 0);
+            $sectionTitle = trim($_POST['section_title'] ?? '');
+            $categorySlug = $_POST['category_slug'] ?? null;
+            $subcategory = trim($_POST['subcategory'] ?? '') ?: null;
+            $bannerBgColor = $_POST['banner_bg_color'] ?? '#a11045';
+            $titleColor = $_POST['title_color'] ?? '#d4a853';
+            $gridBgColor = $_POST['grid_bg_color'] ?? '#f5f0e8';
+            $templateCount = max(3, min(6, intval($_POST['template_count'] ?? 4)));
+            $isActive = isset($_POST['is_active']) ? 1 : 0;
+
+            if (empty($sectionTitle)) {
+                $error = 'Section title is required.';
+            } else {
+                // Check max 8 sections
+                $existingCount = Database::fetchOne("SELECT COUNT(*) as cnt FROM homepage_sections")['cnt'] ?? 0;
+                if ($sectionId === 0 && $existingCount >= 8) {
+                    $error = 'Maximum 8 homepage sections allowed.';
+                } else {
+                    // Handle banner image upload
+                    $bannerImageUrl = $_POST['existing_banner_image'] ?? null;
+                    if (!empty($_FILES['banner_image']['name'])) {
+                        $uploadDir = __DIR__ . '/../uploads/cms/sections/';
+                        $result = ImageHelper::processThumbnailUpload(
+                            $_FILES['banner_image'],
+                            $uploadDir,
+                            'section_img_',
+                            600,
+                            400,
+                            90
+                        );
+                        if ($result['success']) {
+                            $bannerImageUrl = '/uploads/cms/sections/' . $result['url'];
+                        } else {
+                            $error = 'Failed to upload banner image: ' . $result['error'];
+                        }
+                    }
+
+                    // Handle SVG upload
+                    $bannerSvgUrl = $_POST['existing_banner_svg'] ?? null;
+                    if (!empty($_FILES['banner_svg']['name'])) {
+                        $svgFile = $_FILES['banner_svg'];
+                        if ($svgFile['type'] === 'image/svg+xml' || pathinfo($svgFile['name'], PATHINFO_EXTENSION) === 'svg') {
+                            $svgName = 'section_svg_' . time() . '_' . uniqid() . '.svg';
+                            $svgPath = __DIR__ . '/../uploads/cms/sections/' . $svgName;
+                            if (move_uploaded_file($svgFile['tmp_name'], $svgPath)) {
+                                $bannerSvgUrl = '/uploads/cms/sections/' . $svgName;
+                            } else {
+                                $error = 'Failed to upload SVG file.';
+                            }
+                        } else {
+                            $error = 'Invalid SVG file format.';
+                        }
+                    }
+
+                    if (!$error) {
+                        if ($sectionId > 0) {
+                            // Update existing
+                            Database::query(
+                                "UPDATE homepage_sections SET 
+                                    section_title = ?, category_slug = ?, subcategory = ?,
+                                    banner_bg_color = ?, banner_svg_url = ?, banner_image_url = ?,
+                                    title_color = ?, grid_bg_color = ?, template_count = ?, is_active = ?,
+                                    updated_at = NOW()
+                                WHERE id = ?",
+                                [$sectionTitle, $categorySlug, $subcategory, $bannerBgColor, $bannerSvgUrl, 
+                                 $bannerImageUrl, $titleColor, $gridBgColor, $templateCount, $isActive, $sectionId]
+                            );
+                            $success = 'Section updated successfully!';
+                        } else {
+                            // Get next display order
+                            $maxOrder = Database::fetchOne("SELECT MAX(display_order) as max_order FROM homepage_sections")['max_order'] ?? 0;
+                            // Insert new
+                            Database::query(
+                                "INSERT INTO homepage_sections 
+                                    (section_title, category_slug, subcategory, banner_bg_color, banner_svg_url, 
+                                     banner_image_url, title_color, grid_bg_color, template_count, display_order, is_active)
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                                [$sectionTitle, $categorySlug, $subcategory, $bannerBgColor, $bannerSvgUrl,
+                                 $bannerImageUrl, $titleColor, $gridBgColor, $templateCount, $maxOrder + 1, $isActive]
+                            );
+                            $success = 'Section created successfully!';
+                        }
+                    }
+                }
+            }
+        }
+
+        // Homepage Section - Delete
+        if ($action === 'delete_section') {
+            $sectionId = intval($_POST['section_id'] ?? 0);
+            if ($sectionId > 0) {
+                Database::query("DELETE FROM homepage_sections WHERE id = ?", [$sectionId]);
+                $success = 'Section deleted successfully!';
+            }
+        }
+
+        // Homepage Section - Reorder
+        if ($action === 'reorder_sections') {
+            $order = json_decode($_POST['order'] ?? '[]', true);
+            if (is_array($order)) {
+                foreach ($order as $index => $id) {
+                    Database::query("UPDATE homepage_sections SET display_order = ? WHERE id = ?", [$index, intval($id)]);
+                }
+                $success = 'Sections reordered successfully!';
+            }
+        }
+
+        // Homepage Section - Toggle Active
+        if ($action === 'toggle_section') {
+            $sectionId = intval($_POST['section_id'] ?? 0);
+            if ($sectionId > 0) {
+                Database::query("UPDATE homepage_sections SET is_active = NOT is_active WHERE id = ?", [$sectionId]);
+                $success = 'Section status updated!';
+            }
+        }
+
     } else {
         $error = 'Invalid form submission. Please try again.';
     }
@@ -186,6 +305,20 @@ $settings = [
 
 // Get categories
 $categories = Database::fetchAll("SELECT * FROM categories ORDER BY display_order ASC, name ASC");
+
+// Get homepage sections
+$homepageSections = [];
+try {
+    $homepageSections = Database::fetchAll("SELECT * FROM homepage_sections ORDER BY display_order ASC") ?? [];
+} catch (Exception $e) {
+    // Table may not exist yet
+}
+
+// Get section being edited (if any)
+$editSection = null;
+if (isset($_GET['edit_section'])) {
+    $editSection = Database::fetchOne("SELECT * FROM homepage_sections WHERE id = ?", [intval($_GET['edit_section'])]);
+}
 
 $pageTitle = 'CMS Management';
 $currentTab = $_GET['tab'] ?? 'hero';
@@ -234,6 +367,11 @@ $currentTab = $_GET['tab'] ?? 'hero';
                     class="flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors border-t border-slate-100 <?= $currentTab === 'categories' ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-50' ?>">
                     <span class="material-symbols-outlined text-lg">category</span>
                     Category Images
+                </a>
+                <a href="?tab=sections"
+                    class="flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors border-t border-slate-100 <?= $currentTab === 'sections' ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-50' ?>">
+                    <span class="material-symbols-outlined text-lg">dashboard_customize</span>
+                    Homepage Sections
                 </a>
             </nav>
         </div>
@@ -684,6 +822,290 @@ $currentTab = $_GET['tab'] ?? 'hero';
                             </div>
                         <?php endforeach; ?>
                     </div>
+                <?php endif; ?>
+
+                <?php if ($currentTab === 'sections'): ?>
+                    <!-- Homepage Sections Settings -->
+                    <div class="p-6 border-b border-slate-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-lg font-bold text-slate-900">Homepage Sections</h2>
+                                <p class="text-sm text-slate-500 mt-1">Create custom template sections for the homepage (max 8)</p>
+                            </div>
+                            <?php if (!$editSection && count($homepageSections) < 8): ?>
+                                <a href="?tab=sections&edit_section=new"
+                                    class="flex items-center gap-2 px-4 py-2 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 transition-colors">
+                                    <span class="material-symbols-outlined text-lg">add</span>
+                                    Add Section
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <?php if ($editSection || isset($_GET['edit_section'])): ?>
+                        <!-- Section Editor Form -->
+                        <form method="POST" enctype="multipart/form-data">
+                            <?= Security::csrfField() ?>
+                            <input type="hidden" name="action" value="save_section">
+                            <input type="hidden" name="section_id" value="<?= $editSection['id'] ?? 0 ?>">
+                            <?php if ($editSection): ?>
+                                <input type="hidden" name="existing_banner_image" value="<?= Security::escape($editSection['banner_image_url'] ?? '') ?>">
+                                <input type="hidden" name="existing_banner_svg" value="<?= Security::escape($editSection['banner_svg_url'] ?? '') ?>">
+                            <?php endif; ?>
+
+                            <div class="p-6 space-y-6">
+                                <!-- Section Title -->
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Section Title *</label>
+                                    <input type="text" name="section_title" required
+                                        value="<?= Security::escape($editSection['section_title'] ?? '') ?>"
+                                        placeholder="e.g., Mehandi, Christmas Specials"
+                                        class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                                    <p class="text-xs text-slate-400 mt-1">Displayed on the homepage banner (e.g., "Mehandi")</p>
+                                </div>
+
+                                <hr class="border-slate-200">
+
+                                <!-- Template Filtering -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-2">Category</label>
+                                        <select name="category_slug"
+                                            class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                                            <option value="">All Categories</option>
+                                            <?php foreach ($categories as $cat): ?>
+                                                <option value="<?= Security::escape($cat['slug']) ?>"
+                                                    <?= ($editSection['category_slug'] ?? '') === $cat['slug'] ? 'selected' : '' ?>>
+                                                    <?= Security::escape($cat['name']) ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-2">Subcategory / Occasion</label>
+                                        <input type="text" name="subcategory"
+                                            value="<?= Security::escape($editSection['subcategory'] ?? '') ?>"
+                                            placeholder="e.g., mehandi, haldi, christmas"
+                                            class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                                        <p class="text-xs text-slate-400 mt-1">Filter by specific occasion/subcategory</p>
+                                    </div>
+                                </div>
+
+                                <hr class="border-slate-200">
+
+                                <!-- Banner Styling -->
+                                <h4 class="text-sm font-semibold text-slate-900">Header Banner Styling</h4>
+
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <!-- Banner Background Color -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-2">Banner Background</label>
+                                        <div class="flex items-center gap-2">
+                                            <input type="color" name="banner_bg_color"
+                                                value="<?= Security::escape($editSection['banner_bg_color'] ?? '#a11045') ?>"
+                                                class="w-12 h-12 rounded-lg border border-slate-300 cursor-pointer">
+                                            <input type="text" value="<?= Security::escape($editSection['banner_bg_color'] ?? '#a11045') ?>"
+                                                class="flex-1 px-3 py-2 rounded-lg border border-slate-300 text-sm font-mono"
+                                                onchange="this.previousElementSibling.value = this.value"
+                                                oninput="this.previousElementSibling.value = this.value">
+                                        </div>
+                                    </div>
+
+                                    <!-- Title Color -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-2">Title Color</label>
+                                        <div class="flex items-center gap-2">
+                                            <input type="color" name="title_color"
+                                                value="<?= Security::escape($editSection['title_color'] ?? '#d4a853') ?>"
+                                                class="w-12 h-12 rounded-lg border border-slate-300 cursor-pointer">
+                                            <input type="text" value="<?= Security::escape($editSection['title_color'] ?? '#d4a853') ?>"
+                                                class="flex-1 px-3 py-2 rounded-lg border border-slate-300 text-sm font-mono"
+                                                onchange="this.previousElementSibling.value = this.value"
+                                                oninput="this.previousElementSibling.value = this.value">
+                                        </div>
+                                    </div>
+
+                                    <!-- Grid Background Color -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-2">Grid Container Background</label>
+                                        <div class="flex items-center gap-2">
+                                            <input type="color" name="grid_bg_color"
+                                                value="<?= Security::escape($editSection['grid_bg_color'] ?? '#f5f0e8') ?>"
+                                                class="w-12 h-12 rounded-lg border border-slate-300 cursor-pointer">
+                                            <input type="text" value="<?= Security::escape($editSection['grid_bg_color'] ?? '#f5f0e8') ?>"
+                                                class="flex-1 px-3 py-2 rounded-lg border border-slate-300 text-sm font-mono"
+                                                onchange="this.previousElementSibling.value = this.value"
+                                                oninput="this.previousElementSibling.value = this.value">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Image Uploads -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <!-- Banner Image -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-2">Category Image (Right Side)</label>
+                                        <?php if (!empty($editSection['banner_image_url'])): ?>
+                                            <div class="mb-2 relative w-32 h-24 rounded-lg overflow-hidden bg-slate-100">
+                                                <img src="<?= Security::escape($editSection['banner_image_url']) ?>" 
+                                                    alt="Banner" class="w-full h-full object-cover">
+                                            </div>
+                                        <?php endif; ?>
+                                        <input type="file" name="banner_image" accept="image/*"
+                                            class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20">
+                                        <p class="text-xs text-slate-400 mt-1">Image shown on the right side of banner</p>
+                                    </div>
+
+                                    <!-- SVG Pattern -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-2">SVG Pattern (Background)</label>
+                                        <?php if (!empty($editSection['banner_svg_url'])): ?>
+                                            <div class="mb-2 text-xs text-green-600 flex items-center gap-1">
+                                                <span class="material-symbols-outlined text-sm">check_circle</span>
+                                                SVG uploaded: <?= basename($editSection['banner_svg_url']) ?>
+                                            </div>
+                                        <?php endif; ?>
+                                        <input type="file" name="banner_svg" accept=".svg,image/svg+xml"
+                                            class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20">
+                                        <p class="text-xs text-slate-400 mt-1">Decorative SVG pattern overlay</p>
+                                    </div>
+                                </div>
+
+                                <hr class="border-slate-200">
+
+                                <!-- Display Settings -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-2">Templates to Show</label>
+                                        <input type="number" name="template_count" min="3" max="6"
+                                            value="<?= intval($editSection['template_count'] ?? 4) ?>"
+                                            class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                                        <p class="text-xs text-slate-400 mt-1">Number of templates per row (3-6)</p>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <label class="flex items-center gap-3 cursor-pointer">
+                                            <input type="checkbox" name="is_active" value="1"
+                                                <?= ($editSection['is_active'] ?? 1) ? 'checked' : '' ?>
+                                                class="w-5 h-5 rounded border-slate-300 text-primary focus:ring-primary/20">
+                                            <span class="text-sm font-medium text-slate-700">Active (visible on homepage)</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Preview -->
+                                <div class="p-4 rounded-lg border border-slate-200 bg-slate-50">
+                                    <h4 class="text-sm font-medium text-slate-700 mb-3">Preview</h4>
+                                    <div class="rounded-lg overflow-hidden" id="section-preview">
+                                        <div class="h-20 relative flex items-center px-6" 
+                                            style="background-color: <?= Security::escape($editSection['banner_bg_color'] ?? '#a11045') ?>">
+                                            <span class="text-2xl italic" 
+                                                style="color: <?= Security::escape($editSection['title_color'] ?? '#d4a853') ?>">
+                                                <?= Security::escape($editSection['section_title'] ?? 'Section Title') ?>
+                                            </span>
+                                        </div>
+                                        <div class="h-16 flex items-center justify-center"
+                                            style="background-color: <?= Security::escape($editSection['grid_bg_color'] ?? '#f5f0e8') ?>">
+                                            <span class="text-xs text-slate-500">Template cards will appear here</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+                                <a href="?tab=sections" class="text-slate-600 hover:text-slate-900">← Cancel</a>
+                                <button type="submit"
+                                    class="px-6 py-2.5 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 transition-colors">
+                                    <?= $editSection ? 'Update Section' : 'Create Section' ?>
+                                </button>
+                            </div>
+                        </form>
+
+                    <?php else: ?>
+                        <!-- Sections List -->
+                        <?php if (empty($homepageSections)): ?>
+                            <div class="p-12 text-center">
+                                <span class="material-symbols-outlined text-5xl text-slate-300 mb-4">dashboard_customize</span>
+                                <h3 class="text-lg font-bold text-slate-600 mb-2">No Sections Yet</h3>
+                                <p class="text-slate-400 mb-6">Create your first homepage section to showcase templates by category.</p>
+                                <a href="?tab=sections&edit_section=new"
+                                    class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary/90">
+                                    <span class="material-symbols-outlined">add</span>
+                                    Create First Section
+                                </a>
+                            </div>
+                        <?php else: ?>
+                            <div class="divide-y divide-slate-100" id="sections-list">
+                                <?php foreach ($homepageSections as $section): ?>
+                                    <div class="p-4 flex items-center gap-4 hover:bg-slate-50 group" data-section-id="<?= $section['id'] ?>">
+                                        <!-- Drag Handle -->
+                                        <span class="material-symbols-outlined text-slate-300 cursor-move drag-handle">drag_indicator</span>
+
+                                        <!-- Preview -->
+                                        <div class="w-32 h-16 rounded-lg overflow-hidden shrink-0">
+                                            <div class="h-10 relative flex items-center px-2"
+                                                style="background-color: <?= Security::escape($section['banner_bg_color']) ?>">
+                                                <span class="text-xs italic truncate"
+                                                    style="color: <?= Security::escape($section['title_color']) ?>">
+                                                    <?= Security::escape($section['section_title']) ?>
+                                                </span>
+                                            </div>
+                                            <div class="h-6"
+                                                style="background-color: <?= Security::escape($section['grid_bg_color']) ?>">
+                                            </div>
+                                        </div>
+
+                                        <!-- Info -->
+                                        <div class="flex-1 min-w-0">
+                                            <h4 class="font-medium text-slate-900 truncate">
+                                                <?= Security::escape($section['section_title']) ?>
+                                            </h4>
+                                            <p class="text-xs text-slate-400">
+                                                <?= $section['category_slug'] ? Security::escape($section['category_slug']) : 'All' ?>
+                                                <?= $section['subcategory'] ? ' / ' . Security::escape($section['subcategory']) : '' ?>
+                                                • <?= $section['template_count'] ?> templates
+                                            </p>
+                                        </div>
+
+                                        <!-- Status -->
+                                        <form method="POST" class="inline">
+                                            <?= Security::csrfField() ?>
+                                            <input type="hidden" name="action" value="toggle_section">
+                                            <input type="hidden" name="section_id" value="<?= $section['id'] ?>">
+                                            <button type="submit" class="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium
+                                                <?= $section['is_active'] ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500' ?>">
+                                                <span class="w-2 h-2 rounded-full <?= $section['is_active'] ? 'bg-green-500' : 'bg-slate-400' ?>"></span>
+                                                <?= $section['is_active'] ? 'Active' : 'Inactive' ?>
+                                            </button>
+                                        </form>
+
+                                        <!-- Actions -->
+                                        <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <a href="?tab=sections&edit_section=<?= $section['id'] ?>"
+                                                class="p-2 text-slate-500 hover:bg-slate-100 rounded-lg" title="Edit">
+                                                <span class="material-symbols-outlined text-lg">edit</span>
+                                            </a>
+                                            <form method="POST" class="inline" onsubmit="return confirm('Delete this section?')">
+                                                <?= Security::csrfField() ?>
+                                                <input type="hidden" name="action" value="delete_section">
+                                                <input type="hidden" name="section_id" value="<?= $section['id'] ?>">
+                                                <button type="submit"
+                                                    class="p-2 text-red-500 hover:bg-red-50 rounded-lg" title="Delete">
+                                                    <span class="material-symbols-outlined text-lg">delete</span>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+
+                            <div class="px-6 py-4 bg-slate-50 border-t border-slate-200">
+                                <p class="text-xs text-slate-400">
+                                    <span class="material-symbols-outlined text-sm align-middle">info</span>
+                                    Drag sections to reorder. Changes are saved automatically.
+                                </p>
+                            </div>
+                        <?php endif; ?>
+                    <?php endif; ?>
                 <?php endif; ?>
 
             </div>
