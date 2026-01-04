@@ -29,10 +29,15 @@ INSERT IGNORE INTO `settings` (`setting_key`, `setting_value`, `setting_type`) V
 ('theme_bg_light', '#f7f6f8', 'string'),
 ('theme_bg_dark', '#191022', 'string'),
 
--- Header/Footer Navigation Colors
-('nav_bg_color', '#ffffff', 'string'),
-('nav_text_color', '#1e293b', 'string'),
-('nav_hover_color', '#7f13ec', 'string'),
+-- Header Colors
+('header_bg_color', '#ffffff', 'string'),
+('header_text_color', '#1e293b', 'string'),
+('header_hover_color', '#7f13ec', 'string'),
+
+-- Footer Colors
+('footer_bg_color', '#ffffff', 'string'),
+('footer_text_color', '#1e293b', 'string'),
+('footer_hover_color', '#7f13ec', 'string'),
 
 -- Category Display Mode
 ('category_display_mode', 'icon', 'string');

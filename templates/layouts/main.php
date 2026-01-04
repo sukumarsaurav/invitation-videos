@@ -25,7 +25,7 @@ try {
 // Fetch CMS theme settings
 $cmsSettings = [];
 try {
-    $cmsSettingsRows = Database::fetchAll("SELECT setting_key, setting_value FROM settings WHERE setting_key LIKE 'hero_%' OR setting_key LIKE 'theme_%' OR setting_key LIKE 'category_%' OR setting_key LIKE 'nav_%'");
+    $cmsSettingsRows = Database::fetchAll("SELECT setting_key, setting_value FROM settings WHERE setting_key LIKE 'hero_%' OR setting_key LIKE 'theme_%' OR setting_key LIKE 'category_%' OR setting_key LIKE 'header_%' OR setting_key LIKE 'footer_%'");
     foreach ($cmsSettingsRows as $row) {
         $cmsSettings[$row['setting_key']] = $row['setting_value'];
     }
@@ -44,10 +44,14 @@ $heroImageMobile = $cmsSettings['hero_image_mobile'] ?? '';
 $heroTitle = $cmsSettings['hero_title'] ?? 'Create Beautiful <span class="text-primary">Invitation Videos</span>';
 $heroSubtitle = $cmsSettings['hero_subtitle'] ?? 'Stunning video invitations for weddings, birthdays, and special events. Easy to customize, ready to share.';
 $categoryDisplayMode = $cmsSettings['category_display_mode'] ?? 'icon';
-// Nav colors for header/footer
-$navBgColor = $cmsSettings['nav_bg_color'] ?? '#ffffff';
-$navTextColor = $cmsSettings['nav_text_color'] ?? '#1e293b';
-$navHoverColor = $cmsSettings['nav_hover_color'] ?? '#7f13ec';
+// Header colors
+$headerBgColor = $cmsSettings['header_bg_color'] ?? '#ffffff';
+$headerTextColor = $cmsSettings['header_text_color'] ?? '#1e293b';
+$headerHoverColor = $cmsSettings['header_hover_color'] ?? '#7f13ec';
+// Footer colors
+$footerBgColor = $cmsSettings['footer_bg_color'] ?? '#ffffff';
+$footerTextColor = $cmsSettings['footer_text_color'] ?? '#1e293b';
+$footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
 ?>
 <!DOCTYPE html>
 <html lang="en" class="light">
@@ -217,14 +221,23 @@ $navHoverColor = $cmsSettings['nav_hover_color'] ?? '#7f13ec';
             --color-bg-dark:
                 <?= htmlspecialchars($themeBgDark) ?>
             ;
-            --nav-bg-color:
-                <?= htmlspecialchars($navBgColor) ?>
+            --header-bg-color:
+                <?= htmlspecialchars($headerBgColor) ?>
             ;
-            --nav-text-color:
-                <?= htmlspecialchars($navTextColor) ?>
+            --header-text-color:
+                <?= htmlspecialchars($headerTextColor) ?>
             ;
-            --nav-hover-color:
-                <?= htmlspecialchars($navHoverColor) ?>
+            --header-hover-color:
+                <?= htmlspecialchars($headerHoverColor) ?>
+            ;
+            --footer-bg-color:
+                <?= htmlspecialchars($footerBgColor) ?>
+            ;
+            --footer-text-color:
+                <?= htmlspecialchars($footerTextColor) ?>
+            ;
+            --footer-hover-color:
+                <?= htmlspecialchars($footerHoverColor) ?>
             ;
         }
 
@@ -670,24 +683,34 @@ $navHoverColor = $cmsSettings['nav_hover_color'] ?? '#7f13ec';
             --tw-gradient-from: color-mix(in srgb, var(--color-primary) 20%, transparent) !important;
         }
 
-        /* Header/Footer Navigation Colors */
-        header a,
-        footer a {
-            color: var(--nav-text-color, inherit);
+        /* Header Colors */
+        header a {
+            color: var(--header-text-color, inherit);
         }
 
-        header a:hover,
-        footer a:hover {
-            color: var(--nav-hover-color, var(--color-primary)) !important;
+        header a:hover {
+            color: var(--header-hover-color, var(--color-primary)) !important;
         }
 
         header .text-slate-600,
         header .text-slate-700,
-        header .text-slate-900,
+        header .text-slate-900 {
+            color: var(--header-text-color) !important;
+        }
+
+        /* Footer Colors */
+        footer a {
+            color: var(--footer-text-color, inherit);
+        }
+
+        footer a:hover {
+            color: var(--footer-hover-color, var(--color-primary)) !important;
+        }
+
         footer .text-slate-500,
         footer .text-slate-600,
         footer .text-slate-700 {
-            color: var(--nav-text-color) !important;
+            color: var(--footer-text-color) !important;
         }
     </style>
 
@@ -719,7 +742,7 @@ $navHoverColor = $cmsSettings['nav_hover_color'] ?? '#7f13ec';
 
     <!-- Header -->
     <header class="sticky top-0 z-50 border-b border-slate-200 dark:border-slate-800 backdrop-blur-sm shadow-sm"
-        style="background-color: var(--nav-bg-color, #ffffff); color: var(--nav-text-color, #1e293b);">
+        style="background-color: var(--header-bg-color, #ffffff); color: var(--header-text-color, #1e293b);">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <!-- Left Section: Mobile Menu + Logo -->
@@ -1230,7 +1253,7 @@ $navHoverColor = $cmsSettings['nav_hover_color'] ?? '#7f13ec';
     <!-- Footer - Can be hidden on mobile for specific pages like gallery -->
     <footer
         class="border-t border-slate-200 dark:border-slate-800 mt-auto <?= ($hideFooterOnMobile ?? false) ? 'hidden sm:block' : '' ?>"
-        style="background-color: var(--nav-bg-color, #ffffff); color: var(--nav-text-color, #1e293b);"
+        style="background-color: var(--footer-bg-color, #ffffff); color: var(--footer-text-color, #1e293b);"
         x-data="{ footerOpen: window.innerWidth >= 769 }"
         x-init="window.addEventListener('resize', () => { if (window.innerWidth >= 769) footerOpen = true })">
         <!-- Mobile Footer Toggle Bar (visible only on small screens < 769px) -->
