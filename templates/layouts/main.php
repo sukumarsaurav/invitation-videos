@@ -1243,7 +1243,8 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
     <!-- Floating Help Button - Only on landing page -->
     <?php if (($isHomePage ?? false)): ?>
         <a href="/support"
-            class="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 bg-primary text-white font-bold rounded-full shadow-xl shadow-primary/30 hover:bg-primary/90 hover:scale-105 transition-all group"
+            class="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 font-bold rounded-full shadow-xl hover:scale-105 transition-all group"
+            style="background-color: var(--footer-text-color, #1e293b); color: var(--footer-bg-color, #ffffff);"
             title="Need help?">
             <span class="material-symbols-outlined text-xl">support_agent</span>
             <span class="hidden sm:group-hover:inline whitespace-nowrap text-sm">Need Help?</span>
@@ -1417,35 +1418,38 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
                         </ul>
                     </div>
                 </div>
+            </div>
+            
+            <!-- Full-width divider -->
+            <div class="border-t border-slate-200 dark:border-slate-800 mt-8"></div>
+            
+            <!-- Bottom Section: Copyright & Payment -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div class="flex flex-col sm:flex-row items-start justify-between gap-6">
+                    <!-- Left: Copyright (two rows, stacked) -->
+                    <div class="flex flex-col gap-1">
+                        <p class="text-sm" style="color: var(--footer-text-color);">&copy; <?= date('Y') ?>
+                            <?= APP_NAME ?? 'InvitationVideos' ?>. All rights reserved.
+                        </p>
+                        <p class="text-xs" style="color: var(--footer-text-color); opacity: 0.7;">Made with <span class="text-red-500">❤</span> in India |
+                            Developed by <a href="https://neowebx.com" target="_blank" rel="noopener"
+                                class="text-primary hover:underline font-medium">NeoWebX.com</a></p>
+                    </div>
 
-                <!-- Bottom Section: Copyright & Payment -->
-                <div class="border-t border-slate-200 dark:border-slate-800 mt-8 pt-8">
-                    <div class="flex flex-col sm:flex-row items-start justify-between gap-6">
-                        <!-- Left: Copyright (two rows, stacked) -->
-                        <div class="flex flex-col gap-1">
-                            <p class="text-sm text-slate-600 dark:text-slate-400">&copy; <?= date('Y') ?>
-                                <?= APP_NAME ?? 'InvitationVideos' ?>. All rights reserved.
-                            </p>
-                            <p class="text-xs text-slate-500">Made with <span class="text-red-500">❤</span> in India |
-                                Developed by <a href="https://neowebx.com" target="_blank" rel="noopener"
-                                    class="text-primary hover:underline font-medium">NeoWebX.com</a></p>
-                        </div>
-
-                        <!-- Right: Payment Icons -->
-                        <div class="flex flex-col items-end gap-2">
-                            <span class="text-xs text-slate-400 uppercase tracking-wide">Payment secured by</span>
-                            <div class="flex items-center gap-3 flex-wrap justify-end">
-                                <img src="/assets/images/ivitationvideos-200x120.webp" alt="Visa"
-                                    class="h-6 sm:h-8 w-auto object-contain" width="60" height="36" loading="lazy">
-                                <img src="/assets/images/ivitationvideos-razorpay-.webp" alt="Razorpay"
-                                    class="h-6 sm:h-8 w-auto object-contain" width="80" height="36" loading="lazy">
-                                <img src="/assets/images/ivitationvideos-Payment6-200x120.webp" alt="PayPal"
-                                    class="h-6 sm:h-8 w-auto object-contain" width="50" height="36" loading="lazy">
-                                <img src="/assets/images/ivitationvideos-mastercard-200x120.webp" alt="MasterCard"
-                                    class="h-6 sm:h-8 w-auto object-contain" width="50" height="36" loading="lazy">
-                                <img src="/assets/images/ivitationvideos-upi_logo.webp" alt="UPI"
-                                    class="h-6 sm:h-8 w-auto object-contain" width="50" height="36" loading="lazy">
-                            </div>
+                    <!-- Right: Payment Icons -->
+                    <div class="flex flex-col items-end gap-2">
+                        <span class="text-xs uppercase tracking-wide" style="color: var(--footer-text-color);">Payment secured by</span>
+                        <div class="flex items-center gap-3 flex-wrap justify-end">
+                            <img src="/assets/images/ivitationvideos-200x120.webp" alt="Visa"
+                                class="h-6 sm:h-8 w-auto object-contain bg-white" width="60" height="36" loading="lazy">
+                            <img src="/assets/images/ivitationvideos-razorpay-.webp" alt="Razorpay"
+                                class="h-6 sm:h-8 w-auto object-contain bg-white" width="80" height="36" loading="lazy">
+                            <img src="/assets/images/ivitationvideos-Payment6-200x120.webp" alt="PayPal"
+                                class="h-6 sm:h-8 w-auto object-contain bg-white" width="50" height="36" loading="lazy">
+                            <img src="/assets/images/ivitationvideos-mastercard-200x120.webp" alt="MasterCard"
+                                class="h-6 sm:h-8 w-auto object-contain bg-white" width="50" height="36" loading="lazy">
+                            <img src="/assets/images/ivitationvideos-upi_logo.webp" alt="UPI"
+                                class="h-6 sm:h-8 w-auto object-contain bg-white" width="50" height="36" loading="lazy">
                         </div>
                     </div>
                 </div>
