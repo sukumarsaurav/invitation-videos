@@ -212,9 +212,10 @@ if ($category && isset($categoryTitles[$category])) {
                 <?php foreach ($templates as $index => $template):
                     $isAboveFold = $index < 4;
                     ?>
-                    <a href="/template/<?= Security::escape($template['slug']) ?>"
-                        class="group block bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-100 dark:border-slate-800 hover:border-primary/30">
-                        <div class="relative aspect-[4/5] overflow-hidden bg-slate-100">
+                    <a href="/template/<?= Security::escape($template['slug']) ?>" class="group block">
+                        <!-- Image Card -->
+                        <div
+                            class="relative aspect-[4/5] overflow-hidden bg-slate-100 rounded-2xl shadow-sm hover:shadow-xl transition-all border border-slate-100 dark:border-slate-800 group-hover:border-primary/30">
                             <?= ImageHelper::responsiveThumbnail(
                                 $template['thumbnail_url'] ?? '/assets/images/placeholder.jpg',
                                 $template['title'],
@@ -233,13 +234,14 @@ if ($category && isset($categoryTitles[$category])) {
                             <?php endif; ?>
                         </div>
 
-                        <div class="p-3 sm:p-4">
+                        <!-- Title & Price (Outside Card) -->
+                        <div class="pt-3 px-1">
                             <h3
                                 class="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-primary transition-colors">
                                 <?= Security::escape($template['title']) ?>
                             </h3>
                             <p
-                                class="text-sm font-bold mt-1 <?= $template['price_usd'] == 0 ? 'text-green-600' : 'text-primary' ?>">
+                                class="text-sm font-bold mt-0.5 <?= $template['price_usd'] == 0 ? 'text-green-600' : 'text-primary' ?>">
                                 <?= $template['price_usd'] == 0 ? 'Free' : '$' . number_format($template['price_usd'], 0) ?>
                             </p>
                         </div>
@@ -254,10 +256,9 @@ if ($category && isset($categoryTitles[$category])) {
                         class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
                         <!-- Skeleton Cards -->
                         <?php for ($i = 0; $i < 4; $i++): ?>
-                            <div
-                                class="animate-pulse bg-white dark:bg-slate-900 rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-800">
-                                <div class="aspect-[4/5] bg-slate-200 dark:bg-slate-700"></div>
-                                <div class="p-3 sm:p-4">
+                            <div class="animate-pulse">
+                                <div class="aspect-[4/5] bg-slate-200 dark:bg-slate-700 rounded-2xl"></div>
+                                <div class="pt-3 px-1">
                                     <div class="h-4 bg-slate-200 dark:bg-slate-700 rounded w-3/4 mb-2"></div>
                                     <div class="h-3 bg-slate-200 dark:bg-slate-700 rounded w-1/4"></div>
                                 </div>
@@ -539,15 +540,15 @@ if ($category && isset($categoryTitles[$category])) {
         const imgSrc = template.srcset && template.srcset[400] ? template.srcset[400] : template.thumbnail_url;
 
         return `
-        <a href="/template/${template.slug}" class="group block bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-100 dark:border-slate-800 hover:border-primary/30">
-            <div class="relative aspect-[4/5] overflow-hidden bg-slate-100">
+        <a href="/template/${template.slug}" class="group block">
+            <div class="relative aspect-[4/5] overflow-hidden bg-slate-100 rounded-2xl shadow-sm hover:shadow-xl transition-all border border-slate-100 dark:border-slate-800 group-hover:border-primary/30">
                 <img src="${imgSrc}" alt="${template.title}" loading="lazy" decoding="async" 
                      class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                 ${badge}
             </div>
-            <div class="p-3 sm:p-4">
+            <div class="pt-3 px-1">
                 <h3 class="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-primary transition-colors">${template.title}</h3>
-                <p class="text-sm font-bold mt-1 ${priceClass}">${priceText}</p>
+                <p class="text-sm font-bold mt-0.5 ${priceClass}">${priceText}</p>
             </div>
         </a>
     `;

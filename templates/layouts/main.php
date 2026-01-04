@@ -523,9 +523,9 @@
                 <div class="flex items-center gap-2 lg:gap-8 flex-1">
                     <?php if (($isGalleryPage ?? false) && !empty($galleryCategories)): ?>
                         <!-- Mobile: Back Arrow (Gallery pages only) -->
-                        <a href="/templates"
+                        <a href="/"
                             class="sm:hidden p-2 -ml-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
-                            aria-label="Back to templates">
+                            aria-label="Back to home">
                             <span class="material-symbols-outlined text-2xl">arrow_back</span>
                         </a>
                         <!-- Desktop: Regular Menu Button -->
