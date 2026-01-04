@@ -21,6 +21,29 @@ try {
 } catch (Exception $e) {
     // Tables may not exist yet, fail silently
 }
+
+// Fetch CMS theme settings
+$cmsSettings = [];
+try {
+    $cmsSettingsRows = Database::fetchAll("SELECT setting_key, setting_value FROM settings WHERE setting_key LIKE 'hero_%' OR setting_key LIKE 'theme_%' OR setting_key LIKE 'category_%'");
+    foreach ($cmsSettingsRows as $row) {
+        $cmsSettings[$row['setting_key']] = $row['setting_value'];
+    }
+} catch (Exception $e) {
+    // Settings table may not exist yet
+}
+
+// Default CMS values
+$themePrimaryColor = $cmsSettings['theme_primary_color'] ?? '#7f13ec';
+$themeTextPrimary = $cmsSettings['theme_text_primary'] ?? '#0f172a';
+$themeTextSecondary = $cmsSettings['theme_text_secondary'] ?? '#64748b';
+$themeBgLight = $cmsSettings['theme_bg_light'] ?? '#f7f6f8';
+$themeBgDark = $cmsSettings['theme_bg_dark'] ?? '#191022';
+$heroImageDesktop = $cmsSettings['hero_image_desktop'] ?? '';
+$heroImageMobile = $cmsSettings['hero_image_mobile'] ?? '';
+$heroTitle = $cmsSettings['hero_title'] ?? 'Create Beautiful <span class="text-primary">Invitation Videos</span>';
+$heroSubtitle = $cmsSettings['hero_subtitle'] ?? 'Stunning video invitations for weddings, birthdays, and special events. Easy to customize, ready to share.';
+$categoryDisplayMode = $cmsSettings['category_display_mode'] ?? 'icon';
 ?>
 <!DOCTYPE html>
 <html lang="en" class="light">
@@ -173,6 +196,15 @@ try {
 
     <!-- Critical CSS Inline - Immediate render without blocking -->
     <style>
+        /* Dynamic Theme Colors from CMS */
+        :root {
+            --color-primary: <?= htmlspecialchars($themePrimaryColor) ?>;
+            --color-text-primary: <?= htmlspecialchars($themeTextPrimary) ?>;
+            --color-text-secondary: <?= htmlspecialchars($themeTextSecondary) ?>;
+            --color-bg-light: <?= htmlspecialchars($themeBgLight) ?>;
+            --color-bg-dark: <?= htmlspecialchars($themeBgDark) ?>;
+        }
+        
         /* Critical CSS for above-the-fold content */
         *,
         ::after,
@@ -400,11 +432,11 @@ try {
         }
 
         .text-primary {
-            color: #7f13ec
+            color: var(--color-primary, #7f13ec)
         }
 
         .bg-primary {
-            background-color: #7f13ec
+            background-color: var(--color-primary, #7f13ec)
         }
 
         .text-white {

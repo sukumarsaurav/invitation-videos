@@ -38,13 +38,29 @@ $isHomePage = true;  // For floating help button display
 
 <!-- Hero Section -->
 <section
-    class="py-8 sm:py-12 bg-gradient-to-br from-primary/5 via-purple-500/5 to-rose-500/5 dark:from-primary/10 dark:via-purple-500/10 dark:to-rose-500/10">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 text-center">
-        <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-3">
-            Create Beautiful <span class="text-primary">Invitation Videos</span>
+    class="py-8 sm:py-12 relative overflow-hidden<?= empty($heroImageDesktop) ? ' bg-gradient-to-br from-primary/5 via-purple-500/5 to-rose-500/5 dark:from-primary/10 dark:via-purple-500/10 dark:to-rose-500/10' : '' ?>">
+    <?php if (!empty($heroImageDesktop)): ?>
+        <!-- Hero Background Image -->
+        <div class="absolute inset-0 z-0">
+            <picture>
+                <?php if (!empty($heroImageMobile)): ?>
+                    <source media="(max-width: 768px)" srcset="<?= htmlspecialchars($heroImageMobile) ?>">
+                <?php endif; ?>
+                <img src="<?= htmlspecialchars($heroImageDesktop) ?>" alt="Hero Background"
+                    class="w-full h-full object-cover" loading="eager">
+            </picture>
+            <div class="absolute inset-0 bg-black/40"></div>
+        </div>
+    <?php endif; ?>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 text-center relative z-10">
+        <h1
+            class="text-2xl sm:text-3xl md:text-4xl font-bold <?= !empty($heroImageDesktop) ? 'text-white' : 'text-slate-900 dark:text-white' ?> mb-3">
+            <?= $heroTitle ?>
         </h1>
-        <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-2xl mx-auto mb-6">
-            Stunning video invitations for weddings, birthdays, and special events. Easy to customize, ready to share.
+        <p
+            class="<?= !empty($heroImageDesktop) ? 'text-white/90' : 'text-slate-600 dark:text-slate-400' ?> text-sm sm:text-base max-w-2xl mx-auto mb-6">
+            <?= htmlspecialchars($heroSubtitle) ?>
         </p>
         <a href="/templates"
             class="inline-flex items-center gap-2 bg-primary text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all">
@@ -70,20 +86,47 @@ $isHomePage = true;  // For floating help button display
         </div>
 
         <?php
-        $allCategories = [
-            ['slug' => 'wedding', 'name' => 'Wedding', 'icon' => 'favorite', 'color' => 'text-rose-500', 'bg' => 'bg-rose-50 dark:bg-rose-900/20'],
-            ['slug' => 'birthday', 'name' => 'Birthday', 'icon' => 'cake', 'color' => 'text-amber-500', 'bg' => 'bg-amber-50 dark:bg-amber-900/20'],
-            ['slug' => 'baby_shower', 'name' => 'Baby Shower', 'icon' => 'child_care', 'color' => 'text-teal-500', 'bg' => 'bg-teal-50 dark:bg-teal-900/20'],
-            ['slug' => 'save_the_date', 'name' => 'Save Date', 'icon' => 'event', 'color' => 'text-blue-500', 'bg' => 'bg-blue-50 dark:bg-blue-900/20'],
-            ['slug' => 'parties', 'name' => 'Parties', 'icon' => 'celebration', 'color' => 'text-orange-500', 'bg' => 'bg-orange-50 dark:bg-orange-900/20'],
-            ['slug' => 'corporate', 'name' => 'Corporate', 'icon' => 'business_center', 'color' => 'text-slate-600', 'bg' => 'bg-slate-100 dark:bg-slate-800'],
-            ['slug' => 'holidays', 'name' => 'Holidays', 'icon' => 'redeem', 'color' => 'text-red-500', 'bg' => 'bg-red-50 dark:bg-red-900/20'],
-            ['slug' => 'anniversary', 'name' => 'Anniversary', 'icon' => 'favorite_border', 'color' => 'text-pink-500', 'bg' => 'bg-pink-50 dark:bg-pink-900/20'],
-            ['slug' => 'graduation', 'name' => 'Graduation', 'icon' => 'school', 'color' => 'text-indigo-500', 'bg' => 'bg-indigo-50 dark:bg-indigo-900/20'],
-            ['slug' => 'housewarming', 'name' => 'Housewarming', 'icon' => 'home', 'color' => 'text-cyan-500', 'bg' => 'bg-cyan-50 dark:bg-cyan-900/20'],
-            ['slug' => 'religious', 'name' => 'Religious', 'icon' => 'church', 'color' => 'text-yellow-600', 'bg' => 'bg-yellow-50 dark:bg-yellow-900/20'],
-            ['slug' => 'farewell', 'name' => 'Farewell', 'icon' => 'waving_hand', 'color' => 'text-purple-500', 'bg' => 'bg-purple-50 dark:bg-purple-900/20'],
-        ];
+        // Fetch categories from database with image_url support
+        $dbCategories = [];
+        try {
+            $dbCategories = Database::fetchAll("SELECT id, name, slug, icon, color, image_url FROM categories WHERE is_active = 1 ORDER BY display_order ASC, name ASC LIMIT 12") ?? [];
+        } catch (Exception $e) {
+            // Fallback to hardcoded if table doesn't exist
+        }
+        
+        // Fallback hardcoded categories if database is empty
+        if (empty($dbCategories)) {
+            $allCategories = [
+                ['slug' => 'wedding', 'name' => 'Wedding', 'icon' => 'favorite', 'color' => '#f43f5e', 'bg' => 'bg-rose-50 dark:bg-rose-900/20', 'image_url' => null],
+                ['slug' => 'birthday', 'name' => 'Birthday', 'icon' => 'cake', 'color' => '#f59e0b', 'bg' => 'bg-amber-50 dark:bg-amber-900/20', 'image_url' => null],
+                ['slug' => 'baby_shower', 'name' => 'Baby Shower', 'icon' => 'child_care', 'color' => '#14b8a6', 'bg' => 'bg-teal-50 dark:bg-teal-900/20', 'image_url' => null],
+                ['slug' => 'save_the_date', 'name' => 'Save Date', 'icon' => 'event', 'color' => '#3b82f6', 'bg' => 'bg-blue-50 dark:bg-blue-900/20', 'image_url' => null],
+                ['slug' => 'parties', 'name' => 'Parties', 'icon' => 'celebration', 'color' => '#f97316', 'bg' => 'bg-orange-50 dark:bg-orange-900/20', 'image_url' => null],
+                ['slug' => 'corporate', 'name' => 'Corporate', 'icon' => 'business_center', 'color' => '#64748b', 'bg' => 'bg-slate-100 dark:bg-slate-800', 'image_url' => null],
+                ['slug' => 'holidays', 'name' => 'Holidays', 'icon' => 'redeem', 'color' => '#ef4444', 'bg' => 'bg-red-50 dark:bg-red-900/20', 'image_url' => null],
+                ['slug' => 'anniversary', 'name' => 'Anniversary', 'icon' => 'favorite_border', 'color' => '#ec4899', 'bg' => 'bg-pink-50 dark:bg-pink-900/20', 'image_url' => null],
+                ['slug' => 'graduation', 'name' => 'Graduation', 'icon' => 'school', 'color' => '#6366f1', 'bg' => 'bg-indigo-50 dark:bg-indigo-900/20', 'image_url' => null],
+                ['slug' => 'housewarming', 'name' => 'Housewarming', 'icon' => 'home', 'color' => '#06b6d4', 'bg' => 'bg-cyan-50 dark:bg-cyan-900/20', 'image_url' => null],
+                ['slug' => 'religious', 'name' => 'Religious', 'icon' => 'church', 'color' => '#ca8a04', 'bg' => 'bg-yellow-50 dark:bg-yellow-900/20', 'image_url' => null],
+                ['slug' => 'farewell', 'name' => 'Farewell', 'icon' => 'waving_hand', 'color' => '#a855f7', 'bg' => 'bg-purple-50 dark:bg-purple-900/20', 'image_url' => null],
+            ];
+        } else {
+            // Map database categories to display format
+            $allCategories = array_map(function($cat) {
+                $color = $cat['color'] ?? '#7f13ec';
+                return [
+                    'slug' => $cat['slug'],
+                    'name' => $cat['name'],
+                    'icon' => $cat['icon'] ?? 'category',
+                    'color' => $color,
+                    'bg' => 'bg-slate-100 dark:bg-slate-800',
+                    'image_url' => $cat['image_url'] ?? null,
+                ];
+            }, $dbCategories);
+        }
+
+        // Check display mode from CMS settings
+        $showImages = ($categoryDisplayMode === 'image' || $categoryDisplayMode === 'both');
 
         // Split categories for mobile two-row layout
         $row1Categories = array_slice($allCategories, 0, 6);
@@ -99,9 +142,15 @@ $isHomePage = true;  // For floating help button display
                     <?php foreach ($row1Categories as $cat): ?>
                         <a href="/templates?category=<?= $cat['slug'] ?>"
                             class="flex flex-col items-center w-14 flex-shrink-0">
-                            <div class="w-14 h-14 rounded-xl <?= $cat['bg'] ?> flex items-center justify-center mb-1">
-                                <span
-                                    class="material-symbols-outlined text-2xl <?= $cat['color'] ?>"><?= $cat['icon'] ?></span>
+                            <div class="w-14 h-14 rounded-xl <?= $cat['bg'] ?> flex items-center justify-center mb-1 overflow-hidden">
+                                <?php if ($showImages && !empty($cat['image_url'])): ?>
+                                    <img src="<?= htmlspecialchars($cat['image_url']) ?>" 
+                                         alt="<?= htmlspecialchars($cat['name']) ?>" 
+                                         class="w-full h-full object-cover">
+                                <?php else: ?>
+                                    <span class="material-symbols-outlined text-2xl" 
+                                          style="color: <?= htmlspecialchars($cat['color']) ?>"><?= $cat['icon'] ?></span>
+                                <?php endif; ?>
                             </div>
                             <span
                                 class="text-[10px] font-medium text-slate-700 dark:text-slate-300 text-center leading-tight"><?= $cat['name'] ?></span>
@@ -113,9 +162,15 @@ $isHomePage = true;  // For floating help button display
                     <?php foreach ($row2Categories as $cat): ?>
                         <a href="/templates?category=<?= $cat['slug'] ?>"
                             class="flex flex-col items-center w-14 flex-shrink-0">
-                            <div class="w-14 h-14 rounded-xl <?= $cat['bg'] ?> flex items-center justify-center mb-1">
-                                <span
-                                    class="material-symbols-outlined text-2xl <?= $cat['color'] ?>"><?= $cat['icon'] ?></span>
+                            <div class="w-14 h-14 rounded-xl <?= $cat['bg'] ?> flex items-center justify-center mb-1 overflow-hidden">
+                                <?php if ($showImages && !empty($cat['image_url'])): ?>
+                                    <img src="<?= htmlspecialchars($cat['image_url']) ?>" 
+                                         alt="<?= htmlspecialchars($cat['name']) ?>" 
+                                         class="w-full h-full object-cover">
+                                <?php else: ?>
+                                    <span class="material-symbols-outlined text-2xl" 
+                                          style="color: <?= htmlspecialchars($cat['color']) ?>"><?= $cat['icon'] ?></span>
+                                <?php endif; ?>
                             </div>
                             <span
                                 class="text-[10px] font-medium text-slate-700 dark:text-slate-300 text-center leading-tight"><?= $cat['name'] ?></span>
@@ -131,8 +186,15 @@ $isHomePage = true;  // For floating help button display
                 <a href="/templates?category=<?= $cat['slug'] ?>"
                     class="group flex flex-col items-center p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:shadow-lg hover:border-primary/30 transition-all">
                     <div
-                        class="w-14 h-14 rounded-xl <?= $cat['bg'] ?> flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                        <span class="material-symbols-outlined text-2xl <?= $cat['color'] ?>"><?= $cat['icon'] ?></span>
+                        class="w-14 h-14 rounded-xl <?= $cat['bg'] ?> flex items-center justify-center mb-3 group-hover:scale-110 transition-transform overflow-hidden">
+                        <?php if ($showImages && !empty($cat['image_url'])): ?>
+                            <img src="<?= htmlspecialchars($cat['image_url']) ?>" 
+                                 alt="<?= htmlspecialchars($cat['name']) ?>" 
+                                 class="w-full h-full object-cover">
+                        <?php else: ?>
+                            <span class="material-symbols-outlined text-2xl" 
+                                  style="color: <?= htmlspecialchars($cat['color']) ?>"><?= $cat['icon'] ?></span>
+                        <?php endif; ?>
                     </div>
                     <span
                         class="font-semibold text-sm text-slate-900 dark:text-white text-center"><?= $cat['name'] ?></span>

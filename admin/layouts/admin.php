@@ -144,6 +144,7 @@ require_once __DIR__ . '/../auth.php';
                         ['href' => '/admin/template-builder.php', 'icon' => 'design_services', 'label' => 'Template Builder', 'page' => 'template-builder'],
                         ['href' => '/admin/users.php', 'icon' => 'group', 'label' => 'Users', 'page' => 'users'],
                         ['href' => '/admin/blog.php', 'icon' => 'article', 'label' => 'Blog', 'page' => 'blog'],
+                        ['href' => '/admin/cms.php', 'icon' => 'web', 'label' => 'CMS', 'page' => 'cms'],
                         ['href' => '/admin/support.php', 'icon' => 'contact_support', 'label' => 'Support', 'page' => 'support', 'badge' => $pendingTickets ?? null],
                     ];
 
