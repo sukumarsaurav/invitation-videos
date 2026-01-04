@@ -8,6 +8,7 @@
 require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../src/Services/VisitorTracker.php';
+require_once __DIR__ . '/../src/Services/CampaignService.php';
 
 // Date range filter
 $range = $_GET['range'] ?? '7d';
@@ -52,6 +53,11 @@ $visitorsByDay = VisitorTracker::getVisitorsByDay($dateFrom, $dateTo);
 $topPages = VisitorTracker::getTopPages($dateFrom, $dateTo, 10);
 $deviceBreakdown = VisitorTracker::getDeviceBreakdown($dateFrom, $dateTo);
 $browserBreakdown = VisitorTracker::getBrowserBreakdown($dateFrom, $dateTo);
+
+// Get campaign/traffic source data
+$trafficSourceBreakdown = CampaignService::getTrafficSourceBreakdown($dateFrom, $dateTo);
+$topCampaigns = CampaignService::getTopCampaigns($dateFrom, $dateTo, 5);
+$utmSourceBreakdown = CampaignService::getSourceBreakdown($dateFrom, $dateTo);
 
 // Calculate funnel percentages
 $funnelPercentages = [
@@ -414,6 +420,117 @@ $pageTitle = 'Analytics';
                 </div>
             <?php endforeach; ?>
         </div>
+    </div>
+</div>
+
+<!-- Traffic Sources & Campaigns -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    <!-- Traffic Source Breakdown -->
+    <div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-slate-700">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-lg">Traffic Sources</h3>
+            <a href="/admin/campaigns.php" class="text-sm text-primary hover:underline">Manage</a>
+        </div>
+        <?php
+        $sourceIcons = [
+            'paid' => ['icon' => 'paid', 'color' => 'bg-amber-500'],
+            'organic' => ['icon' => 'search', 'color' => 'bg-green-500'],
+            'social' => ['icon' => 'group', 'color' => 'bg-blue-500'],
+            'email' => ['icon' => 'mail', 'color' => 'bg-purple-500'],
+            'referral' => ['icon' => 'link', 'color' => 'bg-cyan-500'],
+            'direct' => ['icon' => 'globe', 'color' => 'bg-slate-500']
+        ];
+        $sourceData = [];
+        foreach ($trafficSourceBreakdown as $src) {
+            $sourceData[$src['traffic_source']] = (int)$src['count'];
+        }
+        $totalTrafficSources = array_sum($sourceData);
+        ?>
+        <div class="space-y-3">
+            <?php foreach ($sourceIcons as $source => $config): ?>
+            <?php 
+            $count = $sourceData[$source] ?? 0;
+            $percent = $totalTrafficSources > 0 ? round(($count / $totalTrafficSources) * 100, 1) : 0;
+            ?>
+            <div class="flex items-center gap-3">
+                <div class="size-8 <?= $config['color'] ?> rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-white text-sm"><?= $config['icon'] ?></span>
+                </div>
+                <div class="flex-1">
+                    <div class="flex justify-between text-sm mb-1">
+                        <span class="capitalize font-medium"><?= $source ?></span>
+                        <span class="text-slate-500"><?= number_format($count) ?> (<?= $percent ?>%)</span>
+                    </div>
+                    <div class="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                        <div class="h-full <?= $config['color'] ?> rounded-full" style="width: <?= $percent ?>%"></div>
+                    </div>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+
+    <!-- Top Campaigns -->
+    <div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-slate-700">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-lg">Top Campaigns</h3>
+            <a href="/admin/campaigns.php?action=new" class="text-sm text-primary hover:underline flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">add</span>
+                New
+            </a>
+        </div>
+        <?php if (empty($topCampaigns)): ?>
+        <div class="text-center py-8 text-slate-400">
+            <span class="material-symbols-outlined text-3xl mb-2">campaign</span>
+            <p class="text-sm">No campaign data yet</p>
+            <a href="/admin/campaigns.php?action=new" class="text-primary text-sm hover:underline mt-2 inline-block">Create your first campaign</a>
+        </div>
+        <?php else: ?>
+        <div class="space-y-3">
+            <?php foreach ($topCampaigns as $campaign): ?>
+            <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-white/5 rounded-lg">
+                <div>
+                    <p class="font-medium text-sm truncate max-w-[150px]"><?= htmlspecialchars($campaign['name']) ?></p>
+                    <p class="text-xs text-slate-400"><?= ucfirst($campaign['utm_source']) ?></p>
+                </div>
+                <div class="text-right">
+                    <p class="font-bold text-sm"><?= number_format($campaign['visitor_count']) ?></p>
+                    <p class="text-xs text-slate-400">visitors</p>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+        <?php endif; ?>
+    </div>
+
+    <!-- UTM Source Breakdown -->
+    <div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-slate-700">
+        <h3 class="font-bold text-lg mb-4">By Source</h3>
+        <?php if (empty($utmSourceBreakdown)): ?>
+        <div class="text-center py-8 text-slate-400">
+            <span class="material-symbols-outlined text-3xl mb-2">analytics</span>
+            <p class="text-sm">No UTM data yet</p>
+        </div>
+        <?php else: ?>
+        <div class="space-y-2">
+            <?php 
+            $maxSourceCount = !empty($utmSourceBreakdown) ? (int)$utmSourceBreakdown[0]['count'] : 1;
+            foreach (array_slice($utmSourceBreakdown, 0, 6) as $src): 
+            ?>
+            <div class="flex items-center gap-3">
+                <div class="flex-1">
+                    <div class="flex justify-between text-sm mb-1">
+                        <span class="font-medium capitalize"><?= htmlspecialchars($src['utm_source']) ?></span>
+                        <span class="text-slate-500"><?= number_format($src['count']) ?></span>
+                    </div>
+                    <div class="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                        <div class="h-full bg-primary rounded-full" style="width: <?= ($src['count'] / $maxSourceCount) * 100 ?>%"></div>
+                    </div>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+        <?php endif; ?>
     </div>
 </div>
 

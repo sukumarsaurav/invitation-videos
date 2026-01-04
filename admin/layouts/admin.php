@@ -132,6 +132,7 @@ require_once __DIR__ . '/../auth.php';
                     $navItems = [
                         ['href' => '/admin/dashboard.php', 'icon' => 'dashboard', 'label' => 'Dashboard', 'page' => 'dashboard'],
                         ['href' => '/admin/analytics.php', 'icon' => 'analytics', 'label' => 'Analytics', 'page' => 'analytics'],
+                        ['href' => '/admin/campaigns.php', 'icon' => 'campaign', 'label' => 'Campaigns', 'page' => 'campaigns'],
                         ['href' => '/admin/orders.php', 'icon' => 'shopping_bag', 'label' => 'Orders', 'page' => 'orders'],
                         ['href' => '/admin/templates.php', 'icon' => 'video_library', 'label' => 'Templates', 'page' => 'templates'],
                         ['href' => '/admin/categories.php', 'icon' => 'category', 'label' => 'Categories', 'page' => 'categories'],

@@ -2,7 +2,7 @@
 /**
  * Visitor Tracker Service
  * 
- * Handles visitor session management and page view logging
+ * Handles visitor session management, page view logging, and UTM campaign tracking
  */
 
 require_once __DIR__ . '/../../config/database.php';
@@ -12,6 +12,8 @@ class VisitorTracker
 {
     private const SESSION_KEY = 'iv_visitor_id';
     private const SESSION_DURATION = 1800; // 30 minutes
+    private const UTM_COOKIE_KEY = 'iv_utm';
+    private const UTM_COOKIE_DURATION = 2592000; // 30 days
 
     /**
      * Check if user has given consent for tracking
@@ -57,6 +59,7 @@ class VisitorTracker
         $location = GeoLocationService::getFullLocationFromIP($ip);
         $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
         $referrer = $_SERVER['HTTP_REFERER'] ?? null;
+        $landingPage = $_SERVER['REQUEST_URI'] ?? '/';
 
         // Generate unique session ID
         $sessionId = bin2hex(random_bytes(16));
@@ -74,10 +77,35 @@ class VisitorTracker
             [$ip]
         ) ? 1 : 0;
 
-        // Insert visitor
+        // Extract UTM parameters from URL
+        $utmData = self::extractUTMParams();
+
+        // Persist UTM in cookie for attribution across pages
+        if (!empty($utmData['utm_source'])) {
+            self::persistUTMCookie($utmData);
+        } else {
+            // Check for existing UTM cookie
+            $utmData = self::getUTMFromCookie() ?: $utmData;
+        }
+
+        // Match to a campaign if possible
+        $campaignId = null;
+        if (!empty($utmData['utm_source']) && !empty($utmData['utm_medium']) && !empty($utmData['utm_campaign'])) {
+            require_once __DIR__ . '/CampaignService.php';
+            $campaignId = CampaignService::matchCampaign(
+                $utmData['utm_source'],
+                $utmData['utm_medium'],
+                $utmData['utm_campaign']
+            );
+        }
+
+        // Determine traffic source type
+        $trafficSource = self::deriveTrafficSource($utmData, $referrer);
+
+        // Insert visitor with UTM data
         Database::query(
-            "INSERT INTO visitors (session_id, ip_address, country_code, country_name, city, region, latitude, longitude, user_agent, referrer, device_type, browser, os, is_returning)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO visitors (session_id, ip_address, country_code, country_name, city, region, latitude, longitude, user_agent, referrer, landing_page, device_type, browser, os, is_returning, utm_source, utm_medium, utm_campaign, utm_term, utm_content, campaign_id, gclid, fbclid, traffic_source)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             [
                 $sessionId,
                 $ip,
@@ -89,10 +117,20 @@ class VisitorTracker
                 $location['longitude'],
                 substr($userAgent, 0, 500),
                 $referrer ? substr($referrer, 0, 500) : null,
+                substr($landingPage, 0, 500),
                 $deviceType,
                 $browser,
                 $os,
-                $isReturning
+                $isReturning,
+                $utmData['utm_source'] ?? null,
+                $utmData['utm_medium'] ?? null,
+                $utmData['utm_campaign'] ?? null,
+                $utmData['utm_term'] ?? null,
+                $utmData['utm_content'] ?? null,
+                $campaignId,
+                $utmData['gclid'] ?? null,
+                $utmData['fbclid'] ?? null,
+                $trafficSource
             ]
         );
 
@@ -108,6 +146,152 @@ class VisitorTracker
         ]);
 
         return $visitorId;
+    }
+
+    /**
+     * Extract UTM parameters from current request
+     */
+    public static function extractUTMParams(): array
+    {
+        return [
+            'utm_source' => isset($_GET['utm_source']) ? substr($_GET['utm_source'], 0, 100) : null,
+            'utm_medium' => isset($_GET['utm_medium']) ? substr($_GET['utm_medium'], 0, 100) : null,
+            'utm_campaign' => isset($_GET['utm_campaign']) ? substr($_GET['utm_campaign'], 0, 255) : null,
+            'utm_term' => isset($_GET['utm_term']) ? substr($_GET['utm_term'], 0, 255) : null,
+            'utm_content' => isset($_GET['utm_content']) ? substr($_GET['utm_content'], 0, 255) : null,
+            'gclid' => isset($_GET['gclid']) ? substr($_GET['gclid'], 0, 255) : null,
+            'fbclid' => isset($_GET['fbclid']) ? substr($_GET['fbclid'], 0, 255) : null,
+        ];
+    }
+
+    /**
+     * Persist UTM data in cookie for cross-page attribution
+     */
+    private static function persistUTMCookie(array $utmData): void
+    {
+        $cookieValue = json_encode($utmData);
+        $expires = time() + self::UTM_COOKIE_DURATION;
+
+        setcookie(self::UTM_COOKIE_KEY, $cookieValue, [
+            'expires' => $expires,
+            'path' => '/',
+            'httponly' => true,
+            'samesite' => 'Lax'
+        ]);
+    }
+
+    /**
+     * Get UTM data from cookie
+     */
+    public static function getUTMFromCookie(): ?array
+    {
+        if (!isset($_COOKIE[self::UTM_COOKIE_KEY])) {
+            return null;
+        }
+
+        $data = json_decode($_COOKIE[self::UTM_COOKIE_KEY], true);
+        return is_array($data) ? $data : null;
+    }
+
+    /**
+     * Get current campaign ID from visitor session or cookie
+     */
+    public static function getCurrentCampaignId(): ?int
+    {
+        // First check if we have a visitor with campaign
+        if (isset($_COOKIE[self::SESSION_KEY])) {
+            $visitor = Database::fetchOne(
+                "SELECT campaign_id FROM visitors WHERE session_id = ? ORDER BY created_at DESC LIMIT 1",
+                [$_COOKIE[self::SESSION_KEY]]
+            );
+            if ($visitor && $visitor['campaign_id']) {
+                return (int) $visitor['campaign_id'];
+            }
+        }
+
+        // Fallback to UTM cookie
+        $utmData = self::getUTMFromCookie();
+        if ($utmData && !empty($utmData['utm_source']) && !empty($utmData['utm_medium']) && !empty($utmData['utm_campaign'])) {
+            require_once __DIR__ . '/CampaignService.php';
+            return CampaignService::matchCampaign(
+                $utmData['utm_source'],
+                $utmData['utm_medium'],
+                $utmData['utm_campaign']
+            );
+        }
+
+        return null;
+    }
+
+    /**
+     * Derive traffic source type from UTM parameters and referrer
+     */
+    private static function deriveTrafficSource(array $utmData, ?string $referrer): string
+    {
+        // Check UTM medium first
+        if (!empty($utmData['utm_medium'])) {
+            $medium = strtolower($utmData['utm_medium']);
+
+            if (in_array($medium, ['cpc', 'ppc', 'paid', 'display', 'banner'])) {
+                return 'paid';
+            }
+            if (in_array($medium, ['email', 'newsletter'])) {
+                return 'email';
+            }
+            if (in_array($medium, ['social', 'organic_social', 'story', 'reel', 'post'])) {
+                return 'social';
+            }
+            if (in_array($medium, ['referral', 'affiliate'])) {
+                return 'referral';
+            }
+        }
+
+        // Check UTM source
+        if (!empty($utmData['utm_source'])) {
+            $source = strtolower($utmData['utm_source']);
+
+            if (in_array($source, ['facebook', 'instagram', 'twitter', 'linkedin', 'tiktok', 'pinterest', 'youtube'])) {
+                return 'social';
+            }
+            if (in_array($source, ['email', 'newsletter'])) {
+                return 'email';
+            }
+        }
+
+        // Check for click IDs (indicates paid traffic)
+        if (!empty($utmData['gclid']) || !empty($utmData['fbclid'])) {
+            return 'paid';
+        }
+
+        // Check referrer
+        if (!empty($referrer)) {
+            $refHost = parse_url($referrer, PHP_URL_HOST);
+
+            if ($refHost) {
+                // Check if it's a search engine
+                $searchEngines = ['google', 'bing', 'yahoo', 'duckduckgo', 'baidu', 'yandex'];
+                foreach ($searchEngines as $engine) {
+                    if (stripos($refHost, $engine) !== false) {
+                        return 'organic';
+                    }
+                }
+
+                // Check if it's a social network
+                $socialNetworks = ['facebook', 'instagram', 'twitter', 't.co', 'linkedin', 'tiktok', 'pinterest', 'youtube'];
+                foreach ($socialNetworks as $social) {
+                    if (stripos($refHost, $social) !== false) {
+                        return 'social';
+                    }
+                }
+
+                // Check if it's our own domain
+                if (stripos($refHost, 'invitationvideos.com') === false) {
+                    return 'referral';
+                }
+            }
+        }
+
+        return 'direct';
     }
 
     /**
