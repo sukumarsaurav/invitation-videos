@@ -350,16 +350,18 @@ if ($category && isset($categoryTitles[$category])) {
 </div>
 
 <!-- Mobile Sticky Bottom Bar (Card Style) -->
-<div id="mobile-bottom-bar"
-    class="fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 sm:hidden">
+<div id="mobile-bottom-bar" class="fixed bottom-0 left-0 right-0 z-40 sm:hidden"
+    style="background-color: var(--footer-bg-color, #1e293b);">
     <div class="flex">
         <button onclick="openSortSheet()"
-            class="flex-1 flex items-center justify-center gap-2 py-4 text-slate-700 dark:text-slate-200 font-medium transition-colors active:bg-slate-50 border-r border-slate-200 dark:border-slate-700">
+            class="flex-1 flex items-center justify-center gap-2 py-4 font-medium transition-colors active:opacity-80"
+            style="color: var(--footer-text-color, #94a3b8); border-right: 1px solid var(--footer-text-color, #94a3b8); border-opacity: 0.3;">
             <span class="material-symbols-outlined text-lg">swap_vert</span>
             <span class="text-sm uppercase tracking-wide">Sort</span>
         </button>
         <button onclick="openFilterSheet()"
-            class="flex-1 flex items-center justify-center gap-2 py-4 text-slate-700 dark:text-slate-200 font-medium transition-colors active:bg-slate-50">
+            class="flex-1 flex items-center justify-center gap-2 py-4 font-medium transition-colors active:opacity-80"
+            style="color: var(--footer-text-color, #94a3b8);">
             <span class="material-symbols-outlined text-lg">tune</span>
             <span class="text-sm uppercase tracking-wide">Filter</span>
             <?php if ($category || $tradition): ?>

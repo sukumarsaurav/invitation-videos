@@ -527,50 +527,35 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
 
             <!-- Progress Indicator (only show if more than 1 step) -->
             <?php if ($totalSteps > 1): ?>
-                <div class="space-y-4">
-                    <div
-                        class="flex flex-col gap-3 bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-200 dark:border-slate-800">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                                    <span class="material-symbols-outlined"><?= $stepIcons[$step] ?? 'edit' ?></span>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Step
-                                        <?= $currentStepIndex + 1 ?> of <?= $totalSteps ?>
-                                    </p>
-                                    <h2 class="font-bold text-slate-900 dark:text-white">
-                                        <?= $stepTitles[$step] ?? 'Details' ?>
-                                    </h2>
-                                </div>
-                            </div>
-                            <span class="text-primary font-bold"><?= $progressPercent ?>%</span>
-                        </div>
-                        <div class="rounded-full bg-slate-200 dark:bg-slate-700 h-2 overflow-hidden">
-                            <div class="h-full rounded-full bg-primary transition-all duration-500"
-                                style="width: <?= $progressPercent ?>%;"></div>
-                        </div>
-
-                        <!-- Step Dots -->
-                        <div class="flex items-center justify-between pt-2">
-                            <?php foreach ($availableSteps as $idx => $s): ?>
-                                <div class="flex items-center gap-2 <?= $idx < count($availableSteps) - 1 ? 'flex-1' : '' ?>">
-                                    <div
-                                        class="size-8 rounded-full flex items-center justify-center text-sm font-bold transition-all
-                                <?= $s < $step ? 'bg-green-500 text-white' : ($s === $step ? 'bg-primary text-white' : 'bg-slate-200 text-slate-500') ?>">
-                                        <?php if ($s < $step): ?>
-                                            <span class="material-symbols-outlined text-sm">check</span>
-                                        <?php else: ?>
-                                            <?= $idx + 1 ?>
-                                        <?php endif; ?>
-                                    </div>
-                                    <?php if ($idx < count($availableSteps) - 1): ?>
-                                        <div class="flex-1 h-0.5 <?= $s < $step ? 'bg-green-500' : 'bg-slate-200 dark:bg-slate-700' ?>">
-                                        </div>
+                <div class="mb-6">
+                    <!-- Step Circles with Connecting Lines -->
+                    <div class="flex items-center justify-center py-4">
+                        <?php foreach ($availableSteps as $idx => $s): ?>
+                            <div class="flex items-center <?= $idx < count($availableSteps) - 1 ? 'flex-1' : '' ?>">
+                                <!-- Step Circle -->
+                                <div
+                                    class="size-10 rounded-full flex items-center justify-center text-sm font-bold transition-all shrink-0
+                                    <?= $s < $step ? 'bg-green-500 text-white' : ($s === $step ? 'bg-primary text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400') ?>">
+                                    <?php if ($s < $step): ?>
+                                        <span class="material-symbols-outlined text-lg">check</span>
+                                    <?php else: ?>
+                                        <?= $idx + 1 ?>
                                     <?php endif; ?>
                                 </div>
-                            <?php endforeach; ?>
-                        </div>
+                                <!-- Connecting Line -->
+                                <?php if ($idx < count($availableSteps) - 1): ?>
+                                    <div
+                                        class="flex-1 h-0.5 mx-2 <?= $s < $step ? 'bg-green-500' : 'bg-slate-200 dark:bg-slate-700' ?>">
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <!-- Current Step Title -->
+                    <div class="text-center">
+                        <h2 class="font-bold text-slate-900 dark:text-white text-lg">
+                            <?= $stepTitles[$step] ?? 'Details' ?>
+                        </h2>
                     </div>
                 </div>
             <?php endif; ?>
