@@ -198,13 +198,23 @@ $categoryDisplayMode = $cmsSettings['category_display_mode'] ?? 'icon';
     <style>
         /* Dynamic Theme Colors from CMS */
         :root {
-            --color-primary: <?= htmlspecialchars($themePrimaryColor) ?>;
-            --color-text-primary: <?= htmlspecialchars($themeTextPrimary) ?>;
-            --color-text-secondary: <?= htmlspecialchars($themeTextSecondary) ?>;
-            --color-bg-light: <?= htmlspecialchars($themeBgLight) ?>;
-            --color-bg-dark: <?= htmlspecialchars($themeBgDark) ?>;
+            --color-primary:
+                <?= htmlspecialchars($themePrimaryColor) ?>
+            ;
+            --color-text-primary:
+                <?= htmlspecialchars($themeTextPrimary) ?>
+            ;
+            --color-text-secondary:
+                <?= htmlspecialchars($themeTextSecondary) ?>
+            ;
+            --color-bg-light:
+                <?= htmlspecialchars($themeBgLight) ?>
+            ;
+            --color-bg-dark:
+                <?= htmlspecialchars($themeBgDark) ?>
+            ;
         }
-        
+
         /* Critical CSS for above-the-fold content */
         *,
         ::after,
@@ -543,6 +553,110 @@ $categoryDisplayMode = $cmsSettings['category_display_mode'] ?? 'icon';
     <noscript>
         <link rel="stylesheet" href="/assets/css/app.css">
     </noscript>
+
+    <!-- Dynamic Theme Color Overrides (loaded after app.css) -->
+    <style>
+        /* Override Tailwind's hardcoded primary colors with CSS variables */
+        .text-primary {
+            color: var(--color-primary) !important;
+        }
+
+        .bg-primary {
+            background-color: var(--color-primary) !important;
+        }
+
+        .border-primary {
+            border-color: var(--color-primary) !important;
+        }
+
+        .border-l-primary {
+            border-left-color: var(--color-primary) !important;
+        }
+
+        .from-primary {
+            --tw-gradient-from: var(--color-primary) !important;
+        }
+
+        .to-primary {
+            --tw-gradient-to: var(--color-primary) !important;
+        }
+
+        .ring-primary {
+            --tw-ring-color: var(--color-primary) !important;
+        }
+
+        .shadow-primary\/25 {
+            --tw-shadow-color: color-mix(in srgb, var(--color-primary) 25%, transparent) !important;
+        }
+
+        .shadow-primary\/30 {
+            --tw-shadow-color: color-mix(in srgb, var(--color-primary) 30%, transparent) !important;
+        }
+
+        .hover\:text-primary:hover {
+            color: var(--color-primary) !important;
+        }
+
+        .hover\:bg-primary:hover {
+            background-color: var(--color-primary) !important;
+        }
+
+        .hover\:bg-primary\/90:hover {
+            background-color: color-mix(in srgb, var(--color-primary) 90%, transparent) !important;
+        }
+
+        .hover\:bg-primary\/10:hover {
+            background-color: color-mix(in srgb, var(--color-primary) 10%, transparent) !important;
+        }
+
+        .hover\:border-primary:hover {
+            border-color: var(--color-primary) !important;
+        }
+
+        .hover\:border-primary\/30:hover {
+            border-color: color-mix(in srgb, var(--color-primary) 30%, transparent) !important;
+        }
+
+        .focus\:ring-primary:focus {
+            --tw-ring-color: var(--color-primary) !important;
+        }
+
+        .focus\:border-primary:focus {
+            border-color: var(--color-primary) !important;
+        }
+
+        .group:hover .group-hover\:text-primary {
+            color: var(--color-primary) !important;
+        }
+
+        .bg-primary\/5 {
+            background-color: color-mix(in srgb, var(--color-primary) 5%, transparent) !important;
+        }
+
+        .bg-primary\/10 {
+            background-color: color-mix(in srgb, var(--color-primary) 10%, transparent) !important;
+        }
+
+        .bg-primary\/20 {
+            background-color: color-mix(in srgb, var(--color-primary) 20%, transparent) !important;
+        }
+
+        .from-primary\/5 {
+            --tw-gradient-from: color-mix(in srgb, var(--color-primary) 5%, transparent) !important;
+        }
+
+        .from-primary\/10 {
+            --tw-gradient-from: color-mix(in srgb, var(--color-primary) 10%, transparent) !important;
+        }
+
+        .dark\:from-primary\/10 {
+            --tw-gradient-from: color-mix(in srgb, var(--color-primary) 10%, transparent) !important;
+        }
+
+        .dark\:from-primary\/20 {
+            --tw-gradient-from: color-mix(in srgb, var(--color-primary) 20%, transparent) !important;
+        }
+    </style>
 
     <!-- Material Symbols - preload for fast icon rendering (CLS fix) -->
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
