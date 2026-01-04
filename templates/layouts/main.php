@@ -718,11 +718,11 @@ try {
 
                             <!-- Mega Menu Dropdown -->
                             <div class="absolute left-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50"
-                                style="width: 900px;">
+                                style="width: 700px;">
                                 <div
                                     class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 p-8">
-                                    <!-- 4 Column Grid -->
-                                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem;">
+                                    <!-- 3 Column Grid -->
+                                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;">
 
                                         <!-- Column 1: Party Types -->
                                         <div>
@@ -768,24 +768,6 @@ try {
                                                 <?php foreach (array_slice($megaMenuFestivals, 0, 12) as $item): ?>
                                                     <li>
                                                         <a href="/templates?festival=<?= $item['slug'] ?>"
-                                                            class="flex items-center gap-2 py-1 text-sm text-slate-600 hover:text-amber-500 transition-colors">
-                                                            <span class="text-slate-400">▸</span>
-                                                            <span
-                                                                class="uppercase text-xs tracking-wide"><?= Security::escape($item['name']) ?></span>
-                                                        </a>
-                                                    </li>
-                                                <?php endforeach; ?>
-                                            </ul>
-                                        </div>
-
-                                        <!-- Column 4: Language -->
-                                        <div>
-                                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
-                                                Language</h4>
-                                            <ul class="space-y-2">
-                                                <?php foreach ($megaMenuLanguages as $item): ?>
-                                                    <li>
-                                                        <a href="/templates?language=<?= $item['slug'] ?>"
                                                             class="flex items-center gap-2 py-1 text-sm text-slate-600 hover:text-amber-500 transition-colors">
                                                             <span class="text-slate-400">▸</span>
                                                             <span

@@ -230,6 +230,62 @@ $router->post('/api/template/{id}/customize', function ($id) {
     $controller->submitCustomization($id);
 });
 
+// Set language preference in session
+$router->post('/api/set-language', function () {
+    header('Content-Type: application/json');
+
+    $input = json_decode(file_get_contents('php://input'), true);
+    $language = $input['language'] ?? 'en';
+    $translationMode = $input['translation_mode'] ?? 'self';
+
+    // Validate language code
+    $validLanguages = ['en', 'hi', 'mr', 'ta', 'te', 'gu', 'bn', 'pa', 'kn', 'ml', 'or', 'as'];
+    if (!in_array($language, $validLanguages)) {
+        $language = 'en';
+    }
+
+    // Validate translation mode
+    if (!in_array($translationMode, ['self', 'translate'])) {
+        $translationMode = 'self';
+    }
+
+    $_SESSION['selected_language'] = $language;
+    $_SESSION['translation_mode'] = $translationMode;
+
+    echo json_encode(['success' => true, 'language' => $language, 'translation_mode' => $translationMode]);
+});
+
+// Get language-specific thumbnails for a template
+$router->get('/api/template/{id}/thumbnails', function ($id) {
+    require_once __DIR__ . '/config/database.php';
+    header('Content-Type: application/json');
+
+    $langCode = $_GET['lang'] ?? 'en';
+    $templateId = intval($id);
+
+    // Try to fetch thumbnails for the selected language
+    $thumbnails = Database::fetchAll(
+        "SELECT thumbnail_url, display_order, is_primary 
+         FROM template_thumbnails 
+         WHERE template_id = ? AND language_code = ? 
+         ORDER BY is_primary DESC, display_order ASC",
+        [$templateId, $langCode]
+    );
+
+    // If no thumbnails for this language, fall back to English
+    if (empty($thumbnails) && $langCode !== 'en') {
+        $thumbnails = Database::fetchAll(
+            "SELECT thumbnail_url, display_order, is_primary 
+             FROM template_thumbnails 
+             WHERE template_id = ? AND language_code = 'en' 
+             ORDER BY is_primary DESC, display_order ASC",
+            [$templateId]
+        );
+    }
+
+    echo json_encode(['thumbnails' => $thumbnails, 'language' => $langCode]);
+});
+
 // ===================
 // AUTH ROUTES
 // ===================
