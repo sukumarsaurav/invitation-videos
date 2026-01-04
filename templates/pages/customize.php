@@ -229,9 +229,10 @@ $progressPercent = $totalSteps > 0 ? round((($currentStepIndex + 1) / $totalStep
 
 // For mobile header: show back arrow instead of hamburger
 $isTemplateDetailPage = true;
-$templateBackUrl = ($step === 0) 
+$templateBackUrl = ($step === 0)
     ? '/templates'  // Preview → Gallery
     : '/template/' . $templateSlug;  // Customize steps → Preview
+$templateTitle = $template['title'];  // For header display on mobile
 
 $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
 ?>
@@ -243,8 +244,8 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
     <?php if ($step === 0): ?>
         <!-- ==================== PREVIEW PAGE ==================== -->
 
-        <!-- Breadcrumb -->
-        <nav class="flex items-center gap-2 text-sm mb-6">
+        <!-- Breadcrumb (hidden on mobile, header shows back arrow) -->
+        <nav class="hidden lg:flex items-center gap-2 text-sm mb-6">
             <a class="text-slate-500 hover:text-primary transition-colors" href="/">Home</a>
             <span class="text-slate-400">/</span>
             <a class="text-slate-500 hover:text-primary transition-colors" href="/templates">Templates</a>
@@ -492,11 +493,6 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                 <!-- Template Title & Progress -->
                 <div class="space-y-4">
                     <div>
-                        <a href="/template/<?= Security::escape($templateSlug) ?>"
-                            class="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-primary mb-2">
-                            <span class="material-symbols-outlined text-lg">arrow_back</span>
-                            Back to preview
-                        </a>
                         <h1 class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">
                             <?= Security::escape($template['title']) ?>
                         </h1>

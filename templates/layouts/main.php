@@ -569,6 +569,12 @@
                             </span>
                             <span class="text-xs text-slate-500"><?= $galleryTotalTemplates ?? 0 ?> Items</span>
                         </div>
+                    <?php elseif ($isTemplateDetailPage ?? false): ?>
+                        <!-- Mobile: Template name after logo -->
+                        <span
+                            class="lg:hidden text-sm font-semibold text-slate-900 dark:text-white truncate max-w-[150px] sm:max-w-[200px]">
+                            <?= Security::escape($templateTitle ?? '') ?>
+                        </span>
                     <?php endif; ?>
 
                     <!-- Desktop Navigation - Categories directly after logo -->
