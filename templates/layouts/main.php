@@ -495,6 +495,10 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
                 display: none
             }
 
+            .sm\:grid {
+                display: grid
+            }
+
             .md\:grid-cols-3 {
                 grid-template-columns: repeat(3, minmax(0, 1fr))
             }
@@ -1450,15 +1454,20 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
                             secured by</span>
                         <div class="flex items-center gap-2 flex-wrap justify-end">
                             <img src="/assets/images/ivitationvideos-200x120.webp" alt="Visa"
-                                class="h-6 sm:h-8 w-auto object-contain bg-white rounded-sm p-1" width="60" height="36" loading="lazy">
+                                class="h-6 sm:h-8 w-auto object-contain bg-white rounded-sm p-1" width="60" height="36"
+                                loading="lazy">
                             <img src="/assets/images/ivitationvideos-razorpay-.webp" alt="Razorpay"
-                                class="h-6 sm:h-8 w-auto object-contain bg-white rounded-sm p-1" width="80" height="36" loading="lazy">
+                                class="h-6 sm:h-8 w-auto object-contain bg-white rounded-sm p-1" width="80" height="36"
+                                loading="lazy">
                             <img src="/assets/images/ivitationvideos-Payment6-200x120.webp" alt="PayPal"
-                                class="h-6 sm:h-8 w-auto object-contain bg-white rounded-sm p-1" width="50" height="36" loading="lazy">
+                                class="h-6 sm:h-8 w-auto object-contain bg-white rounded-sm p-1" width="50" height="36"
+                                loading="lazy">
                             <img src="/assets/images/ivitationvideos-mastercard-200x120.webp" alt="MasterCard"
-                                class="h-6 sm:h-8 w-auto object-contain bg-white rounded-sm p-1" width="50" height="36" loading="lazy">
+                                class="h-6 sm:h-8 w-auto object-contain bg-white rounded-sm p-1" width="50" height="36"
+                                loading="lazy">
                             <img src="/assets/images/ivitationvideos-upi_logo.webp" alt="UPI"
-                                class="h-6 sm:h-8 w-auto object-contain bg-white rounded-sm p-1" width="50" height="36" loading="lazy">
+                                class="h-6 sm:h-8 w-auto object-contain bg-white rounded-sm p-1" width="50" height="36"
+                                loading="lazy">
                         </div>
                     </div>
                 </div>
