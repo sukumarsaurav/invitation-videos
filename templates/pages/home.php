@@ -74,7 +74,7 @@ $isHomePage = true;  // For floating help button display
 
 <!-- Hero Section -->
 <section
-    class="py-12 sm:py-16 lg:py-24 relative overflow-hidden<?= empty($heroImageDesktop) ? ' bg-gradient-to-br from-primary/5 via-purple-500/5 to-rose-500/5 dark:from-primary/10 dark:via-purple-500/10 dark:to-rose-500/10' : '' ?>">
+    class="min-h-[85vh] flex items-center justify-center relative overflow-hidden<?= empty($heroImageDesktop) ? ' bg-gradient-to-br from-primary/5 via-purple-500/5 to-rose-500/5 dark:from-primary/10 dark:via-purple-500/10 dark:to-rose-500/10' : '' ?>">
     <?php if (!empty($heroImageDesktop)): ?>
         <!-- Hero Background Image -->
         <div class="absolute inset-0 z-0">
@@ -85,21 +85,33 @@ $isHomePage = true;  // For floating help button display
                 <img src="<?= htmlspecialchars($heroImageDesktop) ?>" alt="Hero Background"
                     class="w-full h-full object-cover" loading="eager">
             </picture>
-            <div class="absolute inset-0 bg-black/40"></div>
+            <!-- Only show overlay if there's hero text -->
+            <?php if (!empty(trim(strip_tags($heroTitle))) || !empty(trim($heroSubtitle))): ?>
+                <div class="absolute inset-0 bg-black/40"></div>
+            <?php endif; ?>
         </div>
     <?php endif; ?>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 text-center relative z-10">
-        <h1
-            class="text-2xl sm:text-3xl md:text-4xl font-bold <?= !empty($heroImageDesktop) ? 'text-white' : 'text-slate-900 dark:text-white' ?> mb-3">
-            <?= $heroTitle ?>
-        </h1>
-        <p
-            class="<?= !empty($heroImageDesktop) ? 'text-white/90' : 'text-slate-600 dark:text-slate-400' ?> text-sm sm:text-base max-w-2xl mx-auto mb-6">
-            <?= htmlspecialchars($heroSubtitle) ?>
-        </p>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 text-center relative z-10 py-16">
+        <?php
+        // Only show hero text if it's not empty (after stripping HTML tags for title check)
+        $hasTitleText = !empty(trim(strip_tags($heroTitle)));
+        $hasSubtitleText = !empty(trim($heroSubtitle));
+        ?>
+        <?php if ($hasTitleText): ?>
+            <h1
+                class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold <?= !empty($heroImageDesktop) ? 'text-white' : 'text-slate-900 dark:text-white' ?> mb-3">
+                <?= $heroTitle ?>
+            </h1>
+        <?php endif; ?>
+        <?php if ($hasSubtitleText): ?>
+            <p
+                class="<?= !empty($heroImageDesktop) ? 'text-white/90' : 'text-slate-600 dark:text-slate-400' ?> text-sm sm:text-base md:text-lg max-w-2xl mx-auto mb-6">
+                <?= htmlspecialchars($heroSubtitle) ?>
+            </p>
+        <?php endif; ?>
         <a href="/templates"
-            class="inline-flex items-center gap-2 bg-primary text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all">
+            class="inline-flex items-center gap-2 bg-primary text-white font-bold px-6 py-3 sm:px-8 sm:py-4 rounded-xl shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all text-sm sm:text-base">
             <span>Browse Templates</span>
             <span class="material-symbols-outlined">arrow_forward</span>
         </a>
@@ -316,38 +328,47 @@ $isHomePage = true;  // For floating help button display
 </section>
 
 <!-- How It Works -->
-<section id="how-it-works" class="py-12 bg-white dark:bg-slate-900">
+<section id="how-it-works" class="py-12" style="background-color: var(--footer-bg-color, #ffffff);">
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
         <div class="text-center mb-10">
-            <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-3">How It Works</h2>
-            <p class="text-slate-600 dark:text-slate-400">Create your invitation in 3 easy steps</p>
+            <h2 class="text-2xl sm:text-3xl font-bold mb-3" style="color: var(--footer-text-color, #0f172a);">How It
+                Works</h2>
+            <p style="color: var(--footer-text-color, #64748b); opacity: 0.8;">Create your invitation in 3 easy steps
+            </p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="text-center p-6 rounded-2xl bg-slate-50 dark:bg-slate-800">
+            <div
+                class="text-center p-6 rounded-2xl bg-white/10 dark:bg-black/10 backdrop-blur-sm border border-white/20 dark:border-black/20">
                 <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                     <span class="material-symbols-outlined text-3xl text-primary">grid_view</span>
                 </div>
-                <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-2">1. Choose Template</h3>
-                <p class="text-sm text-slate-600 dark:text-slate-400">Browse our collection and select the perfect
+                <h3 class="font-bold text-lg mb-2" style="color: var(--footer-text-color, #0f172a);">1. Choose Template
+                </h3>
+                <p class="text-sm" style="color: var(--footer-text-color, #64748b); opacity: 0.8;">Browse our collection
+                    and select the perfect
                     design for your event.</p>
             </div>
 
-            <div class="text-center p-6 rounded-2xl bg-slate-50 dark:bg-slate-800">
+            <div
+                class="text-center p-6 rounded-2xl bg-white/10 dark:bg-black/10 backdrop-blur-sm border border-white/20 dark:border-black/20">
                 <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                     <span class="material-symbols-outlined text-3xl text-primary">edit</span>
                 </div>
-                <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-2">2. Customize</h3>
-                <p class="text-sm text-slate-600 dark:text-slate-400">Add your details, photos, and music to personalize
+                <h3 class="font-bold text-lg mb-2" style="color: var(--footer-text-color, #0f172a);">2. Customize</h3>
+                <p class="text-sm" style="color: var(--footer-text-color, #64748b); opacity: 0.8;">Add your details,
+                    photos, and music to personalize
                     your invitation.</p>
             </div>
 
-            <div class="text-center p-6 rounded-2xl bg-slate-50 dark:bg-slate-800">
+            <div
+                class="text-center p-6 rounded-2xl bg-white/10 dark:bg-black/10 backdrop-blur-sm border border-white/20 dark:border-black/20">
                 <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                     <span class="material-symbols-outlined text-3xl text-primary">share</span>
                 </div>
-                <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-2">3. Share</h3>
-                <p class="text-sm text-slate-600 dark:text-slate-400">Download your HD video and share it with friends
+                <h3 class="font-bold text-lg mb-2" style="color: var(--footer-text-color, #0f172a);">3. Share</h3>
+                <p class="text-sm" style="color: var(--footer-text-color, #64748b); opacity: 0.8;">Download your HD
+                    video and share it with friends
                     and family.</p>
             </div>
         </div>
@@ -469,87 +490,119 @@ $isHomePage = true;  // For floating help button display
 
 <!-- FAQ Section -->
 <section class="py-12 bg-slate-50 dark:bg-slate-800/50">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
         <div class="text-center mb-10">
             <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-3">Frequently Asked Questions
             </h2>
             <p class="text-slate-600 dark:text-slate-400">Everything you need to know about our video invitations</p>
         </div>
 
-        <div class="space-y-4" x-data="{ openFaq: 1 }">
-            <!-- FAQ Item 1 -->
-            <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm overflow-hidden">
-                <button @click="openFaq = openFaq === 1 ? null : 1"
-                    class="w-full px-6 py-4 flex items-center justify-between text-left">
-                    <h3 class="font-bold text-slate-900 dark:text-white">How do video invitations work?</h3>
-                    <span class="material-symbols-outlined text-primary transition-transform"
-                        :class="{ 'rotate-180': openFaq === 1 }">expand_more</span>
-                </button>
-                <div x-show="openFaq === 1" x-collapse class="px-6 pb-4">
-                    <p class="text-slate-600 dark:text-slate-400">Simply choose a template, customize it with your event
-                        details (names, date, venue, photos), and we'll generate a stunning HD video invitation. You can
-                        then download it and share via WhatsApp, email, or social media.</p>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4" x-data="{ openFaq: 1 }">
+            <!-- Left Column -->
+            <div class="space-y-4">
+                <!-- FAQ Item 1 -->
+                <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm overflow-hidden">
+                    <button @click="openFaq = openFaq === 1 ? null : 1"
+                        class="w-full px-6 py-4 flex items-center justify-between text-left">
+                        <h3 class="font-bold text-slate-900 dark:text-white">How do video invitations work?</h3>
+                        <span class="material-symbols-outlined text-primary transition-transform"
+                            :class="{ 'rotate-180': openFaq === 1 }">expand_more</span>
+                    </button>
+                    <div x-show="openFaq === 1" x-collapse class="px-6 pb-4">
+                        <p class="text-slate-600 dark:text-slate-400">Simply choose a template, customize it with your
+                            event
+                            details (names, date, venue, photos), and we'll generate a stunning HD video invitation. You
+                            can
+                            then download it and share via WhatsApp, email, or social media.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 2 -->
+                <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm overflow-hidden">
+                    <button @click="openFaq = openFaq === 2 ? null : 2"
+                        class="w-full px-6 py-4 flex items-center justify-between text-left">
+                        <h3 class="font-bold text-slate-900 dark:text-white">How long does it take to create an
+                            invitation?
+                        </h3>
+                        <span class="material-symbols-outlined text-primary transition-transform"
+                            :class="{ 'rotate-180': openFaq === 2 }">expand_more</span>
+                    </button>
+                    <div x-show="openFaq === 2" x-collapse class="px-6 pb-4">
+                        <p class="text-slate-600 dark:text-slate-400">Most video invitations are ready within 24-48
+                            hours.
+                            Premium rush delivery is available for urgent orders. You'll receive your video via email
+                            and
+                            can also download it from your account.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 3 -->
+                <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm overflow-hidden">
+                    <button @click="openFaq = openFaq === 3 ? null : 3"
+                        class="w-full px-6 py-4 flex items-center justify-between text-left">
+                        <h3 class="font-bold text-slate-900 dark:text-white">Can I make changes after ordering?</h3>
+                        <span class="material-symbols-outlined text-primary transition-transform"
+                            :class="{ 'rotate-180': openFaq === 3 }">expand_more</span>
+                    </button>
+                    <div x-show="openFaq === 3" x-collapse class="px-6 pb-4">
+                        <p class="text-slate-600 dark:text-slate-400">Yes! We offer one free revision per order. If you
+                            need
+                            to change names, dates, or other details, just contact our support team and we'll update
+                            your
+                            video promptly.</p>
+                    </div>
                 </div>
             </div>
 
-            <!-- FAQ Item 2 -->
-            <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm overflow-hidden">
-                <button @click="openFaq = openFaq === 2 ? null : 2"
-                    class="w-full px-6 py-4 flex items-center justify-between text-left">
-                    <h3 class="font-bold text-slate-900 dark:text-white">How long does it take to create an invitation?
-                    </h3>
-                    <span class="material-symbols-outlined text-primary transition-transform"
-                        :class="{ 'rotate-180': openFaq === 2 }">expand_more</span>
-                </button>
-                <div x-show="openFaq === 2" x-collapse class="px-6 pb-4">
-                    <p class="text-slate-600 dark:text-slate-400">Most video invitations are ready within 24-48 hours.
-                        Premium rush delivery is available for urgent orders. You'll receive your video via email and
-                        can also download it from your account.</p>
+            <!-- Right Column -->
+            <div class="space-y-4">
+                <!-- FAQ Item 4 -->
+                <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm overflow-hidden">
+                    <button @click="openFaq = openFaq === 4 ? null : 4"
+                        class="w-full px-6 py-4 flex items-center justify-between text-left">
+                        <h3 class="font-bold text-slate-900 dark:text-white">What video formats do you provide?</h3>
+                        <span class="material-symbols-outlined text-primary transition-transform"
+                            :class="{ 'rotate-180': openFaq === 4 }">expand_more</span>
+                    </button>
+                    <div x-show="openFaq === 4" x-collapse class="px-6 pb-4">
+                        <p class="text-slate-600 dark:text-slate-400">We provide videos in Full HD (1080p) MP4 format,
+                            optimized for sharing on WhatsApp, Instagram, Facebook, and other platforms. The videos are
+                            also
+                            perfect for displaying on screens at your event.</p>
+                    </div>
                 </div>
-            </div>
 
-            <!-- FAQ Item 3 -->
-            <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm overflow-hidden">
-                <button @click="openFaq = openFaq === 3 ? null : 3"
-                    class="w-full px-6 py-4 flex items-center justify-between text-left">
-                    <h3 class="font-bold text-slate-900 dark:text-white">Can I make changes after ordering?</h3>
-                    <span class="material-symbols-outlined text-primary transition-transform"
-                        :class="{ 'rotate-180': openFaq === 3 }">expand_more</span>
-                </button>
-                <div x-show="openFaq === 3" x-collapse class="px-6 pb-4">
-                    <p class="text-slate-600 dark:text-slate-400">Yes! We offer one free revision per order. If you need
-                        to change names, dates, or other details, just contact our support team and we'll update your
-                        video promptly.</p>
+                <!-- FAQ Item 5 -->
+                <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm overflow-hidden">
+                    <button @click="openFaq = openFaq === 5 ? null : 5"
+                        class="w-full px-6 py-4 flex items-center justify-between text-left">
+                        <h3 class="font-bold text-slate-900 dark:text-white">Do you offer refunds?</h3>
+                        <span class="material-symbols-outlined text-primary transition-transform"
+                            :class="{ 'rotate-180': openFaq === 5 }">expand_more</span>
+                    </button>
+                    <div x-show="openFaq === 5" x-collapse class="px-6 pb-4">
+                        <p class="text-slate-600 dark:text-slate-400">We offer a 100% satisfaction guarantee. If you're
+                            not
+                            happy with your video after revisions, we'll provide a full refund. Your satisfaction is our
+                            priority.</p>
+                    </div>
                 </div>
-            </div>
 
-            <!-- FAQ Item 4 -->
-            <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm overflow-hidden">
-                <button @click="openFaq = openFaq === 4 ? null : 4"
-                    class="w-full px-6 py-4 flex items-center justify-between text-left">
-                    <h3 class="font-bold text-slate-900 dark:text-white">What video formats do you provide?</h3>
-                    <span class="material-symbols-outlined text-primary transition-transform"
-                        :class="{ 'rotate-180': openFaq === 4 }">expand_more</span>
-                </button>
-                <div x-show="openFaq === 4" x-collapse class="px-6 pb-4">
-                    <p class="text-slate-600 dark:text-slate-400">We provide videos in Full HD (1080p) MP4 format,
-                        optimized for sharing on WhatsApp, Instagram, Facebook, and other platforms. The videos are also
-                        perfect for displaying on screens at your event.</p>
-                </div>
-            </div>
-
-            <!-- FAQ Item 5 -->
-            <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm overflow-hidden">
-                <button @click="openFaq = openFaq === 5 ? null : 5"
-                    class="w-full px-6 py-4 flex items-center justify-between text-left">
-                    <h3 class="font-bold text-slate-900 dark:text-white">Do you offer refunds?</h3>
-                    <span class="material-symbols-outlined text-primary transition-transform"
-                        :class="{ 'rotate-180': openFaq === 5 }">expand_more</span>
-                </button>
-                <div x-show="openFaq === 5" x-collapse class="px-6 pb-4">
-                    <p class="text-slate-600 dark:text-slate-400">We offer a 100% satisfaction guarantee. If you're not
-                        happy with your video after revisions, we'll provide a full refund. Your satisfaction is our
-                        priority.</p>
+                <!-- FAQ Item 6 -->
+                <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm overflow-hidden">
+                    <button @click="openFaq = openFaq === 6 ? null : 6"
+                        class="w-full px-6 py-4 flex items-center justify-between text-left">
+                        <h3 class="font-bold text-slate-900 dark:text-white">How can I share my invitation?</h3>
+                        <span class="material-symbols-outlined text-primary transition-transform"
+                            :class="{ 'rotate-180': openFaq === 6 }">expand_more</span>
+                    </button>
+                    <div x-show="openFaq === 6" x-collapse class="px-6 pb-4">
+                        <p class="text-slate-600 dark:text-slate-400">Once your video is ready, you can download it and
+                            share
+                            directly via WhatsApp, email, Facebook, Instagram, or any messaging app. The file is
+                            optimized
+                            for quick sharing without losing quality.</p>
+                    </div>
                 </div>
             </div>
         </div>
