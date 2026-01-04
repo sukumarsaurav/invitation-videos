@@ -472,14 +472,21 @@
     <header
         class="sticky top-0 z-50 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center h-16">
-                <!-- Left Section: Logo + Categories -->
-                <div class="flex items-center gap-6 lg:gap-8 flex-1">
+            <div class="flex items-center justify-between h-16">
+                <!-- Left Section: Mobile Menu + Logo -->
+                <div class="flex items-center gap-2 lg:gap-8 flex-1">
+                    <!-- Mobile Menu Button (Left) -->
+                    <button onclick="openMobileDrawer()"
+                        class="lg:hidden p-2 -ml-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
+                        aria-label="Open menu">
+                        <span class="material-symbols-outlined text-2xl">menu</span>
+                    </button>
+
                     <!-- Logo -->
                     <a href="/" class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                         <img src="/assets/images/inivitationVideoslogo.png" alt="<?= APP_NAME ?? 'InvitationVideos' ?>"
                             class="h-9 sm:h-10 w-auto" width="40" height="40" loading="eager" fetchpriority="high">
-                        <h2 class="text-lg sm:text-xl font-bold leading-tight tracking-tight">
+                        <h2 class="hidden sm:block text-lg sm:text-xl font-bold leading-tight tracking-tight">
                             <?= APP_NAME ?? 'Invitation Videos' ?>
                         </h2>
                     </a>
@@ -514,152 +521,209 @@
                     </nav>
                 </div>
 
-                <!-- Desktop Auth (Right) -->
-                <div class="hidden lg:flex items-center gap-4">
-                    <?php if (isset($_SESSION['user_id'])):
-                        $userAvatar = $_SESSION['user_avatar'] ?? '';
-                        $userName = $_SESSION['user_name'] ?? 'User';
-                        $userInitial = strtoupper(substr($userName, 0, 1));
-                        ?>
-                        <!-- Profile Dropdown -->
-                        <div class="relative group">
-                            <button
-                                class="flex items-center gap-2 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                <!-- Right Section -->
+                <div class="flex items-center gap-4">
+                    <!-- Desktop Auth -->
+                    <div class="hidden lg:flex items-center gap-4">
+                        <?php if (isset($_SESSION['user_id'])):
+                            $userAvatar = $_SESSION['user_avatar'] ?? '';
+                            $userName = $_SESSION['user_name'] ?? 'User';
+                            $userInitial = strtoupper(substr($userName, 0, 1));
+                            ?>
+                            <!-- Profile Dropdown -->
+                            <div class="relative group">
+                                <button
+                                    class="flex items-center gap-2 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                    <?php if ($userAvatar): ?>
+                                        <img src="<?= Security::escape($userAvatar) ?>" alt="Profile"
+                                            class="w-9 h-9 rounded-full object-cover border-2 border-primary/20" width="36"
+                                            height="36">
+                                    <?php else: ?>
+                                        <div
+                                            class="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">
+                                            <?= $userInitial ?>
+                                        </div>
+                                    <?php endif; ?>
+                                    <span class="material-symbols-outlined text-slate-400 text-lg">expand_more</span>
+                                </button>
+
+                                <!-- Dropdown Menu -->
+                                <div
+                                    class="absolute right-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                                    <div
+                                        class="bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 py-2 min-w-[200px]">
+                                        <!-- User Info -->
+                                        <div class="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+                                            <p class="font-medium text-slate-900 dark:text-white">
+                                                <?= Security::escape($userName) ?>
+                                            </p>
+                                            <p class="text-xs text-slate-500 truncate">
+                                                <?= Security::escape($_SESSION['user_email'] ?? '') ?>
+                                            </p>
+                                        </div>
+
+                                        <a href="/profile"
+                                            class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                                            <span class="material-symbols-outlined text-lg">person</span>
+                                            Profile
+                                        </a>
+                                        <a href="/my-orders"
+                                            class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                                            <span class="material-symbols-outlined text-lg">shopping_bag</span>
+                                            My Orders
+                                        </a>
+                                        <a href="/my-tickets"
+                                            class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                                            <span class="material-symbols-outlined text-lg">support_agent</span>
+                                            My Tickets
+                                        </a>
+
+                                        <div class="border-t border-slate-100 dark:border-slate-800 my-1"></div>
+
+                                        <a href="/logout"
+                                            class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                                            <span class="material-symbols-outlined text-lg">logout</span>
+                                            Sign Out
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php else: ?>
+                            <a href="/login" class="text-sm font-medium text-slate-600 hover:text-primary">Login</a>
+                            <a href="/register"
+                                class="flex h-10 items-center justify-center rounded-lg bg-primary px-5 text-sm font-bold text-white shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all">
+                                Get Started
+                            </a>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- Mobile Profile Icon (Right) -->
+                    <div class="lg:hidden">
+                        <?php if (isset($_SESSION['user_id'])):
+                            $userAvatar = $_SESSION['user_avatar'] ?? '';
+                            $userName = $_SESSION['user_name'] ?? 'User';
+                            $userInitial = strtoupper(substr($userName, 0, 1));
+                            ?>
+                            <a href="/profile" class="block p-1">
                                 <?php if ($userAvatar): ?>
                                     <img src="<?= Security::escape($userAvatar) ?>" alt="Profile"
                                         class="w-9 h-9 rounded-full object-cover border-2 border-primary/20" width="36"
                                         height="36">
                                 <?php else: ?>
                                     <div
-                                        class="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">
+                                        class="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">
                                         <?= $userInitial ?>
                                     </div>
                                 <?php endif; ?>
-                                <span class="material-symbols-outlined text-slate-400 text-lg">expand_more</span>
-                            </button>
-
-                            <!-- Dropdown Menu -->
-                            <div
-                                class="absolute right-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                                <div
-                                    class="bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 py-2 min-w-[200px]">
-                                    <!-- User Info -->
-                                    <div class="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
-                                        <p class="font-medium text-slate-900 dark:text-white">
-                                            <?= Security::escape($userName) ?>
-                                        </p>
-                                        <p class="text-xs text-slate-500 truncate">
-                                            <?= Security::escape($_SESSION['user_email'] ?? '') ?>
-                                        </p>
-                                    </div>
-
-                                    <a href="/profile"
-                                        class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                                        <span class="material-symbols-outlined text-lg">person</span>
-                                        Profile
-                                    </a>
-                                    <a href="/my-orders"
-                                        class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                                        <span class="material-symbols-outlined text-lg">shopping_bag</span>
-                                        My Orders
-                                    </a>
-                                    <a href="/my-tickets"
-                                        class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                                        <span class="material-symbols-outlined text-lg">support_agent</span>
-                                        My Tickets
-                                    </a>
-
-                                    <div class="border-t border-slate-100 dark:border-slate-800 my-1"></div>
-
-                                    <a href="/logout"
-                                        class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
-                                        <span class="material-symbols-outlined text-lg">logout</span>
-                                        Sign Out
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    <?php else: ?>
-                        <a href="/login" class="text-sm font-medium text-slate-600 hover:text-primary">Login</a>
-                        <a href="/register"
-                            class="flex h-10 items-center justify-center rounded-lg bg-primary px-5 text-sm font-bold text-white shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all">
-                            Get Started
-                        </a>
-                    <?php endif; ?>
+                            </a>
+                        <?php else: ?>
+                            <a href="/login"
+                                class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
+                                aria-label="Login">
+                                <span class="material-symbols-outlined text-2xl">person</span>
+                            </a>
+                        <?php endif; ?>
+                    </div>
                 </div>
-
-                <!-- Mobile Menu Button -->
-                <button onclick="toggleMobileMenu()"
-                    class="md:hidden p-2 -mr-2 rounded-lg hover:bg-slate-100 text-slate-600">
-                    <span id="menuIcon" class="material-symbols-outlined text-2xl">menu</span>
-                </button>
             </div>
         </div>
-
-        <!-- Mobile Menu -->
-        <div id="mobileMenu"
-            class="md:hidden closed border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-            <nav class="px-4 py-4 space-y-1">
-                <!-- Category Links -->
-                <a href="/templates?category=wedding"
-                    class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-100 font-medium">
-                    <span class="material-symbols-outlined text-rose-500">favorite</span>
-                    Wedding
-                </a>
-                <a href="/templates?category=birthday"
-                    class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-100 font-medium">
-                    <span class="material-symbols-outlined text-amber-500">cake</span>
-                    Birthday
-                </a>
-                <a href="/templates?category=corporate"
-                    class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-100 font-medium">
-                    <span class="material-symbols-outlined text-blue-500">business_center</span>
-                    Corporate
-                </a>
-                <a href="/templates?category=baby_shower"
-                    class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-100 font-medium">
-                    <span class="material-symbols-outlined text-teal-500">child_care</span>
-                    Baby Shower
-                </a>
-                <a href="/templates?category=anniversary"
-                    class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-100 font-medium">
-                    <span class="material-symbols-outlined text-purple-500">celebration</span>
-                    Anniversary
-                </a>
-
-                <div class="border-t border-slate-200 my-3"></div>
-
-                <?php if (isset($_SESSION['user_id'])): ?>
-                    <a href="/my-orders"
-                        class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-100 font-medium">
-                        <span class="material-symbols-outlined">shopping_bag</span>
-                        My Orders
-                    </a>
-                    <a href="/my-tickets"
-                        class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-100 font-medium">
-                        <span class="material-symbols-outlined">support_agent</span>
-                        My Tickets
-                    </a>
-                    <a href="/logout"
-                        class="flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 font-medium">
-                        <span class="material-symbols-outlined">logout</span>
-                        Logout
-                    </a>
-                <?php else: ?>
-                    <a href="/login"
-                        class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-100 font-medium">
-                        <span class="material-symbols-outlined">login</span>
-                        Login
-                    </a>
-                    <a href="/register"
-                        class="flex items-center justify-center gap-2 mt-2 py-3 rounded-lg bg-primary text-white font-bold shadow-lg shadow-primary/30">
-                        <span class="material-symbols-outlined">rocket_launch</span>
-                        Get Started Free
-                    </a>
-                <?php endif; ?>
-            </nav>
-        </div>
     </header>
+
+    <!-- Mobile Side Drawer Backdrop -->
+    <div id="drawerBackdrop" onclick="closeMobileDrawer()"
+        class="fixed inset-0 bg-black/50 z-50 hidden opacity-0 transition-opacity duration-300 lg:hidden"></div>
+
+    <!-- Mobile Side Drawer -->
+    <div id="mobileDrawer"
+        class="fixed top-0 left-0 h-full w-72 max-w-[80vw] bg-white dark:bg-slate-900 z-50 transform -translate-x-full transition-transform duration-300 ease-out shadow-2xl lg:hidden">
+        <!-- Drawer Header -->
+        <div class="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800">
+            <a href="/" class="flex items-center gap-2">
+                <img src="/assets/images/inivitationVideoslogo.png" alt="<?= APP_NAME ?? 'InvitationVideos' ?>"
+                    class="h-8 w-auto" width="32" height="32">
+                <span class="font-bold text-lg"><?= APP_NAME ?? 'Invitation Videos' ?></span>
+            </a>
+            <button onclick="closeMobileDrawer()"
+                class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
+                aria-label="Close menu">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <!-- Drawer Navigation -->
+        <nav class="p-4 space-y-1 overflow-y-auto" style="max-height: calc(100vh - 80px);">
+            <!-- Category Links (No Icons) -->
+            <a href="/templates?category=wedding"
+                class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                Wedding
+            </a>
+            <a href="/templates?category=birthday"
+                class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                Birthday
+            </a>
+            <a href="/templates?category=corporate"
+                class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                Corporate
+            </a>
+            <a href="/templates?category=baby_shower"
+                class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                Baby Shower
+            </a>
+            <a href="/templates?category=anniversary"
+                class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                Anniversary
+            </a>
+
+            <div class="border-t border-slate-200 dark:border-slate-700 my-3"></div>
+
+            <a href="/templates"
+                class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                All Templates
+            </a>
+            <a href="/blog"
+                class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                Blog
+            </a>
+
+            <div class="border-t border-slate-200 dark:border-slate-700 my-3"></div>
+
+            <?php if (isset($_SESSION['user_id'])): ?>
+                <a href="/my-orders"
+                    class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                    My Orders
+                </a>
+                <a href="/my-tickets"
+                    class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                    My Tickets
+                </a>
+                <a href="/logout"
+                    class="block px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 font-medium transition-colors">
+                    Logout
+                </a>
+            <?php else: ?>
+                <a href="/login"
+                    class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                    Login
+                </a>
+                <a href="/register"
+                    class="block px-4 py-3 mt-2 rounded-lg bg-primary text-white text-center font-bold shadow-lg shadow-primary/30 hover:bg-primary/90 transition-colors">
+                    Get Started Free
+                </a>
+            <?php endif; ?>
+
+            <div class="border-t border-slate-200 dark:border-slate-700 my-3"></div>
+
+            <!-- Support Links -->
+            <a href="/support"
+                class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                Help Center
+            </a>
+            <a href="/contact"
+                class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                Contact Us
+            </a>
+        </nav>
+    </div>
 
     <!-- Main Content -->
     <main class="flex-1">
@@ -874,20 +938,31 @@
     </footer>
 
     <script>
-        // Mobile menu toggle
-        function toggleMobileMenu() {
-            const menu = document.getElementById('mobileMenu');
-            const icon = document.getElementById('menuIcon');
-
-            menu.classList.toggle('closed');
-            icon.textContent = menu.classList.contains('closed') ? 'menu' : 'close';
+        // Mobile drawer functions
+        function openMobileDrawer() {
+            const drawer = document.getElementById('mobileDrawer');
+            const backdrop = document.getElementById('drawerBackdrop');
+            
+            drawer.classList.remove('-translate-x-full');
+            backdrop.classList.remove('hidden');
+            setTimeout(() => backdrop.classList.add('opacity-100'), 10);
+            document.body.style.overflow = 'hidden';
         }
 
-        // Close menu on resize to desktop
+        function closeMobileDrawer() {
+            const drawer = document.getElementById('mobileDrawer');
+            const backdrop = document.getElementById('drawerBackdrop');
+            
+            drawer.classList.add('-translate-x-full');
+            backdrop.classList.remove('opacity-100');
+            setTimeout(() => backdrop.classList.add('hidden'), 300);
+            document.body.style.overflow = '';
+        }
+
+        // Close drawer on resize to desktop
         window.addEventListener('resize', () => {
-            if (window.innerWidth >= 768) {
-                document.getElementById('mobileMenu').classList.add('closed');
-                document.getElementById('menuIcon').textContent = 'menu';
+            if (window.innerWidth >= 1024) {
+                closeMobileDrawer();
             }
         });
 
