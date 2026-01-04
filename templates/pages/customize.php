@@ -254,7 +254,7 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                     <div class="flex gap-3">
                         <!-- Thumbnail Strip -->
                         <?php if (!empty($galleryImages) || !empty($template['thumbnail_url'])): ?>
-                            <div class="hidden md:flex flex-col gap-2 w-16 shrink-0">
+                            <div class="hidden lg:flex flex-col gap-2 w-16 shrink-0">
                                 <!-- Primary Thumbnail -->
                                 <button type="button"
                                     class="gallery-thumb aspect-[9/16] rounded-lg overflow-hidden border-2 border-primary ring-2 ring-primary/20 bg-slate-100 transition-all"
@@ -307,7 +307,7 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
 
                             <!-- Mobile Thumbnail Strip -->
                             <?php if (!empty($galleryImages)): ?>
-                                <div class="flex md:hidden gap-2 mt-3 overflow-x-auto pb-2">
+                                <div class="flex lg:hidden gap-2 mt-3 overflow-x-auto pb-2">
                                     <button type="button"
                                         class="gallery-thumb shrink-0 w-14 aspect-[9/16] rounded-lg overflow-hidden border-2 border-primary ring-2 ring-primary/20 bg-slate-100"
                                         data-full-src="<?= Security::escape($template['thumbnail_url'] ?? '/assets/images/placeholder.jpg') ?>">
@@ -326,8 +326,8 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                                 </div>
                             <?php endif; ?>
 
-                            <!-- CTA Button below image (hidden on mobile, shown on md+) -->
-                            <div class="hidden md:block mt-4">
+                            <!-- CTA Button below image (hidden on mobile, shown on lg+) -->
+                            <div class="hidden lg:block mt-4">
                                 <a href="/template/<?= Security::escape($templateSlug) ?>?step=<?= $availableSteps[0] ?? 1 ?>"
                                     class="w-full flex items-center justify-center gap-2 px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all text-lg">
                                     <span>Customize Now</span>
@@ -450,9 +450,9 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
             </div>
         <?php endif; ?>
 
-        <!-- Fixed Bottom Bar for Mobile (up to md breakpoint) -->
+        <!-- Fixed Bottom Bar for Mobile (up to lg breakpoint) -->
         <div
-            class="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
+            class="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
             <div class="flex items-center justify-between gap-4 max-w-7xl mx-auto">
                 <div class="flex-1">
                     <p class="text-xs text-slate-500">Starting at</p>
@@ -473,7 +473,7 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
         </div>
 
         <!-- Spacer for fixed bottom bar on mobile -->
-        <div class="h-24 md:hidden"></div>
+        <div class="h-24 lg:hidden"></div>
 
     <?php else: ?>
         <!-- ==================== CUSTOMIZATION STEPS ==================== -->
