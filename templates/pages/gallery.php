@@ -6,6 +6,11 @@ require_once __DIR__ . '/../../src/Core/ImageHelper.php';
 // Flag to hide footer on mobile (for sticky bottom bar)
 $hideFooterOnMobile = true;
 
+// Flag for gallery page - enables special mobile header
+$isGalleryPage = true;
+$currentCategory = $_GET['category'] ?? null;
+$galleryCategories = [];
+
 // Get filters
 $category = $_GET['category'] ?? null;
 $tradition = $_GET['tradition'] ?? null;
@@ -64,6 +69,9 @@ $allCategories = [
     'holidays' => ['name' => 'Holidays', 'icon' => 'redeem', 'color' => 'text-red-500'],
 ];
 
+// Pass categories to layout for mobile header
+$galleryCategories = $allCategories;
+
 // Cultural traditions
 $traditions = ['Hindu', 'Muslim', 'Christian', 'Sikh', 'Jewish', 'Chinese', 'Western'];
 
@@ -99,7 +107,8 @@ if ($category && isset($categoryTitles[$category])) {
     <div class="flex w-full max-w-[1600px] flex-col lg:flex-row">
 
         <!-- Desktop Sidebar Filters (hidden on mobile) -->
-        <aside class="hidden lg:block w-72 xl:w-80 lg:shrink-0 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-y-auto lg:h-[calc(100vh-65px)] lg:sticky lg:top-[65px]">
+        <aside
+            class="hidden lg:block w-72 xl:w-80 lg:shrink-0 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-y-auto lg:h-[calc(100vh-65px)] lg:sticky lg:top-[65px]">
             <div class="flex flex-col h-full p-6">
                 <!-- Categories -->
                 <div class="py-4">
@@ -111,11 +120,12 @@ if ($category && isset($categoryTitles[$category])) {
                             All Templates
                         </a>
                         <?php foreach ($allCategories as $key => $cat): ?>
-                                <a href="/templates?category=<?= $key ?>"
-                                    class="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium <?= $category === $key ? 'text-primary bg-primary/5 font-bold' : 'text-slate-600 hover:text-primary' ?> rounded-lg">
-                                    <span class="material-symbols-outlined text-lg <?= $cat['color'] ?>"><?= $cat['icon'] ?></span>
-                                    <?= $cat['name'] ?>
-                                </a>
+                            <a href="/templates?category=<?= $key ?>"
+                                class="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium <?= $category === $key ? 'text-primary bg-primary/5 font-bold' : 'text-slate-600 hover:text-primary' ?> rounded-lg">
+                                <span
+                                    class="material-symbols-outlined text-lg <?= $cat['color'] ?>"><?= $cat['icon'] ?></span>
+                                <?= $cat['name'] ?>
+                            </a>
                         <?php endforeach; ?>
                     </div>
                 </div>
@@ -124,14 +134,15 @@ if ($category && isset($categoryTitles[$category])) {
 
                 <!-- Cultural Traditions -->
                 <div class="py-4">
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 px-1">Cultural Traditions</h3>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 px-1">Cultural Traditions
+                    </h3>
                     <div class="flex flex-wrap gap-2">
                         <?php foreach ($traditions as $t): ?>
-                                <a href="/templates?tradition=<?= strtolower($t) ?><?= $category ? '&category=' . $category : '' ?>"
-                                    class="inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-bold transition-all 
+                            <a href="/templates?tradition=<?= strtolower($t) ?><?= $category ? '&category=' . $category : '' ?>"
+                                class="inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-bold transition-all 
                                <?= $tradition === strtolower($t) ? 'border-primary bg-primary text-white' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 hover:border-primary hover:text-primary' ?>">
-                                    <?= $t ?>
-                                </a>
+                                <?= $t ?>
+                            </a>
                         <?php endforeach; ?>
                     </div>
                 </div>
@@ -143,10 +154,10 @@ if ($category && isset($categoryTitles[$category])) {
                     <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 px-1">Sort By</h3>
                     <div class="space-y-1">
                         <?php foreach ($sortOptions as $key => $label): ?>
-                                <a href="?<?= http_build_query(array_merge($_GET, ['sort' => $key])) ?>"
-                                    class="block px-3 py-2 text-sm rounded-lg <?= $sort === $key ? 'text-primary bg-primary/5 font-bold' : 'text-slate-600 hover:text-primary hover:bg-slate-50' ?>">
-                                    <?= $label ?>
-                                </a>
+                            <a href="?<?= http_build_query(array_merge($_GET, ['sort' => $key])) ?>"
+                                class="block px-3 py-2 text-sm rounded-lg <?= $sort === $key ? 'text-primary bg-primary/5 font-bold' : 'text-slate-600 hover:text-primary hover:bg-slate-50' ?>">
+                                <?= $label ?>
+                            </a>
                         <?php endforeach; ?>
                     </div>
                 </div>
@@ -157,7 +168,8 @@ if ($category && isset($categoryTitles[$category])) {
         <main class="flex-1 p-4 sm:p-6 lg:p-10 pb-24 sm:pb-6">
             <!-- Header -->
             <div class="mb-6">
-                <nav class="flex items-center gap-2 text-sm mb-4">
+                <!-- Breadcrumb - hidden on mobile, visible on desktop -->
+                <nav class="hidden sm:flex items-center gap-2 text-sm mb-4">
                     <a class="text-slate-500 hover:text-primary transition-colors" href="/">Home</a>
                     <span class="text-slate-400">/</span>
                     <span class="font-medium text-slate-900 dark:text-white">Templates</span>
@@ -165,8 +177,10 @@ if ($category && isset($categoryTitles[$category])) {
 
                 <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                     <div>
-                        <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                            <?= $category && isset($allCategories[$category]) ? $allCategories[$category]['name'] : 'All' ?> Templates
+                        <h1
+                            class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                            <?= $category && isset($allCategories[$category]) ? $allCategories[$category]['name'] : 'All' ?>
+                            Templates
                         </h1>
                         <p class="text-slate-500 dark:text-slate-400 mt-1">
                             <span id="template-count"><?= $totalTemplates ?></span> templates found
@@ -179,9 +193,10 @@ if ($category && isset($categoryTitles[$category])) {
                         <select onchange="window.location.href=this.value"
                             class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2 text-sm font-medium">
                             <?php foreach ($sortOptions as $key => $label): ?>
-                                    <option value="?<?= http_build_query(array_merge($_GET, ['sort' => $key])) ?>" <?= $sort === $key ? 'selected' : '' ?>>
-                                        <?= $label ?>
-                                    </option>
+                                <option value="?<?= http_build_query(array_merge($_GET, ['sort' => $key])) ?>"
+                                    <?= $sort === $key ? 'selected' : '' ?>>
+                                    <?= $label ?>
+                                </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -189,78 +204,89 @@ if ($category && isset($categoryTitles[$category])) {
             </div>
 
             <!-- Template Grid -->
-            <div id="templates-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+            <div id="templates-grid"
+                class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
                 <?php foreach ($templates as $index => $template):
                     $isAboveFold = $index < 4;
                     ?>
-                        <a href="/template/<?= Security::escape($template['slug']) ?>"
-                            class="group block bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-100 dark:border-slate-800 hover:border-primary/30">
-                            <div class="relative aspect-[4/5] overflow-hidden bg-slate-100">
-                                <?= ImageHelper::responsiveThumbnail(
-                                    $template['thumbnail_url'] ?? '/assets/images/placeholder.jpg',
-                                    $template['title'],
-                                    $isAboveFold,
-                                    $isAboveFold,
-                                    'absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105'
-                                ) ?>
+                    <a href="/template/<?= Security::escape($template['slug']) ?>"
+                        class="group block bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-100 dark:border-slate-800 hover:border-primary/30">
+                        <div class="relative aspect-[4/5] overflow-hidden bg-slate-100">
+                            <?= ImageHelper::responsiveThumbnail(
+                                $template['thumbnail_url'] ?? '/assets/images/placeholder.jpg',
+                                $template['title'],
+                                $isAboveFold,
+                                $isAboveFold,
+                                'absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105'
+                            ) ?>
 
-                                <!-- Badges -->
-                                <?php if ($template['is_premium']): ?>
-                                        <span class="absolute top-2 left-2 px-2 py-1 rounded-md bg-white/90 text-xs font-bold text-slate-900 backdrop-blur-sm">Premium</span>
-                                <?php elseif ($template['price_usd'] == 0): ?>
-                                        <span class="absolute top-2 left-2 px-2 py-1 rounded-md bg-green-500/90 text-xs font-bold text-white backdrop-blur-sm">Free</span>
-                                <?php endif; ?>
-                            </div>
+                            <!-- Badges -->
+                            <?php if ($template['is_premium']): ?>
+                                <span
+                                    class="absolute top-2 left-2 px-2 py-1 rounded-md bg-white/90 text-xs font-bold text-slate-900 backdrop-blur-sm">Premium</span>
+                            <?php elseif ($template['price_usd'] == 0): ?>
+                                <span
+                                    class="absolute top-2 left-2 px-2 py-1 rounded-md bg-green-500/90 text-xs font-bold text-white backdrop-blur-sm">Free</span>
+                            <?php endif; ?>
+                        </div>
 
-                            <div class="p-3 sm:p-4">
-                                <h3 class="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-primary transition-colors">
-                                    <?= Security::escape($template['title']) ?>
-                                </h3>
-                                <p class="text-sm font-bold mt-1 <?= $template['price_usd'] == 0 ? 'text-green-600' : 'text-primary' ?>">
-                                    <?= $template['price_usd'] == 0 ? 'Free' : '$' . number_format($template['price_usd'], 0) ?>
-                                </p>
-                            </div>
-                        </a>
+                        <div class="p-3 sm:p-4">
+                            <h3
+                                class="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-primary transition-colors">
+                                <?= Security::escape($template['title']) ?>
+                            </h3>
+                            <p
+                                class="text-sm font-bold mt-1 <?= $template['price_usd'] == 0 ? 'text-green-600' : 'text-primary' ?>">
+                                <?= $template['price_usd'] == 0 ? 'Free' : '$' . number_format($template['price_usd'], 0) ?>
+                            </p>
+                        </div>
+                    </a>
                 <?php endforeach; ?>
             </div>
 
             <!-- Load More Trigger -->
             <?php if ($hasMore): ?>
-                    <div id="load-more-trigger" class="py-8 flex justify-center">
-                        <div id="loading-spinner" class="flex items-center gap-2 text-slate-500">
-                            <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <span>Loading more...</span>
-                        </div>
+                <div id="load-more-trigger" class="py-8 flex justify-center">
+                    <div id="loading-spinner" class="flex items-center gap-2 text-slate-500">
+                        <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                            </circle>
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                            </path>
+                        </svg>
+                        <span>Loading more...</span>
                     </div>
+                </div>
             <?php endif; ?>
 
             <!-- No Results -->
             <?php if (empty($templates)): ?>
-                    <div class="text-center py-12">
-                        <span class="material-symbols-outlined text-6xl text-slate-300">movie</span>
-                        <h3 class="mt-4 text-xl font-bold">No templates found</h3>
-                        <p class="text-slate-500 mt-2">Try adjusting your filters</p>
-                        <a href="/templates" class="inline-flex items-center gap-2 mt-4 px-6 py-3 bg-primary text-white font-bold rounded-xl">
-                            View All Templates
-                        </a>
-                    </div>
+                <div class="text-center py-12">
+                    <span class="material-symbols-outlined text-6xl text-slate-300">movie</span>
+                    <h3 class="mt-4 text-xl font-bold">No templates found</h3>
+                    <p class="text-slate-500 mt-2">Try adjusting your filters</p>
+                    <a href="/templates"
+                        class="inline-flex items-center gap-2 mt-4 px-6 py-3 bg-primary text-white font-bold rounded-xl">
+                        View All Templates
+                    </a>
+                </div>
             <?php endif; ?>
         </main>
     </div>
 </div>
 
 <!-- Mobile Sticky Bottom Bar -->
-<div id="mobile-bottom-bar" class="fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 p-3 sm:hidden">
+<div id="mobile-bottom-bar"
+    class="fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 p-3 sm:hidden">
     <div class="flex gap-3 max-w-lg mx-auto">
         <button onclick="openFilterSheet()"
             class="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium transition-colors active:bg-slate-200">
             <span class="material-symbols-outlined text-xl">tune</span>
             <span>Filter</span>
             <?php if ($category || $tradition): ?>
-                    <span class="w-2 h-2 rounded-full bg-primary"></span>
+                <span class="w-2 h-2 rounded-full bg-primary"></span>
             <?php endif; ?>
         </button>
         <button onclick="openSortSheet()"
@@ -276,12 +302,13 @@ if ($category && isset($categoryTitles[$category])) {
     class="fixed inset-0 bg-black/50 z-[100] opacity-0 pointer-events-none transition-opacity duration-300"></div>
 
 <!-- Filter Bottom Sheet -->
-<div id="filter-sheet" class="fixed bottom-0 left-0 right-0 z-[110] bg-white dark:bg-slate-900 rounded-t-3xl transform translate-y-full transition-transform duration-300 ease-out max-h-[85vh] overflow-hidden flex flex-col">
+<div id="filter-sheet"
+    class="fixed bottom-0 left-0 right-0 z-[110] bg-white dark:bg-slate-900 rounded-t-3xl transform translate-y-full transition-transform duration-300 ease-out max-h-[85vh] overflow-hidden flex flex-col">
     <!-- Handle -->
     <div class="flex justify-center pt-3 pb-2">
         <div class="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></div>
     </div>
-    
+
     <!-- Header -->
     <div class="flex items-center justify-between px-5 pb-4 border-b border-slate-200 dark:border-slate-700">
         <h3 class="text-lg font-bold">Filter Templates</h3>
@@ -296,15 +323,15 @@ if ($category && isset($categoryTitles[$category])) {
         <div>
             <h4 class="text-sm font-bold text-slate-500 uppercase tracking-wide mb-3">Category</h4>
             <div class="flex flex-wrap gap-2" id="filter-categories">
-                <button type="button" data-category="" 
+                <button type="button" data-category=""
                     class="filter-cat-btn px-4 py-2 rounded-full text-sm font-medium border transition-all <?= !$category ? 'border-primary bg-primary text-white' : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300' ?>">
                     All
                 </button>
                 <?php foreach ($allCategories as $key => $cat): ?>
-                        <button type="button" data-category="<?= $key ?>"
-                            class="filter-cat-btn px-4 py-2 rounded-full text-sm font-medium border transition-all <?= $category === $key ? 'border-primary bg-primary text-white' : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300' ?>">
-                            <?= $cat['name'] ?>
-                        </button>
+                    <button type="button" data-category="<?= $key ?>"
+                        class="filter-cat-btn px-4 py-2 rounded-full text-sm font-medium border transition-all <?= $category === $key ? 'border-primary bg-primary text-white' : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300' ?>">
+                        <?= $cat['name'] ?>
+                    </button>
                 <?php endforeach; ?>
             </div>
         </div>
@@ -313,15 +340,15 @@ if ($category && isset($categoryTitles[$category])) {
         <div>
             <h4 class="text-sm font-bold text-slate-500 uppercase tracking-wide mb-3">Cultural Tradition</h4>
             <div class="flex flex-wrap gap-2" id="filter-traditions">
-                <button type="button" data-tradition="" 
+                <button type="button" data-tradition=""
                     class="filter-trad-btn px-4 py-2 rounded-full text-sm font-medium border transition-all <?= !$tradition ? 'border-primary bg-primary text-white' : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300' ?>">
                     All
                 </button>
                 <?php foreach ($traditions as $t): ?>
-                        <button type="button" data-tradition="<?= strtolower($t) ?>"
-                            class="filter-trad-btn px-4 py-2 rounded-full text-sm font-medium border transition-all <?= $tradition === strtolower($t) ? 'border-primary bg-primary text-white' : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300' ?>">
-                            <?= $t ?>
-                        </button>
+                    <button type="button" data-tradition="<?= strtolower($t) ?>"
+                        class="filter-trad-btn px-4 py-2 rounded-full text-sm font-medium border transition-all <?= $tradition === strtolower($t) ? 'border-primary bg-primary text-white' : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300' ?>">
+                        <?= $t ?>
+                    </button>
                 <?php endforeach; ?>
             </div>
         </div>
@@ -329,7 +356,7 @@ if ($category && isset($categoryTitles[$category])) {
 
     <!-- Apply Button -->
     <div class="p-5 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-        <button onclick="applyFilters()" 
+        <button onclick="applyFilters()"
             class="w-full py-4 rounded-xl bg-primary text-white font-bold text-lg shadow-lg shadow-primary/30 active:scale-[0.98] transition-transform">
             Apply Filters
         </button>
@@ -337,12 +364,13 @@ if ($category && isset($categoryTitles[$category])) {
 </div>
 
 <!-- Sort Bottom Sheet -->
-<div id="sort-sheet" class="fixed bottom-0 left-0 right-0 z-[110] bg-white dark:bg-slate-900 rounded-t-3xl transform translate-y-full transition-transform duration-300 ease-out">
+<div id="sort-sheet"
+    class="fixed bottom-0 left-0 right-0 z-[110] bg-white dark:bg-slate-900 rounded-t-3xl transform translate-y-full transition-transform duration-300 ease-out">
     <!-- Handle -->
     <div class="flex justify-center pt-3 pb-2">
         <div class="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></div>
     </div>
-    
+
     <!-- Header -->
     <div class="flex items-center justify-between px-5 pb-4 border-b border-slate-200 dark:border-slate-700">
         <h3 class="text-lg font-bold">Sort By</h3>
@@ -354,154 +382,154 @@ if ($category && isset($categoryTitles[$category])) {
     <!-- Sort Options -->
     <div class="p-3">
         <?php foreach ($sortOptions as $key => $label): ?>
-                <button onclick="applySort('<?= $key ?>')"
-                    class="w-full flex items-center justify-between px-4 py-4 rounded-xl text-left transition-colors <?= $sort === $key ? 'bg-primary/10 text-primary' : 'hover:bg-slate-50 dark:hover:bg-slate-800' ?>">
-                    <span class="font-medium"><?= $label ?></span>
-                    <?php if ($sort === $key): ?>
-                            <span class="material-symbols-outlined text-primary">check</span>
-                    <?php endif; ?>
-                </button>
+            <button onclick="applySort('<?= $key ?>')"
+                class="w-full flex items-center justify-between px-4 py-4 rounded-xl text-left transition-colors <?= $sort === $key ? 'bg-primary/10 text-primary' : 'hover:bg-slate-50 dark:hover:bg-slate-800' ?>">
+                <span class="font-medium"><?= $label ?></span>
+                <?php if ($sort === $key): ?>
+                    <span class="material-symbols-outlined text-primary">check</span>
+                <?php endif; ?>
+            </button>
         <?php endforeach; ?>
     </div>
 </div>
 
 <script>
-// State
-let currentPage = 1;
-let isLoading = false;
-let hasMore = <?= $hasMore ? 'true' : 'false' ?>;
-let selectedCategory = '<?= $category ?? '' ?>';
-let selectedTradition = '<?= $tradition ?? '' ?>';
-let currentSort = '<?= $sort ?>';
+    // State
+    let currentPage = 1;
+    let isLoading = false;
+    let hasMore = <?= $hasMore ? 'true' : 'false' ?>;
+    let selectedCategory = '<?= $category ?? '' ?>';
+    let selectedTradition = '<?= $tradition ?? '' ?>';
+    let currentSort = '<?= $sort ?>';
 
-// Bottom Sheet Functions
-function openFilterSheet() {
-    document.getElementById('sheet-backdrop').classList.remove('opacity-0', 'pointer-events-none');
-    document.getElementById('filter-sheet').classList.remove('translate-y-full');
-    document.body.style.overflow = 'hidden';
-}
-
-function openSortSheet() {
-    document.getElementById('sheet-backdrop').classList.remove('opacity-0', 'pointer-events-none');
-    document.getElementById('sort-sheet').classList.remove('translate-y-full');
-    document.body.style.overflow = 'hidden';
-}
-
-function closeSheet() {
-    document.getElementById('sheet-backdrop').classList.add('opacity-0', 'pointer-events-none');
-    document.getElementById('filter-sheet').classList.add('translate-y-full');
-    document.getElementById('sort-sheet').classList.add('translate-y-full');
-    document.body.style.overflow = '';
-}
-
-// Filter Selection
-document.querySelectorAll('.filter-cat-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        document.querySelectorAll('.filter-cat-btn').forEach(b => {
-            b.classList.remove('border-primary', 'bg-primary', 'text-white');
-            b.classList.add('border-slate-200', 'dark:border-slate-700', 'text-slate-600', 'dark:text-slate-300');
-        });
-        this.classList.remove('border-slate-200', 'dark:border-slate-700', 'text-slate-600', 'dark:text-slate-300');
-        this.classList.add('border-primary', 'bg-primary', 'text-white');
-        selectedCategory = this.dataset.category;
-    });
-});
-
-document.querySelectorAll('.filter-trad-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        document.querySelectorAll('.filter-trad-btn').forEach(b => {
-            b.classList.remove('border-primary', 'bg-primary', 'text-white');
-            b.classList.add('border-slate-200', 'dark:border-slate-700', 'text-slate-600', 'dark:text-slate-300');
-        });
-        this.classList.remove('border-slate-200', 'dark:border-slate-700', 'text-slate-600', 'dark:text-slate-300');
-        this.classList.add('border-primary', 'bg-primary', 'text-white');
-        selectedTradition = this.dataset.tradition;
-    });
-});
-
-function applyFilters() {
-    const params = new URLSearchParams();
-    if (selectedCategory) params.set('category', selectedCategory);
-    if (selectedTradition) params.set('tradition', selectedTradition);
-    if (currentSort !== 'popular') params.set('sort', currentSort);
-    window.location.href = '/templates' + (params.toString() ? '?' + params.toString() : '');
-}
-
-function applySort(sort) {
-    currentSort = sort;
-    const params = new URLSearchParams(window.location.search);
-    if (sort === 'popular') {
-        params.delete('sort');
-    } else {
-        params.set('sort', sort);
+    // Bottom Sheet Functions
+    function openFilterSheet() {
+        document.getElementById('sheet-backdrop').classList.remove('opacity-0', 'pointer-events-none');
+        document.getElementById('filter-sheet').classList.remove('translate-y-full');
+        document.body.style.overflow = 'hidden';
     }
-    window.location.href = '/templates' + (params.toString() ? '?' + params.toString() : '');
-}
 
-// Infinite Scroll
-const grid = document.getElementById('templates-grid');
-const loadTrigger = document.getElementById('load-more-trigger');
-const spinner = document.getElementById('loading-spinner');
+    function openSortSheet() {
+        document.getElementById('sheet-backdrop').classList.remove('opacity-0', 'pointer-events-none');
+        document.getElementById('sort-sheet').classList.remove('translate-y-full');
+        document.body.style.overflow = 'hidden';
+    }
 
-if (loadTrigger) {
-    const observer = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && !isLoading && hasMore) {
-            loadMoreTemplates();
-        }
-    }, { rootMargin: '200px' });
-    
-    observer.observe(loadTrigger);
-}
+    function closeSheet() {
+        document.getElementById('sheet-backdrop').classList.add('opacity-0', 'pointer-events-none');
+        document.getElementById('filter-sheet').classList.add('translate-y-full');
+        document.getElementById('sort-sheet').classList.add('translate-y-full');
+        document.body.style.overflow = '';
+    }
 
-async function loadMoreTemplates() {
-    if (isLoading || !hasMore) return;
-    isLoading = true;
-    currentPage++;
-    
-    const params = new URLSearchParams();
-    params.set('page', currentPage);
-    params.set('limit', 12);
-    if (selectedCategory) params.set('category', selectedCategory);
-    if (selectedTradition) params.set('tradition', selectedTradition);
-    params.set('sort', currentSort);
-    
-    try {
-        const response = await fetch('/api/templates.php?' + params.toString());
-        const data = await response.json();
-        
-        if (data.success && data.templates.length > 0) {
-            data.templates.forEach(template => {
-                grid.insertAdjacentHTML('beforeend', createTemplateCard(template));
+    // Filter Selection
+    document.querySelectorAll('.filter-cat-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            document.querySelectorAll('.filter-cat-btn').forEach(b => {
+                b.classList.remove('border-primary', 'bg-primary', 'text-white');
+                b.classList.add('border-slate-200', 'dark:border-slate-700', 'text-slate-600', 'dark:text-slate-300');
             });
-            hasMore = data.pagination.hasMore;
-        }
-        
-        if (!hasMore && loadTrigger) {
-            loadTrigger.style.display = 'none';
-        }
-    } catch (error) {
-        console.error('Failed to load templates:', error);
-    }
-    
-    isLoading = false;
-}
+            this.classList.remove('border-slate-200', 'dark:border-slate-700', 'text-slate-600', 'dark:text-slate-300');
+            this.classList.add('border-primary', 'bg-primary', 'text-white');
+            selectedCategory = this.dataset.category;
+        });
+    });
 
-function createTemplateCard(template) {
-    const isFree = template.price_usd === 0;
-    const priceClass = isFree ? 'text-green-600' : 'text-primary';
-    const priceText = isFree ? 'Free' : '$' + Math.round(template.price_usd);
-    
-    let badge = '';
-    if (template.is_premium) {
-        badge = '<span class="absolute top-2 left-2 px-2 py-1 rounded-md bg-white/90 text-xs font-bold text-slate-900 backdrop-blur-sm">Premium</span>';
-    } else if (isFree) {
-        badge = '<span class="absolute top-2 left-2 px-2 py-1 rounded-md bg-green-500/90 text-xs font-bold text-white backdrop-blur-sm">Free</span>';
+    document.querySelectorAll('.filter-trad-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            document.querySelectorAll('.filter-trad-btn').forEach(b => {
+                b.classList.remove('border-primary', 'bg-primary', 'text-white');
+                b.classList.add('border-slate-200', 'dark:border-slate-700', 'text-slate-600', 'dark:text-slate-300');
+            });
+            this.classList.remove('border-slate-200', 'dark:border-slate-700', 'text-slate-600', 'dark:text-slate-300');
+            this.classList.add('border-primary', 'bg-primary', 'text-white');
+            selectedTradition = this.dataset.tradition;
+        });
+    });
+
+    function applyFilters() {
+        const params = new URLSearchParams();
+        if (selectedCategory) params.set('category', selectedCategory);
+        if (selectedTradition) params.set('tradition', selectedTradition);
+        if (currentSort !== 'popular') params.set('sort', currentSort);
+        window.location.href = '/templates' + (params.toString() ? '?' + params.toString() : '');
     }
-    
-    // Use 400w variant or fallback
-    const imgSrc = template.srcset && template.srcset[400] ? template.srcset[400] : template.thumbnail_url;
-    
-    return `
+
+    function applySort(sort) {
+        currentSort = sort;
+        const params = new URLSearchParams(window.location.search);
+        if (sort === 'popular') {
+            params.delete('sort');
+        } else {
+            params.set('sort', sort);
+        }
+        window.location.href = '/templates' + (params.toString() ? '?' + params.toString() : '');
+    }
+
+    // Infinite Scroll
+    const grid = document.getElementById('templates-grid');
+    const loadTrigger = document.getElementById('load-more-trigger');
+    const spinner = document.getElementById('loading-spinner');
+
+    if (loadTrigger) {
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && !isLoading && hasMore) {
+                loadMoreTemplates();
+            }
+        }, { rootMargin: '200px' });
+
+        observer.observe(loadTrigger);
+    }
+
+    async function loadMoreTemplates() {
+        if (isLoading || !hasMore) return;
+        isLoading = true;
+        currentPage++;
+
+        const params = new URLSearchParams();
+        params.set('page', currentPage);
+        params.set('limit', 12);
+        if (selectedCategory) params.set('category', selectedCategory);
+        if (selectedTradition) params.set('tradition', selectedTradition);
+        params.set('sort', currentSort);
+
+        try {
+            const response = await fetch('/api/templates.php?' + params.toString());
+            const data = await response.json();
+
+            if (data.success && data.templates.length > 0) {
+                data.templates.forEach(template => {
+                    grid.insertAdjacentHTML('beforeend', createTemplateCard(template));
+                });
+                hasMore = data.pagination.hasMore;
+            }
+
+            if (!hasMore && loadTrigger) {
+                loadTrigger.style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Failed to load templates:', error);
+        }
+
+        isLoading = false;
+    }
+
+    function createTemplateCard(template) {
+        const isFree = template.price_usd === 0;
+        const priceClass = isFree ? 'text-green-600' : 'text-primary';
+        const priceText = isFree ? 'Free' : '$' + Math.round(template.price_usd);
+
+        let badge = '';
+        if (template.is_premium) {
+            badge = '<span class="absolute top-2 left-2 px-2 py-1 rounded-md bg-white/90 text-xs font-bold text-slate-900 backdrop-blur-sm">Premium</span>';
+        } else if (isFree) {
+            badge = '<span class="absolute top-2 left-2 px-2 py-1 rounded-md bg-green-500/90 text-xs font-bold text-white backdrop-blur-sm">Free</span>';
+        }
+
+        // Use 400w variant or fallback
+        const imgSrc = template.srcset && template.srcset[400] ? template.srcset[400] : template.thumbnail_url;
+
+        return `
         <a href="/template/${template.slug}" class="group block bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-100 dark:border-slate-800 hover:border-primary/30">
             <div class="relative aspect-[4/5] overflow-hidden bg-slate-100">
                 <img src="${imgSrc}" alt="${template.title}" loading="lazy" decoding="async" 
@@ -514,17 +542,17 @@ function createTemplateCard(template) {
             </div>
         </a>
     `;
-}
-
-// Prevent body scroll when sheets are open
-document.addEventListener('touchmove', function(e) {
-    if (document.body.style.overflow === 'hidden') {
-        const sheet = e.target.closest('#filter-sheet, #sort-sheet');
-        if (!sheet) {
-            e.preventDefault();
-        }
     }
-}, { passive: false });
+
+    // Prevent body scroll when sheets are open
+    document.addEventListener('touchmove', function (e) {
+        if (document.body.style.overflow === 'hidden') {
+            const sheet = e.target.closest('#filter-sheet, #sort-sheet');
+            if (!sheet) {
+                e.preventDefault();
+            }
+        }
+    }, { passive: false });
 </script>
 
 <?php

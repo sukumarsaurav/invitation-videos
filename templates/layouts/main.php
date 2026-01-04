@@ -521,12 +521,27 @@
             <div class="flex items-center justify-between h-16">
                 <!-- Left Section: Mobile Menu + Logo -->
                 <div class="flex items-center gap-2 lg:gap-8 flex-1">
-                    <!-- Mobile Menu Button (Left) -->
-                    <button onclick="openMobileDrawer()"
-                        class="lg:hidden p-2 -ml-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
-                        aria-label="Open menu">
-                        <span class="material-symbols-outlined text-2xl">menu</span>
-                    </button>
+                    <?php if (($isGalleryPage ?? false) && !empty($galleryCategories)): ?>
+                        <!-- Mobile: Back Arrow (Gallery pages only) -->
+                        <a href="/templates"
+                            class="sm:hidden p-2 -ml-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
+                            aria-label="Back to templates">
+                            <span class="material-symbols-outlined text-2xl">arrow_back</span>
+                        </a>
+                        <!-- Desktop: Regular Menu Button -->
+                        <button onclick="openMobileDrawer()"
+                            class="hidden sm:block lg:hidden p-2 -ml-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
+                            aria-label="Open menu">
+                            <span class="material-symbols-outlined text-2xl">menu</span>
+                        </button>
+                    <?php else: ?>
+                        <!-- Mobile Menu Button (Left) -->
+                        <button onclick="openMobileDrawer()"
+                            class="lg:hidden p-2 -ml-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
+                            aria-label="Open menu">
+                            <span class="material-symbols-outlined text-2xl">menu</span>
+                        </button>
+                    <?php endif; ?>
 
                     <!-- Logo -->
                     <a href="/" class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
@@ -536,6 +551,13 @@
                             <?= APP_NAME ?? 'Invitation Videos' ?>
                         </h2>
                     </a>
+
+                    <?php if (($isGalleryPage ?? false) && ($currentCategory ?? null) && isset($galleryCategories[$currentCategory])): ?>
+                        <!-- Mobile: Category Name after logo -->
+                        <span class="sm:hidden text-sm font-bold text-slate-900 dark:text-white truncate">
+                            <?= $galleryCategories[$currentCategory]['name'] ?>
+                        </span>
+                    <?php endif; ?>
 
                     <!-- Desktop Navigation - Categories directly after logo -->
                     <nav class="hidden lg:flex items-center gap-4 xl:gap-5">
@@ -674,6 +696,34 @@
             </div>
         </div>
     </header>
+
+    <?php if (($isGalleryPage ?? false) && !empty($galleryCategories)): ?>
+    <!-- Mobile Category Scroll Bar (only on gallery pages, < 768px) -->
+    <div class="sm:hidden sticky top-16 z-40 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+        <div class="category-scroll-container overflow-x-auto px-4 py-3" style="-webkit-overflow-scrolling: touch; scrollbar-width: none;">
+            <div class="flex gap-3" style="min-width: max-content;">
+                <!-- All Templates -->
+                <a href="/templates" 
+                    class="flex flex-col items-center flex-shrink-0 <?= !($currentCategory ?? null) ? 'category-selected' : '' ?>">
+                    <div class="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-1 <?= !($currentCategory ?? null) ? 'border-2 border-primary' : 'border-2 border-transparent' ?>">
+                        <span class="material-symbols-outlined text-2xl text-slate-600 dark:text-slate-300">grid_view</span>
+                    </div>
+                    <span class="text-[10px] font-medium <?= !($currentCategory ?? null) ? 'text-primary' : 'text-slate-700 dark:text-slate-300' ?> text-center leading-tight">All</span>
+                </a>
+                <!-- Category Icons -->
+                <?php foreach ($galleryCategories as $slug => $cat): ?>
+                    <a href="/templates?category=<?= $slug ?>" 
+                        class="flex flex-col items-center flex-shrink-0">
+                        <div class="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-1 <?= ($currentCategory ?? null) === $slug ? 'border-2 border-primary' : 'border-2 border-transparent' ?>">
+                            <span class="material-symbols-outlined text-2xl <?= $cat['color'] ?>"><?= $cat['icon'] ?></span>
+                        </div>
+                        <span class="text-[10px] font-medium <?= ($currentCategory ?? null) === $slug ? 'text-primary' : 'text-slate-700 dark:text-slate-300' ?> text-center leading-tight"><?= $cat['name'] ?></span>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
 
     <!-- Mobile Side Drawer Backdrop -->
     <div id="drawerBackdrop" onclick="closeMobileDrawer()"
