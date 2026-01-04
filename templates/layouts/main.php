@@ -698,31 +698,37 @@
     </header>
 
     <?php if (($isGalleryPage ?? false) && !empty($galleryCategories)): ?>
-    <!-- Mobile Category Scroll Bar (only on gallery pages, < 768px) -->
-    <div class="sm:hidden sticky top-16 z-40 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
-        <div class="category-scroll-container overflow-x-auto px-4 py-3" style="-webkit-overflow-scrolling: touch; scrollbar-width: none;">
-            <div class="flex gap-3" style="min-width: max-content;">
-                <!-- All Templates -->
-                <a href="/templates" 
-                    class="flex flex-col items-center flex-shrink-0 <?= !($currentCategory ?? null) ? 'category-selected' : '' ?>">
-                    <div class="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-1 <?= !($currentCategory ?? null) ? 'border-2 border-primary' : 'border-2 border-transparent' ?>">
-                        <span class="material-symbols-outlined text-2xl text-slate-600 dark:text-slate-300">grid_view</span>
-                    </div>
-                    <span class="text-[10px] font-medium <?= !($currentCategory ?? null) ? 'text-primary' : 'text-slate-700 dark:text-slate-300' ?> text-center leading-tight">All</span>
-                </a>
-                <!-- Category Icons -->
-                <?php foreach ($galleryCategories as $slug => $cat): ?>
-                    <a href="/templates?category=<?= $slug ?>" 
-                        class="flex flex-col items-center flex-shrink-0">
-                        <div class="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-1 <?= ($currentCategory ?? null) === $slug ? 'border-2 border-primary' : 'border-2 border-transparent' ?>">
-                            <span class="material-symbols-outlined text-2xl text-slate-600 dark:text-slate-300"><?= $cat['icon'] ?></span>
+        <!-- Mobile Category Scroll Bar (only on gallery pages, < 768px) -->
+        <div class="sm:hidden sticky top-16 z-40 bg-white dark:bg-slate-900">
+            <div class="category-scroll-container overflow-x-auto px-4 py-3"
+                style="-webkit-overflow-scrolling: touch; scrollbar-width: none;">
+                <div class="flex gap-3" style="min-width: max-content;">
+                    <!-- All Templates -->
+                    <a href="/templates"
+                        class="flex flex-col items-center flex-shrink-0 <?= !($currentCategory ?? null) ? 'category-selected' : '' ?>">
+                        <div
+                            class="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-1 <?= !($currentCategory ?? null) ? 'border-2 border-primary' : 'border-2 border-transparent' ?>">
+                            <span
+                                class="material-symbols-outlined text-2xl text-slate-600 dark:text-slate-300">grid_view</span>
                         </div>
-                        <span class="text-[10px] font-medium <?= ($currentCategory ?? null) === $slug ? 'text-primary' : 'text-slate-700 dark:text-slate-300' ?> text-center leading-tight"><?= $cat['name'] ?></span>
+                        <span
+                            class="text-[10px] font-medium <?= !($currentCategory ?? null) ? 'text-primary' : 'text-slate-700 dark:text-slate-300' ?> text-center leading-tight">All</span>
                     </a>
-                <?php endforeach; ?>
+                    <!-- Category Icons -->
+                    <?php foreach ($galleryCategories as $slug => $cat): ?>
+                        <a href="/templates?category=<?= $slug ?>" class="flex flex-col items-center flex-shrink-0">
+                            <div
+                                class="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-1 <?= ($currentCategory ?? null) === $slug ? 'border-2 border-primary' : 'border-2 border-transparent' ?>">
+                                <span
+                                    class="material-symbols-outlined text-2xl text-slate-600 dark:text-slate-300"><?= $cat['icon'] ?></span>
+                            </div>
+                            <span
+                                class="text-[10px] font-medium <?= ($currentCategory ?? null) === $slug ? 'text-primary' : 'text-slate-700 dark:text-slate-300' ?> text-center leading-tight"><?= $cat['name'] ?></span>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
             </div>
         </div>
-    </div>
     <?php endif; ?>
 
     <!-- Mobile Side Drawer Backdrop -->
