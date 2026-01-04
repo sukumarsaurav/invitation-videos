@@ -483,152 +483,129 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
         <div class="h-24 lg:hidden"></div>
 
     <?php else: ?>
-        <!-- ==================== CUSTOMIZATION STEPS ==================== -->
+            <!-- ==================== CUSTOMIZATION STEPS ==================== -->
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div class="max-w-3xl mx-auto">
 
-            <!-- Left: Form Section -->
-            <div class="lg:col-span-8 space-y-6">
+            <!-- Form Section -->
 
-                <!-- Template Title & Progress -->
-                <div class="space-y-4">
-                    <div>
-                        <h1 class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">
-                            <?= Security::escape($template['title']) ?>
-                        </h1>
+            <!-- Template Title & Progress -->
+            <div class="space-y-4">
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">
+                        <?= Security::escape($template['title']) ?>
+                    </h1>
+                </div>
+
+                <!-- Progress Indicator (Below Title) -->
+                <div
+                    class="flex flex-col gap-3 bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                                <span class="material-symbols-outlined"><?= $stepIcons[$step] ?? 'edit' ?></span>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Step
+                                    <?= $currentStepIndex + 1 ?> of <?= $totalSteps ?>
+                                </p>
+                                <h2 class="font-bold text-slate-900 dark:text-white">
+                                    <?= $stepTitles[$step] ?? 'Details' ?>
+                                </h2>
+                            </div>
+                        </div>
+                        <span class="text-primary font-bold"><?= $progressPercent ?>%</span>
+                    </div>
+                    <div class="rounded-full bg-slate-200 dark:bg-slate-700 h-2 overflow-hidden">
+                        <div class="h-full rounded-full bg-primary transition-all duration-500"
+                            style="width: <?= $progressPercent ?>%;"></div>
                     </div>
 
-                    <!-- Progress Indicator (Below Title) -->
-                    <div
-                        class="flex flex-col gap-3 bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-200 dark:border-slate-800">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
+                    <!-- Step Dots -->
+                    <div class="flex items-center justify-between pt-2">
+                        <?php foreach ($availableSteps as $idx => $s): ?>
+                            <div class="flex items-center gap-2 <?= $idx < count($availableSteps) - 1 ? 'flex-1' : '' ?>">
                                 <div
-                                    class="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                                    <span class="material-symbols-outlined"><?= $stepIcons[$step] ?? 'edit' ?></span>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Step
-                                        <?= $currentStepIndex + 1 ?> of <?= $totalSteps ?>
-                                    </p>
-                                    <h2 class="font-bold text-slate-900 dark:text-white">
-                                        <?= $stepTitles[$step] ?? 'Details' ?>
-                                    </h2>
-                                </div>
-                            </div>
-                            <span class="text-primary font-bold"><?= $progressPercent ?>%</span>
-                        </div>
-                        <div class="rounded-full bg-slate-200 dark:bg-slate-700 h-2 overflow-hidden">
-                            <div class="h-full rounded-full bg-primary transition-all duration-500"
-                                style="width: <?= $progressPercent ?>%;"></div>
-                        </div>
-
-                        <!-- Step Dots -->
-                        <div class="flex items-center justify-between pt-2">
-                            <?php foreach ($availableSteps as $idx => $s): ?>
-                                <div class="flex items-center gap-2 <?= $idx < count($availableSteps) - 1 ? 'flex-1' : '' ?>">
-                                    <div
-                                        class="size-8 rounded-full flex items-center justify-center text-sm font-bold transition-all
+                                    class="size-8 rounded-full flex items-center justify-center text-sm font-bold transition-all
                                 <?= $s < $step ? 'bg-green-500 text-white' : ($s === $step ? 'bg-primary text-white' : 'bg-slate-200 text-slate-500') ?>">
-                                        <?php if ($s < $step): ?>
-                                            <span class="material-symbols-outlined text-sm">check</span>
-                                        <?php else: ?>
-                                            <?= $idx + 1 ?>
-                                        <?php endif; ?>
-                                    </div>
-                                    <?php if ($idx < count($availableSteps) - 1): ?>
-                                        <div
-                                            class="flex-1 h-0.5 <?= $s < $step ? 'bg-green-500' : 'bg-slate-200 dark:bg-slate-700' ?>">
-                                        </div>
+                                    <?php if ($s < $step): ?>
+                                        <span class="material-symbols-outlined text-sm">check</span>
+                                    <?php else: ?>
+                                        <?= $idx + 1 ?>
                                     <?php endif; ?>
                                 </div>
-                            <?php endforeach; ?>
-                        </div>
+                                <?php if ($idx < count($availableSteps) - 1): ?>
+                                    <div class="flex-1 h-0.5 <?= $s < $step ? 'bg-green-500' : 'bg-slate-200 dark:bg-slate-700' ?>">
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        <?php endforeach; ?>
                     </div>
                 </div>
+            </div>
 
-                <?php if (!empty($errors['general'])): ?>
-                    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
-                        <span class="material-symbols-outlined">error</span>
-                        <?= Security::escape($errors['general']) ?>
-                    </div>
-                <?php endif; ?>
+            <?php if (!empty($errors['general'])): ?>
+                <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
+                    <span class="material-symbols-outlined">error</span>
+                    <?= Security::escape($errors['general']) ?>
+                </div>
+            <?php endif; ?>
 
-                <!-- Form -->
-                <form id="customize-form" method="POST" enctype="multipart/form-data" class="space-y-6">
-                    <?= Security::csrfField() ?>
-                    <input type="hidden" name="user_timezone" id="user_timezone" value="">
+            <!-- Form -->
+            <form id="customize-form" method="POST" enctype="multipart/form-data" class="space-y-6">
+                <?= Security::csrfField() ?>
+                <input type="hidden" name="user_timezone" id="user_timezone" value="">
 
-                    <?= $formRenderer->renderByGroups($templateId, $stepGroups[$step] ?? [], $storedValues) ?>
+                <?= $formRenderer->renderByGroups($templateId, $stepGroups[$step] ?? [], $storedValues) ?>
 
-                    <!-- Navigation Buttons -->
-                    <div
-                        class="flex items-center justify-between gap-4 pt-6 border-t border-slate-200 dark:border-slate-700">
-                        <?php if ($currentStepIndex > 0): ?>
-                            <a href="/template/<?= Security::escape($templateSlug) ?>?step=<?= $availableSteps[$currentStepIndex - 1] ?>"
-                                class="flex items-center gap-2 px-6 py-3 rounded-lg border border-slate-200 dark:border-slate-700 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                                <span class="material-symbols-outlined">arrow_back</span>
-                                Back
-                            </a>
+                <!-- Navigation Buttons -->
+                <div class="flex items-center justify-between gap-4 pt-6 border-t border-slate-200 dark:border-slate-700">
+                    <?php if ($currentStepIndex > 0): ?>
+                        <a href="/template/<?= Security::escape($templateSlug) ?>?step=<?= $availableSteps[$currentStepIndex - 1] ?>"
+                            class="hidden md:flex items-center gap-2 px-6 py-3 rounded-lg border border-slate-200 dark:border-slate-700 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                            <span class="material-symbols-outlined">arrow_back</span>
+                            Back
+                        </a>
+                    <?php else: ?>
+                        <a href="/template/<?= Security::escape($templateSlug) ?>"
+                            class="hidden md:flex items-center gap-2 px-6 py-3 rounded-lg border border-slate-200 dark:border-slate-700 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                            <span class="material-symbols-outlined">arrow_back</span>
+                            Back
+                        </a>
+                    <?php endif; ?>
+
+                    <button type="submit"
+                        class="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-8 py-3 rounded-lg bg-primary text-white font-bold hover:bg-primary/90 shadow-lg shadow-primary/25 transition-colors">
+                        <?php if ($currentStepIndex < $totalSteps - 1): ?>
+                            <span>Next Step</span>
+                            <span class="material-symbols-outlined">arrow_forward</span>
                         <?php else: ?>
-                            <a href="/template/<?= Security::escape($templateSlug) ?>"
-                                class="flex items-center gap-2 px-6 py-3 rounded-lg border border-slate-200 dark:border-slate-700 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                                <span class="material-symbols-outlined">arrow_back</span>
-                                Back
-                            </a>
+                            <span>Continue to Checkout</span>
+                            <span class="material-symbols-outlined">shopping_cart</span>
                         <?php endif; ?>
-
-                        <button type="submit"
-                            class="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-8 py-3 rounded-lg bg-primary text-white font-bold hover:bg-primary/90 shadow-lg shadow-primary/25 transition-colors">
-                            <?php if ($currentStepIndex < $totalSteps - 1): ?>
-                                <span>Next Step</span>
-                                <span class="material-symbols-outlined">arrow_forward</span>
-                            <?php else: ?>
-                                <span>Continue to Checkout</span>
-                                <span class="material-symbols-outlined">shopping_cart</span>
-                            <?php endif; ?>
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Right: Preview Sidebar -->
-            <div class="lg:col-span-4 lg:sticky lg:top-24 space-y-4">
-                <div
-                    class="bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-lg border border-slate-200 dark:border-slate-800">
-                    <div class="relative aspect-[4/5] w-full bg-slate-200">
-                        <img src="<?= Security::escape($template['thumbnail_url'] ?? '/assets/images/placeholder.jpg') ?>"
-                            alt="<?= Security::escape($template['title']) ?>" class="w-full h-full object-cover" width="300"
-                            height="375" loading="lazy" decoding="async">
-                        <div
-                            class="absolute top-3 right-3 bg-black/60 backdrop-blur-sm text-white text-xs font-bold px-2 py-1 rounded">
-                            <?= $template['duration_seconds'] ?>s
-                        </div>
-                    </div>
-                    <div class="p-4">
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm text-slate-500">Total</span>
-                            <span
-                                class="text-xl font-bold text-primary">$<?= number_format($template['price_usd'], 0) ?></span>
-                        </div>
-                    </div>
+                    </button>
                 </div>
-
-                <!-- Help Card -->
-                <div
-                    class="bg-white dark:bg-slate-900 rounded-xl p-4 shadow-sm border border-slate-200 dark:border-slate-800 flex items-center gap-4">
-                    <div
-                        class="size-10 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 flex items-center justify-center shrink-0">
-                        <span class="material-symbols-outlined">support_agent</span>
-                    </div>
-                    <div>
-                        <p class="font-bold text-sm">Need Help?</p>
-                        <a class="text-xs text-primary hover:underline" href="/support">Chat with our team</a>
-                    </div>
-                </div>
-            </div>
-
+            </form>
         </div>
+
+        <!-- Fixed Bottom Bar for Mobile (customize steps) -->
+        <div
+            class="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
+            <button type="submit" form="customize-form"
+                class="w-full flex items-center justify-center gap-2 px-8 py-3 rounded-lg bg-primary text-white font-bold hover:bg-primary/90 shadow-lg shadow-primary/25 transition-colors">
+                <?php if ($currentStepIndex < $totalSteps - 1): ?>
+                    <span>Next Step</span>
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                <?php else: ?>
+                    <span>Continue to Checkout</span>
+                    <span class="material-symbols-outlined">shopping_cart</span>
+                <?php endif; ?>
+            </button>
+        </div>
+
+        <!-- Spacer for fixed bottom bar on mobile -->
+        <div class="h-20 md:hidden"></div>
+
     <?php endif; ?>
 
 </div>
