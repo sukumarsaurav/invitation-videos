@@ -374,12 +374,10 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
 
                 <!-- Price -->
                 <div class="flex items-baseline gap-3">
-                    <span class="text-3xl font-black text-primary">
+                    <span class="text-3xl font-black text-primary template-price" data-usd="<?= $template['price_usd'] ?>"
+                        data-inr="<?= $template['price_inr'] ?? 0 ?>">
                         $<?= number_format($template['price_usd'], 0) ?>
                     </span>
-                    <?php if ($template['price_inr']): ?>
-                        <span class="text-lg text-slate-500">/ ₹<?= number_format($template['price_inr'], 0) ?></span>
-                    <?php endif; ?>
                 </div>
 
                 <!-- Description -->
@@ -439,11 +437,10 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                                 <div class="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
                                     <p class="text-white font-semibold text-sm truncate"><?= Security::escape($related['title']) ?>
                                     </p>
-                                    <p class="text-white/80 text-xs">
-                                        <?php
-                                        $displayPrice = !empty($related['discounted_price_usd']) ? $related['discounted_price_usd'] : $related['price_usd'];
-                                        echo '$' . number_format($displayPrice, 0);
-                                        ?>
+                                    <p class="text-white/80 text-xs template-price"
+                                        data-usd="<?= !empty($related['discounted_price_usd']) ? $related['discounted_price_usd'] : $related['price_usd'] ?>"
+                                        data-inr="<?= !empty($related['discounted_price_inr']) ? $related['discounted_price_inr'] : ($related['price_inr'] ?? 0) ?>">
+                                        $<?= number_format(!empty($related['discounted_price_usd']) ? $related['discounted_price_usd'] : $related['price_usd'], 0) ?>
                                     </p>
                                 </div>
                                 <div
@@ -463,12 +460,9 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
             <div class="flex items-center justify-between gap-4 max-w-7xl mx-auto">
                 <div class="flex-1">
                     <p class="text-xs text-slate-500">Starting at</p>
-                    <p class="text-lg font-black text-slate-900 dark:text-white">
+                    <p class="text-lg font-black text-slate-900 dark:text-white template-price"
+                        data-usd="<?= $template['price_usd'] ?>" data-inr="<?= $template['price_inr'] ?? 0 ?>">
                         $<?= number_format($template['price_usd'], 0) ?>
-                        <?php if ($template['price_inr']): ?>
-                            <span class="text-sm font-normal text-slate-400">/
-                                ₹<?= number_format($template['price_inr'], 0) ?></span>
-                        <?php endif; ?>
                     </p>
                 </div>
                 <a href="/template/<?= Security::escape($templateSlug) ?>?step=<?= $availableSteps[0] ?? 1 ?>"
@@ -612,6 +606,24 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
         if (tzField) {
             tzField.value = Intl.DateTimeFormat().resolvedOptions().timeZone;
         }
+
+        // Currency detection (timezone-based) - same as gallery
+        const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const isIndianUser = userTimezone.includes('Kolkata') || userTimezone.includes('Calcutta');
+        const userCurrency = isIndianUser ? 'INR' : 'USD';
+
+        // Update prices based on detected currency
+        document.querySelectorAll('.template-price').forEach(el => {
+            const usd = parseFloat(el.dataset.usd) || 0;
+            const inr = parseFloat(el.dataset.inr) || 0;
+            if (usd === 0) return; // Skip free items
+
+            if (userCurrency === 'INR' && inr > 0) {
+                el.textContent = '₹' + inr.toLocaleString('en-IN');
+            } else {
+                el.textContent = '$' + Math.round(usd);
+            }
+        });
     });
 
     // Video Modal Functions
