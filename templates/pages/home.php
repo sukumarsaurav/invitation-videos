@@ -74,7 +74,7 @@ $isHomePage = true;  // For floating help button display
 
 <!-- Hero Section -->
 <section
-    class="py-8 sm:py-12 relative overflow-hidden<?= empty($heroImageDesktop) ? ' bg-gradient-to-br from-primary/5 via-purple-500/5 to-rose-500/5 dark:from-primary/10 dark:via-purple-500/10 dark:to-rose-500/10' : '' ?>">
+    class="py-12 sm:py-16 lg:py-24 relative overflow-hidden<?= empty($heroImageDesktop) ? ' bg-gradient-to-br from-primary/5 via-purple-500/5 to-rose-500/5 dark:from-primary/10 dark:via-purple-500/10 dark:to-rose-500/10' : '' ?>">
     <?php if (!empty($heroImageDesktop)): ?>
         <!-- Hero Background Image -->
         <div class="absolute inset-0 z-0">
@@ -125,9 +125,15 @@ $isHomePage = true;  // For floating help button display
         // Fetch categories from database with image_url support
         $dbCategories = [];
         try {
+            // Try with image_url first (if migration was run)
             $dbCategories = Database::fetchAll("SELECT id, name, slug, icon, color, image_url FROM categories WHERE is_active = 1 ORDER BY display_order ASC, name ASC LIMIT 12") ?? [];
         } catch (Exception $e) {
-            // Fallback to hardcoded if table doesn't exist
+            // If image_url column doesn't exist, try without it
+            try {
+                $dbCategories = Database::fetchAll("SELECT id, name, slug, icon, color FROM categories WHERE is_active = 1 ORDER BY display_order ASC, name ASC LIMIT 12") ?? [];
+            } catch (Exception $e2) {
+                // Fallback to hardcoded if table doesn't exist
+            }
         }
 
         // Fallback hardcoded categories if database is empty
