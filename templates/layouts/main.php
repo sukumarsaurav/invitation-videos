@@ -415,13 +415,18 @@
             }
         }
 
-        /* Loading state for fonts */
+        /* Loading state for fonts - stable dimensions to prevent CLS */
         .material-symbols-outlined {
             font-family: 'Material Symbols Outlined', sans-serif;
             font-size: 24px;
             display: inline-block;
-            width: 24px;
-            height: 24px
+            width: 1em;
+            height: 1em;
+            min-width: 24px;
+            min-height: 24px;
+            line-height: 1;
+            vertical-align: middle;
+            overflow: hidden
         }
     </style>
 
@@ -437,17 +442,18 @@
         <link rel="stylesheet" href="/assets/css/app.css">
     </noscript>
 
-    <!-- Material Symbols - lazy load after page is interactive -->
-    <script>
-        window.addEventListener('load', function () {
-            setTimeout(function () {
-                var link = document.createElement('link');
-                link.rel = 'stylesheet';
-                link.href = 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&display=swap';
-                document.head.appendChild(link);
-            }, 100);
-        });
-    </script>
+    <!-- Material Symbols - preload for fast icon rendering (CLS fix) -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&display=swap"
+        as="style" crossorigin>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&display=swap"
+        media="print" onload="this.media='all'">
+    <noscript>
+        <link rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&display=swap">
+    </noscript>
 
     <!-- Alpine.js Collapse Plugin + Core - deferred -->
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
