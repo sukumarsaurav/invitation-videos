@@ -35,40 +35,98 @@ $metaDescription = 'Create beautiful video invitations for weddings, birthdays, 
 
 <?php ob_start(); ?>
 
+<!-- Hero Section -->
+<section
+    class="py-8 sm:py-12 bg-gradient-to-br from-primary/5 via-purple-500/5 to-rose-500/5 dark:from-primary/10 dark:via-purple-500/10 dark:to-rose-500/10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 text-center">
+        <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-3">
+            Create Beautiful <span class="text-primary">Invitation Videos</span>
+        </h1>
+        <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-2xl mx-auto mb-6">
+            Stunning video invitations for weddings, birthdays, and special events. Easy to customize, ready to share.
+        </p>
+        <a href="/templates"
+            class="inline-flex items-center gap-2 bg-primary text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all">
+            <span>Browse Templates</span>
+            <span class="material-symbols-outlined">arrow_forward</span>
+        </a>
+    </div>
+</section>
+
 <!-- All Categories Section -->
-<section class="py-10 sm:py-12 bg-white dark:bg-slate-900">
+<section class="py-8 sm:py-12 bg-white dark:bg-slate-900">
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
-        <div class="flex items-start sm:items-center justify-between mb-8 flex-col sm:flex-row gap-4">
+        <div class="flex items-start sm:items-center justify-between mb-6 flex-col sm:flex-row gap-4">
             <div>
-                <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2">All Categories</h1>
-                <p class="text-slate-600 dark:text-slate-400">Browse our comprehensive collection of video templates for
-                    any event.</p>
+                <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-1">All Categories</h2>
+                <p class="text-slate-600 dark:text-slate-400 text-sm">Browse templates for any event</p>
             </div>
             <a href="/templates"
-                class="flex items-center gap-2 text-primary font-bold hover:underline whitespace-nowrap">
+                class="hidden sm:flex items-center gap-2 text-primary font-bold hover:underline whitespace-nowrap">
                 View Full Catalog
                 <span class="material-symbols-outlined">arrow_forward</span>
             </a>
         </div>
 
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            <?php
-            $allCategories = [
-                ['slug' => 'wedding', 'name' => 'Wedding', 'icon' => 'favorite', 'color' => 'text-rose-500', 'bg' => 'bg-rose-50 dark:bg-rose-900/20'],
-                ['slug' => 'birthday', 'name' => 'Birthday', 'icon' => 'cake', 'color' => 'text-amber-500', 'bg' => 'bg-amber-50 dark:bg-amber-900/20'],
-                ['slug' => 'baby_shower', 'name' => 'Baby Shower', 'icon' => 'child_care', 'color' => 'text-teal-500', 'bg' => 'bg-teal-50 dark:bg-teal-900/20'],
-                ['slug' => 'save_the_date', 'name' => 'Save the Date', 'icon' => 'event', 'color' => 'text-blue-500', 'bg' => 'bg-blue-50 dark:bg-blue-900/20'],
-                ['slug' => 'parties', 'name' => 'Parties', 'icon' => 'celebration', 'color' => 'text-orange-500', 'bg' => 'bg-orange-50 dark:bg-orange-900/20'],
-                ['slug' => 'corporate', 'name' => 'Corporate', 'icon' => 'business_center', 'color' => 'text-slate-600', 'bg' => 'bg-slate-100 dark:bg-slate-800'],
-                ['slug' => 'holidays', 'name' => 'Holidays', 'icon' => 'redeem', 'color' => 'text-red-500', 'bg' => 'bg-red-50 dark:bg-red-900/20'],
-                ['slug' => 'anniversary', 'name' => 'Anniversary', 'icon' => 'favorite_border', 'color' => 'text-pink-500', 'bg' => 'bg-pink-50 dark:bg-pink-900/20'],
-                ['slug' => 'graduation', 'name' => 'Graduation', 'icon' => 'school', 'color' => 'text-indigo-500', 'bg' => 'bg-indigo-50 dark:bg-indigo-900/20'],
-                ['slug' => 'housewarming', 'name' => 'Housewarming', 'icon' => 'home', 'color' => 'text-cyan-500', 'bg' => 'bg-cyan-50 dark:bg-cyan-900/20'],
-                ['slug' => 'religious', 'name' => 'Religious', 'icon' => 'church', 'color' => 'text-yellow-600', 'bg' => 'bg-yellow-50 dark:bg-yellow-900/20'],
-                ['slug' => 'farewell', 'name' => 'Farewell', 'icon' => 'waving_hand', 'color' => 'text-purple-500', 'bg' => 'bg-purple-50 dark:bg-purple-900/20'],
-            ];
+        <?php
+        $allCategories = [
+            ['slug' => 'wedding', 'name' => 'Wedding', 'icon' => 'favorite', 'color' => 'text-rose-500', 'bg' => 'bg-rose-50 dark:bg-rose-900/20'],
+            ['slug' => 'birthday', 'name' => 'Birthday', 'icon' => 'cake', 'color' => 'text-amber-500', 'bg' => 'bg-amber-50 dark:bg-amber-900/20'],
+            ['slug' => 'baby_shower', 'name' => 'Baby Shower', 'icon' => 'child_care', 'color' => 'text-teal-500', 'bg' => 'bg-teal-50 dark:bg-teal-900/20'],
+            ['slug' => 'save_the_date', 'name' => 'Save Date', 'icon' => 'event', 'color' => 'text-blue-500', 'bg' => 'bg-blue-50 dark:bg-blue-900/20'],
+            ['slug' => 'parties', 'name' => 'Parties', 'icon' => 'celebration', 'color' => 'text-orange-500', 'bg' => 'bg-orange-50 dark:bg-orange-900/20'],
+            ['slug' => 'corporate', 'name' => 'Corporate', 'icon' => 'business_center', 'color' => 'text-slate-600', 'bg' => 'bg-slate-100 dark:bg-slate-800'],
+            ['slug' => 'holidays', 'name' => 'Holidays', 'icon' => 'redeem', 'color' => 'text-red-500', 'bg' => 'bg-red-50 dark:bg-red-900/20'],
+            ['slug' => 'anniversary', 'name' => 'Anniversary', 'icon' => 'favorite_border', 'color' => 'text-pink-500', 'bg' => 'bg-pink-50 dark:bg-pink-900/20'],
+            ['slug' => 'graduation', 'name' => 'Graduation', 'icon' => 'school', 'color' => 'text-indigo-500', 'bg' => 'bg-indigo-50 dark:bg-indigo-900/20'],
+            ['slug' => 'housewarming', 'name' => 'Housewarming', 'icon' => 'home', 'color' => 'text-cyan-500', 'bg' => 'bg-cyan-50 dark:bg-cyan-900/20'],
+            ['slug' => 'religious', 'name' => 'Religious', 'icon' => 'church', 'color' => 'text-yellow-600', 'bg' => 'bg-yellow-50 dark:bg-yellow-900/20'],
+            ['slug' => 'farewell', 'name' => 'Farewell', 'icon' => 'waving_hand', 'color' => 'text-purple-500', 'bg' => 'bg-purple-50 dark:bg-purple-900/20'],
+        ];
 
-            foreach ($allCategories as $cat): ?>
+        // Split categories for mobile two-row layout
+        $row1Categories = array_slice($allCategories, 0, 6);
+        $row2Categories = array_slice($allCategories, 6, 6);
+        ?>
+
+        <!-- Mobile: Two-row synchronized horizontal scrolling (< 768px) -->
+        <div class="sm:hidden category-scroll-container overflow-x-auto -mx-4 px-4"
+            style="-webkit-overflow-scrolling: touch; scrollbar-width: none;">
+            <div class="flex flex-col gap-4" style="min-width: max-content;">
+                <!-- Row 1 -->
+                <div class="flex gap-4">
+                    <?php foreach ($row1Categories as $cat): ?>
+                        <a href="/templates?category=<?= $cat['slug'] ?>"
+                            class="flex flex-col items-center w-14 flex-shrink-0">
+                            <div class="w-14 h-14 rounded-xl <?= $cat['bg'] ?> flex items-center justify-center mb-1">
+                                <span
+                                    class="material-symbols-outlined text-2xl <?= $cat['color'] ?>"><?= $cat['icon'] ?></span>
+                            </div>
+                            <span
+                                class="text-[10px] font-medium text-slate-700 dark:text-slate-300 text-center leading-tight"><?= $cat['name'] ?></span>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+                <!-- Row 2 -->
+                <div class="flex gap-4">
+                    <?php foreach ($row2Categories as $cat): ?>
+                        <a href="/templates?category=<?= $cat['slug'] ?>"
+                            class="flex flex-col items-center w-14 flex-shrink-0">
+                            <div class="w-14 h-14 rounded-xl <?= $cat['bg'] ?> flex items-center justify-center mb-1">
+                                <span
+                                    class="material-symbols-outlined text-2xl <?= $cat['color'] ?>"><?= $cat['icon'] ?></span>
+                            </div>
+                            <span
+                                class="text-[10px] font-medium text-slate-700 dark:text-slate-300 text-center leading-tight"><?= $cat['name'] ?></span>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+
+        <!-- Desktop: Grid layout (>= 768px) -->
+        <div class="hidden sm:grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <?php foreach ($allCategories as $cat): ?>
                 <a href="/templates?category=<?= $cat['slug'] ?>"
                     class="group flex flex-col items-center p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:shadow-lg hover:border-primary/30 transition-all">
                     <div

@@ -469,6 +469,11 @@
         .duration-300 {
             transition-duration: .3s
         }
+
+        /* Hide scrollbar for mobile category scroll */
+        .category-scroll-container::-webkit-scrollbar {
+            display: none
+        }
     </style>
 
     <!-- Self-hosted fonts - preload for fast text rendering -->
