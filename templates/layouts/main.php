@@ -715,7 +715,7 @@
                     <a href="/templates?category=<?= $slug ?>" 
                         class="flex flex-col items-center flex-shrink-0">
                         <div class="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-1 <?= ($currentCategory ?? null) === $slug ? 'border-2 border-primary' : 'border-2 border-transparent' ?>">
-                            <span class="material-symbols-outlined text-2xl <?= $cat['color'] ?>"><?= $cat['icon'] ?></span>
+                            <span class="material-symbols-outlined text-2xl text-slate-600 dark:text-slate-300"><?= $cat['icon'] ?></span>
                         </div>
                         <span class="text-[10px] font-medium <?= ($currentCategory ?? null) === $slug ? 'text-primary' : 'text-slate-700 dark:text-slate-300' ?> text-center leading-tight"><?= $cat['name'] ?></span>
                     </a>

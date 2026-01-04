@@ -175,7 +175,8 @@ if ($category && isset($categoryTitles[$category])) {
                     <span class="font-medium text-slate-900 dark:text-white">Templates</span>
                 </nav>
 
-                <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                <!-- Header - hidden on mobile, visible on desktop -->
+                <div class="hidden sm:flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                     <div>
                         <h1
                             class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
@@ -244,19 +245,20 @@ if ($category && isset($categoryTitles[$category])) {
                 <?php endforeach; ?>
             </div>
 
-            <!-- Load More Trigger -->
+            <!-- Load More Trigger with Skeleton Placeholders -->
             <?php if ($hasMore): ?>
-                <div id="load-more-trigger" class="py-8 flex justify-center">
-                    <div id="loading-spinner" class="flex items-center gap-2 text-slate-500">
-                        <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none"
-                            viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
-                            </circle>
-                            <path class="opacity-75" fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                            </path>
-                        </svg>
-                        <span>Loading more...</span>
+                <div id="load-more-trigger" class="py-4">
+                    <div id="loading-skeletons" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+                        <!-- Skeleton Cards -->
+                        <?php for ($i = 0; $i < 4; $i++): ?>
+                            <div class="animate-pulse bg-white dark:bg-slate-900 rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-800">
+                                <div class="aspect-[4/5] bg-slate-200 dark:bg-slate-700"></div>
+                                <div class="p-3 sm:p-4">
+                                    <div class="h-4 bg-slate-200 dark:bg-slate-700 rounded w-3/4 mb-2"></div>
+                                    <div class="h-3 bg-slate-200 dark:bg-slate-700 rounded w-1/4"></div>
+                                </div>
+                            </div>
+                        <?php endfor; ?>
                     </div>
                 </div>
             <?php endif; ?>
@@ -277,22 +279,22 @@ if ($category && isset($categoryTitles[$category])) {
     </div>
 </div>
 
-<!-- Mobile Sticky Bottom Bar -->
+<!-- Mobile Sticky Bottom Bar (Card Style) -->
 <div id="mobile-bottom-bar"
-    class="fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 p-3 sm:hidden">
-    <div class="flex gap-3 max-w-lg mx-auto">
+    class="fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 sm:hidden">
+    <div class="flex">
+        <button onclick="openSortSheet()"
+            class="flex-1 flex items-center justify-center gap-2 py-4 text-slate-700 dark:text-slate-200 font-medium transition-colors active:bg-slate-50 border-r border-slate-200 dark:border-slate-700">
+            <span class="material-symbols-outlined text-lg">swap_vert</span>
+            <span class="text-sm uppercase tracking-wide">Sort</span>
+        </button>
         <button onclick="openFilterSheet()"
-            class="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium transition-colors active:bg-slate-200">
-            <span class="material-symbols-outlined text-xl">tune</span>
-            <span>Filter</span>
+            class="flex-1 flex items-center justify-center gap-2 py-4 text-slate-700 dark:text-slate-200 font-medium transition-colors active:bg-slate-50">
+            <span class="material-symbols-outlined text-lg">tune</span>
+            <span class="text-sm uppercase tracking-wide">Filter</span>
             <?php if ($category || $tradition): ?>
                 <span class="w-2 h-2 rounded-full bg-primary"></span>
             <?php endif; ?>
-        </button>
-        <button onclick="openSortSheet()"
-            class="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium transition-colors active:bg-slate-200">
-            <span class="material-symbols-outlined text-xl">sort</span>
-            <span>Sort</span>
         </button>
     </div>
 </div>
@@ -363,33 +365,36 @@ if ($category && isset($categoryTitles[$category])) {
     </div>
 </div>
 
-<!-- Sort Bottom Sheet -->
+<!-- Sort Bottom Sheet (Clean Design) -->
 <div id="sort-sheet"
     class="fixed bottom-0 left-0 right-0 z-[110] bg-white dark:bg-slate-900 rounded-t-3xl transform translate-y-full transition-transform duration-300 ease-out">
-    <!-- Handle -->
-    <div class="flex justify-center pt-3 pb-2">
-        <div class="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></div>
-    </div>
-
     <!-- Header -->
-    <div class="flex items-center justify-between px-5 pb-4 border-b border-slate-200 dark:border-slate-700">
-        <h3 class="text-lg font-bold">Sort By</h3>
-        <button onclick="closeSheet()" class="p-2 -mr-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
-            <span class="material-symbols-outlined">close</span>
-        </button>
+    <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-700">
+        <h3 class="text-sm font-bold uppercase tracking-wide text-slate-900 dark:text-white">Sort By</h3>
     </div>
 
-    <!-- Sort Options -->
-    <div class="p-3">
-        <?php foreach ($sortOptions as $key => $label): ?>
-            <button onclick="applySort('<?= $key ?>')"
-                class="w-full flex items-center justify-between px-4 py-4 rounded-xl text-left transition-colors <?= $sort === $key ? 'bg-primary/10 text-primary' : 'hover:bg-slate-50 dark:hover:bg-slate-800' ?>">
-                <span class="font-medium"><?= $label ?></span>
-                <?php if ($sort === $key): ?>
-                    <span class="material-symbols-outlined text-primary">check</span>
-                <?php endif; ?>
-            </button>
-        <?php endforeach; ?>
+    <!-- Sort Options (Clean List) -->
+    <div class="py-2">
+        <button onclick="applySort('popular')"
+            class="w-full flex items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800">
+            <span class="material-symbols-outlined text-xl text-slate-500">local_fire_department</span>
+            <span class="font-medium text-slate-700 dark:text-slate-200">Popularity</span>
+        </button>
+        <button onclick="applySort('newest')"
+            class="w-full flex items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800">
+            <span class="material-symbols-outlined text-xl text-slate-500">schedule</span>
+            <span class="font-medium text-slate-700 dark:text-slate-200">Latest</span>
+        </button>
+        <button onclick="applySort('price_high')"
+            class="w-full flex items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800">
+            <span class="material-symbols-outlined text-xl text-slate-500">trending_down</span>
+            <span class="font-medium text-slate-700 dark:text-slate-200">Price: High to Low</span>
+        </button>
+        <button onclick="applySort('price_low')"
+            class="w-full flex items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800">
+            <span class="material-symbols-outlined text-xl text-slate-500">trending_up</span>
+            <span class="font-medium text-slate-700 dark:text-slate-200">Price: Low to High</span>
+        </button>
     </div>
 </div>
 
