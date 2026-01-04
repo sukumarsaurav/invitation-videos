@@ -254,7 +254,7 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                     <div class="flex gap-3">
                         <!-- Thumbnail Strip -->
                         <?php if (!empty($galleryImages) || !empty($template['thumbnail_url'])): ?>
-                            <div class="hidden sm:flex flex-col gap-2 w-16 shrink-0">
+                            <div class="hidden md:flex flex-col gap-2 w-16 shrink-0">
                                 <!-- Primary Thumbnail -->
                                 <button type="button"
                                     class="gallery-thumb aspect-[9/16] rounded-lg overflow-hidden border-2 border-primary ring-2 ring-primary/20 bg-slate-100 transition-all"
@@ -307,7 +307,7 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
 
                             <!-- Mobile Thumbnail Strip -->
                             <?php if (!empty($galleryImages)): ?>
-                                <div class="flex sm:hidden gap-2 mt-3 overflow-x-auto pb-2">
+                                <div class="flex md:hidden gap-2 mt-3 overflow-x-auto pb-2">
                                     <button type="button"
                                         class="gallery-thumb shrink-0 w-14 aspect-[9/16] rounded-lg overflow-hidden border-2 border-primary ring-2 ring-primary/20 bg-slate-100"
                                         data-full-src="<?= Security::escape($template['thumbnail_url'] ?? '/assets/images/placeholder.jpg') ?>">
@@ -325,6 +325,15 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                                     <?php endforeach; ?>
                                 </div>
                             <?php endif; ?>
+
+                            <!-- CTA Button below image (hidden on mobile, shown on md+) -->
+                            <div class="hidden md:block mt-4">
+                                <a href="/template/<?= Security::escape($templateSlug) ?>?step=<?= $availableSteps[0] ?? 1 ?>"
+                                    class="w-full flex items-center justify-center gap-2 px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all text-lg">
+                                    <span>Customize Now</span>
+                                    <span class="material-symbols-outlined">arrow_forward</span>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -391,14 +400,7 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                     </li>
                 </ul>
 
-                <!-- CTA Button (hidden on mobile, shown on md+) -->
-                <div class="hidden md:flex flex-col sm:flex-row gap-3 pt-4">
-                    <a href="/template/<?= Security::escape($templateSlug) ?>?step=<?= $availableSteps[0] ?? 1 ?>"
-                        class="flex-1 flex items-center justify-center gap-2 px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all text-lg">
-                        <span>Customize Now</span>
-                        <span class="material-symbols-outlined">arrow_forward</span>
-                    </a>
-                </div>
+
 
                 <!-- Trust badges -->
                 <div class="flex items-center gap-4 pt-4 border-t border-slate-200 dark:border-slate-700">
