@@ -25,7 +25,7 @@ try {
 // Fetch CMS theme settings
 $cmsSettings = [];
 try {
-    $cmsSettingsRows = Database::fetchAll("SELECT setting_key, setting_value FROM settings WHERE setting_key LIKE 'hero_%' OR setting_key LIKE 'theme_%' OR setting_key LIKE 'category_%'");
+    $cmsSettingsRows = Database::fetchAll("SELECT setting_key, setting_value FROM settings WHERE setting_key LIKE 'hero_%' OR setting_key LIKE 'theme_%' OR setting_key LIKE 'category_%' OR setting_key LIKE 'nav_%'");
     foreach ($cmsSettingsRows as $row) {
         $cmsSettings[$row['setting_key']] = $row['setting_value'];
     }
@@ -44,6 +44,10 @@ $heroImageMobile = $cmsSettings['hero_image_mobile'] ?? '';
 $heroTitle = $cmsSettings['hero_title'] ?? 'Create Beautiful <span class="text-primary">Invitation Videos</span>';
 $heroSubtitle = $cmsSettings['hero_subtitle'] ?? 'Stunning video invitations for weddings, birthdays, and special events. Easy to customize, ready to share.';
 $categoryDisplayMode = $cmsSettings['category_display_mode'] ?? 'icon';
+// Nav colors for header/footer
+$navBgColor = $cmsSettings['nav_bg_color'] ?? '#ffffff';
+$navTextColor = $cmsSettings['nav_text_color'] ?? '#1e293b';
+$navHoverColor = $cmsSettings['nav_hover_color'] ?? '#7f13ec';
 ?>
 <!DOCTYPE html>
 <html lang="en" class="light">
@@ -212,6 +216,15 @@ $categoryDisplayMode = $cmsSettings['category_display_mode'] ?? 'icon';
             ;
             --color-bg-dark:
                 <?= htmlspecialchars($themeBgDark) ?>
+            ;
+            --nav-bg-color:
+                <?= htmlspecialchars($navBgColor) ?>
+            ;
+            --nav-text-color:
+                <?= htmlspecialchars($navTextColor) ?>
+            ;
+            --nav-hover-color:
+                <?= htmlspecialchars($navHoverColor) ?>
             ;
         }
 
@@ -656,6 +669,26 @@ $categoryDisplayMode = $cmsSettings['category_display_mode'] ?? 'icon';
         .dark\:from-primary\/20 {
             --tw-gradient-from: color-mix(in srgb, var(--color-primary) 20%, transparent) !important;
         }
+
+        /* Header/Footer Navigation Colors */
+        header a,
+        footer a {
+            color: var(--nav-text-color, inherit);
+        }
+
+        header a:hover,
+        footer a:hover {
+            color: var(--nav-hover-color, var(--color-primary)) !important;
+        }
+
+        header .text-slate-600,
+        header .text-slate-700,
+        header .text-slate-900,
+        footer .text-slate-500,
+        footer .text-slate-600,
+        footer .text-slate-700 {
+            color: var(--nav-text-color) !important;
+        }
     </style>
 
     <!-- Material Symbols - preload for fast icon rendering (CLS fix) -->
@@ -685,8 +718,8 @@ $categoryDisplayMode = $cmsSettings['category_display_mode'] ?? 'icon';
     <!-- End Google Tag Manager (noscript) -->
 
     <!-- Header -->
-    <header
-        class="sticky top-0 z-50 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm shadow-sm">
+    <header class="sticky top-0 z-50 border-b border-slate-200 dark:border-slate-800 backdrop-blur-sm shadow-sm"
+        style="background-color: var(--nav-bg-color, #ffffff); color: var(--nav-text-color, #1e293b);">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <!-- Left Section: Mobile Menu + Logo -->
@@ -1196,7 +1229,8 @@ $categoryDisplayMode = $cmsSettings['category_display_mode'] ?? 'icon';
 
     <!-- Footer - Can be hidden on mobile for specific pages like gallery -->
     <footer
-        class="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 mt-auto <?= ($hideFooterOnMobile ?? false) ? 'hidden sm:block' : '' ?>"
+        class="border-t border-slate-200 dark:border-slate-800 mt-auto <?= ($hideFooterOnMobile ?? false) ? 'hidden sm:block' : '' ?>"
+        style="background-color: var(--nav-bg-color, #ffffff); color: var(--nav-text-color, #1e293b);"
         x-data="{ footerOpen: window.innerWidth >= 769 }"
         x-init="window.addEventListener('resize', () => { if (window.innerWidth >= 769) footerOpen = true })">
         <!-- Mobile Footer Toggle Bar (visible only on small screens < 769px) -->
@@ -1283,12 +1317,18 @@ $categoryDisplayMode = $cmsSettings['category_display_mode'] ?? 'icon';
                     <div>
                         <h4 class="font-bold mb-4">Wedding Templates</h4>
                         <ul class="space-y-2 text-sm text-slate-500">
-                            <li><a href="/templates?religion=hindu" class="hover:text-primary transition-colors">Hindu Wedding</a></li>
-                            <li><a href="/templates?religion=christian" class="hover:text-primary transition-colors">Christian Wedding</a></li>
-                            <li><a href="/templates?religion=muslim" class="hover:text-primary transition-colors">Muslim Wedding</a></li>
-                            <li><a href="/templates?religion=sikh" class="hover:text-primary transition-colors">Sikh Wedding</a></li>
-                            <li><a href="/templates?religion=jain" class="hover:text-primary transition-colors">Jain Wedding</a></li>
-                            <li><a href="/templates?religion=buddhist" class="hover:text-primary transition-colors">Buddhist Wedding</a></li>
+                            <li><a href="/templates?religion=hindu" class="hover:text-primary transition-colors">Hindu
+                                    Wedding</a></li>
+                            <li><a href="/templates?religion=christian"
+                                    class="hover:text-primary transition-colors">Christian Wedding</a></li>
+                            <li><a href="/templates?religion=muslim" class="hover:text-primary transition-colors">Muslim
+                                    Wedding</a></li>
+                            <li><a href="/templates?religion=sikh" class="hover:text-primary transition-colors">Sikh
+                                    Wedding</a></li>
+                            <li><a href="/templates?religion=jain" class="hover:text-primary transition-colors">Jain
+                                    Wedding</a></li>
+                            <li><a href="/templates?religion=buddhist"
+                                    class="hover:text-primary transition-colors">Buddhist Wedding</a></li>
                         </ul>
                     </div>
 
@@ -1296,12 +1336,18 @@ $categoryDisplayMode = $cmsSettings['category_display_mode'] ?? 'icon';
                     <div>
                         <h4 class="font-bold mb-4">Popular Categories</h4>
                         <ul class="space-y-2 text-sm text-slate-500">
-                            <li><a href="/templates?category=wedding" class="hover:text-primary transition-colors">Wedding Invitations</a></li>
-                            <li><a href="/templates?category=birthday" class="hover:text-primary transition-colors">Birthday Invites</a></li>
-                            <li><a href="/templates?category=anniversary" class="hover:text-primary transition-colors">Anniversary Videos</a></li>
-                            <li><a href="/templates?category=baby_shower" class="hover:text-primary transition-colors">Baby Shower</a></li>
-                            <li><a href="/templates?category=corporate" class="hover:text-primary transition-colors">Corporate Events</a></li>
-                            <li><a href="/templates?festival=diwali" class="hover:text-primary transition-colors">Diwali Invitations</a></li>
+                            <li><a href="/templates?category=wedding"
+                                    class="hover:text-primary transition-colors">Wedding Invitations</a></li>
+                            <li><a href="/templates?category=birthday"
+                                    class="hover:text-primary transition-colors">Birthday Invites</a></li>
+                            <li><a href="/templates?category=anniversary"
+                                    class="hover:text-primary transition-colors">Anniversary Videos</a></li>
+                            <li><a href="/templates?category=baby_shower"
+                                    class="hover:text-primary transition-colors">Baby Shower</a></li>
+                            <li><a href="/templates?category=corporate"
+                                    class="hover:text-primary transition-colors">Corporate Events</a></li>
+                            <li><a href="/templates?festival=diwali" class="hover:text-primary transition-colors">Diwali
+                                    Invitations</a></li>
                         </ul>
                     </div>
 
@@ -1312,9 +1358,9 @@ $categoryDisplayMode = $cmsSettings['category_display_mode'] ?? 'icon';
                             <?php if (!empty($footerBlogs)): ?>
                                 <?php foreach ($footerBlogs as $blog): ?>
                                     <li>
-                                        <a href="/blog/<?= Security::escape($blog['slug']) ?>" 
-                                           class="hover:text-primary transition-colors line-clamp-1"
-                                           title="<?= Security::escape($blog['title']) ?>">
+                                        <a href="/blog/<?= Security::escape($blog['slug']) ?>"
+                                            class="hover:text-primary transition-colors line-clamp-1"
+                                            title="<?= Security::escape($blog['title']) ?>">
                                             <?= Security::escape($blog['title']) ?>
                                         </a>
                                     </li>
@@ -1332,14 +1378,14 @@ $categoryDisplayMode = $cmsSettings['category_display_mode'] ?? 'icon';
                             <li><a href="/templates" class="hover:text-primary transition-colors">All Templates</a></li>
                             <li><a href="/blog" class="hover:text-primary transition-colors">Blog</a></li>
                         </ul>
-                        
+
                         <h4 class="font-bold mb-4">Support</h4>
                         <ul class="space-y-2 text-sm text-slate-500 mb-4">
                             <li><a href="/support" class="hover:text-primary transition-colors">Help Center</a></li>
                             <li><a href="/contact" class="hover:text-primary transition-colors">Contact Us</a></li>
                             <li><a href="/faq" class="hover:text-primary transition-colors">FAQ</a></li>
                         </ul>
-                        
+
                         <h4 class="font-bold mb-4">Legal</h4>
                         <ul class="space-y-2 text-sm text-slate-500">
                             <li><a href="/privacy" class="hover:text-primary transition-colors">Privacy Policy</a></li>
@@ -1354,12 +1400,14 @@ $categoryDisplayMode = $cmsSettings['category_display_mode'] ?? 'icon';
                     <div class="flex flex-col sm:flex-row items-start justify-between gap-6">
                         <!-- Left: Copyright (two rows, stacked) -->
                         <div class="flex flex-col gap-1">
-                            <p class="text-sm text-slate-600 dark:text-slate-400">&copy; <?= date('Y') ?> <?= APP_NAME ?? 'InvitationVideos' ?>. All rights reserved.</p>
-                            <p class="text-xs text-slate-500">Made with <span class="text-red-500">❤</span> in India | Developed by <a
-                                    href="https://neowebx.com" target="_blank" rel="noopener"
+                            <p class="text-sm text-slate-600 dark:text-slate-400">&copy; <?= date('Y') ?>
+                                <?= APP_NAME ?? 'InvitationVideos' ?>. All rights reserved.
+                            </p>
+                            <p class="text-xs text-slate-500">Made with <span class="text-red-500">❤</span> in India |
+                                Developed by <a href="https://neowebx.com" target="_blank" rel="noopener"
                                     class="text-primary hover:underline font-medium">NeoWebX.com</a></p>
                         </div>
-                        
+
                         <!-- Right: Payment Icons -->
                         <div class="flex flex-col items-end gap-2">
                             <span class="text-xs text-slate-400 uppercase tracking-wide">Payment secured by</span>

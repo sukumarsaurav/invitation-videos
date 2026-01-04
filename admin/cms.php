@@ -103,6 +103,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             setSetting('theme_text_secondary', $_POST['theme_text_secondary'] ?? '#64748b');
             setSetting('theme_bg_light', $_POST['theme_bg_light'] ?? '#f7f6f8');
             setSetting('theme_bg_dark', $_POST['theme_bg_dark'] ?? '#191022');
+            // Nav colors (header/footer)
+            setSetting('nav_bg_color', $_POST['nav_bg_color'] ?? '#ffffff');
+            setSetting('nav_text_color', $_POST['nav_text_color'] ?? '#1e293b');
+            setSetting('nav_hover_color', $_POST['nav_hover_color'] ?? '#7f13ec');
             $success = 'Theme colors updated successfully!';
         }
 
@@ -163,6 +167,9 @@ $settings = [
     'theme_text_secondary' => getSetting('theme_text_secondary', '#64748b'),
     'theme_bg_light' => getSetting('theme_bg_light', '#f7f6f8'),
     'theme_bg_dark' => getSetting('theme_bg_dark', '#191022'),
+    'nav_bg_color' => getSetting('nav_bg_color', '#ffffff'),
+    'nav_text_color' => getSetting('nav_text_color', '#1e293b'),
+    'nav_hover_color' => getSetting('nav_hover_color', '#7f13ec'),
     'category_display_mode' => getSetting('category_display_mode', 'icon'),
 ];
 
@@ -410,6 +417,59 @@ $currentTab = $_GET['tab'] ?? 'hero';
                                         value="<?= Security::escape($settings['theme_bg_dark']) ?>"
                                         class="w-12 h-12 rounded-lg border border-slate-300 cursor-pointer">
                                     <input type="text" value="<?= Security::escape($settings['theme_bg_dark']) ?>"
+                                        class="w-28 px-3 py-2 rounded-lg border border-slate-300 text-sm font-mono"
+                                        onchange="this.previousElementSibling.value = this.value"
+                                        oninput="this.previousElementSibling.value = this.value">
+                                </div>
+                            </div>
+
+                            <hr class="border-slate-200">
+
+                            <!-- Header/Footer Navigation Colors -->
+                            <h4 class="text-sm font-semibold text-slate-900">Header & Footer Colors</h4>
+                            
+                            <div class="flex items-center gap-4">
+                                <div class="flex-1">
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Background Color</label>
+                                    <p class="text-xs text-slate-400">Header and footer background</p>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <input type="color" name="nav_bg_color"
+                                        value="<?= Security::escape($settings['nav_bg_color']) ?>"
+                                        class="w-12 h-12 rounded-lg border border-slate-300 cursor-pointer">
+                                    <input type="text" value="<?= Security::escape($settings['nav_bg_color']) ?>"
+                                        class="w-28 px-3 py-2 rounded-lg border border-slate-300 text-sm font-mono"
+                                        onchange="this.previousElementSibling.value = this.value"
+                                        oninput="this.previousElementSibling.value = this.value">
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-4">
+                                <div class="flex-1">
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Text Color</label>
+                                    <p class="text-xs text-slate-400">Links and text in header/footer</p>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <input type="color" name="nav_text_color"
+                                        value="<?= Security::escape($settings['nav_text_color']) ?>"
+                                        class="w-12 h-12 rounded-lg border border-slate-300 cursor-pointer">
+                                    <input type="text" value="<?= Security::escape($settings['nav_text_color']) ?>"
+                                        class="w-28 px-3 py-2 rounded-lg border border-slate-300 text-sm font-mono"
+                                        onchange="this.previousElementSibling.value = this.value"
+                                        oninput="this.previousElementSibling.value = this.value">
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-4">
+                                <div class="flex-1">
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Hover/Active Color</label>
+                                    <p class="text-xs text-slate-400">Links on hover and active state</p>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <input type="color" name="nav_hover_color"
+                                        value="<?= Security::escape($settings['nav_hover_color']) ?>"
+                                        class="w-12 h-12 rounded-lg border border-slate-300 cursor-pointer">
+                                    <input type="text" value="<?= Security::escape($settings['nav_hover_color']) ?>"
                                         class="w-28 px-3 py-2 rounded-lg border border-slate-300 text-sm font-mono"
                                         onchange="this.previousElementSibling.value = this.value"
                                         oninput="this.previousElementSibling.value = this.value">
