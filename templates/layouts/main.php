@@ -631,11 +631,11 @@
 
     <!-- Mobile Side Drawer Backdrop -->
     <div id="drawerBackdrop" onclick="closeMobileDrawer()"
-        class="fixed inset-0 bg-black/50 z-50 hidden opacity-0 transition-opacity duration-300 lg:hidden"></div>
+        class="fixed inset-0 bg-black/50 z-[100] hidden opacity-0 transition-opacity duration-300 lg:hidden"></div>
 
     <!-- Mobile Side Drawer -->
     <div id="mobileDrawer"
-        class="fixed top-0 left-0 h-full w-72 max-w-[80vw] bg-white dark:bg-slate-900 z-[60] transform -translate-x-full transition-transform duration-300 ease-out shadow-2xl lg:hidden">
+        class="fixed top-0 left-0 h-full w-72 max-w-[80vw] bg-white dark:bg-slate-900 z-[110] transform -translate-x-full transition-transform duration-300 ease-out shadow-2xl lg:hidden">
         <!-- Drawer Header -->
         <div class="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800">
             <a href="/" class="flex items-center gap-2">
