@@ -483,7 +483,7 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
         <div class="h-24 lg:hidden"></div>
 
     <?php else: ?>
-            <!-- ==================== CUSTOMIZATION STEPS ==================== -->
+        <!-- ==================== CUSTOMIZATION STEPS ==================== -->
 
         <div class="max-w-3xl mx-auto">
 
@@ -575,7 +575,7 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                     <?php endif; ?>
 
                     <button type="submit"
-                        class="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-8 py-3 rounded-lg bg-primary text-white font-bold hover:bg-primary/90 shadow-lg shadow-primary/25 transition-colors">
+                        class="hidden md:flex flex-1 sm:flex-initial items-center justify-center gap-2 px-8 py-3 rounded-lg bg-primary text-white font-bold hover:bg-primary/90 shadow-lg shadow-primary/25 transition-colors">
                         <?php if ($currentStepIndex < $totalSteps - 1): ?>
                             <span>Next Step</span>
                             <span class="material-symbols-outlined">arrow_forward</span>
