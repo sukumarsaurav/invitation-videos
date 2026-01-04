@@ -13,8 +13,10 @@ $dateFrom = date('Y-m-d', strtotime("-$days days"));
 
 // Get stats
 $stats = [
-    'revenue_total' => Database::fetchOne("SELECT COALESCE(SUM(amount), 0) as total FROM orders WHERE payment_status = 'paid'")['total'] ?? 0,
-    'revenue_period' => Database::fetchOne("SELECT COALESCE(SUM(amount), 0) as total FROM orders WHERE payment_status = 'paid' AND created_at >= ?", [$dateFrom])['total'] ?? 0,
+    'revenue_usd' => Database::fetchOne("SELECT COALESCE(SUM(amount), 0) as total FROM orders WHERE payment_status = 'paid' AND currency = 'USD'")['total'] ?? 0,
+    'revenue_inr' => Database::fetchOne("SELECT COALESCE(SUM(amount), 0) as total FROM orders WHERE payment_status = 'paid' AND currency = 'INR'")['total'] ?? 0,
+    'revenue_period_usd' => Database::fetchOne("SELECT COALESCE(SUM(amount), 0) as total FROM orders WHERE payment_status = 'paid' AND currency = 'USD' AND created_at >= ?", [$dateFrom])['total'] ?? 0,
+    'revenue_period_inr' => Database::fetchOne("SELECT COALESCE(SUM(amount), 0) as total FROM orders WHERE payment_status = 'paid' AND currency = 'INR' AND created_at >= ?", [$dateFrom])['total'] ?? 0,
     'orders_total' => Database::fetchOne("SELECT COUNT(*) as total FROM orders WHERE payment_status = 'paid'")['total'] ?? 0,
     'orders_period' => Database::fetchOne("SELECT COUNT(*) as total FROM orders WHERE payment_status = 'paid' AND created_at >= ?", [$dateFrom])['total'] ?? 0,
     'templates' => Database::fetchOne("SELECT COUNT(*) as total FROM templates WHERE is_active = 1")['total'] ?? 0,
@@ -143,12 +145,23 @@ $pageTitle = 'Dashboard';
             <div class="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg text-green-600">
                 <span class="material-symbols-outlined">payments</span>
             </div>
-            <span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded">
-                +<?= number_format($stats['revenue_period'], 0) ?>
-            </span>
         </div>
         <p class="text-slate-500 text-xs font-medium uppercase">Total Revenue</p>
-        <h3 class="text-2xl font-bold mt-1">$<?= number_format($stats['revenue_total'], 0) ?></h3>
+        <div class="flex items-baseline gap-3 mt-1">
+            <?php if ($stats['revenue_inr'] > 0): ?>
+                <h3 class="text-xl font-bold">₹<?= number_format($stats['revenue_inr'], 0) ?></h3>
+            <?php endif; ?>
+            <?php if ($stats['revenue_usd'] > 0): ?>
+                <h3 class="text-xl font-bold text-slate-600">$<?= number_format($stats['revenue_usd'], 0) ?></h3>
+            <?php endif; ?>
+            <?php if ($stats['revenue_inr'] == 0 && $stats['revenue_usd'] == 0): ?>
+                <h3 class="text-2xl font-bold">₹0</h3>
+            <?php endif; ?>
+        </div>
+        <p class="text-xs text-green-600 mt-1">
+            +₹<?= number_format($stats['revenue_period_inr'], 0) ?> /
+            +$<?= number_format($stats['revenue_period_usd'], 0) ?> this period
+        </p>
     </div>
 
     <!-- Orders -->
@@ -314,7 +327,7 @@ $pageTitle = 'Dashboard';
                                 </div>
                             </td>
                             <td class="px-5 py-3 font-bold">
-                                <?= $order['currency'] === 'INR' ? '₹' : '$' ?>    <?= number_format($order['amount'], 0) ?>
+                                <?= $order['currency'] === 'INR' ? '₹' : '$' ?>     <?= number_format($order['amount'], 0) ?>
                             </td>
                             <td class="px-5 py-3">
                                 <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium <?= $statusColor ?>">
@@ -455,7 +468,7 @@ $pageTitle = 'Dashboard';
         data: {
             labels: <?= json_encode($chartLabels) ?>,
             datasets: [{
-                label: 'Revenue ($)',
+                label: 'Revenue (Orders)',
                 data: <?= json_encode($chartRevenue) ?>,
                 borderColor: '#7f13ec',
                 backgroundColor: 'rgba(127, 19, 236, 0.1)',
