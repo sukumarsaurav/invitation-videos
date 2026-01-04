@@ -635,7 +635,7 @@
 
     <!-- Mobile Side Drawer -->
     <div id="mobileDrawer"
-        class="fixed top-0 left-0 h-full w-72 max-w-[80vw] bg-white dark:bg-slate-900 z-50 transform -translate-x-full transition-transform duration-300 ease-out shadow-2xl lg:hidden">
+        class="fixed top-0 left-0 h-full w-72 max-w-[80vw] bg-white dark:bg-slate-900 z-[60] transform -translate-x-full transition-transform duration-300 ease-out shadow-2xl lg:hidden">
         <!-- Drawer Header -->
         <div class="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800">
             <a href="/" class="flex items-center gap-2">
