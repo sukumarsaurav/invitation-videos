@@ -74,7 +74,7 @@ $isHomePage = true;  // For floating help button display
 
 <!-- Hero Section -->
 <section
-    class="min-h-[85vh] flex items-center justify-center relative overflow-hidden<?= empty($heroImageDesktop) ? ' bg-gradient-to-br from-primary/5 via-purple-500/5 to-rose-500/5 dark:from-primary/10 dark:via-purple-500/10 dark:to-rose-500/10' : '' ?>">
+    class="min-h-[80vh] flex items-center justify-center relative overflow-hidden<?= empty($heroImageDesktop) ? ' bg-gradient-to-br from-primary/5 via-purple-500/5 to-rose-500/5 dark:from-primary/10 dark:via-purple-500/10 dark:to-rose-500/10' : '' ?>">
     <?php if (!empty($heroImageDesktop)): ?>
         <!-- Hero Background Image -->
         <div class="absolute inset-0 z-0">
