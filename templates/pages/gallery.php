@@ -17,23 +17,88 @@ $category = $_GET['category'] ?? null;
 $tradition = $_GET['tradition'] ?? null;
 $sort = $_GET['sort'] ?? 'popular';
 
+// New mega menu filters
+$styleFilter = $_GET['style'] ?? null;
+$formatFilter = $_GET['format'] ?? null;
+$religionFilter = $_GET['religion'] ?? null;
+$functionFilter = $_GET['function'] ?? null;
+$partyFilter = $_GET['party'] ?? null;
+$pujaFilter = $_GET['puja'] ?? null;
+$festivalFilter = $_GET['festival'] ?? null;
+$languageFilter = $_GET['language'] ?? null;
+
 // Initial page load - fetch first batch
 $limit = 12;
-$sql = "SELECT * FROM templates WHERE is_active = 1";
-$countSql = "SELECT COUNT(*) as total FROM templates WHERE is_active = 1";
 $params = [];
+$joins = [];
+$conditions = ["t.is_active = 1"];
 
+// Base query with potential joins for category filters
 if ($category) {
-    $sql .= " AND category = ?";
-    $countSql .= " AND category = ?";
+    $conditions[] = "t.category = ?";
     $params[] = $category;
 }
 
 if ($tradition) {
-    $sql .= " AND cultural_tradition = ?";
-    $countSql .= " AND cultural_tradition = ?";
+    $conditions[] = "t.cultural_tradition = ?";
     $params[] = $tradition;
 }
+
+// Style filter
+if ($styleFilter) {
+    $joins[] = "INNER JOIN template_style_map tsm ON t.id = tsm.template_id INNER JOIN template_styles ts ON tsm.style_id = ts.id AND ts.slug = ?";
+    $params[] = $styleFilter;
+}
+
+// Format filter
+if ($formatFilter) {
+    $joins[] = "INNER JOIN template_format_map tfm ON t.id = tfm.template_id INNER JOIN template_formats tf ON tfm.format_id = tf.id AND tf.slug = ?";
+    $params[] = $formatFilter;
+}
+
+// Religion filter
+if ($religionFilter) {
+    $joins[] = "INNER JOIN template_religion_map trm ON t.id = trm.template_id INNER JOIN template_religions tr ON trm.religion_id = tr.id AND tr.slug = ?";
+    $params[] = $religionFilter;
+}
+
+// Function filter
+if ($functionFilter) {
+    $joins[] = "INNER JOIN template_function_map tfnm ON t.id = tfnm.template_id INNER JOIN template_functions tfn ON tfnm.function_id = tfn.id AND tfn.slug = ?";
+    $params[] = $functionFilter;
+}
+
+// Party type filter
+if ($partyFilter) {
+    $joins[] = "INNER JOIN template_party_map tpm ON t.id = tpm.template_id INNER JOIN template_party_types tp ON tpm.party_type_id = tp.id AND tp.slug = ?";
+    $params[] = $partyFilter;
+}
+
+// Puja filter
+if ($pujaFilter) {
+    $joins[] = "INNER JOIN template_puja_map tpjm ON t.id = tpjm.template_id INNER JOIN template_pujas tpj ON tpjm.puja_id = tpj.id AND tpj.slug = ?";
+    $params[] = $pujaFilter;
+}
+
+// Festival filter
+if ($festivalFilter) {
+    $joins[] = "INNER JOIN template_festival_map tfsm ON t.id = tfsm.template_id INNER JOIN template_festivals tfs ON tfsm.festival_id = tfs.id AND tfs.slug = ?";
+    $params[] = $festivalFilter;
+}
+
+// Language filter
+if ($languageFilter) {
+    $joins[] = "INNER JOIN template_language_map tlm ON t.id = tlm.template_id INNER JOIN template_languages tl ON tlm.language_id = tl.id AND tl.slug = ?";
+    $params[] = $languageFilter;
+}
+
+// Build the SQL query
+$joinClause = implode(" ", $joins);
+$whereClause = implode(" AND ", $conditions);
+
+$sql = "SELECT DISTINCT t.* FROM templates t {$joinClause} WHERE {$whereClause}";
+$countSql = "SELECT COUNT(DISTINCT t.id) as total FROM templates t {$joinClause} WHERE {$whereClause}";
+
 
 // Sort
 switch ($sort) {

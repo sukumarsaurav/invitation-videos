@@ -1,3 +1,27 @@
+<?php
+// Fetch mega menu category data (only if tables exist)
+$megaMenuStyles = [];
+$megaMenuFormats = [];
+$megaMenuReligions = [];
+$megaMenuFunctions = [];
+$megaMenuPartyTypes = [];
+$megaMenuPujas = [];
+$megaMenuFestivals = [];
+$megaMenuLanguages = [];
+
+try {
+    $megaMenuStyles = Database::fetchAll("SELECT name, slug, icon FROM template_styles WHERE is_active = 1 ORDER BY display_order LIMIT 15") ?? [];
+    $megaMenuFormats = Database::fetchAll("SELECT name, slug, icon FROM template_formats WHERE is_active = 1 ORDER BY display_order LIMIT 12") ?? [];
+    $megaMenuReligions = Database::fetchAll("SELECT name, slug, icon FROM template_religions WHERE is_active = 1 ORDER BY display_order LIMIT 15") ?? [];
+    $megaMenuFunctions = Database::fetchAll("SELECT name, slug, icon FROM template_functions WHERE is_active = 1 ORDER BY display_order LIMIT 20") ?? [];
+    $megaMenuPartyTypes = Database::fetchAll("SELECT name, slug, icon FROM template_party_types WHERE is_active = 1 ORDER BY display_order LIMIT 20") ?? [];
+    $megaMenuPujas = Database::fetchAll("SELECT name, slug, icon FROM template_pujas WHERE is_active = 1 ORDER BY display_order LIMIT 25") ?? [];
+    $megaMenuFestivals = Database::fetchAll("SELECT name, slug, icon FROM template_festivals WHERE is_active = 1 ORDER BY display_order LIMIT 25") ?? [];
+    $megaMenuLanguages = Database::fetchAll("SELECT name, slug, native_name FROM template_languages WHERE is_active = 1 ORDER BY display_order LIMIT 20") ?? [];
+} catch (Exception $e) {
+    // Tables may not exist yet, fail silently
+}
+?>
 <!DOCTYPE html>
 <html lang="en" class="light">
 
@@ -571,8 +595,130 @@
                         </span>
                     <?php endif; ?>
 
-                    <!-- Desktop Navigation - Categories directly after logo -->
+                    <!-- Desktop Navigation with Mega Menu -->
                     <nav class="hidden lg:flex items-center gap-4 xl:gap-5">
+                        <!-- Mega Menu Trigger -->
+                        <div class="relative group" id="mega-menu-container">
+                            <button class="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-primary transition-colors py-2">
+                                <span class="material-symbols-outlined text-lg">apps</span>
+                                Categories
+                                <span class="material-symbols-outlined text-base transition-transform group-hover:rotate-180">expand_more</span>
+                            </button>
+                            
+                            <!-- Mega Menu Dropdown -->
+                            <div class="mega-menu-dropdown absolute left-1/2 -translate-x-1/2 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                                <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 p-6 min-w-[900px] max-w-[1100px]">
+                                    <div class="grid grid-cols-4 gap-6">
+                                        
+                                        <!-- Column 1: Style -->
+                                        <div class="space-y-3">
+                                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Search by Style</h4>
+                                            <?php foreach ($megaMenuStyles as $item): ?>
+                                                <a href="/templates?style=<?= $item['slug'] ?>" class="flex items-center gap-2 text-sm text-slate-600 hover:text-primary transition-colors">
+                                                    <span class="material-symbols-outlined text-base text-slate-400"><?= $item['icon'] ?></span>
+                                                    <?= Security::escape($item['name']) ?>
+                                                </a>
+                                            <?php endforeach; ?>
+                                        </div>
+                                        
+                                        <!-- Column 2: Format -->
+                                        <div class="space-y-3">
+                                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Search by Format</h4>
+                                            <?php foreach ($megaMenuFormats as $item): ?>
+                                                <a href="/templates?format=<?= $item['slug'] ?>" class="flex items-center gap-2 text-sm text-slate-600 hover:text-primary transition-colors">
+                                                    <span class="material-symbols-outlined text-base text-slate-400"><?= $item['icon'] ?></span>
+                                                    <?= Security::escape($item['name']) ?>
+                                                </a>
+                                            <?php endforeach; ?>
+                                        </div>
+                                        
+                                        <!-- Column 3: Religion -->
+                                        <div class="space-y-3">
+                                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Search by Religion</h4>
+                                            <?php foreach ($megaMenuReligions as $item): ?>
+                                                <a href="/templates?religion=<?= $item['slug'] ?>" class="flex items-center gap-2 text-sm text-slate-600 hover:text-primary transition-colors">
+                                                    <span class="material-symbols-outlined text-base text-slate-400"><?= $item['icon'] ?></span>
+                                                    <?= Security::escape($item['name']) ?>
+                                                </a>
+                                            <?php endforeach; ?>
+                                        </div>
+                                        
+                                        <!-- Column 4: Function -->
+                                        <div class="space-y-3">
+                                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Search by Function</h4>
+                                            <?php foreach ($megaMenuFunctions as $item): ?>
+                                                <a href="/templates?function=<?= $item['slug'] ?>" class="flex items-center gap-2 text-sm text-slate-600 hover:text-primary transition-colors">
+                                                    <span class="material-symbols-outlined text-base text-slate-400"><?= $item['icon'] ?></span>
+                                                    <?= Security::escape($item['name']) ?>
+                                                </a>
+                                            <?php endforeach; ?>
+                                        </div>
+                                        
+                                    </div>
+                                    
+                                    <!-- Second Row -->
+                                    <div class="border-t border-slate-100 dark:border-slate-800 mt-6 pt-6">
+                                        <div class="grid grid-cols-4 gap-6">
+                                            
+                                            <!-- Party Types -->
+                                            <div class="space-y-3">
+                                                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Party Types</h4>
+                                                <?php foreach (array_slice($megaMenuPartyTypes, 0, 10) as $item): ?>
+                                                    <a href="/templates?party=<?= $item['slug'] ?>" class="flex items-center gap-2 text-sm text-slate-600 hover:text-primary transition-colors">
+                                                        <span class="material-symbols-outlined text-base text-slate-400"><?= $item['icon'] ?></span>
+                                                        <?= Security::escape($item['name']) ?>
+                                                    </a>
+                                                <?php endforeach; ?>
+                                            </div>
+                                            
+                                            <!-- Puja & Rituals -->
+                                            <div class="space-y-3">
+                                                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Puja & Rituals</h4>
+                                                <?php foreach (array_slice($megaMenuPujas, 0, 10) as $item): ?>
+                                                    <a href="/templates?puja=<?= $item['slug'] ?>" class="flex items-center gap-2 text-sm text-slate-600 hover:text-primary transition-colors">
+                                                        <span class="material-symbols-outlined text-base text-slate-400"><?= $item['icon'] ?></span>
+                                                        <?= Security::escape($item['name']) ?>
+                                                    </a>
+                                                <?php endforeach; ?>
+                                            </div>
+                                            
+                                            <!-- Festivals -->
+                                            <div class="space-y-3">
+                                                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Festivals</h4>
+                                                <?php foreach (array_slice($megaMenuFestivals, 0, 10) as $item): ?>
+                                                    <a href="/templates?festival=<?= $item['slug'] ?>" class="flex items-center gap-2 text-sm text-slate-600 hover:text-primary transition-colors">
+                                                        <span class="material-symbols-outlined text-base text-slate-400"><?= $item['icon'] ?></span>
+                                                        <?= Security::escape($item['name']) ?>
+                                                    </a>
+                                                <?php endforeach; ?>
+                                            </div>
+                                            
+                                            <!-- Language -->
+                                            <div class="space-y-3">
+                                                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Language</h4>
+                                                <?php foreach ($megaMenuLanguages as $item): ?>
+                                                    <a href="/templates?language=<?= $item['slug'] ?>" class="flex items-center gap-2 text-sm text-slate-600 hover:text-primary transition-colors">
+                                                        <span class="material-symbols-outlined text-base text-slate-400">translate</span>
+                                                        <?= Security::escape($item['name']) ?>
+                                                    </a>
+                                                <?php endforeach; ?>
+                                            </div>
+                                            
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- View All Link -->
+                                    <div class="border-t border-slate-100 dark:border-slate-800 mt-6 pt-4 flex justify-center">
+                                        <a href="/templates" class="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline">
+                                            View All Templates
+                                            <span class="material-symbols-outlined text-base">arrow_forward</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Quick Links (keeping a few popular ones visible) -->
                         <a href="/templates?category=wedding"
                             class="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-primary transition-colors">
                             <span class="material-symbols-outlined text-lg text-rose-500">favorite</span>
@@ -583,20 +729,10 @@
                             <span class="material-symbols-outlined text-lg text-amber-500">cake</span>
                             Birthday
                         </a>
-                        <a href="/templates?category=corporate"
+                        <a href="/templates"
                             class="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-primary transition-colors">
-                            <span class="material-symbols-outlined text-lg text-blue-500">business_center</span>
-                            Corporate
-                        </a>
-                        <a href="/templates?category=baby_shower"
-                            class="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-primary transition-colors">
-                            <span class="material-symbols-outlined text-lg text-teal-500">child_care</span>
-                            Baby Shower
-                        </a>
-                        <a href="/templates?category=anniversary"
-                            class="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-primary transition-colors">
-                            <span class="material-symbols-outlined text-lg text-purple-500">celebration</span>
-                            Anniversary
+                            <span class="material-symbols-outlined text-lg text-slate-400">grid_view</span>
+                            All
                         </a>
                     </nav>
                 </div>
@@ -610,70 +746,70 @@
                             $userName = $_SESSION['user_name'] ?? 'User';
                             $userInitial = strtoupper(substr($userName, 0, 1));
                             ?>
-                            <!-- Profile Dropdown -->
-                            <div class="relative group">
-                                <button
-                                    class="flex items-center gap-2 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                                    <?php if ($userAvatar): ?>
-                                        <img src="<?= Security::escape($userAvatar) ?>" alt="Profile"
-                                            class="w-9 h-9 rounded-full object-cover border-2 border-primary/20" width="36"
-                                            height="36">
-                                    <?php else: ?>
-                                        <div
-                                            class="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">
-                                            <?= $userInitial ?>
-                                        </div>
-                                    <?php endif; ?>
-                                    <span class="material-symbols-outlined text-slate-400 text-lg">expand_more</span>
-                                </button>
+                                <!-- Profile Dropdown -->
+                                <div class="relative group">
+                                    <button
+                                        class="flex items-center gap-2 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                        <?php if ($userAvatar): ?>
+                                                <img src="<?= Security::escape($userAvatar) ?>" alt="Profile"
+                                                    class="w-9 h-9 rounded-full object-cover border-2 border-primary/20" width="36"
+                                                    height="36">
+                                        <?php else: ?>
+                                                <div
+                                                    class="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">
+                                                    <?= $userInitial ?>
+                                                </div>
+                                        <?php endif; ?>
+                                        <span class="material-symbols-outlined text-slate-400 text-lg">expand_more</span>
+                                    </button>
 
-                                <!-- Dropdown Menu -->
-                                <div
-                                    class="absolute right-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                                    <!-- Dropdown Menu -->
                                     <div
-                                        class="bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 py-2 min-w-[200px]">
-                                        <!-- User Info -->
-                                        <div class="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
-                                            <p class="font-medium text-slate-900 dark:text-white">
-                                                <?= Security::escape($userName) ?>
-                                            </p>
-                                            <p class="text-xs text-slate-500 truncate">
-                                                <?= Security::escape($_SESSION['user_email'] ?? '') ?>
-                                            </p>
+                                        class="absolute right-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                                        <div
+                                            class="bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 py-2 min-w-[200px]">
+                                            <!-- User Info -->
+                                            <div class="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+                                                <p class="font-medium text-slate-900 dark:text-white">
+                                                    <?= Security::escape($userName) ?>
+                                                </p>
+                                                <p class="text-xs text-slate-500 truncate">
+                                                    <?= Security::escape($_SESSION['user_email'] ?? '') ?>
+                                                </p>
+                                            </div>
+
+                                            <a href="/profile"
+                                                class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                                                <span class="material-symbols-outlined text-lg">person</span>
+                                                Profile
+                                            </a>
+                                            <a href="/my-orders"
+                                                class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                                                <span class="material-symbols-outlined text-lg">shopping_bag</span>
+                                                My Orders
+                                            </a>
+                                            <a href="/my-tickets"
+                                                class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                                                <span class="material-symbols-outlined text-lg">support_agent</span>
+                                                My Tickets
+                                            </a>
+
+                                            <div class="border-t border-slate-100 dark:border-slate-800 my-1"></div>
+
+                                            <a href="/logout"
+                                                class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                                                <span class="material-symbols-outlined text-lg">logout</span>
+                                                Sign Out
+                                            </a>
                                         </div>
-
-                                        <a href="/profile"
-                                            class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                                            <span class="material-symbols-outlined text-lg">person</span>
-                                            Profile
-                                        </a>
-                                        <a href="/my-orders"
-                                            class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                                            <span class="material-symbols-outlined text-lg">shopping_bag</span>
-                                            My Orders
-                                        </a>
-                                        <a href="/my-tickets"
-                                            class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                                            <span class="material-symbols-outlined text-lg">support_agent</span>
-                                            My Tickets
-                                        </a>
-
-                                        <div class="border-t border-slate-100 dark:border-slate-800 my-1"></div>
-
-                                        <a href="/logout"
-                                            class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
-                                            <span class="material-symbols-outlined text-lg">logout</span>
-                                            Sign Out
-                                        </a>
                                     </div>
                                 </div>
-                            </div>
                         <?php else: ?>
-                            <a href="/login" class="text-sm font-medium text-slate-600 hover:text-primary">Login</a>
-                            <a href="/register"
-                                class="flex h-10 items-center justify-center rounded-lg bg-primary px-5 text-sm font-bold text-white shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all">
-                                Get Started
-                            </a>
+                                <a href="/login" class="text-sm font-medium text-slate-600 hover:text-primary">Login</a>
+                                <a href="/register"
+                                    class="flex h-10 items-center justify-center rounded-lg bg-primary px-5 text-sm font-bold text-white shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all">
+                                    Get Started
+                                </a>
                         <?php endif; ?>
                     </div>
 
@@ -684,24 +820,24 @@
                             $userName = $_SESSION['user_name'] ?? 'User';
                             $userInitial = strtoupper(substr($userName, 0, 1));
                             ?>
-                            <a href="/profile" class="block p-1">
-                                <?php if ($userAvatar): ?>
-                                    <img src="<?= Security::escape($userAvatar) ?>" alt="Profile"
-                                        class="w-9 h-9 rounded-full object-cover border-2 border-primary/20" width="36"
-                                        height="36">
-                                <?php else: ?>
-                                    <div
-                                        class="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">
-                                        <?= $userInitial ?>
-                                    </div>
-                                <?php endif; ?>
-                            </a>
+                                <a href="/profile" class="block p-1">
+                                    <?php if ($userAvatar): ?>
+                                            <img src="<?= Security::escape($userAvatar) ?>" alt="Profile"
+                                                class="w-9 h-9 rounded-full object-cover border-2 border-primary/20" width="36"
+                                                height="36">
+                                    <?php else: ?>
+                                            <div
+                                                class="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">
+                                                <?= $userInitial ?>
+                                            </div>
+                                    <?php endif; ?>
+                                </a>
                         <?php else: ?>
-                            <a href="/login"
-                                class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
-                                aria-label="Login">
-                                <span class="material-symbols-outlined text-2xl">person</span>
-                            </a>
+                                <a href="/login"
+                                    class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
+                                    aria-label="Login">
+                                    <span class="material-symbols-outlined text-2xl">person</span>
+                                </a>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -710,37 +846,37 @@
     </header>
 
     <?php if (($isGalleryPage ?? false) && !empty($galleryCategories)): ?>
-        <!-- Mobile Category Scroll Bar (only on gallery pages, < 768px) -->
-        <div class="sm:hidden sticky top-16 z-40 bg-white dark:bg-slate-900">
-            <div class="category-scroll-container overflow-x-auto px-4 py-3"
-                style="-webkit-overflow-scrolling: touch; scrollbar-width: none;">
-                <div class="flex gap-3" style="min-width: max-content;">
-                    <!-- All Templates -->
-                    <a href="/templates"
-                        class="flex flex-col items-center flex-shrink-0 <?= !($currentCategory ?? null) ? 'category-selected' : '' ?>">
-                        <div
-                            class="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-1 <?= !($currentCategory ?? null) ? 'border-2 border-primary' : 'border-2 border-transparent' ?>">
-                            <span
-                                class="material-symbols-outlined text-2xl text-slate-600 dark:text-slate-300">grid_view</span>
-                        </div>
-                        <span
-                            class="text-[10px] font-medium <?= !($currentCategory ?? null) ? 'text-primary' : 'text-slate-700 dark:text-slate-300' ?> text-center leading-tight">All</span>
-                    </a>
-                    <!-- Category Icons -->
-                    <?php foreach ($galleryCategories as $slug => $cat): ?>
-                        <a href="/templates?category=<?= $slug ?>" class="flex flex-col items-center flex-shrink-0">
+            <!-- Mobile Category Scroll Bar (only on gallery pages, < 768px) -->
+            <div class="sm:hidden sticky top-16 z-40 bg-white dark:bg-slate-900">
+                <div class="category-scroll-container overflow-x-auto px-4 py-3"
+                    style="-webkit-overflow-scrolling: touch; scrollbar-width: none;">
+                    <div class="flex gap-3" style="min-width: max-content;">
+                        <!-- All Templates -->
+                        <a href="/templates"
+                            class="flex flex-col items-center flex-shrink-0 <?= !($currentCategory ?? null) ? 'category-selected' : '' ?>">
                             <div
-                                class="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-1 <?= ($currentCategory ?? null) === $slug ? 'border-2 border-primary' : 'border-2 border-transparent' ?>">
+                                class="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-1 <?= !($currentCategory ?? null) ? 'border-2 border-primary' : 'border-2 border-transparent' ?>">
                                 <span
-                                    class="material-symbols-outlined text-2xl text-slate-600 dark:text-slate-300"><?= $cat['icon'] ?></span>
+                                    class="material-symbols-outlined text-2xl text-slate-600 dark:text-slate-300">grid_view</span>
                             </div>
                             <span
-                                class="text-[10px] font-medium <?= ($currentCategory ?? null) === $slug ? 'text-primary' : 'text-slate-700 dark:text-slate-300' ?> text-center leading-tight"><?= $cat['name'] ?></span>
+                                class="text-[10px] font-medium <?= !($currentCategory ?? null) ? 'text-primary' : 'text-slate-700 dark:text-slate-300' ?> text-center leading-tight">All</span>
                         </a>
-                    <?php endforeach; ?>
+                        <!-- Category Icons -->
+                        <?php foreach ($galleryCategories as $slug => $cat): ?>
+                                <a href="/templates?category=<?= $slug ?>" class="flex flex-col items-center flex-shrink-0">
+                                    <div
+                                        class="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-1 <?= ($currentCategory ?? null) === $slug ? 'border-2 border-primary' : 'border-2 border-transparent' ?>">
+                                        <span
+                                            class="material-symbols-outlined text-2xl text-slate-600 dark:text-slate-300"><?= $cat['icon'] ?></span>
+                                    </div>
+                                    <span
+                                        class="text-[10px] font-medium <?= ($currentCategory ?? null) === $slug ? 'text-primary' : 'text-slate-700 dark:text-slate-300' ?> text-center leading-tight"><?= $cat['name'] ?></span>
+                                </a>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
             </div>
-        </div>
     <?php endif; ?>
 
     <!-- Mobile Side Drawer Backdrop -->
@@ -802,27 +938,27 @@
             <div class="border-t border-slate-200 dark:border-slate-700 my-3"></div>
 
             <?php if (isset($_SESSION['user_id'])): ?>
-                <a href="/my-orders"
-                    class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
-                    My Orders
-                </a>
-                <a href="/my-tickets"
-                    class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
-                    My Tickets
-                </a>
-                <a href="/logout"
-                    class="block px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 font-medium transition-colors">
-                    Logout
-                </a>
+                    <a href="/my-orders"
+                        class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                        My Orders
+                    </a>
+                    <a href="/my-tickets"
+                        class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                        My Tickets
+                    </a>
+                    <a href="/logout"
+                        class="block px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 font-medium transition-colors">
+                        Logout
+                    </a>
             <?php else: ?>
-                <a href="/login"
-                    class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
-                    Login
-                </a>
-                <a href="/register"
-                    class="block px-4 py-3 mt-2 rounded-lg bg-primary text-white text-center font-bold shadow-lg shadow-primary/30 hover:bg-primary/90 transition-colors">
-                    Get Started Free
-                </a>
+                    <a href="/login"
+                        class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                        Login
+                    </a>
+                    <a href="/register"
+                        class="block px-4 py-3 mt-2 rounded-lg bg-primary text-white text-center font-bold shadow-lg shadow-primary/30 hover:bg-primary/90 transition-colors">
+                        Get Started Free
+                    </a>
             <?php endif; ?>
 
             <div class="border-t border-slate-200 dark:border-slate-700 my-3"></div>
@@ -846,12 +982,12 @@
 
     <!-- Floating Help Button - Only on landing page -->
     <?php if (($isHomePage ?? false)): ?>
-        <a href="/support"
-            class="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 bg-primary text-white font-bold rounded-full shadow-xl shadow-primary/30 hover:bg-primary/90 hover:scale-105 transition-all group"
-            title="Need help?">
-            <span class="material-symbols-outlined text-xl">support_agent</span>
-            <span class="hidden sm:group-hover:inline whitespace-nowrap text-sm">Need Help?</span>
-        </a>
+            <a href="/support"
+                class="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 bg-primary text-white font-bold rounded-full shadow-xl shadow-primary/30 hover:bg-primary/90 hover:scale-105 transition-all group"
+                title="Need help?">
+                <span class="material-symbols-outlined text-xl">support_agent</span>
+                <span class="hidden sm:group-hover:inline whitespace-nowrap text-sm">Need Help?</span>
+            </a>
     <?php endif; ?>
 
     <!-- Footer - Can be hidden on mobile for specific pages like gallery -->
