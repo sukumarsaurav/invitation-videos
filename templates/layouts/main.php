@@ -1344,7 +1344,7 @@ try {
                         <p class="text-sm text-slate-300">
                             <span class="font-semibold text-white">We value your privacy.</span>
                             We use cookies to analyze site traffic and improve your experience.
-                            <a href="/privacy-policy" class="underline hover:text-primary">Learn more</a>
+                            <a href="/privacy" class="underline hover:text-primary">Learn more</a>
                         </p>
                     </div>
                     <div class="flex items-center gap-3 flex-shrink-0">
