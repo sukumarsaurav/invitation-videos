@@ -1,6 +1,8 @@
 -- Migration: 010_language_selection.sql
 -- Description: Add language-specific thumbnails and field translations
 -- Date: 2026-01-04
+-- 
+-- IMPORTANT: Run statements in order. If any fail, continue with the rest.
 
 -- Languages table for reference
 CREATE TABLE IF NOT EXISTS languages (
@@ -28,16 +30,16 @@ INSERT IGNORE INTO languages (code, name, native_name, script, display_order) VA
 ('as', 'Assamese', 'অসমীয়া', 'Bengali', 12);
 
 -- Template thumbnails per language (multiple per language allowed)
--- Removed FK on language_code - just a string reference, no strict constraint needed
+-- NOTE: template_id must be INT UNSIGNED to match templates.id
 CREATE TABLE IF NOT EXISTS template_thumbnails (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    template_id INT NOT NULL,
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    template_id INT UNSIGNED NOT NULL,
     language_code VARCHAR(10) NOT NULL DEFAULT 'en',
     thumbnail_url VARCHAR(500) NOT NULL,
     display_order INT DEFAULT 0,
     is_primary BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (template_id) REFERENCES templates(id) ON DELETE CASCADE,
+    CONSTRAINT fk_thumbnails_template FOREIGN KEY (template_id) REFERENCES templates(id) ON DELETE CASCADE,
     INDEX idx_template_lang (template_id, language_code),
     INDEX idx_primary (template_id, language_code, is_primary)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -48,31 +50,30 @@ SELECT id, 'en', thumbnail_url, TRUE, 0
 FROM templates
 WHERE thumbnail_url IS NOT NULL AND thumbnail_url != '';
 
--- Also migrate gallery images to thumbnail table
+-- Also migrate gallery images to thumbnail table (if template_images table exists)
 INSERT IGNORE INTO template_thumbnails (template_id, language_code, thumbnail_url, is_primary, display_order)
 SELECT template_id, 'en', image_url, FALSE, display_order
 FROM template_images;
 
 -- Template field translations
--- Removed FK on language_code - just a string reference
+-- NOTE: template_field_id must be INT UNSIGNED to match template_fields.id
 CREATE TABLE IF NOT EXISTS template_field_translations (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    template_field_id INT NOT NULL,
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    template_field_id INT UNSIGNED NOT NULL,
     language_code VARCHAR(10) NOT NULL,
     label_text VARCHAR(255) NOT NULL,
     placeholder_text VARCHAR(255),
     default_value TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (template_field_id) REFERENCES template_fields(id) ON DELETE CASCADE,
+    CONSTRAINT fk_translations_field FOREIGN KEY (template_field_id) REFERENCES template_fields(id) ON DELETE CASCADE,
     UNIQUE KEY unique_field_lang (template_field_id, language_code)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Add language preference columns to orders table (ignore if already exists)
--- Run each ALTER separately in case some columns already exist
-ALTER TABLE orders ADD COLUMN IF NOT EXISTS selected_language VARCHAR(10) DEFAULT 'en';
-ALTER TABLE orders ADD COLUMN IF NOT EXISTS translation_mode ENUM('self', 'translate') DEFAULT 'self';
-ALTER TABLE orders ADD COLUMN IF NOT EXISTS translation_fee DECIMAL(10,2) DEFAULT 0.00;
+-- Add language preference columns to orders table
+-- Using separate ALTER statements for compatibility
+ALTER TABLE orders ADD COLUMN selected_language VARCHAR(10) DEFAULT 'en';
+ALTER TABLE orders ADD COLUMN translation_mode ENUM('self', 'translate') DEFAULT 'self';
+ALTER TABLE orders ADD COLUMN translation_fee DECIMAL(10,2) DEFAULT 0.00;
 
--- Index for language queries on orders (create only if not exists)
--- MySQL 8.0+ syntax, for older versions remove IF NOT EXISTS
-CREATE INDEX IF NOT EXISTS idx_orders_language ON orders(selected_language);
+-- Index for language queries on orders
+CREATE INDEX idx_orders_language ON orders(selected_language);
