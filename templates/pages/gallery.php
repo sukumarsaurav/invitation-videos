@@ -3,23 +3,29 @@ require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../src/Core/Security.php';
 require_once __DIR__ . '/../../src/Core/ImageHelper.php';
 
+// Flag to hide footer on mobile (for sticky bottom bar)
+$hideFooterOnMobile = true;
+
 // Get filters
 $category = $_GET['category'] ?? null;
 $tradition = $_GET['tradition'] ?? null;
-$priceRange = $_GET['price'] ?? null;
 $sort = $_GET['sort'] ?? 'popular';
 
-// Build query
+// Initial page load - fetch first batch
+$limit = 12;
 $sql = "SELECT * FROM templates WHERE is_active = 1";
+$countSql = "SELECT COUNT(*) as total FROM templates WHERE is_active = 1";
 $params = [];
 
 if ($category) {
     $sql .= " AND category = ?";
+    $countSql .= " AND category = ?";
     $params[] = $category;
 }
 
 if ($tradition) {
     $sql .= " AND cultural_tradition = ?";
+    $countSql .= " AND cultural_tradition = ?";
     $params[] = $tradition;
 }
 
@@ -38,57 +44,52 @@ switch ($sort) {
         $sql .= " ORDER BY purchase_count DESC";
 }
 
+$sql .= " LIMIT $limit";
 $templates = Database::fetchAll($sql, $params);
+$totalResult = Database::fetchOne($countSql, $params);
+$totalTemplates = intval($totalResult['total'] ?? 0);
+$hasMore = $totalTemplates > $limit;
 
-// Categories for filter
-$categories = [
-    'wedding' => 'Wedding',
-    'birthday' => 'Birthday',
-    'corporate' => 'Corporate',
-    'baby_shower' => 'Baby Shower',
-    'anniversary' => 'Anniversary'
+// All categories for filters
+$allCategories = [
+    'wedding' => ['name' => 'Wedding', 'icon' => 'favorite', 'color' => 'text-rose-500'],
+    'birthday' => ['name' => 'Birthday', 'icon' => 'cake', 'color' => 'text-amber-500'],
+    'baby_shower' => ['name' => 'Baby Shower', 'icon' => 'child_care', 'color' => 'text-teal-500'],
+    'corporate' => ['name' => 'Corporate', 'icon' => 'business_center', 'color' => 'text-blue-500'],
+    'anniversary' => ['name' => 'Anniversary', 'icon' => 'celebration', 'color' => 'text-purple-500'],
+    'graduation' => ['name' => 'Graduation', 'icon' => 'school', 'color' => 'text-indigo-500'],
+    'housewarming' => ['name' => 'Housewarming', 'icon' => 'home', 'color' => 'text-cyan-500'],
+    'parties' => ['name' => 'Parties', 'icon' => 'nightlife', 'color' => 'text-orange-500'],
+    'religious' => ['name' => 'Religious', 'icon' => 'church', 'color' => 'text-yellow-600'],
+    'holidays' => ['name' => 'Holidays', 'icon' => 'redeem', 'color' => 'text-red-500'],
 ];
 
 // Cultural traditions
 $traditions = ['Hindu', 'Muslim', 'Christian', 'Sikh', 'Jewish', 'Chinese', 'Western'];
 
-// SEO: Dynamic page titles and meta descriptions based on filters
+// Sort options
+$sortOptions = [
+    'popular' => 'Most Popular',
+    'newest' => 'Newest First',
+    'price_low' => 'Price: Low to High',
+    'price_high' => 'Price: High to Low',
+];
+
+// SEO
 $categoryTitles = [
     'wedding' => 'Wedding Video Invitation Templates',
     'birthday' => 'Birthday Video Invitation Templates',
     'corporate' => 'Corporate Event Video Templates',
     'baby_shower' => 'Baby Shower Video Invitation Templates',
     'anniversary' => 'Anniversary Video Invitation Templates',
-    'holi' => 'Holi Festival Video Invitations',
-    'diwali' => 'Diwali Festival Video Invitations',
-    'graduation' => 'Graduation Video Invitation Templates',
-    'farewell' => 'Farewell Party Video Invitations',
-    'holidays' => 'Holiday Video Invitation Templates',
-    'housewarming' => 'Housewarming Video Invitation Templates',
-    'parties' => 'Party Video Invitation Templates',
-    'religious' => 'Religious Event Video Invitations',
-    'save_the_date' => 'Save the Date Video Templates',
-];
-
-$traditionTitles = [
-    'hindu' => 'Hindu Wedding Video Invitations',
-    'muslim' => 'Muslim Wedding Video Invitations',
-    'christian' => 'Christian Wedding Video Invitations',
-    'sikh' => 'Sikh Wedding Video Invitations',
-    'jewish' => 'Jewish Wedding Video Invitations',
-    'chinese' => 'Chinese Wedding Video Invitations',
-    'western' => 'Western Wedding Video Invitations',
 ];
 
 if ($category && isset($categoryTitles[$category])) {
     $pageTitle = $categoryTitles[$category];
-    $metaDescription = "Browse our beautiful collection of {$categoryTitles[$category]}. Easy customization, professional quality, instant download. Create your perfect invitation today!";
-} elseif ($tradition && isset($traditionTitles[strtolower($tradition)])) {
-    $pageTitle = $traditionTitles[strtolower($tradition)];
-    $metaDescription = "Beautiful {$traditionTitles[strtolower($tradition)]} templates. Culturally authentic designs with easy customization. Download and share your perfect invitation.";
+    $metaDescription = "Browse our beautiful collection of {$categoryTitles[$category]}. Easy customization, professional quality.";
 } else {
     $pageTitle = 'Video Invitation Templates - All Categories';
-    $metaDescription = 'Browse our stunning collection of video invitation templates for weddings, birthdays, anniversaries, and special events. Easy customization, instant download.';
+    $metaDescription = 'Browse our stunning collection of video invitation templates for weddings, birthdays, anniversaries.';
 }
 ?>
 
@@ -97,37 +98,24 @@ if ($category && isset($categoryTitles[$category])) {
 <div class="flex flex-1 justify-center w-full">
     <div class="flex w-full max-w-[1600px] flex-col lg:flex-row">
 
-        <!-- Mobile Filter Button -->
-        <div
-            class="lg:hidden sticky top-[65px] z-40 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 px-4 py-3">
-            <button onclick="toggleFilters()"
-                class="w-full flex items-center justify-between px-4 py-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-                <span class="flex items-center gap-2 text-sm font-medium">
-                    <span class="material-symbols-outlined text-lg">tune</span>
-                    Filters
-                </span>
-                <span id="filterArrow" class="material-symbols-outlined text-lg transition-transform">expand_more</span>
-            </button>
-        </div>
-
-        <!-- Sidebar Filters -->
-        <aside id="filterSidebar"
-            class="hidden lg:block w-full lg:w-72 xl:w-80 lg:shrink-0 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-y-auto lg:h-[calc(100vh-65px)] lg:sticky lg:top-[65px]">
-            <div class="flex flex-col h-full p-4 sm:p-6">
-
+        <!-- Desktop Sidebar Filters (hidden on mobile) -->
+        <aside class="hidden lg:block w-72 xl:w-80 lg:shrink-0 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-y-auto lg:h-[calc(100vh-65px)] lg:sticky lg:top-[65px]">
+            <div class="flex flex-col h-full p-6">
                 <!-- Categories -->
                 <div class="py-4">
                     <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 px-1">Categories</h3>
                     <div class="space-y-0.5">
                         <a href="/templates"
-                            class="w-full flex items-center justify-between px-3 py-2 text-sm font-medium <?= !$category ? 'text-primary bg-primary/5' : 'text-slate-600 hover:text-primary' ?> rounded-lg">
-                            All Events
+                            class="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium <?= !$category ? 'text-primary bg-primary/5' : 'text-slate-600 hover:text-primary' ?> rounded-lg">
+                            <span class="material-symbols-outlined text-lg">grid_view</span>
+                            All Templates
                         </a>
-                        <?php foreach ($categories as $key => $label): ?>
-                            <a href="/templates?category=<?= $key ?>"
-                                class="w-full flex items-center justify-between px-3 py-2 text-sm font-medium <?= $category === $key ? 'text-primary bg-primary/5 font-bold' : 'text-slate-600 hover:text-primary' ?> rounded-lg">
-                                <?= $label ?>
-                            </a>
+                        <?php foreach ($allCategories as $key => $cat): ?>
+                                <a href="/templates?category=<?= $key ?>"
+                                    class="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium <?= $category === $key ? 'text-primary bg-primary/5 font-bold' : 'text-slate-600 hover:text-primary' ?> rounded-lg">
+                                    <span class="material-symbols-outlined text-lg <?= $cat['color'] ?>"><?= $cat['icon'] ?></span>
+                                    <?= $cat['name'] ?>
+                                </a>
                         <?php endforeach; ?>
                     </div>
                 </div>
@@ -136,47 +124,39 @@ if ($category && isset($categoryTitles[$category])) {
 
                 <!-- Cultural Traditions -->
                 <div class="py-4">
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 px-1">Cultural Traditions
-                    </h3>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 px-1">Cultural Traditions</h3>
                     <div class="flex flex-wrap gap-2">
                         <?php foreach ($traditions as $t): ?>
-                            <a href="/templates?tradition=<?= strtolower($t) ?>"
-                                class="inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-bold transition-all 
-                           <?= $tradition === strtolower($t) ? 'border-primary bg-primary text-white' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 hover:border-primary hover:text-primary' ?>">
-                                <?= $t ?>
-                            </a>
+                                <a href="/templates?tradition=<?= strtolower($t) ?><?= $category ? '&category=' . $category : '' ?>"
+                                    class="inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-bold transition-all 
+                               <?= $tradition === strtolower($t) ? 'border-primary bg-primary text-white' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 hover:border-primary hover:text-primary' ?>">
+                                    <?= $t ?>
+                                </a>
                         <?php endforeach; ?>
                     </div>
                 </div>
 
                 <div class="h-px bg-slate-200 dark:bg-slate-800 my-2"></div>
 
-                <!-- Price Range -->
+                <!-- Sort (Desktop) -->
                 <div class="py-4">
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 px-1">Price Range</h3>
-                    <div class="space-y-2">
-                        <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer hover:text-primary">
-                            <input type="radio" name="price" value="" <?= !$priceRange ? 'checked' : '' ?>
-                                class="text-primary focus:ring-primary"> Any Price
-                        </label>
-                        <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer hover:text-primary">
-                            <input type="radio" name="price" value="free" class="text-primary focus:ring-primary"> Free
-                        </label>
-                        <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer hover:text-primary">
-                            <input type="radio" name="price" value="premium" class="text-primary focus:ring-primary">
-                            Premium
-                        </label>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 px-1">Sort By</h3>
+                    <div class="space-y-1">
+                        <?php foreach ($sortOptions as $key => $label): ?>
+                                <a href="?<?= http_build_query(array_merge($_GET, ['sort' => $key])) ?>"
+                                    class="block px-3 py-2 text-sm rounded-lg <?= $sort === $key ? 'text-primary bg-primary/5 font-bold' : 'text-slate-600 hover:text-primary hover:bg-slate-50' ?>">
+                                    <?= $label ?>
+                                </a>
+                        <?php endforeach; ?>
                     </div>
                 </div>
-
             </div>
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-1 p-4 sm:p-6 lg:p-10">
-
+        <main class="flex-1 p-4 sm:p-6 lg:p-10 pb-24 sm:pb-6">
             <!-- Header -->
-            <div class="mb-6 sm:mb-8">
+            <div class="mb-6">
                 <nav class="flex items-center gap-2 text-sm mb-4">
                     <a class="text-slate-500 hover:text-primary transition-colors" href="/">Home</a>
                     <span class="text-slate-400">/</span>
@@ -184,176 +164,367 @@ if ($category && isset($categoryTitles[$category])) {
                 </nav>
 
                 <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-                    <div class="flex flex-col gap-2">
-                        <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                            <?= $category ? $categories[$category] : 'All' ?> Templates
+                    <div>
+                        <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                            <?= $category && isset($allCategories[$category]) ? $allCategories[$category]['name'] : 'All' ?> Templates
                         </h1>
-                        <p class="text-slate-500 dark:text-slate-400">
-                            <?= count($templates) ?> templates found
+                        <p class="text-slate-500 dark:text-slate-400 mt-1">
+                            <span id="template-count"><?= $totalTemplates ?></span> templates found
                         </p>
                     </div>
 
-                    <!-- Sort -->
-                    <div class="flex items-center gap-2">
-                        <span class="text-sm text-slate-500">Sort by:</span>
-                        <select
-                            class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2 text-sm font-medium"
-                            onchange="window.location.href=this.value">
-                            <option value="?sort=popular" <?= $sort === 'popular' ? 'selected' : '' ?>>Popular</option>
-                            <option value="?sort=newest" <?= $sort === 'newest' ? 'selected' : '' ?>>Newest</option>
-                            <option value="?sort=price_low" <?= $sort === 'price_low' ? 'selected' : '' ?>>Price: Low
-                            </option>
-                            <option value="?sort=price_high" <?= $sort === 'price_high' ? 'selected' : '' ?>>Price: High
-                            </option>
+                    <!-- Desktop Sort Dropdown -->
+                    <div class="hidden sm:flex items-center gap-2">
+                        <span class="text-sm text-slate-500">Sort:</span>
+                        <select onchange="window.location.href=this.value"
+                            class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2 text-sm font-medium">
+                            <?php foreach ($sortOptions as $key => $label): ?>
+                                    <option value="?<?= http_build_query(array_merge($_GET, ['sort' => $key])) ?>" <?= $sort === $key ? 'selected' : '' ?>>
+                                        <?= $label ?>
+                                    </option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
                 </div>
             </div>
 
-            <?php
-            // SEO Content: Category and Tradition Descriptions
-            $categoryDescriptions = [
-                'wedding' => 'Create the perfect first impression with our stunning wedding invitation videos. From elegant save-the-date animations to grand reception announcements, our wedding video templates capture the romance and joy of your special day. Each template is professionally designed with beautiful typography, smooth transitions, and customizable elements for names, dates, and venue details.',
-                'birthday' => 'Make birthday celebrations unforgettable with animated video invitations that bring excitement and joy. Our birthday invitation videos feature vibrant designs for all ages – from playful kids\' party themes to sophisticated adult celebration templates. Add photos, custom messages, and your choice of music to create an invitation that sets the perfect party mood.',
-                'baby_shower' => 'Announce the arrival of your little one with adorable baby shower invitation videos. Our collection includes sweet animations for both boy and girl celebrations, gender reveal announcements, and sprinkle party invites. Each video invitation template features gentle colors, cute graphics, and space for all your event details.',
-                'anniversary' => 'Celebrate years of love and togetherness with beautiful anniversary invitation videos. Whether it\'s a milestone 25th silver anniversary or a golden 50th celebration, our video templates help you invite guests in a memorable way. Share your journey with photo montages and heartfelt messages.',
-                'corporate' => 'Elevate your corporate events with professional video invitations that make a lasting impression. Our business-ready templates are perfect for conferences, product launches, team celebrations, and networking events. Clean designs, customizable branding elements, and sophisticated animations reflect your company\'s professionalism.',
-                'graduation' => 'Mark academic achievements with inspiring graduation invitation videos. From high school to university ceremonies, our templates celebrate this important milestone with pride. Include graduation photos, ceremony details, and party information in one beautiful animated invitation.',
-                'housewarming' => 'Welcome guests to your new home with charming housewarming invitation videos. Our templates feature cozy home-themed animations that perfectly set the tone for your celebration. Share your excitement about your new space and invite loved ones to help you make it a home.',
-                'parties' => 'Get the party started with dynamic video invitations that build excitement for any celebration. From cocktail parties to themed events, our party invitation videos feature energetic animations, bold designs, and space for all your event details. Make your guests eager to RSVP yes!',
-                'religious' => 'Honor sacred traditions with respectful and beautiful religious event invitation videos. Our collection includes templates for christenings, bar/bat mitzvahs, first communions, and other spiritual celebrations. Each design incorporates appropriate symbols and elegant styling.',
-                'farewell' => 'Say goodbye in style with heartfelt farewell invitation videos. Whether it\'s a retirement party, going-away celebration, or fond farewell, our templates help you gather loved ones for one last memorable gathering. Add photos and personal messages to make it special.',
-                'holidays' => 'Spread festive cheer with holiday invitation videos for all seasonal celebrations. From Christmas parties to New Year\'s Eve bashes, our templates capture the spirit of each holiday with themed animations, colors, and music. Create invitations that put guests in a celebratory mood.',
-                'save_the_date' => 'Give your guests advance notice with elegant save-the-date video invitations. Our animated templates create anticipation for your upcoming wedding or event. Include essential details like date, location, and a preview of what\'s to come in a beautifully designed video format.',
-                'diwali' => 'Light up your Diwali celebration invitations with stunning video templates featuring diyas, rangoli, and festive fireworks. Our Diwali invitation videos capture the joy and brightness of the Festival of Lights, perfect for puja ceremonies, family gatherings, and Diwali parties.',
-                'holi' => 'Celebrate the Festival of Colors with vibrant Holi invitation videos bursting with gulaal splashes and joyful animations. Our templates capture the playful spirit of Holi, perfect for inviting friends and family to join your colorful celebration.',
-            ];
-
-            $traditionDescriptions = [
-                'hindu' => 'Embrace the richness of Hindu wedding traditions with our culturally authentic video invitations. Our Hindu wedding invitation videos feature beautiful elements like mandaps, kalash, paisley patterns, and traditional motifs. Perfect for Mehendi, Sangeet, Haldi, and main wedding ceremony invitations.',
-                'muslim' => 'Honor Islamic traditions with elegant Muslim wedding invitation videos. Our templates incorporate beautiful Arabic calligraphy, crescent moon motifs, and sophisticated designs suitable for Nikah ceremonies and Walima celebrations. Each video invitation maintains cultural respect while celebrating your union.',
-                'christian' => 'Celebrate your Christian wedding with graceful video invitations featuring crosses, church imagery, and elegant floral designs. Our templates are perfect for church weddings, rehearsal dinners, and reception celebrations. Share your faith and love through beautifully animated invitations.',
-                'sikh' => 'Honor Sikh traditions with video invitations featuring Khanda symbols, Gurudwara imagery, and vibrant Punjabi designs. Our Sikh wedding invitation videos are perfect for Anand Karaj ceremonies and all pre-wedding celebrations. Capture the joy and spirituality of your special day.',
-                'jewish' => 'Celebrate Jewish traditions with elegant video invitations featuring Star of David, Chuppah imagery, and traditional motifs. Our templates are perfect for Jewish weddings, Bar/Bat Mitzvahs, and holiday celebrations. Each design honors your heritage with beautiful animations.',
-                'chinese' => 'Embrace Chinese traditions with auspicious video invitations featuring lucky symbols, red and gold themes, and traditional motifs. Our Chinese wedding invitation videos are perfect for tea ceremonies and banquet celebrations. Include Double Happiness symbols and elegant calligraphy.',
-                'western' => 'Create timeless elegance with our contemporary Western wedding invitation videos. Featuring classic designs, romantic typography, and sophisticated animations, our templates are perfect for modern celebrations. From rustic charm to black-tie elegance, find your perfect style.',
-            ];
-
-            $pageDescription = '';
-            if ($category && isset($categoryDescriptions[$category])) {
-                $pageDescription = $categoryDescriptions[$category];
-            } elseif ($tradition && isset($traditionDescriptions[strtolower($tradition)])) {
-                $pageDescription = $traditionDescriptions[strtolower($tradition)];
-            } else {
-                $pageDescription = 'Browse our extensive collection of professionally designed video invitation templates. From elegant wedding announcements to vibrant birthday parties, our invitation videos help you create memorable first impressions. Each template is fully customizable with your event details, photos, and music – making it easy to create stunning video invitations that your guests will love.';
-            }
-            ?>
-
-            <?php if ($pageDescription): ?>
-                <div class="mb-8 max-w-3xl">
-                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
-                        <?= htmlspecialchars($pageDescription) ?>
-                    </p>
-                </div>
-            <?php endif; ?>
-
             <!-- Template Grid -->
-            <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-6 mb-12">
+            <div id="templates-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
                 <?php foreach ($templates as $index => $template):
-                    // First 2 images are above the fold on mobile - load eagerly
-                    $isAboveFold = $index < 2;
+                    $isAboveFold = $index < 4;
                     ?>
-                    <div
-                        class="group relative flex flex-col overflow-hidden rounded-xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1">
-                        <div class="relative aspect-[4/5] w-full overflow-hidden bg-slate-100">
-                            <?= ImageHelper::responsiveThumbnail(
-                                $template['thumbnail_url'] ?? '/assets/images/placeholder.jpg',
-                                $template['title'],
-                                $isAboveFold,
-                                $isAboveFold,
-                                'absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105'
-                            ) ?>
+                        <a href="/template/<?= Security::escape($template['slug']) ?>"
+                            class="group block bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-100 dark:border-slate-800 hover:border-primary/30">
+                            <div class="relative aspect-[4/5] overflow-hidden bg-slate-100">
+                                <?= ImageHelper::responsiveThumbnail(
+                                    $template['thumbnail_url'] ?? '/assets/images/placeholder.jpg',
+                                    $template['title'],
+                                    $isAboveFold,
+                                    $isAboveFold,
+                                    'absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105'
+                                ) ?>
 
-                            <!-- Play Button Overlay -->
-                            <div
-                                class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
-                                <button
-                                    class="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm transition-transform hover:scale-110">
-                                    <span class="material-symbols-outlined text-3xl">play_arrow</span>
-                                </button>
-                            </div>
-
-                            <!-- Badges -->
-                            <div class="absolute left-3 top-3 flex gap-2">
+                                <!-- Badges -->
                                 <?php if ($template['is_premium']): ?>
-                                    <span
-                                        class="rounded-md bg-white/90 px-2 py-1 text-xs font-bold text-slate-900 backdrop-blur-sm shadow-sm">Premium</span>
+                                        <span class="absolute top-2 left-2 px-2 py-1 rounded-md bg-white/90 text-xs font-bold text-slate-900 backdrop-blur-sm">Premium</span>
                                 <?php elseif ($template['price_usd'] == 0): ?>
-                                    <span
-                                        class="rounded-md bg-green-500/90 px-2 py-1 text-xs font-bold text-white backdrop-blur-sm shadow-sm">Free</span>
+                                        <span class="absolute top-2 left-2 px-2 py-1 rounded-md bg-green-500/90 text-xs font-bold text-white backdrop-blur-sm">Free</span>
                                 <?php endif; ?>
                             </div>
 
-                            <!-- Favorite Button -->
-                            <div class="absolute right-3 top-3">
-                                <button
-                                    class="rounded-full bg-white/20 p-2 text-white hover:bg-white hover:text-red-500 backdrop-blur-sm transition-colors">
-                                    <span class="material-symbols-outlined text-[20px]">favorite</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="flex flex-1 flex-col p-4">
-                            <div class="flex justify-between items-start mb-2">
-                                <h3 class="text-base font-bold text-slate-900 dark:text-white leading-tight">
+                            <div class="p-3 sm:p-4">
+                                <h3 class="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-primary transition-colors">
                                     <?= Security::escape($template['title']) ?>
                                 </h3>
-                                <span
-                                    class="text-base font-bold <?= $template['price_usd'] == 0 ? 'text-green-600' : 'text-primary' ?>">
+                                <p class="text-sm font-bold mt-1 <?= $template['price_usd'] == 0 ? 'text-green-600' : 'text-primary' ?>">
                                     <?= $template['price_usd'] == 0 ? 'Free' : '$' . number_format($template['price_usd'], 0) ?>
-                                </span>
+                                </p>
                             </div>
-
-                            <div class="mb-4 flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
-                                <div class="flex items-center gap-1">
-                                    <span class="material-symbols-outlined text-[14px]">schedule</span>
-                                    <span><?= $template['duration_seconds'] ?>s</span>
-                                </div>
-                                <div class="flex items-center gap-1">
-                                    <span class="material-symbols-outlined text-[14px]">aspect_ratio</span>
-                                    <span><?= $template['aspect_ratio'] ?? '9:16' ?></span>
-                                </div>
-                            </div>
-
-                            <a href="/template/<?= Security::escape($template['slug']) ?>"
-                                class="mt-auto flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2 text-sm font-bold text-white transition-all hover:bg-primary/90 focus:ring-4 focus:ring-primary/20">
-                                Select
-                            </a>
-                        </div>
-                    </div>
+                        </a>
                 <?php endforeach; ?>
             </div>
 
-            <?php if (empty($templates)): ?>
-                <div class="text-center py-12">
-                    <span class="material-symbols-outlined text-6xl text-slate-300">movie</span>
-                    <h3 class="mt-4 text-xl font-bold">No templates found</h3>
-                    <p class="text-slate-500 mt-2">Try adjusting your filters</p>
-                </div>
+            <!-- Load More Trigger -->
+            <?php if ($hasMore): ?>
+                    <div id="load-more-trigger" class="py-8 flex justify-center">
+                        <div id="loading-spinner" class="flex items-center gap-2 text-slate-500">
+                            <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span>Loading more...</span>
+                        </div>
+                    </div>
             <?php endif; ?>
 
+            <!-- No Results -->
+            <?php if (empty($templates)): ?>
+                    <div class="text-center py-12">
+                        <span class="material-symbols-outlined text-6xl text-slate-300">movie</span>
+                        <h3 class="mt-4 text-xl font-bold">No templates found</h3>
+                        <p class="text-slate-500 mt-2">Try adjusting your filters</p>
+                        <a href="/templates" class="inline-flex items-center gap-2 mt-4 px-6 py-3 bg-primary text-white font-bold rounded-xl">
+                            View All Templates
+                        </a>
+                    </div>
+            <?php endif; ?>
         </main>
     </div>
 </div>
 
-<script>
-    function toggleFilters() {
-        const sidebar = document.getElementById('filterSidebar');
-        const arrow = document.getElementById('filterArrow');
+<!-- Mobile Sticky Bottom Bar -->
+<div id="mobile-bottom-bar" class="fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 p-3 sm:hidden">
+    <div class="flex gap-3 max-w-lg mx-auto">
+        <button onclick="openFilterSheet()"
+            class="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium transition-colors active:bg-slate-200">
+            <span class="material-symbols-outlined text-xl">tune</span>
+            <span>Filter</span>
+            <?php if ($category || $tradition): ?>
+                    <span class="w-2 h-2 rounded-full bg-primary"></span>
+            <?php endif; ?>
+        </button>
+        <button onclick="openSortSheet()"
+            class="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium transition-colors active:bg-slate-200">
+            <span class="material-symbols-outlined text-xl">sort</span>
+            <span>Sort</span>
+        </button>
+    </div>
+</div>
 
-        sidebar.classList.toggle('hidden');
-        arrow.style.transform = sidebar.classList.contains('hidden') ? '' : 'rotate(180deg)';
+<!-- Bottom Sheet Backdrop -->
+<div id="sheet-backdrop" onclick="closeSheet()"
+    class="fixed inset-0 bg-black/50 z-[100] opacity-0 pointer-events-none transition-opacity duration-300"></div>
+
+<!-- Filter Bottom Sheet -->
+<div id="filter-sheet" class="fixed bottom-0 left-0 right-0 z-[110] bg-white dark:bg-slate-900 rounded-t-3xl transform translate-y-full transition-transform duration-300 ease-out max-h-[85vh] overflow-hidden flex flex-col">
+    <!-- Handle -->
+    <div class="flex justify-center pt-3 pb-2">
+        <div class="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></div>
+    </div>
+    
+    <!-- Header -->
+    <div class="flex items-center justify-between px-5 pb-4 border-b border-slate-200 dark:border-slate-700">
+        <h3 class="text-lg font-bold">Filter Templates</h3>
+        <button onclick="closeSheet()" class="p-2 -mr-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+    </div>
+
+    <!-- Filter Content -->
+    <div class="flex-1 overflow-y-auto p-5 space-y-6">
+        <!-- Categories -->
+        <div>
+            <h4 class="text-sm font-bold text-slate-500 uppercase tracking-wide mb-3">Category</h4>
+            <div class="flex flex-wrap gap-2" id="filter-categories">
+                <button type="button" data-category="" 
+                    class="filter-cat-btn px-4 py-2 rounded-full text-sm font-medium border transition-all <?= !$category ? 'border-primary bg-primary text-white' : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300' ?>">
+                    All
+                </button>
+                <?php foreach ($allCategories as $key => $cat): ?>
+                        <button type="button" data-category="<?= $key ?>"
+                            class="filter-cat-btn px-4 py-2 rounded-full text-sm font-medium border transition-all <?= $category === $key ? 'border-primary bg-primary text-white' : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300' ?>">
+                            <?= $cat['name'] ?>
+                        </button>
+                <?php endforeach; ?>
+            </div>
+        </div>
+
+        <!-- Traditions -->
+        <div>
+            <h4 class="text-sm font-bold text-slate-500 uppercase tracking-wide mb-3">Cultural Tradition</h4>
+            <div class="flex flex-wrap gap-2" id="filter-traditions">
+                <button type="button" data-tradition="" 
+                    class="filter-trad-btn px-4 py-2 rounded-full text-sm font-medium border transition-all <?= !$tradition ? 'border-primary bg-primary text-white' : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300' ?>">
+                    All
+                </button>
+                <?php foreach ($traditions as $t): ?>
+                        <button type="button" data-tradition="<?= strtolower($t) ?>"
+                            class="filter-trad-btn px-4 py-2 rounded-full text-sm font-medium border transition-all <?= $tradition === strtolower($t) ? 'border-primary bg-primary text-white' : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300' ?>">
+                            <?= $t ?>
+                        </button>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- Apply Button -->
+    <div class="p-5 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+        <button onclick="applyFilters()" 
+            class="w-full py-4 rounded-xl bg-primary text-white font-bold text-lg shadow-lg shadow-primary/30 active:scale-[0.98] transition-transform">
+            Apply Filters
+        </button>
+    </div>
+</div>
+
+<!-- Sort Bottom Sheet -->
+<div id="sort-sheet" class="fixed bottom-0 left-0 right-0 z-[110] bg-white dark:bg-slate-900 rounded-t-3xl transform translate-y-full transition-transform duration-300 ease-out">
+    <!-- Handle -->
+    <div class="flex justify-center pt-3 pb-2">
+        <div class="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></div>
+    </div>
+    
+    <!-- Header -->
+    <div class="flex items-center justify-between px-5 pb-4 border-b border-slate-200 dark:border-slate-700">
+        <h3 class="text-lg font-bold">Sort By</h3>
+        <button onclick="closeSheet()" class="p-2 -mr-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+    </div>
+
+    <!-- Sort Options -->
+    <div class="p-3">
+        <?php foreach ($sortOptions as $key => $label): ?>
+                <button onclick="applySort('<?= $key ?>')"
+                    class="w-full flex items-center justify-between px-4 py-4 rounded-xl text-left transition-colors <?= $sort === $key ? 'bg-primary/10 text-primary' : 'hover:bg-slate-50 dark:hover:bg-slate-800' ?>">
+                    <span class="font-medium"><?= $label ?></span>
+                    <?php if ($sort === $key): ?>
+                            <span class="material-symbols-outlined text-primary">check</span>
+                    <?php endif; ?>
+                </button>
+        <?php endforeach; ?>
+    </div>
+</div>
+
+<script>
+// State
+let currentPage = 1;
+let isLoading = false;
+let hasMore = <?= $hasMore ? 'true' : 'false' ?>;
+let selectedCategory = '<?= $category ?? '' ?>';
+let selectedTradition = '<?= $tradition ?? '' ?>';
+let currentSort = '<?= $sort ?>';
+
+// Bottom Sheet Functions
+function openFilterSheet() {
+    document.getElementById('sheet-backdrop').classList.remove('opacity-0', 'pointer-events-none');
+    document.getElementById('filter-sheet').classList.remove('translate-y-full');
+    document.body.style.overflow = 'hidden';
+}
+
+function openSortSheet() {
+    document.getElementById('sheet-backdrop').classList.remove('opacity-0', 'pointer-events-none');
+    document.getElementById('sort-sheet').classList.remove('translate-y-full');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeSheet() {
+    document.getElementById('sheet-backdrop').classList.add('opacity-0', 'pointer-events-none');
+    document.getElementById('filter-sheet').classList.add('translate-y-full');
+    document.getElementById('sort-sheet').classList.add('translate-y-full');
+    document.body.style.overflow = '';
+}
+
+// Filter Selection
+document.querySelectorAll('.filter-cat-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.filter-cat-btn').forEach(b => {
+            b.classList.remove('border-primary', 'bg-primary', 'text-white');
+            b.classList.add('border-slate-200', 'dark:border-slate-700', 'text-slate-600', 'dark:text-slate-300');
+        });
+        this.classList.remove('border-slate-200', 'dark:border-slate-700', 'text-slate-600', 'dark:text-slate-300');
+        this.classList.add('border-primary', 'bg-primary', 'text-white');
+        selectedCategory = this.dataset.category;
+    });
+});
+
+document.querySelectorAll('.filter-trad-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.filter-trad-btn').forEach(b => {
+            b.classList.remove('border-primary', 'bg-primary', 'text-white');
+            b.classList.add('border-slate-200', 'dark:border-slate-700', 'text-slate-600', 'dark:text-slate-300');
+        });
+        this.classList.remove('border-slate-200', 'dark:border-slate-700', 'text-slate-600', 'dark:text-slate-300');
+        this.classList.add('border-primary', 'bg-primary', 'text-white');
+        selectedTradition = this.dataset.tradition;
+    });
+});
+
+function applyFilters() {
+    const params = new URLSearchParams();
+    if (selectedCategory) params.set('category', selectedCategory);
+    if (selectedTradition) params.set('tradition', selectedTradition);
+    if (currentSort !== 'popular') params.set('sort', currentSort);
+    window.location.href = '/templates' + (params.toString() ? '?' + params.toString() : '');
+}
+
+function applySort(sort) {
+    currentSort = sort;
+    const params = new URLSearchParams(window.location.search);
+    if (sort === 'popular') {
+        params.delete('sort');
+    } else {
+        params.set('sort', sort);
     }
+    window.location.href = '/templates' + (params.toString() ? '?' + params.toString() : '');
+}
+
+// Infinite Scroll
+const grid = document.getElementById('templates-grid');
+const loadTrigger = document.getElementById('load-more-trigger');
+const spinner = document.getElementById('loading-spinner');
+
+if (loadTrigger) {
+    const observer = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && !isLoading && hasMore) {
+            loadMoreTemplates();
+        }
+    }, { rootMargin: '200px' });
+    
+    observer.observe(loadTrigger);
+}
+
+async function loadMoreTemplates() {
+    if (isLoading || !hasMore) return;
+    isLoading = true;
+    currentPage++;
+    
+    const params = new URLSearchParams();
+    params.set('page', currentPage);
+    params.set('limit', 12);
+    if (selectedCategory) params.set('category', selectedCategory);
+    if (selectedTradition) params.set('tradition', selectedTradition);
+    params.set('sort', currentSort);
+    
+    try {
+        const response = await fetch('/api/templates.php?' + params.toString());
+        const data = await response.json();
+        
+        if (data.success && data.templates.length > 0) {
+            data.templates.forEach(template => {
+                grid.insertAdjacentHTML('beforeend', createTemplateCard(template));
+            });
+            hasMore = data.pagination.hasMore;
+        }
+        
+        if (!hasMore && loadTrigger) {
+            loadTrigger.style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Failed to load templates:', error);
+    }
+    
+    isLoading = false;
+}
+
+function createTemplateCard(template) {
+    const isFree = template.price_usd === 0;
+    const priceClass = isFree ? 'text-green-600' : 'text-primary';
+    const priceText = isFree ? 'Free' : '$' + Math.round(template.price_usd);
+    
+    let badge = '';
+    if (template.is_premium) {
+        badge = '<span class="absolute top-2 left-2 px-2 py-1 rounded-md bg-white/90 text-xs font-bold text-slate-900 backdrop-blur-sm">Premium</span>';
+    } else if (isFree) {
+        badge = '<span class="absolute top-2 left-2 px-2 py-1 rounded-md bg-green-500/90 text-xs font-bold text-white backdrop-blur-sm">Free</span>';
+    }
+    
+    // Use 400w variant or fallback
+    const imgSrc = template.srcset && template.srcset[400] ? template.srcset[400] : template.thumbnail_url;
+    
+    return `
+        <a href="/template/${template.slug}" class="group block bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-100 dark:border-slate-800 hover:border-primary/30">
+            <div class="relative aspect-[4/5] overflow-hidden bg-slate-100">
+                <img src="${imgSrc}" alt="${template.title}" loading="lazy" decoding="async" 
+                     class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                ${badge}
+            </div>
+            <div class="p-3 sm:p-4">
+                <h3 class="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-primary transition-colors">${template.title}</h3>
+                <p class="text-sm font-bold mt-1 ${priceClass}">${priceText}</p>
+            </div>
+        </a>
+    `;
+}
+
+// Prevent body scroll when sheets are open
+document.addEventListener('touchmove', function(e) {
+    if (document.body.style.overflow === 'hidden') {
+        const sheet = e.target.closest('#filter-sheet, #sort-sheet');
+        if (!sheet) {
+            e.preventDefault();
+        }
+    }
+}, { passive: false });
 </script>
 
 <?php

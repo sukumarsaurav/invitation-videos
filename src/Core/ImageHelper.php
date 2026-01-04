@@ -452,7 +452,7 @@ class ImageHelper
         string $sourcePath,
         string $uploadDir,
         string $baseFilename,
-        array $widths = [315, 472, 630],
+        array $widths = [200, 300, 400],
         int $quality = 70
     ): array {
         $result = [
@@ -536,7 +536,7 @@ class ImageHelper
         // Check for responsive variants
         $docRoot = $_SERVER['DOCUMENT_ROOT'] ?? '';
         $srcset = [];
-        $widths = [315, 472, 630];
+        $widths = [200, 300, 400];
         $largestVariant = $thumbnailUrl; // Fallback to original
 
         foreach ($widths as $width) {
@@ -551,7 +551,7 @@ class ImageHelper
 
         // If no variants exist, fall back to original
         if (empty($srcset)) {
-            $srcset[] = htmlspecialchars($thumbnailUrl, ENT_QUOTES, 'UTF-8') . ' 630w';
+            $srcset[] = htmlspecialchars($thumbnailUrl, ENT_QUOTES, 'UTF-8') . ' 400w';
             $largestVariant = $thumbnailUrl;
         }
 
@@ -565,9 +565,9 @@ class ImageHelper
         $class = htmlspecialchars($class, ENT_QUOTES, 'UTF-8');
         $srcsetAttr = implode(', ', $srcset);
 
-        // sizes: on small screens (2-col grid), each image is ~50vw
-        // on medium (3-col grid), ~33vw; on large (4-col grid), ~25vw  
-        $sizes = '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw';
+        // sizes: matches new breakpoints - 2 cols below 769px, 3 cols 769-1023, 4 cols 1024-1279, 5 cols 1280+
+        // Max container is ~1280px, so largest image is ~256px (1280/5)
+        $sizes = '(max-width: 768px) 50vw, (max-width: 1023px) 33vw, (max-width: 1279px) 25vw, 20vw';
 
         return sprintf(
             '<img src="%s" srcset="%s" sizes="%s" alt="%s" class="%s" width="300" height="375" loading="%s" decoding="%s"%s>',

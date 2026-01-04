@@ -434,6 +434,7 @@
 
         /* Footer content - always visible on desktop (>= 769px) */
         @media(min-width:769px) {
+
             .footer-content,
             .footer-content[x-cloak] {
                 display: block !important
@@ -770,16 +771,17 @@
         <?= $content ?? '' ?>
     </main>
 
-    <!-- Floating Help Button -->
+    <!-- Floating Help Button - Hidden on mobile for gallery pages -->
     <a href="/support"
-        class="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 bg-primary text-white font-bold rounded-full shadow-xl shadow-primary/30 hover:bg-primary/90 hover:scale-105 transition-all group"
+        class="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 bg-primary text-white font-bold rounded-full shadow-xl shadow-primary/30 hover:bg-primary/90 hover:scale-105 transition-all group <?= ($hideFooterOnMobile ?? false) ? 'hidden sm:flex' : '' ?>"
         title="Need help?">
         <span class="material-symbols-outlined text-xl">support_agent</span>
         <span class="hidden sm:group-hover:inline whitespace-nowrap text-sm">Need Help?</span>
     </a>
 
-    <!-- Footer -->
-    <footer class="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 mt-auto"
+    <!-- Footer - Can be hidden on mobile for specific pages like gallery -->
+    <footer
+        class="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 mt-auto <?= ($hideFooterOnMobile ?? false) ? 'hidden sm:block' : '' ?>"
         x-data="{ footerOpen: false }">
         <!-- Mobile Footer Toggle Bar (visible only on small screens < 769px) -->
         <div class="sm:hidden">
@@ -1059,7 +1061,7 @@
             }
             currentAudio = new Audio(url);
             currentAudio.play();
-    }
+        }
     </script>
 
 </body>

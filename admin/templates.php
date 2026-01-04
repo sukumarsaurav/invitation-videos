@@ -101,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['thumbnail']) && $_FI
             $mainImagePath,
             $uploadDir,
             $baseFilename,
-            [315, 472, 630],
+            [200, 300, 400],
             70
         );
         
@@ -127,7 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['thumbnail']) && $_FI
             // Also delete old responsive variants
             $oldPathInfo = pathinfo($oldThumbnailUrl);
             $oldBasename = $oldPathInfo['filename'];
-            foreach ([315, 472, 630] as $width) {
+            foreach ([200, 300, 400] as $width) {
                 $oldVariant = __DIR__ . '/../uploads/templates/' . $oldBasename . '-' . $width . 'w.webp';
                 if (file_exists($oldVariant)) {
                     @unlink($oldVariant);
