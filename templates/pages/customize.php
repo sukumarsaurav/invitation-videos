@@ -227,6 +227,12 @@ $storedValues = $_SESSION['customize_data'] ?? [];
 // Calculate progress
 $progressPercent = $totalSteps > 0 ? round((($currentStepIndex + 1) / $totalSteps) * 100) : 0;
 
+// For mobile header: show back arrow instead of hamburger
+$isTemplateDetailPage = true;
+$templateBackUrl = ($step === 0) 
+    ? '/templates'  // Preview → Gallery
+    : '/template/' . $templateSlug;  // Customize steps → Preview
+
 $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
 ?>
 
