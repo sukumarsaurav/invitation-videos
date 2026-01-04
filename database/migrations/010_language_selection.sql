@@ -10,10 +10,10 @@ CREATE TABLE IF NOT EXISTS languages (
     script VARCHAR(50) NOT NULL,
     is_active BOOLEAN DEFAULT TRUE,
     display_order INT DEFAULT 0
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Insert supported languages
-INSERT INTO languages (code, name, native_name, script, display_order) VALUES
+-- Insert supported languages (ignore if already exists)
+INSERT IGNORE INTO languages (code, name, native_name, script, display_order) VALUES
 ('en', 'English', 'English', 'Latin', 1),
 ('hi', 'Hindi', 'हिंदी', 'Devanagari', 2),
 ('mr', 'Marathi', 'मराठी', 'Devanagari', 3),
@@ -28,6 +28,7 @@ INSERT INTO languages (code, name, native_name, script, display_order) VALUES
 ('as', 'Assamese', 'অসমীয়া', 'Bengali', 12);
 
 -- Template thumbnails per language (multiple per language allowed)
+-- Removed FK on language_code - just a string reference, no strict constraint needed
 CREATE TABLE IF NOT EXISTS template_thumbnails (
     id INT AUTO_INCREMENT PRIMARY KEY,
     template_id INT NOT NULL,
@@ -37,23 +38,23 @@ CREATE TABLE IF NOT EXISTS template_thumbnails (
     is_primary BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (template_id) REFERENCES templates(id) ON DELETE CASCADE,
-    FOREIGN KEY (language_code) REFERENCES languages(code) ON DELETE CASCADE,
     INDEX idx_template_lang (template_id, language_code),
     INDEX idx_primary (template_id, language_code, is_primary)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Migrate existing template thumbnails to new table (as English)
-INSERT INTO template_thumbnails (template_id, language_code, thumbnail_url, is_primary, display_order)
+INSERT IGNORE INTO template_thumbnails (template_id, language_code, thumbnail_url, is_primary, display_order)
 SELECT id, 'en', thumbnail_url, TRUE, 0
 FROM templates
 WHERE thumbnail_url IS NOT NULL AND thumbnail_url != '';
 
 -- Also migrate gallery images to thumbnail table
-INSERT INTO template_thumbnails (template_id, language_code, thumbnail_url, is_primary, display_order)
+INSERT IGNORE INTO template_thumbnails (template_id, language_code, thumbnail_url, is_primary, display_order)
 SELECT template_id, 'en', image_url, FALSE, display_order
 FROM template_images;
 
 -- Template field translations
+-- Removed FK on language_code - just a string reference
 CREATE TABLE IF NOT EXISTS template_field_translations (
     id INT AUTO_INCREMENT PRIMARY KEY,
     template_field_id INT NOT NULL,
@@ -63,24 +64,15 @@ CREATE TABLE IF NOT EXISTS template_field_translations (
     default_value TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (template_field_id) REFERENCES template_fields(id) ON DELETE CASCADE,
-    FOREIGN KEY (language_code) REFERENCES languages(code) ON DELETE CASCADE,
     UNIQUE KEY unique_field_lang (template_field_id, language_code)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Common translations for standard field labels
--- This will be inserted when admin adds translations via admin panel
+-- Add language preference columns to orders table (ignore if already exists)
+-- Run each ALTER separately in case some columns already exist
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS selected_language VARCHAR(10) DEFAULT 'en';
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS translation_mode ENUM('self', 'translate') DEFAULT 'self';
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS translation_fee DECIMAL(10,2) DEFAULT 0.00;
 
--- Add translation_price to settings or use hardcoded value
--- For now, we'll use ₹99 / $1.99 as hardcoded in the application
-
--- Remove language from mega menu categories (handled in PHP code)
--- Language filter will now be on template detail page instead
-
--- Add language preference columns to orders table
-ALTER TABLE orders 
-    ADD COLUMN selected_language VARCHAR(10) DEFAULT 'en' AFTER customization_data,
-    ADD COLUMN translation_mode ENUM('self', 'translate') DEFAULT 'self' AFTER selected_language,
-    ADD COLUMN translation_fee DECIMAL(10,2) DEFAULT 0.00 AFTER translation_mode;
-
--- Index for language queries on orders
-CREATE INDEX idx_orders_language ON orders(selected_language);
+-- Index for language queries on orders (create only if not exists)
+-- MySQL 8.0+ syntax, for older versions remove IF NOT EXISTS
+CREATE INDEX IF NOT EXISTS idx_orders_language ON orders(selected_language);
