@@ -240,9 +240,9 @@ if ($category && isset($categoryTitles[$category])) {
                                 class="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-primary transition-colors">
                                 <?= Security::escape($template['title']) ?>
                             </h3>
-                            <p
-                                class="text-sm font-bold mt-0.5 <?= $template['price_usd'] == 0 ? 'text-green-600' : 'text-primary' ?>">
-                                <?= $template['price_usd'] == 0 ? 'Free' : '$' . number_format($template['price_usd'], 0) ?>
+                            <p class="template-price text-sm font-semibold mt-0.5 <?= $template['price_usd'] == 0 ? 'text-green-600' : 'text-slate-700 dark:text-slate-300' ?>"
+                                data-usd="<?= $template['price_usd'] ?>" data-inr="<?= $template['price_inr'] ?? 0 ?>">
+                                <?= $template['price_usd'] == 0 ? 'Free' : '₹' . number_format($template['price_inr'] ?? 0, 0) ?>
                             </p>
                         </div>
                     </a>
@@ -412,6 +412,29 @@ if ($category && isset($categoryTitles[$category])) {
     let selectedTradition = '<?= $tradition ?? '' ?>';
     let currentSort = '<?= $sort ?>';
 
+    // Currency detection (timezone-based)
+    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const isIndianUser = userTimezone.includes('Kolkata') || userTimezone.includes('Calcutta');
+    const userCurrency = isIndianUser ? 'INR' : 'USD';
+
+    // Update prices based on detected currency
+    function updatePriceDisplay() {
+        document.querySelectorAll('.template-price').forEach(el => {
+            const usd = parseFloat(el.dataset.usd) || 0;
+            const inr = parseFloat(el.dataset.inr) || 0;
+            if (usd === 0) return; // Skip free items
+
+            if (userCurrency === 'INR') {
+                el.textContent = '₹' + inr.toLocaleString('en-IN');
+            } else {
+                el.textContent = '$' + Math.round(usd);
+            }
+        });
+    }
+
+    // Run on page load
+    document.addEventListener('DOMContentLoaded', updatePriceDisplay);
+
     // Bottom Sheet Functions
     function openFilterSheet() {
         document.getElementById('sheet-backdrop').classList.remove('opacity-0', 'pointer-events-none');
@@ -526,8 +549,10 @@ if ($category && isset($categoryTitles[$category])) {
 
     function createTemplateCard(template) {
         const isFree = template.price_usd === 0;
-        const priceClass = isFree ? 'text-green-600' : 'text-primary';
-        const priceText = isFree ? 'Free' : '$' + Math.round(template.price_usd);
+        const priceClass = isFree ? 'text-green-600' : 'text-slate-700 dark:text-slate-300';
+        const priceInr = Math.round(template.price_inr || 0);
+        const priceUsd = Math.round(template.price_usd || 0);
+        const priceText = isFree ? 'Free' : (userCurrency === 'INR' ? '₹' + priceInr.toLocaleString('en-IN') : '$' + priceUsd);
 
         let badge = '';
         if (template.is_premium) {
@@ -548,7 +573,7 @@ if ($category && isset($categoryTitles[$category])) {
             </div>
             <div class="pt-3 px-1">
                 <h3 class="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-primary transition-colors">${template.title}</h3>
-                <p class="text-sm font-bold mt-0.5 ${priceClass}">${priceText}</p>
+                <p class="template-price text-sm font-semibold mt-0.5 ${priceClass}" data-usd="${template.price_usd}" data-inr="${template.price_inr || 0}">${priceText}</p>
             </div>
         </a>
     `;
