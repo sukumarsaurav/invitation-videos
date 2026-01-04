@@ -607,12 +607,12 @@ try {
                             </button>
 
                             <!-- Mega Menu Dropdown -->
-                            <div
-                                class="absolute left-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                            <div class="absolute left-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50"
+                                style="width: 900px;">
                                 <div
-                                    class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 p-8 w-[900px]">
+                                    class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 p-8">
                                     <!-- 4 Column Grid -->
-                                    <div class="grid grid-cols-4 gap-8">
+                                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem;">
 
                                         <!-- Column 1: Style -->
                                         <div>
@@ -717,12 +717,12 @@ try {
                             </button>
 
                             <!-- Mega Menu Dropdown -->
-                            <div
-                                class="absolute left-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                            <div class="absolute left-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50"
+                                style="width: 900px;">
                                 <div
-                                    class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 p-8 w-[900px]">
+                                    class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 p-8">
                                     <!-- 4 Column Grid -->
-                                    <div class="grid grid-cols-4 gap-8">
+                                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem;">
 
                                         <!-- Column 1: Party Types -->
                                         <div>
