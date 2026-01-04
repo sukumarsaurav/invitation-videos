@@ -496,6 +496,101 @@ $isHomePage = true;  // For floating help button display
     </div>
 </section>
 
+<!-- CTA Section -->
+<section class="py-16 bg-gradient-to-r from-primary to-purple-600">
+    <div class="max-w-4xl mx-auto px-6 text-center">
+        <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">Ready to Create Your Invitation?</h2>
+        <p class="text-base sm:text-lg text-white/80 mb-6">Join thousands of happy customers who have created stunning
+            video invitations.</p>
+        <a href="/templates"
+            class="inline-flex items-center gap-2 bg-white text-primary font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all">
+            <span>Get Started Free</span>
+            <span class="material-symbols-outlined">arrow_forward</span>
+        </a>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="py-12 bg-white dark:bg-slate-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <div class="text-center mb-10">
+            <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-3">What Our Customers Say</h2>
+            <p class="text-slate-600 dark:text-slate-400">Trusted by thousands of happy couples and families</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Testimonial 1 -->
+            <div class="bg-slate-50 dark:bg-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all">
+                <div class="flex items-center gap-1 mb-4">
+                    <?php for ($i = 0; $i < 5; $i++): ?>
+                        <span class="material-symbols-outlined text-amber-400 text-lg"
+                            style="font-variation-settings: 'FILL' 1;">star</span>
+                    <?php endfor; ?>
+                </div>
+                <p class="text-slate-600 dark:text-slate-400 mb-4">
+                    "The video invitation for our wedding was absolutely stunning! Our guests were amazed and kept
+                    asking where we got it made. Highly recommend!"
+                </p>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <span class="text-primary font-bold">P</span>
+                    </div>
+                    <div>
+                        <p class="font-bold text-slate-900 dark:text-white text-sm">Priya & Rahul</p>
+                        <p class="text-xs text-slate-500">Wedding Invitation</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Testimonial 2 -->
+            <div class="bg-slate-50 dark:bg-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all">
+                <div class="flex items-center gap-1 mb-4">
+                    <?php for ($i = 0; $i < 5; $i++): ?>
+                        <span class="material-symbols-outlined text-amber-400 text-lg"
+                            style="font-variation-settings: 'FILL' 1;">star</span>
+                    <?php endfor; ?>
+                </div>
+                <p class="text-slate-600 dark:text-slate-400 mb-4">
+                    "Created a beautiful birthday invitation for my daughter's 5th birthday. The animation quality was
+                    professional and delivery was super fast!"
+                </p>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-rose-500/10 flex items-center justify-center">
+                        <span class="text-rose-500 font-bold">A</span>
+                    </div>
+                    <div>
+                        <p class="font-bold text-slate-900 dark:text-white text-sm">Anjali Sharma</p>
+                        <p class="text-xs text-slate-500">Birthday Invitation</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Testimonial 3 -->
+            <div class="bg-slate-50 dark:bg-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all">
+                <div class="flex items-center gap-1 mb-4">
+                    <?php for ($i = 0; $i < 5; $i++): ?>
+                        <span class="material-symbols-outlined text-amber-400 text-lg"
+                            style="font-variation-settings: 'FILL' 1;">star</span>
+                    <?php endfor; ?>
+                </div>
+                <p class="text-slate-600 dark:text-slate-400 mb-4">
+                    "Easy to customize and the WhatsApp sharing was seamless. Everyone loved the video quality. Will
+                    definitely use again for our next event!"
+                </p>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                        <span class="text-emerald-500 font-bold">R</span>
+                    </div>
+                    <div>
+                        <p class="font-bold text-slate-900 dark:text-white text-sm">Rajesh Kumar</p>
+                        <p class="text-xs text-slate-500">Engagement Ceremony</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- FAQ Section -->
 <section class="py-12 bg-slate-50 dark:bg-slate-800/50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
@@ -681,20 +776,6 @@ $isHomePage = true;  // For floating help button display
         </div>
     </section>
 <?php endif; ?>
-
-<!-- CTA Section -->
-<section class="py-16 bg-gradient-to-r from-primary to-purple-600">
-    <div class="max-w-4xl mx-auto px-6 text-center">
-        <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">Ready to Create Your Invitation?</h2>
-        <p class="text-base sm:text-lg text-white/80 mb-6">Join thousands of happy customers who have created stunning
-            video invitations.</p>
-        <a href="/templates"
-            class="inline-flex items-center gap-2 bg-white text-primary font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all">
-            <span>Get Started Free</span>
-            <span class="material-symbols-outlined">arrow_forward</span>
-        </a>
-    </div>
-</section>
 
 <?php
 $content = ob_get_clean();
