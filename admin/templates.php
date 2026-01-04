@@ -401,10 +401,66 @@ if ($action === 'delete' && $templateId) {
     exit;
 }
 
-// Get templates for list view
+// Get templates for list view with pagination and filtering
 $templates = [];
+$totalTemplates = 0;
+$totalPages = 1;
+$currentPage = 1;
+$perPage = 25;
+$filterCategory = '';
+$filterStatus = '';
+$sortBy = 'created_at';
+$sortOrder = 'DESC';
+
 if ($action === 'list') {
-    $templates = Database::fetchAll("SELECT * FROM templates ORDER BY created_at DESC");
+    // Pagination parameters
+    $perPage = intval($_GET['per_page'] ?? 25);
+    $perPage = in_array($perPage, [10, 25, 50, 100]) ? $perPage : 25;
+    $currentPage = max(1, intval($_GET['page'] ?? 1));
+    $offset = ($currentPage - 1) * $perPage;
+
+    // Filter parameters
+    $filterCategory = $_GET['category'] ?? '';
+    $filterStatus = $_GET['status'] ?? '';
+
+    // Sort parameters
+    $sortBy = $_GET['sort'] ?? 'created_at';
+    $sortOrder = strtoupper($_GET['order'] ?? 'DESC') === 'ASC' ? 'ASC' : 'DESC';
+    $allowedSorts = ['title', 'created_at', 'price_usd', 'purchase_count', 'category'];
+    $sortBy = in_array($sortBy, $allowedSorts) ? $sortBy : 'created_at';
+
+    // Build WHERE clause
+    $where = [];
+    $params = [];
+
+    if (!empty($filterCategory)) {
+        $where[] = "category = ?";
+        $params[] = $filterCategory;
+    }
+
+    if ($filterStatus === 'active') {
+        $where[] = "is_active = 1";
+    } elseif ($filterStatus === 'draft') {
+        $where[] = "is_active = 0";
+    } elseif ($filterStatus === 'premium') {
+        $where[] = "is_premium = 1";
+    } elseif ($filterStatus === 'discounted') {
+        $where[] = "discounted_price_usd IS NOT NULL AND discounted_price_usd > 0";
+    }
+
+    $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
+
+    // Get total count
+    $countSql = "SELECT COUNT(*) as total FROM templates $whereClause";
+    $countResult = Database::fetchOne($countSql, $params);
+    $totalTemplates = $countResult['total'] ?? 0;
+    $totalPages = max(1, ceil($totalTemplates / $perPage));
+    $currentPage = min($currentPage, $totalPages);
+    $offset = ($currentPage - 1) * $perPage;
+
+    // Fetch templates with pagination
+    $sql = "SELECT * FROM templates $whereClause ORDER BY $sortBy $sortOrder LIMIT $perPage OFFSET $offset";
+    $templates = Database::fetchAll($sql, $params);
 }
 
 // Get template for edit view
@@ -536,6 +592,88 @@ function getYouTubeEmbedUrl($url)
         </div>
     <?php endif; ?>
 
+    <!-- Filter Bar -->
+    <form method="GET"
+        class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-4 mb-6">
+        <div class="flex flex-wrap items-end gap-4">
+            <!-- Category Filter -->
+            <label class="flex flex-col gap-1.5">
+                <span class="text-xs font-medium text-slate-500">Category</span>
+                <select name="category" onchange="this.form.submit()"
+                    class="h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm min-w-[140px]">
+                    <option value="">All Categories</option>
+                    <?php foreach ($categories as $cat): ?>
+                        <option value="<?= $cat['slug'] ?>" <?= $filterCategory === $cat['slug'] ? 'selected' : '' ?>>
+                            <?= Security::escape($cat['name']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
+
+            <!-- Status Filter -->
+            <label class="flex flex-col gap-1.5">
+                <span class="text-xs font-medium text-slate-500">Status</span>
+                <select name="status" onchange="this.form.submit()"
+                    class="h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm min-w-[130px]">
+                    <option value="">All Status</option>
+                    <option value="active" <?= $filterStatus === 'active' ? 'selected' : '' ?>>Active</option>
+                    <option value="draft" <?= $filterStatus === 'draft' ? 'selected' : '' ?>>Draft</option>
+                    <option value="premium" <?= $filterStatus === 'premium' ? 'selected' : '' ?>>Premium</option>
+                    <option value="discounted" <?= $filterStatus === 'discounted' ? 'selected' : '' ?>>Discounted</option>
+                </select>
+            </label>
+
+            <!-- Sort By -->
+            <label class="flex flex-col gap-1.5">
+                <span class="text-xs font-medium text-slate-500">Sort By</span>
+                <select name="sort" onchange="this.form.submit()"
+                    class="h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm min-w-[130px]">
+                    <option value="created_at" <?= $sortBy === 'created_at' ? 'selected' : '' ?>>Date Created</option>
+                    <option value="title" <?= $sortBy === 'title' ? 'selected' : '' ?>>Title</option>
+                    <option value="price_usd" <?= $sortBy === 'price_usd' ? 'selected' : '' ?>>Price</option>
+                    <option value="purchase_count" <?= $sortBy === 'purchase_count' ? 'selected' : '' ?>>Sales</option>
+                    <option value="category" <?= $sortBy === 'category' ? 'selected' : '' ?>>Category</option>
+                </select>
+            </label>
+
+            <!-- Sort Order -->
+            <label class="flex flex-col gap-1.5">
+                <span class="text-xs font-medium text-slate-500">Order</span>
+                <select name="order" onchange="this.form.submit()"
+                    class="h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm min-w-[100px]">
+                    <option value="DESC" <?= $sortOrder === 'DESC' ? 'selected' : '' ?>>Descending</option>
+                    <option value="ASC" <?= $sortOrder === 'ASC' ? 'selected' : '' ?>>Ascending</option>
+                </select>
+            </label>
+
+            <!-- Per Page -->
+            <label class="flex flex-col gap-1.5">
+                <span class="text-xs font-medium text-slate-500">Per Page</span>
+                <select name="per_page" onchange="this.form.submit()"
+                    class="h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm min-w-[80px]">
+                    <option value="10" <?= $perPage === 10 ? 'selected' : '' ?>>10</option>
+                    <option value="25" <?= $perPage === 25 ? 'selected' : '' ?>>25</option>
+                    <option value="50" <?= $perPage === 50 ? 'selected' : '' ?>>50</option>
+                    <option value="100" <?= $perPage === 100 ? 'selected' : '' ?>>100</option>
+                </select>
+            </label>
+
+            <!-- Reset Filters -->
+            <?php if ($filterCategory || $filterStatus || $sortBy !== 'created_at' || $sortOrder !== 'DESC'): ?>
+                <a href="/admin/templates.php"
+                    class="h-10 px-4 flex items-center gap-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-medium transition-colors">
+                    <span class="material-symbols-outlined text-base">close</span>
+                    Reset
+                </a>
+            <?php endif; ?>
+
+            <!-- Results Count -->
+            <div class="ml-auto text-sm text-slate-500">
+                Showing <?= (($currentPage - 1) * $perPage) + 1 ?>-<?= min($currentPage * $perPage, $totalTemplates) ?> of
+                <?= number_format($totalTemplates) ?> templates
+            </div>
+        </div>
+    </form>
+
     <div
         class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
@@ -626,14 +764,71 @@ function getYouTubeEmbedUrl($url)
                         <tr>
                             <td colspan="7" class="px-6 py-12 text-center text-slate-500">
                                 <span class="material-symbols-outlined text-5xl text-slate-300 mb-2">video_library</span>
-                                <p class="text-lg font-medium">No templates yet</p>
-                                <p class="text-sm">Create your first template to get started</p>
+                                <p class="text-lg font-medium">No templates found</p>
+                                <p class="text-sm">Try adjusting your filters or create a new template</p>
                             </td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
             </table>
         </div>
+
+        <!-- Pagination -->
+        <?php if ($totalPages > 1): ?>
+            <div class="flex items-center justify-between px-6 py-4 border-t border-slate-100 dark:border-slate-800">
+                <div class="text-sm text-slate-500">
+                    Page <?= $currentPage ?> of <?= $totalPages ?>
+                </div>
+                <div class="flex items-center gap-1">
+                    <?php
+                    // Build query string for pagination links
+                    $queryParams = $_GET;
+                    unset($queryParams['page']);
+                    $baseUrl = '/admin/templates.php?' . http_build_query($queryParams);
+                    $baseUrl .= empty($queryParams) ? 'page=' : '&page=';
+                    ?>
+
+                    <!-- First & Previous -->
+                    <?php if ($currentPage > 1): ?>
+                        <a href="<?= $baseUrl ?>1" class="p-2 rounded-lg hover:bg-slate-100 text-slate-500 transition-colors"
+                            title="First">
+                            <span class="material-symbols-outlined text-lg">first_page</span>
+                        </a>
+                        <a href="<?= $baseUrl ?><?= $currentPage - 1 ?>"
+                            class="p-2 rounded-lg hover:bg-slate-100 text-slate-500 transition-colors" title="Previous">
+                            <span class="material-symbols-outlined text-lg">chevron_left</span>
+                        </a>
+                    <?php endif; ?>
+
+                    <!-- Page Numbers -->
+                    <?php
+                    $startPage = max(1, $currentPage - 2);
+                    $endPage = min($totalPages, $currentPage + 2);
+                    for ($i = $startPage; $i <= $endPage; $i++):
+                        ?>
+                        <?php if ($i === $currentPage): ?>
+                            <span
+                                class="size-9 flex items-center justify-center rounded-lg bg-primary text-white font-semibold text-sm"><?= $i ?></span>
+                        <?php else: ?>
+                            <a href="<?= $baseUrl ?><?= $i ?>"
+                                class="size-9 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600 text-sm transition-colors"><?= $i ?></a>
+                        <?php endif; ?>
+                    <?php endfor; ?>
+
+                    <!-- Next & Last -->
+                    <?php if ($currentPage < $totalPages): ?>
+                        <a href="<?= $baseUrl ?><?= $currentPage + 1 ?>"
+                            class="p-2 rounded-lg hover:bg-slate-100 text-slate-500 transition-colors" title="Next">
+                            <span class="material-symbols-outlined text-lg">chevron_right</span>
+                        </a>
+                        <a href="<?= $baseUrl ?><?= $totalPages ?>"
+                            class="p-2 rounded-lg hover:bg-slate-100 text-slate-500 transition-colors" title="Last">
+                            <span class="material-symbols-outlined text-lg">last_page</span>
+                        </a>
+                    <?php endif; ?>
+                </div>
+            </div>
+        <?php endif; ?>
     </div>
 
 <?php elseif ($action === 'new' || $action === 'edit'): ?>
@@ -1561,7 +1756,7 @@ function getYouTubeEmbedUrl($url)
                 alert('Delete error: ' + err.message);
             }
         }
-    // Language Thumbnail Tab Switching
+        // Language Thumbnail Tab Switching
         function switchLangTab(langCode) {
             // Update tab styles
             document.querySelectorAll('.lang-tab').forEach(tab => {
@@ -1573,7 +1768,7 @@ function getYouTubeEmbedUrl($url)
                     tab.classList.add('border-transparent', 'text-slate-500');
                 }
             });
-        
+
             // Show/hide panels
             document.querySelectorAll('.lang-panel').forEach(panel => {
                 if (panel.dataset.lang === langCode) {
@@ -1604,7 +1799,7 @@ function getYouTubeEmbedUrl($url)
                 const result = await response.json();
                 if (result.success) {
                     const grid = document.querySelector(`.lang-thumb-grid[data-lang="${langCode}"]`);
-                
+
                     // Remove "no thumbnails" message if present
                     const noMsg = grid.querySelector('.no-thumbs-msg');
                     if (noMsg) noMsg.remove();
@@ -1692,14 +1887,14 @@ function getYouTubeEmbedUrl($url)
                 const result = await response.json();
                 if (result.success) {
                     const grid = document.querySelector(`.lang-thumb-grid[data-lang="${langCode}"]`);
-                
+
                     // Remove primary styling from all
                     grid.querySelectorAll('[data-thumb-id]').forEach(el => {
                         el.classList.remove('ring-2', 'ring-primary');
                         const badge = el.querySelector('.bg-primary.text-white.text-xs');
                         if (badge) badge.remove();
                     });
-                
+
                     // Add primary styling to selected
                     const selectedThumb = grid.querySelector(`[data-thumb-id="${thumbId}"]`);
                     if (selectedThumb) {
@@ -1715,7 +1910,7 @@ function getYouTubeEmbedUrl($url)
                 alert('Error: ' + err.message);
             }
         }
-        </script>
+    </script>
 
 <?php endif; ?>
 
