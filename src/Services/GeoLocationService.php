@@ -17,9 +17,28 @@ class GeoLocationService
      */
     public static function getCountryFromIP(string $ip): array
     {
+        $location = self::getFullLocationFromIP($ip);
+        return [
+            'country_code' => $location['country_code'],
+            'country_name' => $location['country_name']
+        ];
+    }
+
+    /**
+     * Get full location information from IP address
+     * 
+     * @param string $ip IP address
+     * @return array Full location data including city, region, lat/lon
+     */
+    public static function getFullLocationFromIP(string $ip): array
+    {
         $default = [
             'country_code' => 'US',
-            'country_name' => 'United States'
+            'country_name' => 'United States',
+            'city' => null,
+            'region' => null,
+            'latitude' => null,
+            'longitude' => null
         ];
 
         // Skip for localhost/private IPs
@@ -34,7 +53,9 @@ class GeoLocationService
                 ]
             ]);
 
-            $response = @file_get_contents(self::API_URL . $ip . '?fields=countryCode,country,status', false, $context);
+            // Request all fields we need
+            $fields = 'status,countryCode,country,regionName,city,lat,lon';
+            $response = @file_get_contents(self::API_URL . $ip . '?fields=' . $fields, false, $context);
 
             if ($response === false) {
                 return $default;
@@ -48,7 +69,11 @@ class GeoLocationService
 
             return [
                 'country_code' => $data['countryCode'] ?? 'US',
-                'country_name' => $data['country'] ?? 'United States'
+                'country_name' => $data['country'] ?? 'United States',
+                'city' => $data['city'] ?? null,
+                'region' => $data['regionName'] ?? null,
+                'latitude' => isset($data['lat']) ? (float) $data['lat'] : null,
+                'longitude' => isset($data['lon']) ? (float) $data['lon'] : null
             ];
         } catch (Exception $e) {
             return $default;

@@ -1333,6 +1333,37 @@ try {
         }
     </script>
 
+    <!-- Cookie Consent Banner -->
+    <div id="cookie-consent-banner"
+        class="fixed bottom-0 left-0 right-0 z-[200] transform translate-y-full opacity-0 transition-all duration-300 ease-out">
+        <div class="bg-slate-900 text-white shadow-2xl border-t border-slate-700">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div class="flex-1">
+                        <p class="text-sm text-slate-300">
+                            <span class="font-semibold text-white">We value your privacy.</span>
+                            We use cookies to analyze site traffic and improve your experience.
+                            <a href="/privacy-policy" class="underline hover:text-primary">Learn more</a>
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-3 flex-shrink-0">
+                        <button onclick="CookieConsent.decline()"
+                            class="px-4 py-2 text-sm font-medium text-slate-400 hover:text-white transition-colors">
+                            Decline
+                        </button>
+                        <button onclick="CookieConsent.accept()"
+                            class="px-6 py-2 bg-primary hover:bg-primary/90 text-white text-sm font-bold rounded-lg transition-colors shadow-lg shadow-primary/30">
+                            Accept Cookies
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cookie Consent Script -->
+    <script src="/assets/js/cookie-consent.js" defer></script>
+
 </body>
 
 </html>
