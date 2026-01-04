@@ -311,7 +311,7 @@ class CampaignService
 
         // Revenue
         $revenue = Database::fetchOne(
-            "SELECT COALESCE(SUM(total_amount), 0) as total FROM orders 
+            "SELECT COALESCE(SUM(amount), 0) as total FROM orders 
              WHERE campaign_id = ? AND payment_status = 'paid' AND created_at BETWEEN ? AND ?",
             [$campaignId, $dateFrom, $dateTo]
         )['total'] ?? 0;
@@ -381,7 +381,7 @@ class CampaignService
         return Database::fetchAll(
             "SELECT c.*, COUNT(v.id) as visitor_count,
                     (SELECT COUNT(*) FROM orders o WHERE o.campaign_id = c.id AND o.payment_status = 'paid' AND o.created_at BETWEEN ? AND ?) as conversions,
-                    (SELECT COALESCE(SUM(o.total_amount), 0) FROM orders o WHERE o.campaign_id = c.id AND o.payment_status = 'paid' AND o.created_at BETWEEN ? AND ?) as revenue
+                    (SELECT COALESCE(SUM(o.amount), 0) FROM orders o WHERE o.campaign_id = c.id AND o.payment_status = 'paid' AND o.created_at BETWEEN ? AND ?) as revenue
              FROM campaigns c
              LEFT JOIN visitors v ON v.campaign_id = c.id AND v.created_at BETWEEN ? AND ?
              GROUP BY c.id
