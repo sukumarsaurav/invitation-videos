@@ -356,39 +356,61 @@ if (!empty($homepageSections)):
                     </h2>
                 </div>
             </div>
+            <?php
+            // Parse visible counts for carousel
+            $visibleCounts = json_decode($section['visible_counts'] ?? '{}', true) ?: ['xs' => 2, 'sm' => 3, 'md' => 4, 'lg' => 4, 'xl' => 4];
+            ?>
 
-            <!-- Template Grid Container -->
+            <!-- Template Carousel Container -->
             <div class="py-6 sm:py-8" style="background-color: <?= Security::escape($section['grid_bg_color']) ?>">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6">
-                    <div
-                        class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-<?= min(intval($section['template_count']), 4) ?> lg:grid-cols-<?= intval($section['template_count']) ?> gap-4 sm:gap-6">
-                        <?php foreach ($sectionTemplates as $tplIndex => $template): ?>
-                            <a href="/template/<?= Security::escape($template['slug']) ?>"
-                                class="group block bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200/50">
-                                <!-- Image -->
-                                <div class="relative aspect-[4/5] overflow-hidden bg-slate-100">
-                                    <?= ImageHelper::responsiveThumbnail(
-                                        $template['thumbnail_url'] ?? '/assets/images/placeholder.jpg',
-                                        $template['title'],
-                                        $sectionIndex === 0 && $tplIndex < 2,
-                                        $sectionIndex === 0 && $tplIndex < 2,
-                                        'absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105'
-                                    ) ?>
-                                </div>
+                    <div class="section-carousel relative"
+                        data-visible-counts='<?= Security::escape(json_encode($visibleCounts)) ?>'>
+                        <!-- Prev Arrow (Desktop) -->
+                        <button class="carousel-prev" aria-label="Previous templates">
+                            <span class="material-symbols-outlined">chevron_left</span>
+                        </button>
 
-                                <!-- Content -->
-                                <div class="p-4">
-                                    <h3
-                                        class="font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors truncate text-sm sm:text-base">
-                                        <?= Security::escape($template['title']) ?>
-                                    </h3>
-                                    <p
-                                        class="text-sm <?= $template['price_usd'] > 0 ? 'text-slate-700 dark:text-slate-300' : 'text-green-600 font-bold' ?>">
-                                        <?= $template['price_usd'] > 0 ? '₹' . number_format($template['price_inr'], 0) : 'Free' ?>
-                                    </p>
+                        <!-- Carousel Track -->
+                        <div class="carousel-track">
+                            <?php foreach ($sectionTemplates as $tplIndex => $template): ?>
+                                <div class="carousel-item">
+                                    <a href="/template/<?= Security::escape($template['slug']) ?>"
+                                        class="group block bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200/50">
+                                        <!-- Image -->
+                                        <div class="relative aspect-[4/5] overflow-hidden bg-slate-100">
+                                            <?= ImageHelper::responsiveThumbnail(
+                                                $template['thumbnail_url'] ?? '/assets/images/placeholder.jpg',
+                                                $template['title'],
+                                                $sectionIndex === 0 && $tplIndex < 2,
+                                                $sectionIndex === 0 && $tplIndex < 2,
+                                                'absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105'
+                                            ) ?>
+                                        </div>
+
+                                        <!-- Content -->
+                                        <div class="p-4">
+                                            <h3
+                                                class="font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors truncate text-sm sm:text-base">
+                                                <?= Security::escape($template['title']) ?>
+                                            </h3>
+                                            <p
+                                                class="text-sm <?= $template['price_usd'] > 0 ? 'text-slate-700 dark:text-slate-300' : 'text-green-600 font-bold' ?>">
+                                                <?= $template['price_usd'] > 0 ? '₹' . number_format($template['price_inr'], 0) : 'Free' ?>
+                                            </p>
+                                        </div>
+                                    </a>
                                 </div>
-                            </a>
-                        <?php endforeach; ?>
+                            <?php endforeach; ?>
+                        </div>
+
+                        <!-- Next Arrow (Desktop) -->
+                        <button class="carousel-next" aria-label="Next templates">
+                            <span class="material-symbols-outlined">chevron_forward</span>
+                        </button>
+
+                        <!-- Dot Indicators -->
+                        <div class="carousel-dots"></div>
                     </div>
                 </div>
             </div>

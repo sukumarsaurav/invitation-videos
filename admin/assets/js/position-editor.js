@@ -36,6 +36,9 @@ class PositionEditor {
         this.imageAnimation = options.imageAnimation || 'none';
         this.imageOverflow = options.imageOverflow !== undefined ? options.imageOverflow : true;
 
+        // Carousel visible counts
+        this.visibleCounts = this.parseJSON(options.visibleCounts) || { xs: 2, sm: 3, md: 4, lg: 4, xl: 4 };
+
         // Preview elements
         this.bannerBgColor = options.bannerBgColor || '#a11045';
         this.titleColor = options.titleColor || '#d4a853';
@@ -205,6 +208,24 @@ class PositionEditor {
                     </div>
                 </div>
                 
+                <!-- Carousel: Templates Visible -->
+                <div class="mt-6 bg-slate-50 rounded-lg p-4">
+                    <h4 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-lg">view_carousel</span>
+                        Templates Visible (Carousel)
+                    </h4>
+                    <p class="text-xs text-slate-500 mb-3">How many template cards to show at this breakpoint. Users can scroll/navigate to see more.</p>
+                    <div class="flex items-center gap-4">
+                        <input type="range" class="visible-count-slider flex-1" min="1" max="6" step="1" 
+                               value="${this.visibleCounts[this.currentBreakpoint] || 4}">
+                        <div class="flex items-center gap-1">
+                            <input type="number" class="visible-count-input w-16 px-2 py-1 text-sm text-center rounded border border-slate-300" 
+                                   min="1" max="6" step="1" value="${this.visibleCounts[this.currentBreakpoint] || 4}">
+                            <span class="text-xs text-slate-500">cards</span>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Action Buttons -->
                 <div class="mt-6 flex flex-wrap gap-3">
                     <button type="button" class="copy-to-all-btn flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 text-sm font-medium rounded-lg hover:bg-slate-200 transition-colors">
@@ -224,6 +245,7 @@ class PositionEditor {
                 <input type="hidden" name="svg_animation" id="svg_animation_input" value="${this.svgAnimation}">
                 <input type="hidden" name="image_animation" id="image_animation_input" value="${this.imageAnimation}">
                 <input type="hidden" name="image_overflow" id="image_overflow_input" value="${this.imageOverflow ? '1' : '0'}">
+                <input type="hidden" name="visible_counts" id="visible_counts_input" value='${JSON.stringify(this.visibleCounts)}'>
             </div>
         `;
     }
@@ -330,6 +352,26 @@ class PositionEditor {
             });
         }
 
+        // Visible count slider and input
+        const visibleSlider = this.container.querySelector('.visible-count-slider');
+        const visibleInput = this.container.querySelector('.visible-count-input');
+
+        if (visibleSlider) {
+            visibleSlider.addEventListener('input', (e) => {
+                this.visibleCounts[this.currentBreakpoint] = parseInt(e.target.value);
+                if (visibleInput) visibleInput.value = e.target.value;
+                this.updateHiddenInputs();
+            });
+        }
+
+        if (visibleInput) {
+            visibleInput.addEventListener('change', (e) => {
+                this.visibleCounts[this.currentBreakpoint] = parseInt(e.target.value);
+                if (visibleSlider) visibleSlider.value = e.target.value;
+                this.updateHiddenInputs();
+            });
+        }
+
         // Copy to all button
         this.container.querySelector('.copy-to-all-btn')?.addEventListener('click', () => {
             this.copyToAllBreakpoints();
@@ -420,6 +462,13 @@ class PositionEditor {
         const heightInput = this.container.querySelector('.height-input');
         if (heightSlider) heightSlider.value = height;
         if (heightInput) heightInput.value = height;
+
+        // Update visible counts
+        const visibleCount = this.visibleCounts[this.currentBreakpoint] || 4;
+        const visibleSlider = this.container.querySelector('.visible-count-slider');
+        const visibleInput = this.container.querySelector('.visible-count-input');
+        if (visibleSlider) visibleSlider.value = visibleCount;
+        if (visibleInput) visibleInput.value = visibleCount;
     }
 
     updatePreview() {
@@ -474,6 +523,9 @@ class PositionEditor {
         if (svgAnimInput) svgAnimInput.value = this.svgAnimation;
         if (imgAnimInput) imgAnimInput.value = this.imageAnimation;
         if (overflowInput) overflowInput.value = this.imageOverflow ? '1' : '0';
+
+        const visibleCountsInput = document.getElementById('visible_counts_input');
+        if (visibleCountsInput) visibleCountsInput.value = JSON.stringify(this.visibleCounts);
     }
 
     copyToAllBreakpoints() {
@@ -483,6 +535,7 @@ class PositionEditor {
                 this.svgPosition[bp] = { ...this.svgPosition[current] };
                 this.imagePosition[bp] = { ...this.imagePosition[current] };
                 this.bannerHeights[bp] = this.bannerHeights[current];
+                this.visibleCounts[bp] = this.visibleCounts[current];
             }
         });
         this.updateHiddenInputs();

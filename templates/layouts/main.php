@@ -1572,6 +1572,9 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
     <!-- Section Positioning Script for responsive homepage banners -->
     <script src="/assets/js/section-positioning.js" defer></script>
 
+    <!-- Template Carousel Script -->
+    <script src="/assets/js/section-carousel.js" defer></script>
+
 </body>
 
 </html>

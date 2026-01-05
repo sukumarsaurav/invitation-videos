@@ -37,6 +37,10 @@ ALTER TABLE `homepage_sections` ADD COLUMN IF NOT EXISTS `image_animation` VARCH
 ALTER TABLE `homepage_sections` ADD COLUMN IF NOT EXISTS `image_overflow` TINYINT(1) DEFAULT 1 
     COMMENT 'Allow image to extend beyond container boundaries';
 
+-- Visible template counts per breakpoint (for carousel)
+ALTER TABLE `homepage_sections` ADD COLUMN IF NOT EXISTS `visible_counts` JSON DEFAULT NULL 
+    COMMENT 'Templates visible per breakpoint: {xs:2, sm:3, md:4, lg:4, xl:4}';
+
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- =====================================================

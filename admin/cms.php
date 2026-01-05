@@ -177,6 +177,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $svgAnimation = $_POST['svg_animation'] ?? 'none';
             $imageAnimation = $_POST['image_animation'] ?? 'none';
             $imageOverflow = isset($_POST['image_overflow']) && $_POST['image_overflow'] === '1' ? 1 : 0;
+            $visibleCounts = $_POST['visible_counts'] ?? null;
 
             if (empty($sectionTitle)) {
                 $error = 'Section title is required.';
@@ -231,12 +232,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     banner_bg_color = ?, banner_svg_url = ?, banner_image_url = ?,
                                     title_color = ?, grid_bg_color = ?, template_count = ?, is_active = ?,
                                     svg_position = ?, image_position = ?, banner_heights = ?,
-                                    svg_animation = ?, image_animation = ?, image_overflow = ?,
+                                    svg_animation = ?, image_animation = ?, image_overflow = ?, visible_counts = ?,
                                     updated_at = NOW()
                                 WHERE id = ?",
                                 [$sectionTitle, $categorySlug, $subcategory, $bannerBgColor, $bannerSvgUrl, 
                                  $bannerImageUrl, $titleColor, $gridBgColor, $templateCount, $isActive,
-                                 $svgPosition, $imagePosition, $bannerHeights, $svgAnimation, $imageAnimation, $imageOverflow, $sectionId]
+                                 $svgPosition, $imagePosition, $bannerHeights, $svgAnimation, $imageAnimation, $imageOverflow, $visibleCounts, $sectionId]
                             );
                             $success = 'Section updated successfully!';
                         } else {
@@ -247,11 +248,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 "INSERT INTO homepage_sections 
                                     (section_title, category_slug, subcategory, banner_bg_color, banner_svg_url, 
                                      banner_image_url, title_color, grid_bg_color, template_count, display_order, is_active,
-                                     svg_position, image_position, banner_heights, svg_animation, image_animation, image_overflow)
-                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                                     svg_position, image_position, banner_heights, svg_animation, image_animation, image_overflow, visible_counts)
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                                 [$sectionTitle, $categorySlug, $subcategory, $bannerBgColor, $bannerSvgUrl,
                                  $bannerImageUrl, $titleColor, $gridBgColor, $templateCount, $maxOrder + 1, $isActive,
-                                 $svgPosition, $imagePosition, $bannerHeights, $svgAnimation, $imageAnimation, $imageOverflow]
+                                 $svgPosition, $imagePosition, $bannerHeights, $svgAnimation, $imageAnimation, $imageOverflow, $visibleCounts]
                             );
                             $success = 'Section created successfully!';
                         }
@@ -1157,6 +1158,7 @@ $currentTab = $_GET['tab'] ?? 'hero';
                 svgAnimation: <?= json_encode($editSection['svg_animation'] ?? 'none') ?>,
                 imageAnimation: <?= json_encode($editSection['image_animation'] ?? 'none') ?>,
                 imageOverflow: <?= ($editSection['image_overflow'] ?? 1) ? 'true' : 'false' ?>,
+                visibleCounts: <?= json_encode($editSection['visible_counts'] ?? null) ?>,
                 
                 // Preview context
                 bannerBgColor: <?= json_encode($editSection['banner_bg_color'] ?? '#a11045') ?>,

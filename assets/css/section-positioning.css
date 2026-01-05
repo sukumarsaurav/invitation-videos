@@ -8,8 +8,9 @@
    ===================================================== */
 .section-banner {
     position: relative;
-    overflow: visible; /* Allow elements to overflow */
-    
+    overflow: visible;
+    /* Allow elements to overflow */
+
     /* Default heights - overridden by inline CSS variables */
     --height-xs: 80px;
     --height-sm: 100px;
@@ -96,7 +97,8 @@
 .section-image img {
     height: 100%;
     width: auto;
-    max-height: 150%; /* Allow overflow */
+    max-height: 150%;
+    /* Allow overflow */
     object-fit: contain;
 }
 
@@ -162,4 +164,122 @@
     display: flex;
     align-items: center;
     height: 100%;
+}
+
+/* =====================================================
+   Template Carousel
+   ===================================================== */
+.section-carousel {
+    position: relative;
+}
+
+/* Carousel Track */
+.carousel-track {
+    display: flex;
+    gap: 16px;
+    transition: transform 0.4s ease-out;
+}
+
+/* Mobile: Horizontal scroll with snap */
+@media (max-width: 768px) {
+    .carousel-track {
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding-bottom: 8px;
+    }
+
+    .carousel-track::-webkit-scrollbar {
+        display: none;
+    }
+
+    .carousel-item {
+        scroll-snap-align: start;
+    }
+}
+
+/* Desktop: Hidden overflow for slide animation */
+@media (min-width: 769px) {
+    .carousel-track {
+        overflow: hidden;
+    }
+}
+
+/* Carousel Items */
+.carousel-item {
+    flex-shrink: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Arrow Buttons */
+.carousel-prev,
+.carousel-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 20;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: white;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #1e293b;
+}
+
+.carousel-prev:hover,
+.carousel-next:hover {
+    background: #f8fafc;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.carousel-prev {
+    left: -22px;
+}
+
+.carousel-next {
+    right: -22px;
+}
+
+/* Hide arrows on mobile */
+@media (max-width: 768px) {
+
+    .carousel-prev,
+    .carousel-next {
+        display: none;
+    }
+}
+
+/* Dot Indicators */
+.carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.carousel-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    background: #cbd5e1;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.carousel-dot.active,
+.carousel-dot:hover {
+    background: var(--color-primary, #7f13ec);
+}
+
+/* Active dot is wider */
+.carousel-dot.active {
+    width: 24px;
 }
