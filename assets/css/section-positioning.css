@@ -103,13 +103,19 @@
     max-width: none;
 }
 
-/* Image element */
+/* Image element - positioned at bottom-right, overflows upward */
 .section-image {
+    position: absolute;
+    top: auto;
+    bottom: 0;
+    left: auto;
+    right: 2rem;
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: flex-end;
-    padding-right: 2rem;
     overflow: hidden;
+    height: auto;
+    max-height: none;
 }
 
 /* Only allow overflow on larger screens */
@@ -120,11 +126,13 @@
 }
 
 .section-image img {
-    height: 100%;
+    height: auto;
     width: auto;
-    max-height: 150%;
-    /* Allow overflow */
+    max-height: 200%;
+    /* Image is 200% of banner height, so 50% extends above */
     object-fit: contain;
+    transform: translateY(0);
+    /* Image bottom aligns with banner bottom, top extends above */
 }
 
 /* =====================================================
