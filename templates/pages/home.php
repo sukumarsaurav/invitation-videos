@@ -402,6 +402,22 @@ if (!empty($homepageSections)):
                                     </a>
                                 </div>
                             <?php endforeach; ?>
+
+                            <!-- See All Card -->
+                            <div class="carousel-item">
+                                <a href="/templates<?= !empty($section['category_slug']) ? '?category=' . Security::escape($section['category_slug']) : '' ?>"
+                                    class="group flex flex-col items-center justify-center bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200/50 hover:border-primary/30 aspect-[4/5]">
+                                    <div
+                                        class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
+                                        <span class="material-symbols-outlined text-3xl text-primary">grid_view</span>
+                                    </div>
+                                    <p
+                                        class="font-bold text-slate-900 dark:text-white text-sm sm:text-base group-hover:text-primary transition-colors">
+                                        See All</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                        <?= Security::escape($section['section_title']) ?></p>
+                                </a>
+                            </div>
                         </div>
 
                         <!-- Next Arrow (Desktop) -->

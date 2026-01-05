@@ -274,6 +274,13 @@
     margin-top: 16px;
 }
 
+/* Hide dots on mobile - using horizontal scroll instead */
+@media (max-width: 768px) {
+    .carousel-dots {
+        display: none;
+    }
+}
+
 .carousel-dot {
     width: 8px;
     height: 8px;
