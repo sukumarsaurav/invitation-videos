@@ -12,6 +12,17 @@ $currentCategory = $_GET['category'] ?? null;
 $galleryCategories = [];
 $galleryTotalTemplates = 0;
 
+// Fetch CMS category display mode setting
+$categoryDisplayMode = 'icon'; // default
+try {
+    $cmsSetting = Database::fetchOne("SELECT setting_value FROM settings WHERE setting_key = 'category_display_mode'");
+    if ($cmsSetting) {
+        $categoryDisplayMode = $cmsSetting['setting_value'];
+    }
+} catch (Exception $e) {
+    // Settings table may not exist
+}
+
 // Get filters
 $category = $_GET['category'] ?? null;
 $tradition = $_GET['tradition'] ?? null;
@@ -121,19 +132,47 @@ $totalResult = Database::fetchOne($countSql, $params);
 $totalTemplates = intval($totalResult['total'] ?? 0);
 $hasMore = $totalTemplates > $limit;
 
-// All categories for filters
-$allCategories = [
-    'wedding' => ['name' => 'Wedding', 'icon' => 'favorite', 'color' => 'text-rose-500'],
-    'birthday' => ['name' => 'Birthday', 'icon' => 'cake', 'color' => 'text-amber-500'],
-    'baby_shower' => ['name' => 'Baby Shower', 'icon' => 'child_care', 'color' => 'text-teal-500'],
-    'corporate' => ['name' => 'Corporate', 'icon' => 'business_center', 'color' => 'text-blue-500'],
-    'anniversary' => ['name' => 'Anniversary', 'icon' => 'celebration', 'color' => 'text-purple-500'],
-    'graduation' => ['name' => 'Graduation', 'icon' => 'school', 'color' => 'text-indigo-500'],
-    'housewarming' => ['name' => 'Housewarming', 'icon' => 'home', 'color' => 'text-cyan-500'],
-    'parties' => ['name' => 'Parties', 'icon' => 'nightlife', 'color' => 'text-orange-500'],
-    'religious' => ['name' => 'Religious', 'icon' => 'church', 'color' => 'text-yellow-600'],
-    'holidays' => ['name' => 'Holidays', 'icon' => 'redeem', 'color' => 'text-red-500'],
-];
+// Fetch categories from database with image_url support (same as home.php)
+$dbCategories = [];
+try {
+    $dbCategories = Database::fetchAll("SELECT id, name, slug, icon, color, image_url FROM categories WHERE is_active = 1 ORDER BY display_order ASC, name ASC LIMIT 12") ?? [];
+} catch (Exception $e) {
+    try {
+        $dbCategories = Database::fetchAll("SELECT id, name, slug, icon, color FROM categories WHERE is_active = 1 ORDER BY display_order ASC, name ASC LIMIT 12") ?? [];
+    } catch (Exception $e2) {
+        // Fallback to hardcoded if table doesn't exist
+    }
+}
+
+// Map database categories or use hardcoded fallback
+if (!empty($dbCategories)) {
+    $allCategories = [];
+    foreach ($dbCategories as $cat) {
+        $allCategories[$cat['slug']] = [
+            'name' => $cat['name'],
+            'icon' => $cat['icon'] ?? 'category',
+            'color' => 'text-primary',
+            'image_url' => $cat['image_url'] ?? null,
+        ];
+    }
+} else {
+    // Fallback hardcoded categories
+    $allCategories = [
+        'wedding' => ['name' => 'Wedding', 'icon' => 'favorite', 'color' => 'text-rose-500', 'image_url' => null],
+        'birthday' => ['name' => 'Birthday', 'icon' => 'cake', 'color' => 'text-amber-500', 'image_url' => null],
+        'baby_shower' => ['name' => 'Baby Shower', 'icon' => 'child_care', 'color' => 'text-teal-500', 'image_url' => null],
+        'corporate' => ['name' => 'Corporate', 'icon' => 'business_center', 'color' => 'text-blue-500', 'image_url' => null],
+        'anniversary' => ['name' => 'Anniversary', 'icon' => 'celebration', 'color' => 'text-purple-500', 'image_url' => null],
+        'graduation' => ['name' => 'Graduation', 'icon' => 'school', 'color' => 'text-indigo-500', 'image_url' => null],
+        'housewarming' => ['name' => 'Housewarming', 'icon' => 'home', 'color' => 'text-cyan-500', 'image_url' => null],
+        'parties' => ['name' => 'Parties', 'icon' => 'nightlife', 'color' => 'text-orange-500', 'image_url' => null],
+        'religious' => ['name' => 'Religious', 'icon' => 'church', 'color' => 'text-yellow-600', 'image_url' => null],
+        'holidays' => ['name' => 'Holidays', 'icon' => 'redeem', 'color' => 'text-red-500', 'image_url' => null],
+    ];
+}
+
+// Check if we should show images
+$showCategoryImages = ($categoryDisplayMode === 'image' || $categoryDisplayMode === 'both');
 
 // Pass categories to layout for mobile header
 $galleryCategories = $allCategories;
@@ -189,8 +228,13 @@ if ($category && isset($categoryTitles[$category])) {
                         <?php foreach ($allCategories as $key => $cat): ?>
                             <a href="/templates?category=<?= $key ?>"
                                 class="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium <?= $category === $key ? 'text-primary bg-primary/5 font-bold' : 'text-slate-600 hover:text-primary' ?> rounded-lg">
-                                <span
-                                    class="material-symbols-outlined text-lg <?= $cat['color'] ?>"><?= $cat['icon'] ?></span>
+                                <?php if ($showCategoryImages && !empty($cat['image_url'])): ?>
+                                    <img src="<?= htmlspecialchars($cat['image_url']) ?>" 
+                                         alt="<?= htmlspecialchars($cat['name']) ?>" 
+                                         class="w-6 h-6 rounded object-cover">
+                                <?php else: ?>
+                                    <span class="material-symbols-outlined text-lg <?= $cat['color'] ?>"><?= $cat['icon'] ?></span>
+                                <?php endif; ?>
                                 <?= $cat['name'] ?>
                             </a>
                         <?php endforeach; ?>
