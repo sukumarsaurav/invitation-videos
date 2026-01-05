@@ -1,0 +1,165 @@
+/**
+ * Section Positioning Styles
+ * Responsive positioning for homepage section SVG backgrounds and category images
+ */
+
+/* =====================================================
+   Section Banner Container
+   ===================================================== */
+.section-banner {
+    position: relative;
+    overflow: visible; /* Allow elements to overflow */
+    
+    /* Default heights - overridden by inline CSS variables */
+    --height-xs: 80px;
+    --height-sm: 100px;
+    --height-md: 120px;
+    --height-lg: 140px;
+    --height-xl: 160px;
+}
+
+/* Responsive banner heights */
+.section-banner {
+    height: var(--height-xs);
+}
+
+@media (min-width: 481px) {
+    .section-banner {
+        height: var(--height-xs);
+    }
+}
+
+@media (min-width: 769px) {
+    .section-banner {
+        height: var(--height-sm);
+    }
+}
+
+@media (min-width: 1024px) {
+    .section-banner {
+        height: var(--height-md);
+    }
+}
+
+@media (min-width: 1280px) {
+    .section-banner {
+        height: var(--height-lg);
+    }
+}
+
+@media (min-width: 1536px) {
+    .section-banner {
+        height: var(--height-xl);
+    }
+}
+
+/* =====================================================
+   Positioned Elements (SVG & Image)
+   ===================================================== */
+.section-element {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* SVG element */
+.section-svg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.section-svg svg {
+    width: auto;
+    height: 100%;
+    max-width: none;
+}
+
+/* Image element */
+.section-image {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 2rem;
+    overflow: hidden;
+}
+
+.section-image.allow-overflow {
+    overflow: visible;
+}
+
+.section-image img {
+    height: 100%;
+    width: auto;
+    max-height: 150%; /* Allow overflow */
+    object-fit: contain;
+}
+
+/* =====================================================
+   Scroll Animations
+   ===================================================== */
+.animate-on-scroll {
+    opacity: 0;
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.animate-on-scroll.visible {
+    opacity: 1;
+}
+
+/* Fade In */
+.animate-on-scroll.fade-in {
+    /* Just opacity change, handled by .visible */
+}
+
+/* Slide Left (starts from left, slides to position) */
+.animate-on-scroll.slide-left {
+    transform: translateX(-50px);
+}
+
+.animate-on-scroll.slide-left.visible {
+    /* Transform will be set by JS, just remove the offset */
+}
+
+/* Slide Right (starts from right, slides to position) */
+.animate-on-scroll.slide-right {
+    transform: translateX(50px);
+}
+
+.animate-on-scroll.slide-right.visible {
+    /* Transform will be set by JS */
+}
+
+/* Slide Up (starts from bottom, slides up) */
+.animate-on-scroll.slide-up {
+    transform: translateY(30px);
+}
+
+.animate-on-scroll.slide-up.visible {
+    /* Transform will be set by JS */
+}
+
+/* Scale In (starts smaller, scales to position) */
+.animate-on-scroll.scale-in {
+    transform: scale(0.8);
+}
+
+.animate-on-scroll.scale-in.visible {
+    /* Transform will be set by JS */
+}
+
+/* =====================================================
+   Section Title Layer
+   ===================================================== */
+.section-title-layer {
+    position: relative;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    height: 100%;
+}

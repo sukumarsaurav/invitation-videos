@@ -169,6 +169,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $gridBgColor = $_POST['grid_bg_color'] ?? '#f5f0e8';
             $templateCount = max(3, min(6, intval($_POST['template_count'] ?? 4)));
             $isActive = isset($_POST['is_active']) ? 1 : 0;
+            
+            // Visual positioning data
+            $svgPosition = $_POST['svg_position'] ?? null;
+            $imagePosition = $_POST['image_position'] ?? null;
+            $bannerHeights = $_POST['banner_heights'] ?? null;
+            $svgAnimation = $_POST['svg_animation'] ?? 'none';
+            $imageAnimation = $_POST['image_animation'] ?? 'none';
+            $imageOverflow = isset($_POST['image_overflow']) && $_POST['image_overflow'] === '1' ? 1 : 0;
 
             if (empty($sectionTitle)) {
                 $error = 'Section title is required.';
@@ -222,10 +230,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     section_title = ?, category_slug = ?, subcategory = ?,
                                     banner_bg_color = ?, banner_svg_url = ?, banner_image_url = ?,
                                     title_color = ?, grid_bg_color = ?, template_count = ?, is_active = ?,
+                                    svg_position = ?, image_position = ?, banner_heights = ?,
+                                    svg_animation = ?, image_animation = ?, image_overflow = ?,
                                     updated_at = NOW()
                                 WHERE id = ?",
                                 [$sectionTitle, $categorySlug, $subcategory, $bannerBgColor, $bannerSvgUrl, 
-                                 $bannerImageUrl, $titleColor, $gridBgColor, $templateCount, $isActive, $sectionId]
+                                 $bannerImageUrl, $titleColor, $gridBgColor, $templateCount, $isActive,
+                                 $svgPosition, $imagePosition, $bannerHeights, $svgAnimation, $imageAnimation, $imageOverflow, $sectionId]
                             );
                             $success = 'Section updated successfully!';
                         } else {
@@ -235,10 +246,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             Database::query(
                                 "INSERT INTO homepage_sections 
                                     (section_title, category_slug, subcategory, banner_bg_color, banner_svg_url, 
-                                     banner_image_url, title_color, grid_bg_color, template_count, display_order, is_active)
-                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                                     banner_image_url, title_color, grid_bg_color, template_count, display_order, is_active,
+                                     svg_position, image_position, banner_heights, svg_animation, image_animation, image_overflow)
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                                 [$sectionTitle, $categorySlug, $subcategory, $bannerBgColor, $bannerSvgUrl,
-                                 $bannerImageUrl, $titleColor, $gridBgColor, $templateCount, $maxOrder + 1, $isActive]
+                                 $bannerImageUrl, $titleColor, $gridBgColor, $templateCount, $maxOrder + 1, $isActive,
+                                 $svgPosition, $imagePosition, $bannerHeights, $svgAnimation, $imageAnimation, $imageOverflow]
                             );
                             $success = 'Section created successfully!';
                         }
@@ -992,21 +1005,24 @@ $currentTab = $_GET['tab'] ?? 'hero';
                                     </div>
                                 </div>
 
-                                <!-- Preview -->
+                                <!-- Visual Position Editor -->
+                                <div class="p-4 rounded-lg border border-slate-200 bg-white">
+                                    <h4 class="text-sm font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-lg text-primary">tune</span>
+                                        Visual Position Editor
+                                    </h4>
+                                    <p class="text-xs text-slate-500 mb-4">
+                                        Configure SVG and Image positioning for each screen size. Use the breakpoint tabs to set different positions for mobile, tablet, and desktop views.
+                                    </p>
+                                    <div id="position-editor-container"></div>
+                                </div>
+
+                                <!-- Grid Preview -->
                                 <div class="p-4 rounded-lg border border-slate-200 bg-slate-50">
-                                    <h4 class="text-sm font-medium text-slate-700 mb-3">Preview</h4>
-                                    <div class="rounded-lg overflow-hidden" id="section-preview">
-                                        <div class="h-20 relative flex items-center px-6" 
-                                            style="background-color: <?= Security::escape($editSection['banner_bg_color'] ?? '#a11045') ?>">
-                                            <span class="text-2xl italic" 
-                                                style="color: <?= Security::escape($editSection['title_color'] ?? '#d4a853') ?>">
-                                                <?= Security::escape($editSection['section_title'] ?? 'Section Title') ?>
-                                            </span>
-                                        </div>
-                                        <div class="h-16 flex items-center justify-center"
-                                            style="background-color: <?= Security::escape($editSection['grid_bg_color'] ?? '#f5f0e8') ?>">
-                                            <span class="text-xs text-slate-500">Template cards will appear here</span>
-                                        </div>
+                                    <h4 class="text-sm font-medium text-slate-700 mb-3">Template Grid Preview</h4>
+                                    <div class="h-16 flex items-center justify-center rounded-lg"
+                                        style="background-color: <?= Security::escape($editSection['grid_bg_color'] ?? '#f5f0e8') ?>">
+                                        <span class="text-xs text-slate-500">Template cards will appear here</span>
                                     </div>
                                 </div>
                             </div>
@@ -1125,6 +1141,60 @@ $currentTab = $_GET['tab'] ?? 'hero';
         });
     });
 </script>
+
+<?php if ($currentTab === 'sections' && ($editSection || isset($_GET['edit_section']))): ?>
+<!-- Position Editor Script -->
+<script src="/admin/assets/js/position-editor.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize the position editor
+        if (document.getElementById('position-editor-container')) {
+            const editor = PositionEditor.create('position-editor-container', {
+                // Existing positioning data
+                svgPosition: <?= json_encode($editSection['svg_position'] ?? null) ?>,
+                imagePosition: <?= json_encode($editSection['image_position'] ?? null) ?>,
+                bannerHeights: <?= json_encode($editSection['banner_heights'] ?? null) ?>,
+                svgAnimation: <?= json_encode($editSection['svg_animation'] ?? 'none') ?>,
+                imageAnimation: <?= json_encode($editSection['image_animation'] ?? 'none') ?>,
+                imageOverflow: <?= ($editSection['image_overflow'] ?? 1) ? 'true' : 'false' ?>,
+                
+                // Preview context
+                bannerBgColor: <?= json_encode($editSection['banner_bg_color'] ?? '#a11045') ?>,
+                titleColor: <?= json_encode($editSection['title_color'] ?? '#d4a853') ?>,
+                sectionTitle: <?= json_encode($editSection['section_title'] ?? 'Section Title') ?>,
+                svgUrl: <?= json_encode($editSection['banner_svg_url'] ?? '') ?>,
+                imageUrl: <?= json_encode($editSection['banner_image_url'] ?? '') ?>
+            });
+            
+            // Update editor when colors change
+            const bgColorInput = document.querySelector('input[name="banner_bg_color"]');
+            const titleColorInput = document.querySelector('input[name="title_color"]');
+            const titleInput = document.querySelector('input[name="section_title"]');
+            
+            if (bgColorInput) {
+                bgColorInput.addEventListener('input', function() {
+                    const canvas = document.querySelector('.preview-canvas');
+                    if (canvas) canvas.style.backgroundColor = this.value;
+                });
+            }
+            
+            if (titleColorInput) {
+                titleColorInput.addEventListener('input', function() {
+                    const title = document.querySelector('.preview-canvas span[style*="font-family"]');
+                    if (title) title.style.color = this.value;
+                });
+            }
+            
+            if (titleInput) {
+                titleInput.addEventListener('input', function() {
+                    const title = document.querySelector('.preview-canvas span[style*="font-family"]');
+                    if (title) title.textContent = this.value || 'Section Title';
+                });
+            }
+        }
+    });
+</script>
+<?php endif; ?>
 
 <?php
 $content = ob_get_clean();

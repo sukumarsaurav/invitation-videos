@@ -584,6 +584,9 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
         <link rel="stylesheet" href="/assets/css/app.css">
     </noscript>
 
+    <!-- Section Positioning CSS for responsive homepage banners -->
+    <link rel="stylesheet" href="/assets/css/section-positioning.css">
+
     <!-- Dynamic Theme Color Overrides (loaded after app.css) -->
     <style>
         /* Override Tailwind's hardcoded primary colors with CSS variables */
@@ -1565,6 +1568,9 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
 
     <!-- Cookie Consent Script -->
     <script src="/assets/js/cookie-consent.js" defer></script>
+
+    <!-- Section Positioning Script for responsive homepage banners -->
+    <script src="/assets/js/section-positioning.js" defer></script>
 
 </body>
 

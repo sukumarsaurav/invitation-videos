@@ -311,37 +311,49 @@ if (!empty($homepageSections)):
                 $svgContent = file_get_contents($svgPath);
             }
         }
+
+        // Parse positioning data
+        $svgPos = json_decode($section['svg_position'] ?? '{}', true) ?: [];
+        $imgPos = json_decode($section['image_position'] ?? '{}', true) ?: [];
+        $bannerHeights = json_decode($section['banner_heights'] ?? '{}', true) ?: ['xs' => '80px', 'sm' => '100px', 'md' => '120px', 'lg' => '140px', 'xl' => '160px'];
+        $svgAnimation = $section['svg_animation'] ?? 'none';
+        $imgAnimation = $section['image_animation'] ?? 'none';
+        $imageOverflow = $section['image_overflow'] ?? 1;
         ?>
 
         <!-- CMS Section: <?= Security::escape($section['section_title']) ?> -->
-        <section class="relative overflow-hidden">
+        <section class="relative overflow-visible">
             <!-- Header Banner -->
-            <div class="relative py-6 sm:py-8" style="background-color: <?= Security::escape($section['banner_bg_color']) ?>">
+            <div class="section-banner relative" style="background-color: <?= Security::escape($section['banner_bg_color']) ?>;
+                        --height-xs: <?= Security::escape($bannerHeights['xs'] ?? '80px') ?>;
+                        --height-sm: <?= Security::escape($bannerHeights['sm'] ?? '100px') ?>;
+                        --height-md: <?= Security::escape($bannerHeights['md'] ?? '120px') ?>;
+                        --height-lg: <?= Security::escape($bannerHeights['lg'] ?? '140px') ?>;
+                        --height-xl: <?= Security::escape($bannerHeights['xl'] ?? '160px') ?>;">
+
                 <!-- SVG Pattern Background -->
                 <?php if ($svgContent): ?>
-                    <div class="absolute inset-0 opacity-30 pointer-events-none overflow-hidden">
-                        <div class="absolute inset-0 flex items-center justify-center" style="transform: scale(1.5);">
-                            <?= $svgContent ?>
-                        </div>
+                    <div class="section-element section-svg <?= $svgAnimation !== 'none' ? 'animate-on-scroll ' . $svgAnimation : '' ?>"
+                        data-positions='<?= Security::escape(json_encode($svgPos)) ?>'>
+                        <?= $svgContent ?>
                     </div>
                 <?php endif; ?>
 
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
-                    <div class="flex items-center justify-between">
-                        <!-- Title (Left) -->
-                        <h2 class="text-2xl sm:text-3xl md:text-4xl font-light italic"
-                            style="color: <?= Security::escape($section['title_color']) ?>; font-family: 'Georgia', serif;">
-                            <?= Security::escape($section['section_title']) ?>
-                        </h2>
-
-                        <!-- Category Image (Right) -->
-                        <?php if (!empty($section['banner_image_url'])): ?>
-                            <div class="hidden sm:block h-24 md:h-32">
-                                <img src="<?= Security::escape($section['banner_image_url']) ?>"
-                                    alt="<?= Security::escape($section['section_title']) ?>" class="h-full w-auto object-contain">
-                            </div>
-                        <?php endif; ?>
+                <!-- Category Image (Now visible on all screens) -->
+                <?php if (!empty($section['banner_image_url'])): ?>
+                    <div class="section-element section-image <?= $imgAnimation !== 'none' ? 'animate-on-scroll ' . $imgAnimation : '' ?> <?= $imageOverflow ? 'allow-overflow' : '' ?>"
+                        data-positions='<?= Security::escape(json_encode($imgPos)) ?>'>
+                        <img src="<?= Security::escape($section['banner_image_url']) ?>"
+                            alt="<?= Security::escape($section['section_title']) ?>">
                     </div>
+                <?php endif; ?>
+
+                <!-- Title Layer -->
+                <div class="section-title-layer max-w-7xl mx-auto px-4 sm:px-6">
+                    <h2 class="text-2xl sm:text-3xl md:text-4xl font-light italic"
+                        style="color: <?= Security::escape($section['title_color']) ?>; font-family: 'Georgia', serif;">
+                        <?= Security::escape($section['section_title']) ?>
+                    </h2>
                 </div>
             </div>
 
