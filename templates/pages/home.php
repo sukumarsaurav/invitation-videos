@@ -258,12 +258,12 @@ $isHomePage = true;  // For floating help button display
                 <a href="/templates?category=<?= $cat['slug'] ?>" class="group flex flex-col items-center">
                     <!-- Image/Icon Container - No card, just the image box -->
                     <div
-                        class="w-20 h-20 rounded-2xl <?= $cat['bg'] ?> flex items-center justify-center mb-2 group-hover:scale-105 transition-transform overflow-hidden border border-slate-200 dark:border-slate-700">
+                        class="w-40 h-40 rounded-2xl <?= $cat['bg'] ?> flex items-center justify-center mb-2 group-hover:scale-105 transition-transform overflow-hidden border border-slate-200 dark:border-slate-700">
                         <?php if ($showImages && !empty($cat['image_url'])): ?>
                             <img src="<?= htmlspecialchars($cat['image_url']) ?>" alt="<?= htmlspecialchars($cat['name']) ?>"
                                 class="w-full h-full object-cover">
                         <?php else: ?>
-                            <span class="material-symbols-outlined text-3xl"
+                            <span class="material-symbols-outlined text-6xl"
                                 style="color: <?= htmlspecialchars($cat['color']) ?>"><?= $cat['icon'] ?></span>
                         <?php endif; ?>
                     </div>
