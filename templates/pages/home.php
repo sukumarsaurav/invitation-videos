@@ -322,7 +322,7 @@ if (!empty($homepageSections)):
         ?>
 
         <!-- CMS Section: <?= Security::escape($section['section_title']) ?> -->
-        <section class="relative overflow-visible">
+        <section class="relative overflow-hidden sm:overflow-visible">
             <!-- Header Banner -->
             <div class="section-banner relative" style="background-color: <?= Security::escape($section['banner_bg_color']) ?>;
                         --height-xs: <?= Security::escape($bannerHeights['xs'] ?? '80px') ?>;
