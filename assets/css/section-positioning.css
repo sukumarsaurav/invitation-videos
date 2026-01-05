@@ -23,8 +23,8 @@
    ===================================================== */
 .section-banner {
     position: relative;
-    overflow: hidden;
-    /* Prevent horizontal overflow on mobile */
+    overflow: visible;
+    /* Allow image overflow on all screen sizes */
 
     /* Default heights - overridden by inline CSS variables */
     --height-xs: 80px;
@@ -32,13 +32,6 @@
     --height-md: 120px;
     --height-lg: 140px;
     --height-xl: 160px;
-}
-
-/* Allow overflow only on larger screens where it's controlled */
-@media (min-width: 769px) {
-    .section-banner {
-        overflow: visible;
-    }
 }
 
 /* Responsive banner heights */
@@ -113,16 +106,14 @@
     display: flex;
     align-items: flex-end;
     justify-content: flex-end;
-    overflow: hidden;
+    overflow: visible;
     height: auto;
     max-height: none;
 }
 
-/* Only allow overflow on larger screens */
-@media (min-width: 769px) {
-    .section-image.allow-overflow {
-        overflow: visible;
-    }
+/* Allow overflow on all screen sizes when class is present */
+.section-image.allow-overflow {
+    overflow: visible;
 }
 
 .section-image img {
