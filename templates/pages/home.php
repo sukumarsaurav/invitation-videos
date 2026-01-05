@@ -252,23 +252,24 @@ $isHomePage = true;  // For floating help button display
             </div>
         </div>
 
-        <!-- Desktop: Grid layout (>= 768px) -->
-        <div class="hidden sm:grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <!-- Desktop: Grid layout (>= 768px) - Clean design with larger icons -->
+        <div class="hidden sm:grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
             <?php foreach ($allCategories as $cat): ?>
-                <a href="/templates?category=<?= $cat['slug'] ?>"
-                    class="group flex flex-col items-center p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:shadow-lg hover:border-primary/30 transition-all">
+                <a href="/templates?category=<?= $cat['slug'] ?>" class="group flex flex-col items-center">
+                    <!-- Image/Icon Container - No card, just the image box -->
                     <div
-                        class="w-14 h-14 rounded-xl <?= $cat['bg'] ?> flex items-center justify-center mb-3 group-hover:scale-110 transition-transform overflow-hidden">
+                        class="w-20 h-20 rounded-2xl <?= $cat['bg'] ?> flex items-center justify-center mb-2 group-hover:scale-105 transition-transform overflow-hidden border border-slate-200 dark:border-slate-700">
                         <?php if ($showImages && !empty($cat['image_url'])): ?>
                             <img src="<?= htmlspecialchars($cat['image_url']) ?>" alt="<?= htmlspecialchars($cat['name']) ?>"
                                 class="w-full h-full object-cover">
                         <?php else: ?>
-                            <span class="material-symbols-outlined text-2xl"
+                            <span class="material-symbols-outlined text-3xl"
                                 style="color: <?= htmlspecialchars($cat['color']) ?>"><?= $cat['icon'] ?></span>
                         <?php endif; ?>
                     </div>
+                    <!-- Category Name - Outside, below image -->
                     <span
-                        class="font-semibold text-sm text-slate-900 dark:text-white text-center"><?= $cat['name'] ?></span>
+                        class="font-medium text-sm text-slate-700 dark:text-slate-300 text-center group-hover:text-primary transition-colors"><?= $cat['name'] ?></span>
                 </a>
             <?php endforeach; ?>
         </div>
