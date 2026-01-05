@@ -406,16 +406,28 @@ if (!empty($homepageSections)):
                             <!-- See All Card -->
                             <div class="carousel-item">
                                 <a href="/templates<?= !empty($section['category_slug']) ? '?category=' . Security::escape($section['category_slug']) : '' ?>"
-                                    class="group flex flex-col items-center justify-center bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200/50 hover:border-primary/30 aspect-[4/5]">
+                                    class="group block bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200/50 hover:border-primary/30">
+                                    <!-- Icon Area (same as template image area) -->
                                     <div
-                                        class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
-                                        <span class="material-symbols-outlined text-3xl text-primary">grid_view</span>
+                                        class="relative aspect-[4/5] overflow-hidden bg-slate-50 dark:bg-slate-800 flex items-center justify-center">
+                                        <div class="text-center">
+                                            <div
+                                                class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3 group-hover:bg-primary/20 transition-colors">
+                                                <span class="material-symbols-outlined text-3xl text-primary">grid_view</span>
+                                            </div>
+                                            <p
+                                                class="font-bold text-slate-900 dark:text-white text-sm sm:text-base group-hover:text-primary transition-colors">
+                                                See All</p>
+                                        </div>
                                     </div>
-                                    <p
-                                        class="font-bold text-slate-900 dark:text-white text-sm sm:text-base group-hover:text-primary transition-colors">
-                                        See All</p>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                        <?= Security::escape($section['section_title']) ?></p>
+                                    <!-- Content (same as template content area) -->
+                                    <div class="p-4">
+                                        <h3
+                                            class="font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors truncate text-sm sm:text-base">
+                                            <?= Security::escape($section['section_title']) ?>
+                                        </h3>
+                                        <p class="text-sm text-slate-500">View all templates</p>
+                                    </div>
                                 </a>
                             </div>
                         </div>
