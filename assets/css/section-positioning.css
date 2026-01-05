@@ -115,8 +115,8 @@
 }
 
 /* Fade In */
-.animate-on-scroll.fade-in {
-    /* Just opacity change, handled by .visible */
+.animate-on-scroll.fade-in.visible {
+    opacity: 1;
 }
 
 /* Slide Left (starts from left, slides to position) */
@@ -125,7 +125,7 @@
 }
 
 .animate-on-scroll.slide-left.visible {
-    /* Transform will be set by JS, just remove the offset */
+    transform: translateX(0);
 }
 
 /* Slide Right (starts from right, slides to position) */
@@ -134,7 +134,7 @@
 }
 
 .animate-on-scroll.slide-right.visible {
-    /* Transform will be set by JS */
+    transform: translateX(0);
 }
 
 /* Slide Up (starts from bottom, slides up) */
@@ -143,7 +143,7 @@
 }
 
 .animate-on-scroll.slide-up.visible {
-    /* Transform will be set by JS */
+    transform: translateY(0);
 }
 
 /* Scale In (starts smaller, scales to position) */
@@ -152,7 +152,7 @@
 }
 
 .animate-on-scroll.scale-in.visible {
-    /* Transform will be set by JS */
+    transform: scale(1);
 }
 
 /* =====================================================
