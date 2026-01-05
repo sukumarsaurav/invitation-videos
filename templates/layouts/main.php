@@ -1134,12 +1134,19 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
                             class="text-[10px] font-medium <?= !($currentCategory ?? null) ? 'text-primary' : 'text-slate-700 dark:text-slate-300' ?> text-center leading-tight">All</span>
                     </a>
                     <!-- Category Icons -->
-                    <?php foreach ($galleryCategories as $slug => $cat): ?>
+                    <?php
+                    $showGalleryImages = ($categoryDisplayMode ?? 'icon') === 'image' || ($categoryDisplayMode ?? 'icon') === 'both';
+                    foreach ($galleryCategories as $slug => $cat): ?>
                         <a href="/templates?category=<?= $slug ?>" class="flex flex-col items-center flex-shrink-0">
                             <div
-                                class="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-1 <?= ($currentCategory ?? null) === $slug ? 'border-2 border-primary' : 'border-2 border-transparent' ?>">
-                                <span
-                                    class="material-symbols-outlined text-2xl text-slate-600 dark:text-slate-300"><?= $cat['icon'] ?></span>
+                                class="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-1 overflow-hidden <?= ($currentCategory ?? null) === $slug ? 'border-2 border-primary' : 'border-2 border-transparent' ?>">
+                                <?php if ($showGalleryImages && !empty($cat['image_url'])): ?>
+                                    <img src="<?= htmlspecialchars($cat['image_url']) ?>"
+                                        alt="<?= htmlspecialchars($cat['name']) ?>" class="w-full h-full object-cover">
+                                <?php else: ?>
+                                    <span
+                                        class="material-symbols-outlined text-2xl text-slate-600 dark:text-slate-300"><?= $cat['icon'] ?></span>
+                                <?php endif; ?>
                             </div>
                             <span
                                 class="text-[10px] font-medium <?= ($currentCategory ?? null) === $slug ? 'text-primary' : 'text-slate-700 dark:text-slate-300' ?> text-center leading-tight"><?= $cat['name'] ?></span>
