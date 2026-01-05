@@ -127,8 +127,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_FILES['category_image'],
                     $uploadDir,
                     'cat_' . $categoryId . '_',
-                    200,
-                    200,
+                    160,
+                    160,
                     90
                 );
                 if ($result['success']) {
