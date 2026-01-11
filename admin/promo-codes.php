@@ -137,13 +137,12 @@ $pageTitle = $action === 'new' ? 'New Promo Code' : ($action === 'edit' ? 'Edit 
                                 <?php if ($code['discount_type'] === 'percentage'): ?>
                                     <?= number_format($code['discount_value'], 0) ?>%
                                 <?php else: ?>
-                                    $<?= number_format($code['discount_value'], 2) ?> /
-                                    ₹<?= number_format($code['discount_value'] * 83, 0) ?>
+                                    ₹<?= number_format($code['discount_value'], 0) ?>
                                 <?php endif; ?>
                             </td>
                             <td class="px-6 py-4">
                                 <?php if ($code['min_order_amount'] > 0): ?>
-                                    $<?= number_format($code['min_order_amount'], 2) ?>
+                                    ₹<?= number_format($code['min_order_amount'], 0) ?>
                                 <?php else: ?>
                                     <span class="text-slate-400">None</span>
                                 <?php endif; ?>
@@ -284,7 +283,7 @@ $pageTitle = $action === 'new' ? 'New Promo Code' : ($action === 'edit' ? 'Edit 
 
             <!-- Min Order -->
             <label class="flex flex-col gap-2">
-                <span class="text-sm font-medium">Minimum Order Amount (USD)</span>
+                <span class="text-sm font-medium">Minimum Order Amount (INR)</span>
                 <input type="number" name="min_order_amount" step="0.01" min="0"
                     class="h-11 px-4 rounded-lg border border-slate-200 bg-slate-50"
                     value="<?= $promo['min_order_amount'] ?? 0 ?>" placeholder="0">

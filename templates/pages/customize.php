@@ -378,7 +378,7 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                 <div class="flex items-baseline gap-3">
                     <span class="text-3xl font-black text-primary template-price" data-usd="<?= $template['price_usd'] ?>"
                         data-inr="<?= $template['price_inr'] ?? 0 ?>">
-                        $<?= number_format($template['price_usd'], 0) ?>
+                        ₹<?= number_format($template['price_inr'] ?? 0, 0) ?>
                     </span>
                 </div>
 
@@ -482,7 +482,7 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                                     <p class="text-white/80 text-xs template-price"
                                         data-usd="<?= !empty($related['discounted_price_usd']) ? $related['discounted_price_usd'] : $related['price_usd'] ?>"
                                         data-inr="<?= !empty($related['discounted_price_inr']) ? $related['discounted_price_inr'] : ($related['price_inr'] ?? 0) ?>">
-                                        $<?= number_format(!empty($related['discounted_price_usd']) ? $related['discounted_price_usd'] : $related['price_usd'], 0) ?>
+                                        ₹<?= number_format(!empty($related['discounted_price_inr']) ? $related['discounted_price_inr'] : ($related['price_inr'] ?? 0), 0) ?>
                                     </p>
                                 </div>
                                 <div
@@ -504,7 +504,7 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                     <p class="text-xs text-slate-500">Starting at</p>
                     <p class="text-lg font-black text-slate-900 dark:text-white template-price"
                         data-usd="<?= $template['price_usd'] ?>" data-inr="<?= $template['price_inr'] ?? 0 ?>">
-                        $<?= number_format($template['price_usd'], 0) ?>
+                        ₹<?= number_format($template['price_inr'] ?? 0, 0) ?>
                     </p>
                 </div>
                 <a href="/template/<?= Security::escape($templateSlug) ?>?step=<?= $availableSteps[0] ?? 1 ?>"
@@ -634,22 +634,21 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
             tzField.value = Intl.DateTimeFormat().resolvedOptions().timeZone;
         }
 
-        // Currency detection (timezone-based) - same as gallery
+        // Currency detection (timezone-based) - INR is default, USD only for non-Indian users
         const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        const isIndianUser = userTimezone.includes('Kolkata') || userTimezone.includes('Calcutta');
+        const isIndianUser = userTimezone.includes('Kolkata') || userTimezone.includes('Calcutta') || userTimezone.includes('Asia/');
         const userCurrency = isIndianUser ? 'INR' : 'USD';
 
-        // Update prices based on detected currency
+        // Update prices based on detected currency (only change if USD)
         document.querySelectorAll('.template-price').forEach(el => {
             const usd = parseFloat(el.dataset.usd) || 0;
             const inr = parseFloat(el.dataset.inr) || 0;
             if (usd === 0) return; // Skip free items
 
-            if (userCurrency === 'INR' && inr > 0) {
-                el.textContent = '₹' + inr.toLocaleString('en-IN');
-            } else {
+            if (userCurrency === 'USD' && usd > 0) {
                 el.textContent = '$' + Math.round(usd);
             }
+            // INR is already shown by default in the HTML
         });
     });
 

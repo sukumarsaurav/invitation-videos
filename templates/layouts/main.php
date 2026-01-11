@@ -861,17 +861,137 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
                             </div>
                         </div>
 
-                        <!-- Birthday Direct Link -->
-                        <a href="/templates?category=birthday"
-                            class="text-sm font-medium text-slate-700 hover:text-primary transition-colors">
-                            Birthday
-                        </a>
+                        <!-- Birthday Mega Menu Dropdown -->
+                        <div class="relative group" id="birthday-mega-menu">
+                            <button
+                                class="flex items-center gap-1 text-sm font-medium text-slate-700 hover:text-primary transition-colors py-3">
+                                Birthday
+                                <span
+                                    class="material-symbols-outlined text-base transition-transform group-hover:rotate-180">expand_more</span>
+                            </button>
+                            <div class="absolute left-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50"
+                                style="width: 280px;">
+                                <div
+                                    class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 p-4 max-h-[400px] overflow-y-auto">
+                                    <ul class="space-y-1">
+                                        <li>
+                                            <a href="/templates?party=kids-birthday"
+                                                class="block py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
+                                                Kids Birthday
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/templates?party=first-birthday"
+                                                class="block py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
+                                                First Birthday
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/templates?party=adult-birthday"
+                                                class="block py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
+                                                Adult Birthday
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/templates?party=sweet-16"
+                                                class="block py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
+                                                Sweet 16
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/templates?party=baby-shower"
+                                                class="block py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
+                                                Baby Shower
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/templates?party=graduation"
+                                                class="block py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
+                                                Graduation
+                                            </a>
+                                        </li>
+                                    </ul>
+                                    <div class="border-t border-slate-100 dark:border-slate-800 mt-3 pt-3">
+                                        <a href="/templates?category=birthday"
+                                            class="block py-2 px-3 text-sm text-primary font-medium hover:bg-primary/5 rounded-lg transition-colors">
+                                            View All Birthday Templates →
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                        <!-- Party Direct Link -->
-                        <a href="/templates?category=parties"
-                            class="text-sm font-medium text-slate-700 hover:text-primary transition-colors">
-                            Party
-                        </a>
+                        <!-- Party Mega Menu Dropdown -->
+                        <div class="relative group" id="party-mega-menu">
+                            <button
+                                class="flex items-center gap-1 text-sm font-medium text-slate-700 hover:text-primary transition-colors py-3">
+                                Party
+                                <span
+                                    class="material-symbols-outlined text-base transition-transform group-hover:rotate-180">expand_more</span>
+                            </button>
+                            <div class="absolute left-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50"
+                                style="width: 280px;">
+                                <div
+                                    class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 p-4 max-h-[400px] overflow-y-auto">
+                                    <ul class="space-y-1">
+                                        <li>
+                                            <a href="/templates?party=cocktail-party"
+                                                class="block py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
+                                                Cocktail Party
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/templates?party=dinner-party"
+                                                class="block py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
+                                                Dinner Party
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/templates?party=pool-party"
+                                                class="block py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
+                                                Pool Party
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/templates?party=bachelor-party"
+                                                class="block py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
+                                                Bachelor / Bachelorette
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/templates?party=retirement-party"
+                                                class="block py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
+                                                Retirement Party
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/templates?party=housewarming"
+                                                class="block py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
+                                                Housewarming
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/templates?party=kitty-party"
+                                                class="block py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
+                                                Kitty Party
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/templates?party=new-year"
+                                                class="block py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
+                                                New Year
+                                            </a>
+                                        </li>
+                                    </ul>
+                                    <div class="border-t border-slate-100 dark:border-slate-800 mt-3 pt-3">
+                                        <a href="/templates?category=parties"
+                                            class="block py-2 px-3 text-sm text-primary font-medium hover:bg-primary/5 rounded-lg transition-colors">
+                                            View All Party Templates →
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                         <!-- Pooja & Rituals Dropdown -->
                         <div class="relative group" id="puja-mega-menu">
@@ -1157,14 +1277,73 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
                 class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
                 Wedding
             </a>
-            <a href="/templates?category=birthday"
-                class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
-                Birthday
-            </a>
-            <a href="/templates?category=parties"
-                class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
-                Party
-            </a>
+            
+            <!-- Birthday Expandable Section -->
+            <div x-data="{ open: false }">
+                <button @click="open = !open"
+                    class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                    <span>Birthday</span>
+                    <span class="material-symbols-outlined text-base transition-transform" :class="open ? 'rotate-180' : ''">expand_more</span>
+                </button>
+                <div x-show="open" x-collapse class="ml-4 space-y-1 mt-1">
+                    <a href="/templates?party=kids-birthday"
+                        class="block px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm transition-colors">
+                        Kids Birthday
+                    </a>
+                    <a href="/templates?party=first-birthday"
+                        class="block px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm transition-colors">
+                        First Birthday
+                    </a>
+                    <a href="/templates?party=adult-birthday"
+                        class="block px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm transition-colors">
+                        Adult Birthday
+                    </a>
+                    <a href="/templates?party=baby-shower"
+                        class="block px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm transition-colors">
+                        Baby Shower
+                    </a>
+                    <a href="/templates?category=birthday"
+                        class="block px-4 py-2 rounded-lg text-primary font-medium text-sm transition-colors">
+                        View All →
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Party Expandable Section -->
+            <div x-data="{ open: false }">
+                <button @click="open = !open"
+                    class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                    <span>Party</span>
+                    <span class="material-symbols-outlined text-base transition-transform" :class="open ? 'rotate-180' : ''">expand_more</span>
+                </button>
+                <div x-show="open" x-collapse class="ml-4 space-y-1 mt-1">
+                    <a href="/templates?party=cocktail-party"
+                        class="block px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm transition-colors">
+                        Cocktail Party
+                    </a>
+                    <a href="/templates?party=dinner-party"
+                        class="block px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm transition-colors">
+                        Dinner Party
+                    </a>
+                    <a href="/templates?party=pool-party"
+                        class="block px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm transition-colors">
+                        Pool Party
+                    </a>
+                    <a href="/templates?party=housewarming"
+                        class="block px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm transition-colors">
+                        Housewarming
+                    </a>
+                    <a href="/templates?party=new-year"
+                        class="block px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm transition-colors">
+                        New Year
+                    </a>
+                    <a href="/templates?category=parties"
+                        class="block px-4 py-2 rounded-lg text-primary font-medium text-sm transition-colors">
+                        View All →
+                    </a>
+                </div>
+            </div>
+            
             <a href="/templates?category=religious"
                 class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
                 Pooja & Rituals

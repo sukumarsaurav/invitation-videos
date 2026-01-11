@@ -229,11 +229,11 @@ if ($category && isset($categoryTitles[$category])) {
                             <a href="/templates?category=<?= $key ?>"
                                 class="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium <?= $category === $key ? 'text-primary bg-primary/5 font-bold' : 'text-slate-600 hover:text-primary' ?> rounded-lg">
                                 <?php if ($showCategoryImages && !empty($cat['image_url'])): ?>
-                                    <img src="<?= htmlspecialchars($cat['image_url']) ?>" 
-                                         alt="<?= htmlspecialchars($cat['name']) ?>" 
-                                         class="w-6 h-6 rounded object-cover">
+                                    <img src="<?= htmlspecialchars($cat['image_url']) ?>"
+                                        alt="<?= htmlspecialchars($cat['name']) ?>" class="w-6 h-6 rounded object-cover">
                                 <?php else: ?>
-                                    <span class="material-symbols-outlined text-lg <?= $cat['color'] ?>"><?= $cat['icon'] ?></span>
+                                    <span
+                                        class="material-symbols-outlined text-lg <?= $cat['color'] ?>"><?= $cat['icon'] ?></span>
                                 <?php endif; ?>
                                 <?= $cat['name'] ?>
                             </a>
@@ -523,23 +523,22 @@ if ($category && isset($categoryTitles[$category])) {
     let selectedTradition = '<?= $tradition ?? '' ?>';
     let currentSort = '<?= $sort ?>';
 
-    // Currency detection (timezone-based)
+    // Currency detection (timezone-based) - INR is default
     const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const isIndianUser = userTimezone.includes('Kolkata') || userTimezone.includes('Calcutta');
+    const isIndianUser = userTimezone.includes('Kolkata') || userTimezone.includes('Calcutta') || userTimezone.includes('Asia/');
     const userCurrency = isIndianUser ? 'INR' : 'USD';
 
-    // Update prices based on detected currency
+    // Update prices based on detected currency (only change if USD user)
     function updatePriceDisplay() {
         document.querySelectorAll('.template-price').forEach(el => {
             const usd = parseFloat(el.dataset.usd) || 0;
             const inr = parseFloat(el.dataset.inr) || 0;
             if (usd === 0) return; // Skip free items
 
-            if (userCurrency === 'INR') {
-                el.textContent = '₹' + inr.toLocaleString('en-IN');
-            } else {
+            if (userCurrency === 'USD' && usd > 0) {
                 el.textContent = '$' + Math.round(usd);
             }
+            // INR is already shown by default in the HTML
         });
     }
 
@@ -663,7 +662,7 @@ if ($category && isset($categoryTitles[$category])) {
         const priceClass = isFree ? 'text-green-600' : 'text-slate-700 dark:text-slate-300';
         const priceInr = Math.round(template.price_inr || 0);
         const priceUsd = Math.round(template.price_usd || 0);
-        const priceText = isFree ? 'Free' : (userCurrency === 'INR' ? '₹' + priceInr.toLocaleString('en-IN') : '$' + priceUsd);
+        const priceText = isFree ? 'Free' : (userCurrency === 'USD' ? '$' + priceUsd : '₹' + priceInr.toLocaleString('en-IN'));
 
         let badge = '';
         if (template.is_premium) {

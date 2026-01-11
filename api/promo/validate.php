@@ -90,10 +90,10 @@ $discountAmount = 0;
 if ($promo['discount_type'] === 'percentage') {
     $discountAmount = $originalAmount * ($promo['discount_value'] / 100);
 } else {
-    // Fixed discount - convert if needed
+    // Fixed discount - stored in INR, convert if USD order
     $discountAmount = floatval($promo['discount_value']);
-    if ($order['currency'] === 'INR') {
-        $discountAmount = $promo['discount_value'] * 83; // Approximate USD to INR
+    if ($order['currency'] === 'USD') {
+        $discountAmount = $promo['discount_value'] / 83; // INR to USD conversion
     }
 }
 
