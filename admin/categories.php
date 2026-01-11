@@ -13,6 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($action === 'save_category') {
         $id = intval($_POST['id'] ?? 0);
+        $parentId = $_POST['parent_id'] ? intval($_POST['parent_id']) : null;
         $name = trim($_POST['name'] ?? '');
         $slug = trim($_POST['slug'] ?? '');
         $icon = trim($_POST['icon'] ?? 'category');
@@ -28,14 +29,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($id > 0) {
             Database::query(
-                "UPDATE categories SET name = ?, slug = ?, icon = ?, color = ?, display_order = ?, is_active = ? WHERE id = ?",
-                [$name, $slug, $icon, $color, $displayOrder, $isActive, $id]
+                "UPDATE categories SET parent_id = ?, name = ?, slug = ?, icon = ?, color = ?, display_order = ?, is_active = ? WHERE id = ?",
+                [$parentId, $name, $slug, $icon, $color, $displayOrder, $isActive, $id]
             );
             header('Location: /admin/categories.php?success=updated');
         } else {
             Database::query(
-                "INSERT INTO categories (name, slug, icon, color, display_order, is_active) VALUES (?, ?, ?, ?, ?, ?)",
-                [$name, $slug, $icon, $color, $displayOrder, $isActive]
+                "INSERT INTO categories (parent_id, name, slug, icon, color, display_order, is_active) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                [$parentId, $name, $slug, $icon, $color, $displayOrder, $isActive]
             );
             header('Location: /admin/categories.php?success=created');
         }
@@ -76,11 +77,17 @@ if ($action === 'edit' && $id > 0) {
 
 // Get all categories with template counts
 $categories = Database::fetchAll(
-    "SELECT c.*, COUNT(t.id) as template_count 
+    "SELECT c.*, p.name as parent_name, COUNT(t.id) as template_count 
      FROM categories c 
+     LEFT JOIN categories p ON p.id = c.parent_id
      LEFT JOIN templates t ON t.category = c.slug
      GROUP BY c.id 
-     ORDER BY c.display_order ASC, c.name ASC"
+     ORDER BY COALESCE(c.parent_id, c.id), c.parent_id IS NOT NULL, c.display_order ASC, c.name ASC"
+);
+
+// Get main categories (parent_id IS NULL) for dropdown
+$mainCategories = Database::fetchAll(
+    "SELECT id, name FROM categories WHERE parent_id IS NULL ORDER BY display_order ASC, name ASC"
 );
 
 $pendingTickets = 0;
@@ -117,6 +124,22 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($category ? 'Edit Cate
                 <input type="text" name="slug" value="<?= Security::escape($category['slug'] ?? '') ?>"
                     class="w-full h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-primary"
                     placeholder="engagement (auto-generated if empty)">
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-2">Parent Category</label>
+                <select name="parent_id"
+                    class="w-full h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-primary bg-white">
+                    <option value="">— Main Category (No Parent) —</option>
+                    <?php foreach ($mainCategories as $main): ?>
+                        <?php if (($category['id'] ?? 0) !== $main['id']): ?>
+                            <option value="<?= $main['id'] ?>" <?= ($category['parent_id'] ?? null) == $main['id'] ? 'selected' : '' ?>>
+                                <?= Security::escape($main['name']) ?>
+                            </option>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </select>
+                <p class="text-xs text-slate-500 mt-1">Select a parent to make this a subcategory</p>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
@@ -211,15 +234,23 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($category ? 'Edit Cate
                 </thead>
                 <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                     <?php foreach ($categories as $cat): ?>
-                        <tr class="hover:bg-slate-50 dark:hover:bg-white/5">
+                        <tr class="hover:bg-slate-50 dark:hover:bg-white/5 <?= $cat['parent_id'] ? 'bg-slate-25' : '' ?>">
                             <td class="px-6 py-4 text-slate-500 font-mono"><?= $cat['display_order'] ?></td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-lg flex items-center justify-center text-white"
+                                    <?php if ($cat['parent_id']): ?>
+                                        <span class="text-slate-300 dark:text-slate-600 mr-2">↳</span>
+                                    <?php endif; ?>
+                                    <div class="w-10 h-10 rounded-lg flex items-center justify-center text-white flex-shrink-0"
                                         style="background-color: <?= Security::escape($cat['color']) ?>">
                                         <span class="material-symbols-outlined"><?= Security::escape($cat['icon']) ?></span>
                                     </div>
-                                    <span class="font-bold"><?= Security::escape($cat['name']) ?></span>
+                                    <div>
+                                        <span class="font-bold block"><?= Security::escape($cat['name']) ?></span>
+                                        <?php if ($cat['parent_name']): ?>
+                                            <span class="text-xs text-slate-400">in <?= Security::escape($cat['parent_name']) ?></span>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-slate-500 font-mono text-xs"><?= Security::escape($cat['slug']) ?></td>

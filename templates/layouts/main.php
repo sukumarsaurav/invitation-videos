@@ -999,15 +999,138 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
                             </div>
                         </div>
 
-                        <!-- Direct Links -->
+                        <!-- Birthday Direct Link -->
                         <a href="/templates?category=birthday"
                             class="text-sm font-medium text-slate-700 hover:text-primary transition-colors">
                             Birthday
                         </a>
-                        <a href="/templates"
+
+                        <!-- Party Direct Link -->
+                        <a href="/templates?category=parties"
                             class="text-sm font-medium text-slate-700 hover:text-primary transition-colors">
-                            All Templates
+                            Party
                         </a>
+
+                        <!-- Pooja & Rituals Dropdown -->
+                        <div class="relative group" id="puja-mega-menu">
+                            <button
+                                class="flex items-center gap-1 text-sm font-medium text-slate-700 hover:text-primary transition-colors py-3">
+                                Pooja & Rituals
+                                <span
+                                    class="material-symbols-outlined text-base transition-transform group-hover:rotate-180">expand_more</span>
+                            </button>
+                            <div class="absolute left-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50"
+                                style="width: 280px;">
+                                <div
+                                    class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 p-4 max-h-[400px] overflow-y-auto">
+                                    <ul class="space-y-1">
+                                        <?php foreach (array_slice($megaMenuPujas, 0, 15) as $item): ?>
+                                            <li>
+                                                <a href="/templates?puja=<?= $item['slug'] ?>"
+                                                    class="flex items-center gap-2 py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
+                                                    <span
+                                                        class="material-symbols-outlined text-lg text-amber-500"><?= $item['icon'] ?></span>
+                                                    <?= Security::escape($item['name']) ?>
+                                                </a>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Festivals Dropdown -->
+                        <div class="relative group" id="festival-mega-menu">
+                            <button
+                                class="flex items-center gap-1 text-sm font-medium text-slate-700 hover:text-primary transition-colors py-3">
+                                Festivals
+                                <span
+                                    class="material-symbols-outlined text-base transition-transform group-hover:rotate-180">expand_more</span>
+                            </button>
+                            <div class="absolute left-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50"
+                                style="width: 280px;">
+                                <div
+                                    class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 p-4 max-h-[400px] overflow-y-auto">
+                                    <ul class="space-y-1">
+                                        <?php foreach (array_slice($megaMenuFestivals, 0, 15) as $item): ?>
+                                            <li>
+                                                <a href="/templates?festival=<?= $item['slug'] ?>"
+                                                    class="flex items-center gap-2 py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
+                                                    <span
+                                                        class="material-symbols-outlined text-lg text-amber-500"><?= $item['icon'] ?></span>
+                                                    <?= Security::escape($item['name']) ?>
+                                                </a>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Miscellaneous Dropdown -->
+                        <div class="relative group" id="misc-mega-menu">
+                            <button
+                                class="flex items-center gap-1 text-sm font-medium text-slate-700 hover:text-primary transition-colors py-3">
+                                Miscellaneous
+                                <span
+                                    class="material-symbols-outlined text-base transition-transform group-hover:rotate-180">expand_more</span>
+                            </button>
+                            <div class="absolute right-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50"
+                                style="width: 280px;">
+                                <div
+                                    class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 p-4">
+                                    <ul class="space-y-1">
+                                        <li>
+                                            <a href="/templates?category=corporate"
+                                                class="flex items-center gap-2 py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
+                                                <span
+                                                    class="material-symbols-outlined text-lg text-blue-500">business</span>
+                                                Corporate
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/templates?category=baby_shower"
+                                                class="flex items-center gap-2 py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
+                                                <span
+                                                    class="material-symbols-outlined text-lg text-teal-500">child_care</span>
+                                                Baby Shower
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/templates?category=anniversary"
+                                                class="flex items-center gap-2 py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
+                                                <span
+                                                    class="material-symbols-outlined text-lg text-pink-500">celebration</span>
+                                                Anniversary
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/templates?category=graduation"
+                                                class="flex items-center gap-2 py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
+                                                <span
+                                                    class="material-symbols-outlined text-lg text-indigo-500">school</span>
+                                                Graduation
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/templates?category=housewarming"
+                                                class="flex items-center gap-2 py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
+                                                <span
+                                                    class="material-symbols-outlined text-lg text-orange-500">home</span>
+                                                Housewarming
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/templates"
+                                                class="flex items-center gap-2 py-2 px-3 text-sm text-primary font-medium hover:bg-primary/5 rounded-lg transition-colors">
+                                                <span class="material-symbols-outlined text-lg">grid_view</span>
+                                                View All Templates
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
                     </nav>
                 </div>
 
@@ -1183,7 +1306,7 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
 
         <!-- Drawer Navigation -->
         <nav class="p-4 space-y-1 overflow-y-auto" style="max-height: calc(100vh - 80px);">
-            <!-- Category Links (No Icons) -->
+            <!-- Category Links matching navbar order -->
             <a href="/templates?category=wedding"
                 class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
                 Wedding
@@ -1192,6 +1315,22 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
                 class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
                 Birthday
             </a>
+            <a href="/templates?category=parties"
+                class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                Party
+            </a>
+            <a href="/templates?category=religious"
+                class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                Pooja & Rituals
+            </a>
+            <a href="/templates?category=holidays"
+                class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                Festivals
+            </a>
+            
+            <!-- Miscellaneous Section -->
+            <div class="border-t border-slate-200 dark:border-slate-700 my-3"></div>
+            <p class="px-4 py-1 text-xs font-bold text-slate-400 uppercase tracking-wide">Miscellaneous</p>
             <a href="/templates?category=corporate"
                 class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
                 Corporate
@@ -1207,10 +1346,6 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
 
             <div class="border-t border-slate-200 dark:border-slate-700 my-3"></div>
 
-            <a href="/templates"
-                class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
-                All Templates
-            </a>
             <a href="/blog"
                 class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
                 Blog

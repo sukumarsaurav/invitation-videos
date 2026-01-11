@@ -12,9 +12,9 @@ $featuredTemplates = Database::fetchAll(
     "SELECT * FROM templates WHERE is_active = 1 ORDER BY purchase_count DESC LIMIT 6"
 );
 
-// Get trending templates (recently popular)
+// Get trending templates (recently popular) - 5 for homepage
 $trendingTemplates = Database::fetchAll(
-    "SELECT * FROM templates WHERE is_active = 1 ORDER BY created_at DESC, purchase_count DESC LIMIT 8"
+    "SELECT * FROM templates WHERE is_active = 1 ORDER BY created_at DESC, purchase_count DESC LIMIT 5"
 );
 
 // Get categories with counts
@@ -195,20 +195,22 @@ $isHomePage = true;  // For floating help button display
             </a>
         </div>
 
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
-            <?php
-            $categoryBadgeColors = [
-                'wedding' => 'bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300',
-                'birthday' => 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300',
-                'baby_shower' => 'bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-300',
-                'corporate' => 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300',
-                'anniversary' => 'bg-pink-100 text-pink-700 dark:bg-pink-900/50 dark:text-pink-300',
-                'parties' => 'bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300',
-                'graduation' => 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300',
-                'religious' => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300',
-            ];
+        <?php
+        $categoryBadgeColors = [
+            'wedding' => 'bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300',
+            'birthday' => 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300',
+            'baby_shower' => 'bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-300',
+            'corporate' => 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300',
+            'anniversary' => 'bg-pink-100 text-pink-700 dark:bg-pink-900/50 dark:text-pink-300',
+            'parties' => 'bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300',
+            'graduation' => 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300',
+            'religious' => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300',
+        ];
+        ?>
 
-            foreach ($trendingTemplates as $index => $template):
+        <!-- Desktop: 5-column grid -->
+        <div class="hidden sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+            <?php foreach ($trendingTemplates as $index => $template):
                 $badgeColor = $categoryBadgeColors[$template['category']] ?? 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300';
                 $isAboveFold = $index < 2;
                 ?>
@@ -235,6 +237,42 @@ $isHomePage = true;  // For floating help button display
                         </h3>
                         <p
                             class="text-sm <?= $template['price_usd'] > 0 ? 'text-primary font-bold' : 'text-green-600 font-bold' ?>">
+                            <?= $template['price_usd'] > 0 ? '₹' . number_format($template['price_inr'], 0) : 'Free' ?>
+                        </p>
+                    </div>
+                </a>
+            <?php endforeach; ?>
+        </div>
+
+        <!-- Mobile: Horizontal scroll (2 visible + scroll for 3 more) -->
+        <div class="sm:hidden flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory -mx-4 px-4"
+            style="-webkit-overflow-scrolling: touch; scrollbar-width: none;">
+            <?php foreach ($trendingTemplates as $index => $template):
+                $badgeColor = $categoryBadgeColors[$template['category']] ?? 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300';
+                $isAboveFold = $index < 2;
+                ?>
+                <a href="/template/<?= Security::escape($template['slug']) ?>"
+                    class="group flex-shrink-0 w-[45%] snap-start bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200 dark:border-slate-700">
+                    <div class="relative aspect-[4/5] overflow-hidden bg-slate-100">
+                        <?= ImageHelper::responsiveThumbnail(
+                            $template['thumbnail_url'] ?? '/assets/images/placeholder.jpg',
+                            $template['title'],
+                            $isAboveFold,
+                            $isAboveFold,
+                            'absolute inset-0 w-full h-full object-cover'
+                        ) ?>
+                        <div class="absolute top-2 left-2">
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold <?= $badgeColor ?>">
+                                <?= ucfirst(str_replace('_', ' ', $template['category'])) ?>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <h3 class="font-bold text-sm text-slate-900 dark:text-white truncate">
+                            <?= Security::escape($template['title']) ?>
+                        </h3>
+                        <p
+                            class="text-xs <?= $template['price_usd'] > 0 ? 'text-primary font-bold' : 'text-green-600 font-bold' ?>">
                             <?= $template['price_usd'] > 0 ? '₹' . number_format($template['price_inr'], 0) : 'Free' ?>
                         </p>
                     </div>
@@ -686,6 +724,122 @@ $isHomePage = true;  // For floating help button display
         </div>
     </section>
 <?php endif; ?>
+
+<!-- Mobile Bottom Tab Bar (Homepage Only) -->
+<div
+    class="fixed bottom-0 left-0 right-0 z-40 sm:hidden bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 shadow-lg">
+    <div class="flex justify-around items-center py-2">
+        <!-- Home Tab (Active) -->
+        <a href="/" class="flex flex-col items-center gap-0.5 px-4 py-1 text-primary">
+            <span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">home</span>
+            <span class="text-[10px] font-medium">Home</span>
+        </a>
+        <!-- Category Tab -->
+        <button onclick="openHomeCategorySheet()" class="flex flex-col items-center gap-0.5 px-4 py-1 text-slate-500">
+            <span class="material-symbols-outlined text-xl">category</span>
+            <span class="text-[10px] font-medium">Category</span>
+        </button>
+        <!-- Wishlist Tab -->
+        <a href="/wishlist" class="flex flex-col items-center gap-0.5 px-4 py-1 text-slate-500">
+            <span class="material-symbols-outlined text-xl">favorite_border</span>
+            <span class="text-[10px] font-medium">Wishlist</span>
+        </a>
+        <!-- Profile Tab -->
+        <a href="<?= isset($_SESSION['user_id']) ? '/profile' : '/login' ?>"
+            class="flex flex-col items-center gap-0.5 px-4 py-1 text-slate-500">
+            <span class="material-symbols-outlined text-xl">person</span>
+            <span class="text-[10px] font-medium">Profile</span>
+        </a>
+    </div>
+</div>
+
+<!-- Category Bottom Sheet Backdrop -->
+<div id="homeCategoryBackdrop" onclick="closeHomeCategorySheet()"
+    class="fixed inset-0 bg-black/50 z-[100] opacity-0 pointer-events-none transition-opacity duration-300 sm:hidden">
+</div>
+
+<!-- Category Bottom Sheet -->
+<div id="homeCategorySheet"
+    class="fixed bottom-0 left-0 right-0 z-[110] bg-white dark:bg-slate-900 rounded-t-3xl transform translate-y-full transition-transform duration-300 ease-out max-h-[75vh] overflow-hidden flex flex-col sm:hidden">
+    <!-- Handle -->
+    <div class="flex justify-center pt-3 pb-2">
+        <div class="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></div>
+    </div>
+
+    <!-- Header -->
+    <div class="flex items-center justify-between px-5 pb-4 border-b border-slate-200 dark:border-slate-700">
+        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Browse Categories</h3>
+        <button onclick="closeHomeCategorySheet()"
+            class="p-2 -mr-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+    </div>
+
+    <!-- Two Column Layout: Categories | Subcategories -->
+    <div class="flex-1 flex overflow-hidden">
+        <!-- Left Column: Main Categories -->
+        <div
+            class="w-2/5 border-r border-slate-200 dark:border-slate-700 overflow-y-auto bg-slate-50 dark:bg-slate-800/50">
+            <?php foreach ($homepageCategories as $index => $cat): ?>
+                <button onclick="selectHomeCategory('<?= $cat['slug'] ?>', this)"
+                    class="home-cat-btn w-full flex items-center gap-2 px-4 py-3 text-left text-sm font-medium transition-colors <?= $index === 0 ? 'bg-white dark:bg-slate-900 text-primary border-l-2 border-primary' : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800' ?>">
+                    <img src="<?= htmlspecialchars($cat['image']) ?>" alt="<?= htmlspecialchars($cat['name']) ?>"
+                        class="w-8 h-8 rounded-lg object-cover">
+                    <?= $cat['name'] ?>
+                </button>
+            <?php endforeach; ?>
+        </div>
+
+        <!-- Right Column: Subcategories (populated by JS or static) -->
+        <div class="w-3/5 overflow-y-auto p-4" id="homeSubcategoriesContainer">
+            <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Select a category to see subcategories</p>
+            <!-- Default: All templates link -->
+            <a href="/templates"
+                class="flex items-center gap-2 p-3 rounded-lg bg-primary/5 text-primary font-medium mb-2">
+                <span class="material-symbols-outlined text-lg">grid_view</span>
+                View All Templates
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Add padding at bottom for mobile tab bar -->
+<div class="h-16 sm:hidden"></div>
+
+<script>
+    // Homepage Category Sheet Functions
+    function openHomeCategorySheet() {
+        document.getElementById('homeCategoryBackdrop').classList.remove('opacity-0', 'pointer-events-none');
+        document.getElementById('homeCategorySheet').classList.remove('translate-y-full');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeHomeCategorySheet() {
+        document.getElementById('homeCategoryBackdrop').classList.add('opacity-0', 'pointer-events-none');
+        document.getElementById('homeCategorySheet').classList.add('translate-y-full');
+        document.body.style.overflow = '';
+    }
+
+    function selectHomeCategory(slug, btn) {
+        // Update active state
+        document.querySelectorAll('.home-cat-btn').forEach(b => {
+            b.classList.remove('bg-white', 'dark:bg-slate-900', 'text-primary', 'border-l-2', 'border-primary');
+            b.classList.add('text-slate-600', 'dark:text-slate-300');
+        });
+        btn.classList.remove('text-slate-600', 'dark:text-slate-300');
+        btn.classList.add('bg-white', 'dark:bg-slate-900', 'text-primary', 'border-l-2', 'border-primary');
+
+        // Navigate to category page
+        const container = document.getElementById('homeSubcategoriesContainer');
+        container.innerHTML = `
+        <a href="/templates?category=${slug}" class="flex items-center gap-2 p-3 rounded-lg bg-primary text-white font-medium mb-3">
+            <span class="material-symbols-outlined text-lg">grid_view</span>
+            View All ${btn.textContent.trim()} Templates
+        </a>
+        <p class="text-xs text-slate-400 text-center">More subcategories coming soon</p>
+    `;
+    }
+</script>
 
 <?php
 $content = ob_get_clean();
