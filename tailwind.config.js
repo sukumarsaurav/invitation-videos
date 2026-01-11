@@ -9,11 +9,25 @@ module.exports = {
     theme: {
         extend: {
             colors: {
-                "primary": "#7f13ec",
-                "background-light": "#f7f6f8",
-                "background-dark": "#191022",
+                // Primary Color - Used for buttons, links, and accents
+                "primary": "#970747",
+                // Text Colors
+                "text-primary": "#b69b5b",      // Main headings and important text
+                "text-secondary": "#404040",    // Body text and descriptions
+                // Background Colors
+                "background-light": "#fdf7f3",  // Light mode background
+                "background-dark": "#2c0914",   // Dark mode background
+                // Header Colors
+                "header-bg": "#2c0914",         // Header background
+                "header-text": "#b69b5b",       // Header links and text
+                "header-hover": "#fdf7f3",      // Header link hover state
+                // Footer Colors
+                "footer-bg": "#2c0914",         // Footer background
+                "footer-text": "#b69b5b",       // Footer links and text
+                "footer-hover": "#fdf7f3",      // Footer link hover state
+                // Legacy aliases for compatibility
                 "surface-light": "#ffffff",
-                "surface-dark": "#251b30",
+                "surface-dark": "#2c0914",
             },
             fontFamily: {
                 "display": ["Plus Jakarta Sans", "sans-serif"],
