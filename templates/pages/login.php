@@ -26,6 +26,10 @@ unset($_SESSION['error']);
 $redirectParam = !empty($_GET['redirect']) ? '?redirect=' . urlencode($_GET['redirect']) : '';
 
 $pageTitle = 'Login';
+
+// Mobile header configuration
+$showBackButton = true;
+$mobilePageTitle = 'Login';
 ?>
 
 <?php ob_start(); ?>

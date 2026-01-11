@@ -775,6 +775,13 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
                             aria-label="Go back">
                             <span class="material-symbols-outlined text-2xl">arrow_back</span>
                         </a>
+                    <?php elseif ($showBackButton ?? false): ?>
+                        <!-- Mobile: Back Arrow (Auth pages) -->
+                        <a href="/"
+                            class="lg:hidden p-2 -ml-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
+                            aria-label="Go back">
+                            <span class="material-symbols-outlined text-2xl">arrow_back</span>
+                        </a>
                     <?php else: ?>
                         <!-- Mobile Menu Button (Left) -->
                         <button onclick="openMobileDrawer()"
@@ -809,6 +816,11 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
                             class="lg:hidden text-sm font-semibold text-slate-900 dark:text-white truncate max-w-[150px] sm:max-w-[200px]">
                             <?= Security::escape($templateTitle ?? '') ?>
                         </span>
+                    <?php elseif ($mobilePageTitle ?? false): ?>
+                        <!-- Mobile: Page title (auth pages) -->
+                        <span class="lg:hidden text-sm font-bold text-slate-900 dark:text-white">
+                            <?= Security::escape($mobilePageTitle) ?>
+                        </span>
                     <?php endif; ?>
 
                     <!-- Desktop Navigation with Mega Menu -->
@@ -822,178 +834,28 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
                                     class="material-symbols-outlined text-base transition-transform group-hover:rotate-180">expand_more</span>
                             </button>
 
-                            <!-- Mega Menu Dropdown -->
+                            <!-- Wedding Dropdown - Function Only -->
                             <div class="absolute left-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50"
-                                style="width: 900px;">
+                                style="width: 280px;">
                                 <div
-                                    class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 p-8">
-                                    <!-- 4 Column Grid -->
-                                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem;">
-
-                                        <!-- Column 1: Style -->
-                                        <div>
-                                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
-                                                Search by Style</h4>
-                                            <ul class="space-y-2">
-                                                <?php foreach ($megaMenuStyles as $item): ?>
-                                                    <li>
-                                                        <a href="/templates?style=<?= $item['slug'] ?>"
-                                                            class="flex items-center gap-2 py-1 text-sm text-slate-600 hover:text-amber-500 transition-colors">
-                                                            <span
-                                                                class="material-symbols-outlined text-lg text-amber-500"><?= $item['icon'] ?></span>
-                                                            <span
-                                                                class="uppercase text-xs tracking-wide"><?= Security::escape($item['name']) ?></span>
-                                                        </a>
-                                                    </li>
-                                                <?php endforeach; ?>
-                                            </ul>
-                                        </div>
-
-                                        <!-- Column 2: Format -->
-                                        <div>
-                                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
-                                                Search by Format</h4>
-                                            <ul class="space-y-2">
-                                                <?php foreach ($megaMenuFormats as $item): ?>
-                                                    <li>
-                                                        <a href="/templates?format=<?= $item['slug'] ?>"
-                                                            class="flex items-center gap-2 py-1 text-sm text-slate-600 hover:text-amber-500 transition-colors">
-                                                            <span class="text-slate-400">▸</span>
-                                                            <span
-                                                                class="uppercase text-xs tracking-wide"><?= Security::escape($item['name']) ?></span>
-                                                        </a>
-                                                    </li>
-                                                <?php endforeach; ?>
-                                            </ul>
-                                        </div>
-
-                                        <!-- Column 3: Religion -->
-                                        <div>
-                                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
-                                                Search by Religion</h4>
-                                            <ul class="space-y-2">
-                                                <?php foreach ($megaMenuReligions as $item): ?>
-                                                    <li>
-                                                        <a href="/templates?religion=<?= $item['slug'] ?>"
-                                                            class="flex items-center gap-2 py-1 text-sm text-slate-600 hover:text-amber-500 transition-colors">
-                                                            <span
-                                                                class="material-symbols-outlined text-lg text-amber-500"><?= $item['icon'] ?></span>
-                                                            <span
-                                                                class="uppercase text-xs tracking-wide"><?= Security::escape($item['name']) ?></span>
-                                                        </a>
-                                                    </li>
-                                                <?php endforeach; ?>
-                                            </ul>
-                                        </div>
-
-                                        <!-- Column 4: Function -->
-                                        <div>
-                                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
-                                                Search by Function</h4>
-                                            <ul class="space-y-2">
-                                                <?php foreach ($megaMenuFunctions as $item): ?>
-                                                    <li>
-                                                        <a href="/templates?function=<?= $item['slug'] ?>"
-                                                            class="flex items-center gap-2 py-1 text-sm text-slate-600 hover:text-amber-500 transition-colors">
-                                                            <span class="text-slate-400">▸</span>
-                                                            <span
-                                                                class="uppercase text-xs tracking-wide"><?= Security::escape($item['name']) ?></span>
-                                                        </a>
-                                                    </li>
-                                                <?php endforeach; ?>
-                                            </ul>
-                                        </div>
-
-                                    </div>
-
-                                    <!-- Footer with View All -->
-                                    <div
-                                        class="border-t border-slate-100 dark:border-slate-800 mt-6 pt-4 flex justify-between items-center">
-                                        <div>
-                                            <span class="text-sm font-semibold text-slate-900">All Categories</span>
-                                            <p class="text-xs text-slate-400">Browse templates for any event</p>
-                                        </div>
+                                    class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 p-4 max-h-[400px] overflow-y-auto">
+                                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
+                                        Wedding Functions</h4>
+                                    <ul class="space-y-1">
+                                        <?php foreach ($megaMenuFunctions as $item): ?>
+                                            <li>
+                                                <a href="/templates?function=<?= $item['slug'] ?>"
+                                                    class="block py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
+                                                    <?= Security::escape($item['name']) ?>
+                                                </a>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                    <div class="border-t border-slate-100 dark:border-slate-800 mt-3 pt-3">
                                         <a href="/templates?category=wedding"
-                                            class="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline">
-                                            View Full Catalog
-                                            <span class="material-symbols-outlined text-base">arrow_forward</span>
+                                            class="block py-2 px-3 text-sm text-primary font-medium hover:bg-primary/5 rounded-lg transition-colors">
+                                            View All Wedding Templates →
                                         </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Other Categories Dropdown -->
-                        <div class="relative group" id="occasions-mega-menu">
-                            <button
-                                class="flex items-center gap-1 text-sm font-medium text-slate-700 hover:text-primary transition-colors py-3">
-                                Occasions
-                                <span
-                                    class="material-symbols-outlined text-base transition-transform group-hover:rotate-180">expand_more</span>
-                            </button>
-
-                            <!-- Mega Menu Dropdown -->
-                            <div class="absolute left-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50"
-                                style="width: 700px;">
-                                <div
-                                    class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 p-8">
-                                    <!-- 3 Column Grid -->
-                                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;">
-
-                                        <!-- Column 1: Party Types -->
-                                        <div>
-                                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
-                                                Party Types</h4>
-                                            <ul class="space-y-2">
-                                                <?php foreach (array_slice($megaMenuPartyTypes, 0, 12) as $item): ?>
-                                                    <li>
-                                                        <a href="/templates?party=<?= $item['slug'] ?>"
-                                                            class="flex items-center gap-2 py-1 text-sm text-slate-600 hover:text-amber-500 transition-colors">
-                                                            <span class="text-slate-400">▸</span>
-                                                            <span
-                                                                class="uppercase text-xs tracking-wide"><?= Security::escape($item['name']) ?></span>
-                                                        </a>
-                                                    </li>
-                                                <?php endforeach; ?>
-                                            </ul>
-                                        </div>
-
-                                        <!-- Column 2: Puja & Rituals -->
-                                        <div>
-                                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
-                                                Puja & Rituals</h4>
-                                            <ul class="space-y-2">
-                                                <?php foreach (array_slice($megaMenuPujas, 0, 12) as $item): ?>
-                                                    <li>
-                                                        <a href="/templates?puja=<?= $item['slug'] ?>"
-                                                            class="flex items-center gap-2 py-1 text-sm text-slate-600 hover:text-amber-500 transition-colors">
-                                                            <span class="text-slate-400">▸</span>
-                                                            <span
-                                                                class="uppercase text-xs tracking-wide"><?= Security::escape($item['name']) ?></span>
-                                                        </a>
-                                                    </li>
-                                                <?php endforeach; ?>
-                                            </ul>
-                                        </div>
-
-                                        <!-- Column 3: Festivals -->
-                                        <div>
-                                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
-                                                Festivals</h4>
-                                            <ul class="space-y-2">
-                                                <?php foreach (array_slice($megaMenuFestivals, 0, 12) as $item): ?>
-                                                    <li>
-                                                        <a href="/templates?festival=<?= $item['slug'] ?>"
-                                                            class="flex items-center gap-2 py-1 text-sm text-slate-600 hover:text-amber-500 transition-colors">
-                                                            <span class="text-slate-400">▸</span>
-                                                            <span
-                                                                class="uppercase text-xs tracking-wide"><?= Security::escape($item['name']) ?></span>
-                                                        </a>
-                                                    </li>
-                                                <?php endforeach; ?>
-                                            </ul>
-                                        </div>
-
                                     </div>
                                 </div>
                             </div>
@@ -1027,9 +889,7 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
                                         <?php foreach (array_slice($megaMenuPujas, 0, 15) as $item): ?>
                                             <li>
                                                 <a href="/templates?puja=<?= $item['slug'] ?>"
-                                                    class="flex items-center gap-2 py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
-                                                    <span
-                                                        class="material-symbols-outlined text-lg text-amber-500"><?= $item['icon'] ?></span>
+                                                    class="block py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
                                                     <?= Security::escape($item['name']) ?>
                                                 </a>
                                             </li>
@@ -1055,9 +915,7 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
                                         <?php foreach (array_slice($megaMenuFestivals, 0, 15) as $item): ?>
                                             <li>
                                                 <a href="/templates?festival=<?= $item['slug'] ?>"
-                                                    class="flex items-center gap-2 py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
-                                                    <span
-                                                        class="material-symbols-outlined text-lg text-amber-500"><?= $item['icon'] ?></span>
+                                                    class="block py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
                                                     <?= Security::escape($item['name']) ?>
                                                 </a>
                                             </li>
@@ -1082,49 +940,38 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
                                     <ul class="space-y-1">
                                         <li>
                                             <a href="/templates?category=corporate"
-                                                class="flex items-center gap-2 py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
-                                                <span
-                                                    class="material-symbols-outlined text-lg text-blue-500">business</span>
+                                                class="block py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
                                                 Corporate
                                             </a>
                                         </li>
                                         <li>
                                             <a href="/templates?category=baby_shower"
-                                                class="flex items-center gap-2 py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
-                                                <span
-                                                    class="material-symbols-outlined text-lg text-teal-500">child_care</span>
+                                                class="block py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
                                                 Baby Shower
                                             </a>
                                         </li>
                                         <li>
                                             <a href="/templates?category=anniversary"
-                                                class="flex items-center gap-2 py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
-                                                <span
-                                                    class="material-symbols-outlined text-lg text-pink-500">celebration</span>
+                                                class="block py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
                                                 Anniversary
                                             </a>
                                         </li>
                                         <li>
                                             <a href="/templates?category=graduation"
-                                                class="flex items-center gap-2 py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
-                                                <span
-                                                    class="material-symbols-outlined text-lg text-indigo-500">school</span>
+                                                class="block py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
                                                 Graduation
                                             </a>
                                         </li>
                                         <li>
                                             <a href="/templates?category=housewarming"
-                                                class="flex items-center gap-2 py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
-                                                <span
-                                                    class="material-symbols-outlined text-lg text-orange-500">home</span>
+                                                class="block py-2 px-3 text-sm text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
                                                 Housewarming
                                             </a>
                                         </li>
                                         <li>
                                             <a href="/templates"
-                                                class="flex items-center gap-2 py-2 px-3 text-sm text-primary font-medium hover:bg-primary/5 rounded-lg transition-colors">
-                                                <span class="material-symbols-outlined text-lg">grid_view</span>
-                                                View All Templates
+                                                class="block py-2 px-3 text-sm text-primary font-medium hover:bg-primary/5 rounded-lg transition-colors">
+                                                View All Templates →
                                             </a>
                                         </li>
                                     </ul>
@@ -1202,7 +1049,6 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
                                 </div>
                             </div>
                         <?php else: ?>
-                            <a href="/login" class="text-sm font-medium text-slate-600 hover:text-primary">Login</a>
                             <a href="/register"
                                 class="flex h-10 items-center justify-center rounded-lg bg-primary px-5 text-sm font-bold text-white shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all">
                                 Get Started
@@ -1327,7 +1173,7 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
                 class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
                 Festivals
             </a>
-            
+
             <!-- Miscellaneous Section -->
             <div class="border-t border-slate-200 dark:border-slate-700 my-3"></div>
             <p class="px-4 py-1 text-xs font-bold text-slate-400 uppercase tracking-wide">Miscellaneous</p>
@@ -1709,6 +1555,21 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
 
     <!-- Template Carousel Script -->
     <script src="/assets/js/section-carousel.js" defer></script>
+
+    <!-- Floating Support Button -->
+    <a href="/support"
+        class="fixed z-50 w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-110"
+        style="background-color: #b69b5b; right: 1rem; bottom: 5rem;" aria-label="Support">
+        <span class="material-symbols-outlined text-white text-xl">headset_mic</span>
+    </a>
+    <!-- Adjust support button position for mobile bottom tab -->
+    <style>
+        @media (max-width: 639px) {
+            a[href="/support"].fixed {
+                bottom: 5.5rem !important;
+            }
+        }
+    </style>
 
 </body>
 
