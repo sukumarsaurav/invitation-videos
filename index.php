@@ -32,12 +32,6 @@ $router = new Router();
 // Set base path (empty for root domain deployment)
 $router->setBasePath('');
 
-// DEBUG ROUTING
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-error_log("DEBUG: URI: " . $uri);
-error_log("DEBUG: Method: " . $_SERVER['REQUEST_METHOD']);
-// END DEBUG
-
 // ===================
 // PUBLIC ROUTES
 // ===================
@@ -64,6 +58,11 @@ $router->get('/my-tickets', function () {
 
 $router->post('/my-tickets', function () {
     include __DIR__ . '/templates/pages/my-tickets.php';
+});
+
+// Categories page (mobile two-column layout)
+$router->get('/categories', function () {
+    include __DIR__ . '/templates/pages/categories.php';
 });
 
 // Template gallery
