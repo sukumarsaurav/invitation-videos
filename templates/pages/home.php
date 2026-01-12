@@ -29,6 +29,25 @@ $blogPosts = Database::fetchAll(
      ORDER BY published_at DESC LIMIT 3"
 );
 
+// Category template sections data - fetch 5 templates for each main category
+$categoryTemplates = [];
+$mainCategoryConfigs = [
+    'wedding' => ['name' => 'Wedding', 'color' => 'rose', 'icon' => 'favorite'],
+    'birthday' => ['name' => 'Birthday', 'color' => 'amber', 'icon' => 'cake'],
+    'party' => ['name' => 'Party', 'color' => 'orange', 'icon' => 'celebration'],
+    'pooja-rituals' => ['name' => 'Pooja & Rituals', 'color' => 'yellow', 'icon' => 'self_improvement'],
+    'festivals' => ['name' => 'Festivals', 'color' => 'red', 'icon' => 'festival'],
+];
+
+foreach ($mainCategoryConfigs as $catSlug => $catConfig) {
+    $categoryTemplates[$catSlug] = Database::fetchAll(
+        "SELECT * FROM templates WHERE is_active = 1 AND category = ? ORDER BY purchase_count DESC LIMIT 5",
+        [$catSlug]
+    ) ?? [];
+}
+
+
+
 // Use hardcoded config from homepage-config.php
 require_once __DIR__ . '/../../config/homepage-config.php';
 
@@ -189,7 +208,7 @@ $isHomePage = true;  // For floating help button display
                 <p class="text-slate-600 dark:text-slate-400">Discover trending designs for your next event.</p>
             </div>
             <a href="/templates"
-                class="flex items-center gap-2 text-primary font-bold hover:underline whitespace-nowrap">
+                class="hidden sm:flex items-center gap-2 text-primary font-bold hover:underline whitespace-nowrap">
                 View All Templates
                 <span class="material-symbols-outlined">arrow_forward</span>
             </a>
@@ -278,12 +297,147 @@ $isHomePage = true;  // For floating help button display
                     </div>
                 </a>
             <?php endforeach; ?>
+
+            <!-- View All Card (Mobile Only) -->
+            <a href="/templates"
+                class="flex-shrink-0 w-[45%] snap-start bg-gradient-to-br from-primary to-primary/80 rounded-2xl overflow-hidden shadow-lg flex flex-col items-center justify-center border border-primary/30">
+                <div class="aspect-[4/5] w-full flex flex-col items-center justify-center p-4">
+                    <span class="material-symbols-outlined text-4xl text-white mb-3">grid_view</span>
+                    <span class="text-white font-bold text-center">View All</span>
+                    <span class="text-white/70 text-sm text-center">Templates</span>
+                    <span class="material-symbols-outlined text-white mt-3">arrow_forward</span>
+                </div>
+            </a>
         </div>
+
     </div>
 </section>
 
+<?php
+// =====================================================
+// Category Template Sections (Wedding, Birthday, Party, etc.)
+// =====================================================
+$sectionColors = [
+    'wedding' => ['bg' => 'bg-rose-50 dark:bg-rose-950/20', 'badge' => 'bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300'],
+    'birthday' => ['bg' => 'bg-amber-50 dark:bg-amber-950/20', 'badge' => 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300'],
+    'party' => ['bg' => 'bg-orange-50 dark:bg-orange-950/20', 'badge' => 'bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300'],
+    'pooja-rituals' => ['bg' => 'bg-yellow-50 dark:bg-yellow-950/20', 'badge' => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300'],
+    'festivals' => ['bg' => 'bg-red-50 dark:bg-red-950/20', 'badge' => 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300'],
+];
+?>
+
+<?php foreach ($mainCategoryConfigs as $catSlug => $catConfig):
+    $templates = $categoryTemplates[$catSlug] ?? [];
+    if (empty($templates))
+        continue;
+    $colors = $sectionColors[$catSlug] ?? ['bg' => 'bg-slate-50 dark:bg-slate-800/50', 'badge' => 'bg-slate-100 text-slate-700'];
+    ?>
+    <!-- <?= $catConfig['name'] ?> Templates Section -->
+    <section class="py-12 <?= $colors['bg'] ?>">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="flex items-start sm:items-center justify-between mb-8 flex-col sm:flex-row gap-4">
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2"><?= $catConfig['name'] ?>
+                        Templates</h2>
+                    <p class="text-slate-600 dark:text-slate-400">Beautiful <?= strtolower($catConfig['name']) ?> video
+                        invitations</p>
+                </div>
+                <!-- Desktop View All link -->
+                <a href="/templates?category=<?= $catSlug ?>"
+                    class="hidden sm:flex items-center gap-2 text-primary font-bold hover:underline whitespace-nowrap">
+                    View All <?= $catConfig['name'] ?>
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                </a>
+            </div>
+
+            <!-- Desktop: 5-column grid -->
+            <div class="hidden sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+                <?php foreach ($templates as $index => $template):
+                    $badgeColor = $colors['badge'];
+                    $isAboveFold = false;
+                    ?>
+                    <a href="/template/<?= Security::escape($template['slug']) ?>"
+                        class="group block bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200 dark:border-slate-700 hover:border-primary/30">
+                        <div class="relative aspect-[4/5] overflow-hidden bg-slate-100">
+                            <?= ImageHelper::responsiveThumbnail(
+                                $template['thumbnail_url'] ?? '/assets/images/placeholder.jpg',
+                                $template['title'],
+                                $isAboveFold,
+                                $isAboveFold,
+                                'absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105'
+                            ) ?>
+                            <div class="absolute top-3 left-3">
+                                <span class="px-3 py-1 rounded-full text-xs font-bold <?= $badgeColor ?>">
+                                    <?= $catConfig['name'] ?>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <h3
+                                class="font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors truncate">
+                                <?= Security::escape($template['title']) ?>
+                            </h3>
+                            <p
+                                class="text-sm <?= $template['price_usd'] > 0 ? 'text-primary font-bold' : 'text-green-600 font-bold' ?>">
+                                <?= $template['price_usd'] > 0 ? '₹' . number_format($template['price_inr'], 0) : 'Free' ?>
+                            </p>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+
+            <!-- Mobile: Horizontal scroll with View All card -->
+            <div class="sm:hidden flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory -mx-4 px-4"
+                style="-webkit-overflow-scrolling: touch; scrollbar-width: none;">
+                <?php foreach ($templates as $index => $template):
+                    $badgeColor = $colors['badge'];
+                    ?>
+                    <a href="/template/<?= Security::escape($template['slug']) ?>"
+                        class="group flex-shrink-0 w-[45%] snap-start bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200 dark:border-slate-700">
+                        <div class="relative aspect-[4/5] overflow-hidden bg-slate-100">
+                            <?= ImageHelper::responsiveThumbnail(
+                                $template['thumbnail_url'] ?? '/assets/images/placeholder.jpg',
+                                $template['title'],
+                                false,
+                                false,
+                                'absolute inset-0 w-full h-full object-cover'
+                            ) ?>
+                            <div class="absolute top-2 left-2">
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold <?= $badgeColor ?>">
+                                    <?= $catConfig['name'] ?>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="p-3">
+                            <h3 class="font-bold text-sm text-slate-900 dark:text-white truncate">
+                                <?= Security::escape($template['title']) ?>
+                            </h3>
+                            <p
+                                class="text-xs <?= $template['price_usd'] > 0 ? 'text-primary font-bold' : 'text-green-600 font-bold' ?>">
+                                <?= $template['price_usd'] > 0 ? '₹' . number_format($template['price_inr'], 0) : 'Free' ?>
+                            </p>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+
+                <!-- View All Card (Mobile Only) -->
+                <a href="/templates?category=<?= $catSlug ?>"
+                    class="flex-shrink-0 w-[45%] snap-start bg-gradient-to-br from-primary to-primary/80 rounded-2xl overflow-hidden shadow-lg flex flex-col items-center justify-center border border-primary/30">
+                    <div class="aspect-[4/5] w-full flex flex-col items-center justify-center p-4">
+                        <span class="material-symbols-outlined text-4xl text-white mb-3">grid_view</span>
+                        <span class="text-white font-bold text-center">View All</span>
+                        <span class="text-white/70 text-sm text-center"><?= $catConfig['name'] ?></span>
+                        <span class="material-symbols-outlined text-white mt-3">arrow_forward</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+<?php endforeach; ?>
+
 
 <!-- How It Works -->
+
 <section id="how-it-works" class="py-12" style="background-color: var(--footer-bg-color, #ffffff);">
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
         <div class="text-center mb-10">
