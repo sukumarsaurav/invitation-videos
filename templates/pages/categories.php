@@ -12,25 +12,10 @@ require_once __DIR__ . '/../../config/homepage-config.php';
 // Get active category from URL
 $activeCategory = $_GET['active'] ?? null;
 
-// Get all categories with subcategories from database
-$allCategories = Database::fetchAll(
-    "SELECT * FROM categories WHERE parent_id IS NULL AND is_active = 1 ORDER BY display_order ASC, name ASC"
-);
+// Categories now come from homepage-config.php ($homepageCategories)
+// No database dependency for main category listing
 
-// Get subcategories for active category
-$subcategories = [];
-if ($activeCategory) {
-    $parentCategory = Database::fetchOne(
-        "SELECT id FROM categories WHERE slug = ? AND parent_id IS NULL",
-        [$activeCategory]
-    );
-    if ($parentCategory) {
-        $subcategories = Database::fetchAll(
-            "SELECT * FROM categories WHERE parent_id = ? AND is_active = 1 ORDER BY display_order ASC, name ASC",
-            [$parentCategory['id']]
-        );
-    }
-}
+// Subcategories feature removed - all categories link directly to templates page
 
 $pageTitle = 'Browse Categories';
 $metaDescription = 'Browse all template categories for video invitations including weddings, birthdays, parties, and more.';
@@ -87,32 +72,11 @@ $metaDescription = 'Browse all template categories for video invitations includi
             <span class="material-symbols-outlined text-lg">arrow_forward</span>
         </a>
 
-        <?php if (!empty($subcategories)): ?>
-            <!-- Subcategories 3-Column Grid -->
-            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Subcategories</h3>
-            <div class="grid grid-cols-3 gap-2">
-                <?php foreach ($subcategories as $sub): ?>
-                    <a href="/templates?category=<?= $sub['slug'] ?>"
-                        class="flex flex-col items-center gap-1 p-2 rounded-lg bg-slate-50 dark:bg-slate-800 hover:bg-primary/5 transition-colors text-center">
-                        <div class="w-12 h-12 rounded-lg flex items-center justify-center text-white"
-                            style="background-color: <?= $sub['color'] ?? '#7f13ec' ?>">
-                            <span class="material-symbols-outlined text-xl">
-                                <?= $sub['icon'] ?? 'category' ?>
-                            </span>
-                        </div>
-                        <span class="text-[10px] font-medium text-slate-700 dark:text-slate-200 leading-tight">
-                            <?= Security::escape($sub['name']) ?>
-                        </span>
-                    </a>
-                <?php endforeach; ?>
-            </div>
-        <?php else: ?>
-            <!-- Placeholder when no subcategories -->
-            <div class="text-center py-6">
-                <p class="text-slate-400 text-xs">Select a category to view subcategories</p>
-                <p class="text-[10px] text-slate-300 mt-1">Subcategories can be added from admin</p>
-            </div>
-        <?php endif; ?>
+        <!-- Info Section - Direct users to templates -->
+        <div class="text-center py-6">
+            <p class="text-slate-400 text-xs">Click "View All" or select a category</p>
+            <p class="text-[10px] text-slate-300 mt-1">to browse templates</p>
+        </div>
     </div>
 </div>
 

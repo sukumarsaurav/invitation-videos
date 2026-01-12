@@ -126,3 +126,43 @@ $homepageSections = [
     //     'grid_bg_color' => '#f5f0e8',
     // ],
 ];
+
+// =====================================================
+// NAVIGATION CATEGORIES
+// Used for: navbar dropdowns, mobile sidebar, gallery filters
+// Uses only local images - no database/CMS dependency
+// =====================================================
+$navCategories = [
+    'wedding' => [
+        'name' => 'Wedding',
+        'image' => '/assets/images/categories/wedding.png',
+    ],
+    'birthday' => [
+        'name' => 'Birthday',
+        'image' => '/assets/images/categories/birthday.png',
+    ],
+    'baby_shower' => [
+        'name' => 'Baby Shower',
+        'image' => '/assets/images/categories/baby_shower.png',
+    ],
+    'corporate' => [
+        'name' => 'Corporate',
+        'image' => '/assets/images/categories/corporate.png',
+    ],
+    'anniversary' => [
+        'name' => 'Anniversary',
+        'image' => '/assets/images/categories/anniversary.png',
+    ],
+    'parties' => [
+        'name' => 'Parties',
+        'image' => '/assets/images/categories/parties.png',
+    ],
+    'holidays' => [
+        'name' => 'Holidays',
+        'image' => '/assets/images/categories/holidays.png',
+    ],
+    'religious' => [
+        'name' => 'Religious',
+        'image' => '/assets/images/categories/religious.png',
+    ],
+];
