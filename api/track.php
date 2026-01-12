@@ -5,6 +5,11 @@
  * Receives page view data from the frontend and logs it
  */
 
+// TEMPORARY: Enable error reporting for debugging
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 header('Content-Type: application/json');
 
 // Only accept POST requests
