@@ -435,44 +435,48 @@ $pageTitle = 'Checkout - ' . $order['order_number'];
         button.disabled = true;
         button.innerText = 'Applying...';
 
-        try {
-            const response = await fetch('/api/promo/validate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code: code, order_id: orderId })
-            });
+        const response = await fetch('/api/promo/validate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                code: code,
+                order_id: orderId,
+                is_draft: isDraft,
+                draft_token: draftToken
+            })
+        });
 
-            const result = await response.json();
+        const result = await response.json();
 
-            if (result.success) {
-                currentDiscount = result.discount_amount;
-                currentTotal = result.new_total;
+        if (result.success) {
+            currentDiscount = result.discount_amount;
+            currentTotal = result.new_total;
 
-                // Update UI
-                document.getElementById('discount-amount').textContent = result.discount_display;
-                document.getElementById('total-amount').textContent = result.new_total_display;
+            // Update UI
+            document.getElementById('discount-amount').textContent = result.discount_display;
+            document.getElementById('total-amount').textContent = result.new_total_display;
 
-                // Update pay button
-                const payBtn = document.getElementById('pay-button');
-                payBtn.innerHTML = '<span class="material-symbols-outlined">lock</span> Pay ' + result.new_total_display;
+            // Update pay button
+            const payBtn = document.getElementById('pay-button');
+            payBtn.innerHTML = '<span class="material-symbols-outlined">lock</span> Pay ' + result.new_total_display;
 
-                // Show success and disable input
-                showPromoSuccess(result.message + ' (' + result.promo_description + ')');
-                document.getElementById('promo-code').disabled = true;
-                button.disabled = true;
-                button.innerText = 'Applied';
-                button.classList.remove('hover:bg-slate-200');
-                button.classList.add('bg-green-100', 'text-green-700');
-            } else {
-                showPromoError(result.error);
-                button.disabled = false;
-                button.innerText = originalText;
-            }
-        } catch (error) {
-            showPromoError('Failed to validate promo code');
+            // Show success and disable input
+            showPromoSuccess(result.message + ' (' + result.promo_description + ')');
+            document.getElementById('promo-code').disabled = true;
+            button.disabled = true;
+            button.innerText = 'Applied';
+            button.classList.remove('hover:bg-slate-200');
+            button.classList.add('bg-green-100', 'text-green-700');
+        } else {
+            showPromoError(result.error);
             button.disabled = false;
             button.innerText = originalText;
         }
+    } catch (error) {
+        showPromoError('Failed to validate promo code');
+        button.disabled = false;
+        button.innerText = originalText;
+    }
     }
 
     function showPromoError(message) {

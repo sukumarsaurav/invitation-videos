@@ -31,11 +31,28 @@ if (!$orderId) {
     exit;
 }
 
-// Get the order
-$order = Database::fetchOne(
-    "SELECT * FROM orders WHERE id = ? AND status = 'pending'",
-    [$orderId]
-);
+$isDraft = !empty($input['is_draft']);
+$draftToken = $input['draft_token'] ?? '';
+
+// Get the order or draft
+$order = null;
+
+if ($isDraft) {
+    if (empty($draftToken)) {
+        echo json_encode(['success' => false, 'error' => 'Invalid draft token']);
+        exit;
+    }
+
+    $order = Database::fetchOne(
+        "SELECT * FROM draft_orders WHERE id = ? AND draft_token = ?",
+        [$orderId, $draftToken]
+    );
+} else {
+    $order = Database::fetchOne(
+        "SELECT * FROM orders WHERE id = ? AND status = 'pending'",
+        [$orderId]
+    );
+}
 
 if (!$order) {
     echo json_encode(['success' => false, 'error' => 'Order not found']);
@@ -101,9 +118,10 @@ if ($promo['discount_type'] === 'percentage') {
 $discountAmount = min($discountAmount, $originalAmount);
 $newAmount = $originalAmount - $discountAmount;
 
-// Update the order with promo code
+// Update the order or draft with promo code
+$table = $isDraft ? 'draft_orders' : 'orders';
 Database::query(
-    "UPDATE orders SET 
+    "UPDATE $table SET 
         promo_code_id = ?,
         discount_amount = ?,
         amount = ?
