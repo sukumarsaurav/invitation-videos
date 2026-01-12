@@ -101,10 +101,10 @@ $metaDescription = 'Browse all template categories for video invitations includi
 <?php ob_start(); ?>
 
 <!-- Categories Page - Two Column Layout (Mobile) -->
-<div class="min-h-screen flex sm:hidden" style="padding-bottom: 60px;">
-    <!-- Left Column: Main Categories (Narrower) -->
-    <div class="w-20 flex-shrink-0 border-r border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 overflow-y-auto"
-        style="height: calc(100vh - 60px);">
+<div class="min-h-screen flex sm:hidden" style="padding-bottom: 60px; padding-top: 60px;">
+    <!-- Left Column: Main Categories (Narrower) - Fixed position with independent scroll -->
+    <div class="w-20 flex-shrink-0 border-r border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 overflow-y-auto overscroll-contain touch-pan-y"
+        style="height: calc(100vh - 120px); position: sticky; top: 60px;">
         <?php foreach ($mainCategoriesWithSubs as $slug => $cat):
             $isActive = $activeCategory === $slug;
             ?>
@@ -121,8 +121,10 @@ $metaDescription = 'Browse all template categories for video invitations includi
         <?php endforeach; ?>
     </div>
 
-    <!-- Right Section: Subcategories Grid -->
-    <div class="flex-1 overflow-y-auto p-3 bg-white dark:bg-slate-900" style="height: calc(100vh - 60px);">
+    <!-- Right Section: Subcategories Grid - Independent scroll -->
+    <div class="flex-1 overflow-y-auto overscroll-contain touch-pan-y p-3 bg-white dark:bg-slate-900"
+        style="height: calc(100vh - 120px);">
+
         <h2 class="text-base font-bold text-slate-900 dark:text-white mb-3">
             <?= $displayCategoryName ?>
         </h2>
