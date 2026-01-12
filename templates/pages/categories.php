@@ -37,7 +37,7 @@ try {
                 'slug' => $cat['slug'],
                 'icon' => $cat['icon'],
                 'color' => $cat['color'],
-                'image' => $cat['image_url'] ?? '/assets/images/categories/' . $cat['slug'] . '.png',
+                'image' => $cat['image_url'] ?? '/assets/images/categories/' . $cat['slug'] . '.webp',
                 'subcategories' => []
             ];
         } else if ($cat['parent_slug'] && isset($mainCategoriesWithSubs[$cat['parent_slug']])) {
@@ -46,7 +46,7 @@ try {
                 'name' => $cat['name'],
                 'slug' => $cat['slug'],
                 'icon' => $cat['icon'],
-                'image' => '/assets/images/subcategories/' . $cat['slug'] . '.png',
+                'image' => '/assets/images/subcategories/' . $cat['slug'] . '.webp',
             ];
         }
     }
@@ -65,7 +65,7 @@ try {
                 'slug' => $sub['slug'],
                 'icon' => $sub['icon'],
                 'color' => '#6b7280',
-                'image' => '/assets/images/categories/' . $sub['slug'] . '.png',
+                'image' => '/assets/images/categories/' . $sub['slug'] . '.webp',
                 'subcategories' => []
             ];
         }

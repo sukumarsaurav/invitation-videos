@@ -25,7 +25,7 @@ try {
                 'slug' => $cat['slug'],
                 'icon' => $cat['icon'],
                 'color' => $cat['color'],
-                'image' => $cat['image_url'] ?? '/assets/images/categories/' . $cat['slug'] . '.png',
+                'image' => $cat['image_url'] ?? '/assets/images/categories/' . $cat['slug'] . '.webp',
             ];
             $categorySubcategories[$cat['slug']] = [];
         } else {
@@ -43,11 +43,11 @@ try {
 } catch (Exception $e) {
     // Categories table may not exist or be empty, use fallback
     $mainCategories = [
-        'wedding' => ['id' => 1, 'name' => 'Wedding', 'slug' => 'wedding', 'icon' => 'favorite', 'color' => '#ec4899', 'image' => '/assets/images/categories/wedding.png'],
-        'birthday' => ['id' => 2, 'name' => 'Birthday', 'slug' => 'birthday', 'icon' => 'cake', 'color' => '#f59e0b', 'image' => '/assets/images/categories/birthday.png'],
-        'party' => ['id' => 3, 'name' => 'Party', 'slug' => 'party', 'icon' => 'celebration', 'color' => '#10b981', 'image' => '/assets/images/categories/parties.png'],
-        'pooja-rituals' => ['id' => 4, 'name' => 'Pooja & Rituals', 'slug' => 'pooja-rituals', 'icon' => 'self_improvement', 'color' => '#8b5cf6', 'image' => '/assets/images/categories/religious.png'],
-        'festivals' => ['id' => 5, 'name' => 'Festivals', 'slug' => 'festivals', 'icon' => 'festival', 'color' => '#ef4444', 'image' => '/assets/images/categories/holidays.png'],
+        'wedding' => ['id' => 1, 'name' => 'Wedding', 'slug' => 'wedding', 'icon' => 'favorite', 'color' => '#ec4899', 'image' => '/assets/images/categories/wedding.webp'],
+        'birthday' => ['id' => 2, 'name' => 'Birthday', 'slug' => 'birthday', 'icon' => 'cake', 'color' => '#f59e0b', 'image' => '/assets/images/categories/birthday.webp'],
+        'party' => ['id' => 3, 'name' => 'Party', 'slug' => 'party', 'icon' => 'celebration', 'color' => '#10b981', 'image' => '/assets/images/categories/parties.webp'],
+        'pooja-rituals' => ['id' => 4, 'name' => 'Pooja & Rituals', 'slug' => 'pooja-rituals', 'icon' => 'self_improvement', 'color' => '#8b5cf6', 'image' => '/assets/images/categories/religious.webp'],
+        'festivals' => ['id' => 5, 'name' => 'Festivals', 'slug' => 'festivals', 'icon' => 'festival', 'color' => '#ef4444', 'image' => '/assets/images/categories/holidays.webp'],
         'miscellaneous' => ['id' => 6, 'name' => 'Miscellaneous', 'slug' => 'miscellaneous', 'icon' => 'apps', 'color' => '#6b7280', 'image' => null],
     ];
     $categorySubcategories = [];

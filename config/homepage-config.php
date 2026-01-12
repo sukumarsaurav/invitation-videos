@@ -48,7 +48,7 @@ try {
         if ($cat['slug'] === 'miscellaneous')
             continue;
 
-        $image = $cat['image_url'] ?? '/assets/images/categories/' . $cat['slug'] . '.png';
+        $image = $cat['image_url'] ?? '/assets/images/categories/' . $cat['slug'] . '.webp';
 
         // Build homepage categories array
         $homepageCategories[] = [
@@ -70,25 +70,25 @@ try {
 // Fallback if database failed or returned empty
 if (empty($homepageCategories)) {
     $homepageCategories = [
-        ['slug' => 'wedding', 'name' => 'Wedding', 'image' => '/assets/images/categories/wedding.png'],
-        ['slug' => 'birthday', 'name' => 'Birthday', 'image' => '/assets/images/categories/birthday.png'],
-        ['slug' => 'party', 'name' => 'Party', 'image' => '/assets/images/categories/parties.png'],
-        ['slug' => 'pooja-rituals', 'name' => 'Pooja & Rituals', 'image' => '/assets/images/categories/religious.png'],
-        ['slug' => 'festivals', 'name' => 'Festivals', 'image' => '/assets/images/categories/holidays.png'],
-        ['slug' => 'corporate', 'name' => 'Corporate', 'image' => '/assets/images/categories/corporate.png'],
-        ['slug' => 'anniversary', 'name' => 'Anniversary', 'image' => '/assets/images/categories/anniversary.png'],
-        ['slug' => 'save-the-date', 'name' => 'Save Date', 'image' => '/assets/images/categories/save_the_date.png'],
-        ['slug' => 'farewell', 'name' => 'Farewell', 'image' => '/assets/images/categories/farewell.png'],
+        ['slug' => 'wedding', 'name' => 'Wedding', 'image' => '/assets/images/categories/wedding.webp'],
+        ['slug' => 'birthday', 'name' => 'Birthday', 'image' => '/assets/images/categories/birthday.webp'],
+        ['slug' => 'party', 'name' => 'Party', 'image' => '/assets/images/categories/parties.webp'],
+        ['slug' => 'pooja-rituals', 'name' => 'Pooja & Rituals', 'image' => '/assets/images/categories/religious.webp'],
+        ['slug' => 'festivals', 'name' => 'Festivals', 'image' => '/assets/images/categories/holidays.webp'],
+        ['slug' => 'corporate', 'name' => 'Corporate', 'image' => '/assets/images/categories/corporate.webp'],
+        ['slug' => 'anniversary', 'name' => 'Anniversary', 'image' => '/assets/images/categories/anniversary.webp'],
+        ['slug' => 'save-the-date', 'name' => 'Save Date', 'image' => '/assets/images/categories/save_the_date.webp'],
+        ['slug' => 'farewell', 'name' => 'Farewell', 'image' => '/assets/images/categories/farewell.webp'],
     ];
 
     $navCategories = [
-        'wedding' => ['name' => 'Wedding', 'image' => '/assets/images/categories/wedding.png'],
-        'birthday' => ['name' => 'Birthday', 'image' => '/assets/images/categories/birthday.png'],
-        'party' => ['name' => 'Party', 'image' => '/assets/images/categories/parties.png'],
-        'pooja-rituals' => ['name' => 'Pooja & Rituals', 'image' => '/assets/images/categories/religious.png'],
-        'festivals' => ['name' => 'Festivals', 'image' => '/assets/images/categories/holidays.png'],
-        'corporate' => ['name' => 'Corporate', 'image' => '/assets/images/categories/corporate.png'],
-        'anniversary' => ['name' => 'Anniversary', 'image' => '/assets/images/categories/anniversary.png'],
+        'wedding' => ['name' => 'Wedding', 'image' => '/assets/images/categories/wedding.webp'],
+        'birthday' => ['name' => 'Birthday', 'image' => '/assets/images/categories/birthday.webp'],
+        'party' => ['name' => 'Party', 'image' => '/assets/images/categories/parties.webp'],
+        'pooja-rituals' => ['name' => 'Pooja & Rituals', 'image' => '/assets/images/categories/religious.webp'],
+        'festivals' => ['name' => 'Festivals', 'image' => '/assets/images/categories/holidays.webp'],
+        'corporate' => ['name' => 'Corporate', 'image' => '/assets/images/categories/corporate.webp'],
+        'anniversary' => ['name' => 'Anniversary', 'image' => '/assets/images/categories/anniversary.webp'],
     ];
 }
 
