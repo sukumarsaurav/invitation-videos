@@ -59,8 +59,13 @@ try {
         'visitor_id' => $visitorId
     ]);
 
-} catch (Exception $e) {
-    error_log('Tracking error: ' . $e->getMessage());
+} catch (Throwable $e) {
+    // TEMPORARY: Show actual error for debugging
     http_response_code(500);
-    echo json_encode(['error' => 'Internal error']);
+    echo json_encode([
+        'error' => $e->getMessage(),
+        'file' => $e->getFile(),
+        'line' => $e->getLine(),
+        'trace' => $e->getTraceAsString()
+    ]);
 }
