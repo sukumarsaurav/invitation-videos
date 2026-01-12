@@ -2,12 +2,8 @@
 /**
  * Homepage Configuration
  * 
- * Edit this file to update homepage content without CMS.
- * Add/remove categories, update hero section, or modify sections here.
- * 
- * Example: To add Holi category for festival season:
- *   1. Add image to /assets/images/categories/holi.webp
- *   2. Add entry to $homepageCategories array below
+ * Categories are now loaded from the database `categories` table.
+ * This file provides fallback values and hero section configuration.
  */
 
 // =====================================================
@@ -24,145 +20,80 @@ $heroConfig = [
 ];
 
 // =====================================================
-// CATEGORIES
-// All categories displayed on homepage
-// Images are loaded from /assets/images/categories/{slug}.webp
+// CATEGORIES - Loaded from Database
 // =====================================================
-$homepageCategories = [
-    [
-        'slug' => 'wedding',
-        'name' => 'Wedding',
-        'image' => '/assets/images/categories/wedding.png',
-    ],
-    [
-        'slug' => 'birthday',
-        'name' => 'Birthday',
-        'image' => '/assets/images/categories/birthday.png',
-    ],
-    [
-        'slug' => 'baby_shower',
-        'name' => 'Baby Shower',
-        'image' => '/assets/images/categories/baby_shower.png',
-    ],
-    [
-        'slug' => 'save_the_date',
-        'name' => 'Save Date',
-        'image' => '/assets/images/categories/save_the_date.png',
-    ],
-    [
-        'slug' => 'parties',
-        'name' => 'Parties',
-        'image' => '/assets/images/categories/parties.png',
-    ],
-    [
-        'slug' => 'corporate',
-        'name' => 'Corporate',
-        'image' => '/assets/images/categories/corporate.png',
-    ],
-    [
-        'slug' => 'holidays',
-        'name' => 'Holidays',
-        'image' => '/assets/images/categories/holidays.png',
-    ],
-    [
-        'slug' => 'anniversary',
-        'name' => 'Anniversary',
-        'image' => '/assets/images/categories/anniversary.png',
-    ],
-    [
-        'slug' => 'graduation',
-        'name' => 'Graduation',
-        'image' => '/assets/images/categories/graduation.png',
-    ],
-    [
-        'slug' => 'housewarming',
-        'name' => 'Housewarming',
-        'image' => '/assets/images/categories/housewarming.png',
-    ],
-    [
-        'slug' => 'religious',
-        'name' => 'Religious',
-        'image' => '/assets/images/categories/religious.png',
-    ],
-    [
-        'slug' => 'farewell',
-        'name' => 'Farewell',
-        'image' => '/assets/images/categories/farewell.png',
-    ],
-    // =====================================================
-    // SEASONAL CATEGORIES (uncomment when needed)
-    // =====================================================
-    // [
-    //     'slug' => 'holi',
-    //     'name' => 'Holi',
-    //     'image' => '/assets/images/categories/holi.png',
-    // ],
-    // [
-    //     'slug' => 'diwali',
-    //     'name' => 'Diwali',
-    //     'image' => '/assets/images/categories/diwali.png',
-    // ],
-    // [
-    //     'slug' => 'christmas',
-    //     'name' => 'Christmas',
-    //     'image' => '/assets/images/categories/christmas.png',
-    // ],
-];
+// Try to load categories from database, fallback to hardcoded if unavailable
+$homepageCategories = [];
+$navCategories = [];
+
+try {
+    // Include database if not already included
+    if (!class_exists('Database')) {
+        require_once __DIR__ . '/database.php';
+    }
+
+    // Get main categories (parent_id = NULL) and select miscellaneous subcategories for homepage
+    $dbCategories = Database::fetchAll(
+        "SELECT id, name, slug, icon, color, image_url, parent_id 
+         FROM categories 
+         WHERE is_active = 1 
+         AND (parent_id IS NULL OR parent_id = (SELECT id FROM categories WHERE slug = 'miscellaneous'))
+         ORDER BY 
+            CASE WHEN parent_id IS NULL THEN 0 ELSE 1 END,
+            display_order"
+    ) ?? [];
+
+    foreach ($dbCategories as $cat) {
+        // Skip "miscellaneous" as a display category (its children are shown instead)
+        if ($cat['slug'] === 'miscellaneous')
+            continue;
+
+        $image = $cat['image_url'] ?? '/assets/images/categories/' . $cat['slug'] . '.png';
+
+        // Build homepage categories array
+        $homepageCategories[] = [
+            'slug' => $cat['slug'],
+            'name' => $cat['name'],
+            'image' => $image,
+        ];
+
+        // Build nav categories (keyed by slug)
+        $navCategories[$cat['slug']] = [
+            'name' => $cat['name'],
+            'image' => $image,
+        ];
+    }
+} catch (Exception $e) {
+    // Database not available, use fallback
+}
+
+// Fallback if database failed or returned empty
+if (empty($homepageCategories)) {
+    $homepageCategories = [
+        ['slug' => 'wedding', 'name' => 'Wedding', 'image' => '/assets/images/categories/wedding.png'],
+        ['slug' => 'birthday', 'name' => 'Birthday', 'image' => '/assets/images/categories/birthday.png'],
+        ['slug' => 'party', 'name' => 'Party', 'image' => '/assets/images/categories/parties.png'],
+        ['slug' => 'pooja-rituals', 'name' => 'Pooja & Rituals', 'image' => '/assets/images/categories/religious.png'],
+        ['slug' => 'festivals', 'name' => 'Festivals', 'image' => '/assets/images/categories/holidays.png'],
+        ['slug' => 'corporate', 'name' => 'Corporate', 'image' => '/assets/images/categories/corporate.png'],
+        ['slug' => 'anniversary', 'name' => 'Anniversary', 'image' => '/assets/images/categories/anniversary.png'],
+        ['slug' => 'save-the-date', 'name' => 'Save Date', 'image' => '/assets/images/categories/save_the_date.png'],
+        ['slug' => 'farewell', 'name' => 'Farewell', 'image' => '/assets/images/categories/farewell.png'],
+    ];
+
+    $navCategories = [
+        'wedding' => ['name' => 'Wedding', 'image' => '/assets/images/categories/wedding.png'],
+        'birthday' => ['name' => 'Birthday', 'image' => '/assets/images/categories/birthday.png'],
+        'party' => ['name' => 'Party', 'image' => '/assets/images/categories/parties.png'],
+        'pooja-rituals' => ['name' => 'Pooja & Rituals', 'image' => '/assets/images/categories/religious.png'],
+        'festivals' => ['name' => 'Festivals', 'image' => '/assets/images/categories/holidays.png'],
+        'corporate' => ['name' => 'Corporate', 'image' => '/assets/images/categories/corporate.png'],
+        'anniversary' => ['name' => 'Anniversary', 'image' => '/assets/images/categories/anniversary.png'],
+    ];
+}
 
 // =====================================================
 // HOMEPAGE SECTIONS
 // Template showcase sections displayed below categories
-// Each section pulls templates based on category/subcategory filters
 // =====================================================
-$homepageSections = [
-    // Example section (uncomment and customize as needed):
-    // [
-    //     'title' => 'Wedding Collection',
-    //     'category_slug' => 'wedding',
-    //     'subcategory' => null,
-    //     'template_count' => 4,
-    //     'banner_bg_color' => '#a11045',
-    //     'title_color' => '#d4a853',
-    //     'grid_bg_color' => '#f5f0e8',
-    // ],
-];
-
-// =====================================================
-// NAVIGATION CATEGORIES
-// Used for: navbar dropdowns, mobile sidebar, gallery filters
-// Uses only local images - no database/CMS dependency
-// =====================================================
-$navCategories = [
-    'wedding' => [
-        'name' => 'Wedding',
-        'image' => '/assets/images/categories/wedding.png',
-    ],
-    'birthday' => [
-        'name' => 'Birthday',
-        'image' => '/assets/images/categories/birthday.png',
-    ],
-    'baby_shower' => [
-        'name' => 'Baby Shower',
-        'image' => '/assets/images/categories/baby_shower.png',
-    ],
-    'corporate' => [
-        'name' => 'Corporate',
-        'image' => '/assets/images/categories/corporate.png',
-    ],
-    'anniversary' => [
-        'name' => 'Anniversary',
-        'image' => '/assets/images/categories/anniversary.png',
-    ],
-    'parties' => [
-        'name' => 'Parties',
-        'image' => '/assets/images/categories/parties.png',
-    ],
-    'holidays' => [
-        'name' => 'Holidays',
-        'image' => '/assets/images/categories/holidays.png',
-    ],
-    'religious' => [
-        'name' => 'Religious',
-        'image' => '/assets/images/categories/religious.png',
-    ],
-];
+$homepageSections = [];
