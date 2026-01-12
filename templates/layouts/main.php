@@ -1431,17 +1431,18 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
     <main class="flex-1">
         <?= $content ?? '' ?>
     </main>
-
     <!-- Floating Help Button - Only on landing page -->
     <?php if (($isHomePage ?? false)): ?>
         <a href="/support"
-            class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 flex items-center justify-center w-12 h-12 sm:w-auto sm:h-auto sm:px-4 sm:py-3 font-bold rounded-full shadow-xl hover:scale-105 transition-all group"
+            class="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 flex items-center justify-center w-12 h-12 sm:w-auto sm:h-auto sm:px-4 sm:py-3 font-bold rounded-full shadow-xl hover:scale-105 transition-all group"
             style="background-color: var(--footer-text-color, #1e293b); color: var(--footer-bg-color, #ffffff);"
             title="Need help?">
             <span class="material-symbols-outlined text-xl">support_agent</span>
             <span class="hidden sm:group-hover:inline whitespace-nowrap text-sm">Need Help?</span>
         </a>
     <?php endif; ?>
+
+
 
     <!-- Footer - Can be hidden on mobile for specific pages like gallery -->
     <footer
@@ -1706,7 +1707,7 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
             }
             currentAudio = new Audio(url);
             currentAudio.play();
-        }
+    }
     </script>
 
     <!-- Cookie Consent Banner -->
@@ -1746,20 +1747,7 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
     <!-- Template Carousel Script -->
     <script src="/assets/js/section-carousel.js" defer></script>
 
-    <!-- Floating Support Button -->
-    <a href="/support"
-        class="fixed z-50 w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-110"
-        style="background-color: #b69b5b; right: 1rem; bottom: 5rem;" aria-label="Support">
-        <span class="material-symbols-outlined text-white text-xl">headset_mic</span>
-    </a>
-    <!-- Adjust support button position for mobile bottom tab -->
-    <style>
-        @media (max-width: 639px) {
-            a[href="/support"].fixed {
-                bottom: 5.5rem !important;
-            }
-        }
-    </style>
+
 
 </body>
 
