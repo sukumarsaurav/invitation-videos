@@ -735,10 +735,10 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
         as="style" crossorigin>
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&display=swap"
-        media="print" onload="this.media='all'">
+        media="print" onload="this.media='all'" crossorigin>
     <noscript>
         <link rel="stylesheet"
-            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&display=swap">
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&display=swap" crossorigin>
     </noscript>
 
     <!-- Alpine.js Collapse Plugin + Core - deferred -->
@@ -1707,7 +1707,7 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
             }
             currentAudio = new Audio(url);
             currentAudio.play();
-    }
+        }
     </script>
 
     <!-- Cookie Consent Banner -->
