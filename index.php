@@ -258,6 +258,15 @@ $router->get('/api/wishlist/ids', function () {
     require_once __DIR__ . '/api/wishlist.php';
 });
 
+// Tracking API
+$router->post('/api/track.php', function () {
+    require_once __DIR__ . '/api/track.php';
+});
+
+$router->get('/api/track.php', function () {
+    require_once __DIR__ . '/api/track.php';
+});
+
 // Get template fields (for dynamic forms) - supports both ID and slug
 $router->get('/api/template/{identifier}/fields', function ($identifier) {
     require_once __DIR__ . '/src/Controllers/TemplateController.php';
