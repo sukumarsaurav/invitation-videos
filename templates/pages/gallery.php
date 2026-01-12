@@ -341,6 +341,15 @@ if ($category && isset($categoryTitles[$category])) {
                                 <span
                                     class="absolute top-2 left-2 px-2 py-1 rounded-md bg-green-500/90 text-xs font-bold text-white backdrop-blur-sm">Free</span>
                             <?php endif; ?>
+
+                            <!-- Wishlist Button -->
+                            <button type="button"
+                                class="wishlist-btn absolute top-2 right-2 size-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:bg-white transition-all z-10"
+                                data-template-id="<?= $template['id'] ?>" data-in-wishlist="false"
+                                onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist(this);"
+                                title="Add to wishlist">
+                                <span class="material-symbols-outlined text-lg text-slate-400 wishlist-icon">favorite</span>
+                            </button>
                         </div>
 
                         <!-- Title & Price (Outside Card) -->
@@ -674,12 +683,25 @@ if ($category && isset($categoryTitles[$category])) {
         // Use 400w variant or fallback
         const imgSrc = template.srcset && template.srcset[400] ? template.srcset[400] : template.thumbnail_url;
 
+        // Wishlist button
+        const wishlistBtn = `
+            <button type="button" 
+                class="wishlist-btn absolute top-2 right-2 size-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:bg-white transition-all z-10"
+                data-template-id="${template.id}"
+                data-in-wishlist="false"
+                onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist(this);"
+                title="Add to wishlist">
+                <span class="material-symbols-outlined text-lg text-slate-400 wishlist-icon">favorite</span>
+            </button>
+        `;
+
         return `
         <a href="/template/${template.slug}" class="group block">
             <div class="relative aspect-[4/5] overflow-hidden bg-slate-100 rounded-2xl shadow-sm hover:shadow-xl transition-all border border-slate-100 dark:border-slate-800 group-hover:border-primary/30">
                 <img src="${imgSrc}" alt="${template.title}" loading="lazy" decoding="async" 
                      class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                 ${badge}
+                ${wishlistBtn}
             </div>
             <div class="pt-3 px-1">
                 <h3 class="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-primary transition-colors">${template.title}</h3>
@@ -698,7 +720,13 @@ if ($category && isset($categoryTitles[$category])) {
             }
         }
     }, { passive: false });
+
+    // User login status for wishlist
+    window.isUserLoggedIn = <?= !empty($_SESSION['user_id']) ? 'true' : 'false' ?>;
 </script>
+
+<!-- Wishlist JavaScript -->
+<script src="/assets/js/wishlist.js" defer></script>
 
 <?php
 $content = ob_get_clean();

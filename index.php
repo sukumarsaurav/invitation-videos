@@ -60,6 +60,11 @@ $router->post('/my-tickets', function () {
     include __DIR__ . '/templates/pages/my-tickets.php';
 });
 
+// Wishlist page
+$router->get('/wishlist', function () {
+    include __DIR__ . '/templates/pages/wishlist.php';
+});
+
 // Categories page (mobile two-column layout)
 $router->get('/categories', function () {
     include __DIR__ . '/templates/pages/categories.php';
@@ -219,6 +224,38 @@ $router->post('/api/webhook/razorpay', function () {
 // Promo code validation
 $router->post('/api/promo/validate', function () {
     require_once __DIR__ . '/api/promo/validate.php';
+});
+
+// Wishlist API routes
+$router->post('/api/wishlist/add', function () {
+    $_GET['action'] = 'add';
+    require_once __DIR__ . '/api/wishlist.php';
+});
+
+$router->post('/api/wishlist/remove', function () {
+    $_GET['action'] = 'remove';
+    require_once __DIR__ . '/api/wishlist.php';
+});
+
+$router->get('/api/wishlist', function () {
+    $_GET['action'] = 'list';
+    require_once __DIR__ . '/api/wishlist.php';
+});
+
+$router->get('/api/wishlist/check/{templateId}', function ($templateId) {
+    $_GET['action'] = 'check';
+    $_GET['template_id'] = $templateId;
+    require_once __DIR__ . '/api/wishlist.php';
+});
+
+$router->get('/api/wishlist/count', function () {
+    $_GET['action'] = 'count';
+    require_once __DIR__ . '/api/wishlist.php';
+});
+
+$router->get('/api/wishlist/ids', function () {
+    $_GET['action'] = 'ids';
+    require_once __DIR__ . '/api/wishlist.php';
 });
 
 // Get template fields (for dynamic forms) - supports both ID and slug

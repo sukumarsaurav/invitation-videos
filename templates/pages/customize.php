@@ -55,6 +55,16 @@ $relatedTemplates = Database::fetchAll(
     [$template['category'], $templateId]
 );
 
+// Check if template is in user's wishlist
+$isInWishlist = false;
+if (!empty($_SESSION['user_id'])) {
+    $wishlistCheck = Database::fetchOne(
+        "SELECT id FROM wishlist WHERE user_id = ? AND template_id = ?",
+        [$_SESSION['user_id'], $templateId]
+    );
+    $isInWishlist = (bool) $wishlistCheck;
+}
+
 // Initialize form renderer
 $formRenderer = new DynamicFormRenderer();
 $groupedFields = $formRenderer->getFields($templateId);
@@ -352,14 +362,27 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
             <div class="lg:col-span-5 xl:col-span-5 space-y-6">
 
                 <!-- Title & Category -->
-                <div>
-                    <span
-                        class="inline-flex items-center gap-1 text-xs font-bold text-primary uppercase tracking-wider mb-2">
-                        <?= ucfirst(str_replace('_', ' ', $template['category'] ?? 'General')) ?>
-                    </span>
-                    <h1 class="text-3xl md:text-4xl font-black text-slate-900 dark:text-white leading-tight">
-                        <?= Security::escape($template['title']) ?>
-                    </h1>
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <span
+                            class="inline-flex items-center gap-1 text-xs font-bold text-primary uppercase tracking-wider mb-2">
+                            <?= ucfirst(str_replace('_', ' ', $template['category'] ?? 'General')) ?>
+                        </span>
+                        <h1 class="text-3xl md:text-4xl font-black text-slate-900 dark:text-white leading-tight">
+                            <?= Security::escape($template['title']) ?>
+                        </h1>
+                    </div>
+
+                    <!-- Wishlist Button -->
+                    <button type="button"
+                        class="wishlist-btn size-11 shrink-0 rounded-full border-2 flex items-center justify-center transition-all <?= $isInWishlist ? 'border-rose-200 bg-rose-50' : 'border-slate-200 hover:border-rose-200 hover:bg-rose-50' ?>"
+                        data-template-id="<?= $templateId ?>" data-in-wishlist="<?= $isInWishlist ? 'true' : 'false' ?>"
+                        onclick="toggleWishlist(this);"
+                        title="<?= $isInWishlist ? 'Remove from wishlist' : 'Add to wishlist' ?>">
+                        <span
+                            class="material-symbols-outlined text-xl <?= $isInWishlist ? 'text-rose-500' : 'text-slate-400' ?> wishlist-icon"
+                            style="<?= $isInWishlist ? 'font-variation-settings: \"FILL\" 1;' : '' ?>">favorite</span>
+                    </button>
                 </div>
 
                 <!-- Rating (mock) -->
@@ -973,7 +996,13 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
             closeTranslationModal();
         };
     }
+
+    // User login status for wishlist
+    window.isUserLoggedIn = <?= !empty($_SESSION['user_id']) ? 'true' : 'false' ?>;
 </script>
+
+<!-- Wishlist JavaScript -->
+<script src="/assets/js/wishlist.js" defer></script>
 
 <?php
 $content = ob_get_clean();

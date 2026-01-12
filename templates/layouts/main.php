@@ -1152,6 +1152,11 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
                                             <span class="material-symbols-outlined text-lg">shopping_bag</span>
                                             My Orders
                                         </a>
+                                        <a href="/wishlist"
+                                            class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                                            <span class="material-symbols-outlined text-lg">favorite</span>
+                                            My Wishlist
+                                        </a>
                                         <a href="/my-tickets"
                                             class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                                             <span class="material-symbols-outlined text-lg">support_agent</span>
@@ -1277,13 +1282,14 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
                 class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
                 Wedding
             </a>
-            
+
             <!-- Birthday Expandable Section -->
             <div x-data="{ open: false }">
                 <button @click="open = !open"
                     class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
                     <span>Birthday</span>
-                    <span class="material-symbols-outlined text-base transition-transform" :class="open ? 'rotate-180' : ''">expand_more</span>
+                    <span class="material-symbols-outlined text-base transition-transform"
+                        :class="open ? 'rotate-180' : ''">expand_more</span>
                 </button>
                 <div x-show="open" x-collapse class="ml-4 space-y-1 mt-1">
                     <a href="/templates?party=kids-birthday"
@@ -1308,13 +1314,14 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
                     </a>
                 </div>
             </div>
-            
+
             <!-- Party Expandable Section -->
             <div x-data="{ open: false }">
                 <button @click="open = !open"
                     class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
                     <span>Party</span>
-                    <span class="material-symbols-outlined text-base transition-transform" :class="open ? 'rotate-180' : ''">expand_more</span>
+                    <span class="material-symbols-outlined text-base transition-transform"
+                        :class="open ? 'rotate-180' : ''">expand_more</span>
                 </button>
                 <div x-show="open" x-collapse class="ml-4 space-y-1 mt-1">
                     <a href="/templates?party=cocktail-party"
@@ -1343,7 +1350,7 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
                     </a>
                 </div>
             </div>
-            
+
             <a href="/templates?category=religious"
                 class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
                 Pooja & Rituals
@@ -1382,6 +1389,10 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
                 <a href="/my-orders"
                     class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
                     My Orders
+                </a>
+                <a href="/wishlist"
+                    class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                    My Wishlist
                 </a>
                 <a href="/my-tickets"
                     class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
