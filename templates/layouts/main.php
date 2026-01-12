@@ -1271,11 +1271,27 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
 
         <!-- Drawer Navigation -->
         <nav class="p-4 space-y-1 overflow-y-auto" style="max-height: calc(100vh - 80px);">
-            <!-- Category Links matching navbar order -->
-            <a href="/templates?category=wedding"
-                class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
-                Wedding
-            </a>
+            <!-- Wedding Expandable Section -->
+            <div x-data="{ open: false }">
+                <button @click="open = !open"
+                    class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                    <span>Wedding</span>
+                    <span class="material-symbols-outlined text-base transition-transform"
+                        :class="open ? 'rotate-180' : ''">expand_more</span>
+                </button>
+                <div x-show="open" x-collapse class="ml-4 space-y-1 mt-1">
+                    <?php foreach ($megaMenuFunctions as $item): ?>
+                        <a href="/templates?function=<?= $item['slug'] ?>"
+                            class="block px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm transition-colors">
+                            <?= Security::escape($item['name']) ?>
+                        </a>
+                    <?php endforeach; ?>
+                    <a href="/templates?category=wedding"
+                        class="block px-4 py-2 rounded-lg text-primary font-medium text-sm transition-colors">
+                        View All →
+                    </a>
+                </div>
+            </div>
 
             <!-- Birthday Expandable Section -->
             <div x-data="{ open: false }">
@@ -1298,9 +1314,17 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
                         class="block px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm transition-colors">
                         Adult Birthday
                     </a>
+                    <a href="/templates?party=sweet-16"
+                        class="block px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm transition-colors">
+                        Sweet 16
+                    </a>
                     <a href="/templates?party=baby-shower"
                         class="block px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm transition-colors">
                         Baby Shower
+                    </a>
+                    <a href="/templates?party=graduation"
+                        class="block px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm transition-colors">
+                        Graduation
                     </a>
                     <a href="/templates?category=birthday"
                         class="block px-4 py-2 rounded-lg text-primary font-medium text-sm transition-colors">
@@ -1330,9 +1354,21 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
                         class="block px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm transition-colors">
                         Pool Party
                     </a>
+                    <a href="/templates?party=bachelor-party"
+                        class="block px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm transition-colors">
+                        Bachelor / Bachelorette
+                    </a>
+                    <a href="/templates?party=retirement-party"
+                        class="block px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm transition-colors">
+                        Retirement Party
+                    </a>
                     <a href="/templates?party=housewarming"
                         class="block px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm transition-colors">
                         Housewarming
+                    </a>
+                    <a href="/templates?party=kitty-party"
+                        class="block px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm transition-colors">
+                        Kitty Party
                     </a>
                     <a href="/templates?party=new-year"
                         class="block px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm transition-colors">
@@ -1345,14 +1381,49 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
                 </div>
             </div>
 
-            <a href="/templates?category=religious"
-                class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
-                Pooja & Rituals
-            </a>
-            <a href="/templates?category=holidays"
-                class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
-                Festivals
-            </a>
+            <!-- Pooja & Rituals Expandable Section -->
+            <div x-data="{ open: false }">
+                <button @click="open = !open"
+                    class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                    <span>Pooja & Rituals</span>
+                    <span class="material-symbols-outlined text-base transition-transform"
+                        :class="open ? 'rotate-180' : ''">expand_more</span>
+                </button>
+                <div x-show="open" x-collapse class="ml-4 space-y-1 mt-1">
+                    <?php foreach (array_slice($megaMenuPujas, 0, 10) as $item): ?>
+                        <a href="/templates?puja=<?= $item['slug'] ?>"
+                            class="block px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm transition-colors">
+                            <?= Security::escape($item['name']) ?>
+                        </a>
+                    <?php endforeach; ?>
+                    <a href="/templates?category=religious"
+                        class="block px-4 py-2 rounded-lg text-primary font-medium text-sm transition-colors">
+                        View All →
+                    </a>
+                </div>
+            </div>
+
+            <!-- Festivals Expandable Section -->
+            <div x-data="{ open: false }">
+                <button @click="open = !open"
+                    class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                    <span>Festivals</span>
+                    <span class="material-symbols-outlined text-base transition-transform"
+                        :class="open ? 'rotate-180' : ''">expand_more</span>
+                </button>
+                <div x-show="open" x-collapse class="ml-4 space-y-1 mt-1">
+                    <?php foreach (array_slice($megaMenuFestivals, 0, 10) as $item): ?>
+                        <a href="/templates?festival=<?= $item['slug'] ?>"
+                            class="block px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm transition-colors">
+                            <?= Security::escape($item['name']) ?>
+                        </a>
+                    <?php endforeach; ?>
+                    <a href="/templates?category=holidays"
+                        class="block px-4 py-2 rounded-lg text-primary font-medium text-sm transition-colors">
+                        View All →
+                    </a>
+                </div>
+            </div>
 
             <!-- Miscellaneous Section -->
             <div class="border-t border-slate-200 dark:border-slate-700 my-3"></div>
@@ -1360,10 +1431,6 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
             <a href="/templates?category=corporate"
                 class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
                 Corporate
-            </a>
-            <a href="/templates?category=baby_shower"
-                class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
-                Baby Shower
             </a>
             <a href="/templates?category=anniversary"
                 class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
@@ -1396,28 +1463,28 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
                     class="block px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 font-medium transition-colors">
                     Logout
                 </a>
-            <?php else: ?>
-                <a href="/login"
-                    class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
-                    Login
-                </a>
-                <a href="/register"
-                    class="block px-4 py-3 mt-2 rounded-lg bg-primary text-white text-center font-bold shadow-lg shadow-primary/30 hover:bg-primary/90 transition-colors">
-                    Get Started Free
-                </a>
             <?php endif; ?>
 
+            <!-- Support Links (smaller, lighter) -->
             <div class="border-t border-slate-200 dark:border-slate-700 my-3"></div>
-
-            <!-- Support Links -->
             <a href="/support"
-                class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                class="block px-4 py-2 rounded-lg text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm font-normal transition-colors">
                 Help Center
             </a>
             <a href="/contact"
-                class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                class="block px-4 py-2 rounded-lg text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm font-normal transition-colors">
                 Contact Us
             </a>
+
+            <!-- Get Started Free Button (bottom) -->
+            <?php if (!isset($_SESSION['user_id'])): ?>
+                <div class="pt-4">
+                    <a href="/register"
+                        class="block px-4 py-3 rounded-lg bg-primary text-white text-center font-bold shadow-lg shadow-primary/30 hover:bg-primary/90 transition-colors">
+                        Get Started Free
+                    </a>
+                </div>
+            <?php endif; ?>
         </nav>
     </div>
 
