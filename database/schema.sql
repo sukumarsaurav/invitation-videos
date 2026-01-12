@@ -1,447 +1,932 @@
--- Invitation Videos Database Schema
--- MySQL 8.0+
+-- phpMyAdmin SQL Dump
+-- version 5.2.2
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1:3306
+-- Generation Time: Jan 12, 2026 at 12:57 PM
+-- Server version: 11.8.3-MariaDB-log
+-- PHP Version: 7.2.34
 
-SET NAMES utf8mb4;
-SET FOREIGN_KEY_CHECKS = 0;
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
 
--- =====================
--- USERS TABLE
--- =====================
-CREATE TABLE IF NOT EXISTS `users` (
-    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `email` VARCHAR(255) NOT NULL,
-    `google_id` VARCHAR(255) DEFAULT NULL COMMENT 'Google OAuth user ID',
-    `password_hash` VARCHAR(255) DEFAULT NULL COMMENT 'NULL for Google-only users',
-    `name` VARCHAR(255) DEFAULT NULL,
-    `avatar_url` VARCHAR(500) DEFAULT NULL COMMENT 'Profile picture URL from Google',
-    `phone` VARCHAR(20) DEFAULT NULL,
-    `country_code` VARCHAR(5) DEFAULT 'US',
-    `role` ENUM('customer', 'admin', 'editor') NOT NULL DEFAULT 'customer',
-    `status` ENUM('active', 'inactive', 'suspended') NOT NULL DEFAULT 'active',
-    `email_verified_at` TIMESTAMP NULL DEFAULT NULL,
-    `last_login` TIMESTAMP NULL DEFAULT NULL,
-    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_users_email` (`email`),
-    INDEX `idx_users_google_id` (`google_id`),
-    INDEX `idx_users_status` (`status`),
-    INDEX `idx_users_role` (`role`)
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Database: `u277468165_invitationvid`
+--
+
+-- --------------------------------------------------------
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `blog_posts`
+--
+
+CREATE TABLE `blog_posts` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `excerpt` text DEFAULT NULL,
+  `content` longtext NOT NULL,
+  `featured_image` varchar(500) DEFAULT NULL,
+  `category` varchar(100) DEFAULT NULL,
+  `tags` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`tags`)),
+  `status` enum('draft','published','archived') DEFAULT 'draft',
+  `author_id` int(10) UNSIGNED DEFAULT NULL,
+  `view_count` int(11) DEFAULT 0,
+  `published_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- =====================
--- CATEGORIES TABLE (Template Categories)
--- =====================
-CREATE TABLE IF NOT EXISTS `categories` (
-    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `name` VARCHAR(100) NOT NULL,
-    `slug` VARCHAR(100) NOT NULL,
-    `icon` VARCHAR(50) DEFAULT 'category',
-    `color` VARCHAR(7) DEFAULT '#7f13ec',
-    `display_order` INT NOT NULL DEFAULT 0,
-    `is_active` TINYINT(1) NOT NULL DEFAULT 1,
-    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_categories_slug` (`slug`)
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `campaigns`
+--
+
+CREATE TABLE `campaigns` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `name` varchar(255) NOT NULL COMMENT 'Campaign display name',
+  `slug` varchar(100) NOT NULL COMMENT 'URL-safe identifier',
+  `utm_source` varchar(100) NOT NULL COMMENT 'Traffic source: google, facebook, linkedin, etc.',
+  `utm_medium` varchar(100) NOT NULL COMMENT 'Marketing medium: cpc, paid, social, email, etc.',
+  `utm_campaign` varchar(255) NOT NULL COMMENT 'Campaign identifier for tracking',
+  `utm_term` varchar(255) DEFAULT NULL COMMENT 'Paid search keywords',
+  `utm_content` varchar(255) DEFAULT NULL COMMENT 'A/B test or content identifier',
+  `landing_page` varchar(500) DEFAULT '/' COMMENT 'Target landing page URL path',
+  `status` enum('draft','active','paused','ended') NOT NULL DEFAULT 'draft',
+  `start_date` date DEFAULT NULL,
+  `end_date` date DEFAULT NULL,
+  `budget` decimal(10,2) DEFAULT NULL COMMENT 'Optional budget tracking in INR',
+  `notes` text DEFAULT NULL COMMENT 'Internal notes about the campaign',
+  `created_by` int(10) UNSIGNED NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Insert default categories
-INSERT IGNORE INTO `categories` (`name`, `slug`, `icon`, `color`, `display_order`) VALUES
-('Wedding', 'wedding', 'favorite', '#ec4899', 1),
-('Birthday', 'birthday', 'cake', '#f59e0b', 2),
-('Baby Shower', 'baby_shower', 'child_care', '#10b981', 3),
-('Corporate', 'corporate', 'business', '#3b82f6', 4),
-('Anniversary', 'anniversary', 'celebration', '#8b5cf6', 5),
-('Other', 'other', 'category', '#6b7280', 99);
+-- --------------------------------------------------------
 
--- =====================
--- TEMPLATES TABLE
--- =====================
-CREATE TABLE IF NOT EXISTS `templates` (
-    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `title` VARCHAR(255) NOT NULL,
-    `slug` VARCHAR(255) NOT NULL,
-    `description` TEXT DEFAULT NULL,
-    `category` VARCHAR(50) NOT NULL DEFAULT 'other' COMMENT 'References categories.slug',
-    `subcategory` VARCHAR(100) DEFAULT NULL,
-    `cultural_tradition` VARCHAR(50) DEFAULT NULL,
-    `price_usd` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-    `price_inr` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-    `discounted_price_usd` DECIMAL(10,2) DEFAULT NULL,
-    `discounted_price_inr` DECIMAL(10,2) DEFAULT NULL,
-    `thumbnail_url` VARCHAR(500) DEFAULT NULL,
-    `preview_video_url` VARCHAR(500) DEFAULT NULL,
-    `duration_seconds` INT UNSIGNED DEFAULT 30,
-    `aspect_ratio` VARCHAR(10) DEFAULT '9:16',
-    `is_premium` TINYINT(1) NOT NULL DEFAULT 0,
-    `is_active` TINYINT(1) NOT NULL DEFAULT 1,
-    `view_count` INT UNSIGNED NOT NULL DEFAULT 0,
-    `purchase_count` INT UNSIGNED NOT NULL DEFAULT 0,
-    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_templates_slug` (`slug`),
-    INDEX `idx_templates_category` (`category`),
-    INDEX `idx_templates_active` (`is_active`),
-    INDEX `idx_templates_premium` (`is_premium`),
-    INDEX `idx_templates_tradition` (`cultural_tradition`),
-    INDEX `idx_templates_discounted` (`discounted_price_usd`, `discounted_price_inr`)
+--
+-- Table structure for table `categories`
+--
+
+CREATE TABLE `categories` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `parent_id` int(10) UNSIGNED DEFAULT NULL,
+  `name` varchar(100) NOT NULL,
+  `slug` varchar(100) NOT NULL,
+  `icon` varchar(50) DEFAULT NULL,
+  `color` varchar(7) DEFAULT '#7f13ec',
+  `image_url` varchar(500) DEFAULT NULL,
+  `display_order` int(11) DEFAULT 0,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- =====================
--- TEMPLATE SLIDES (For Template Builder)
--- =====================
-CREATE TABLE IF NOT EXISTS `template_slides` (
-    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `template_id` INT UNSIGNED NOT NULL,
-    `slide_order` INT NOT NULL DEFAULT 0,
-    `duration_ms` INT NOT NULL DEFAULT 3000,
-    `background_color` VARCHAR(7) DEFAULT '#ffffff',
-    `background_image` VARCHAR(500) DEFAULT NULL,
-    `transition_type` ENUM('none', 'fade', 'slide', 'zoom') DEFAULT 'fade',
-    `transition_duration_ms` INT DEFAULT 500,
-    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`),
-    INDEX `idx_slides_template` (`template_id`),
-    INDEX `idx_slides_order` (`slide_order`),
-    CONSTRAINT `fk_slides_template` FOREIGN KEY (`template_id`) REFERENCES `templates` (`id`) ON DELETE CASCADE
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `competitors`
+--
+
+CREATE TABLE `competitors` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `domain` varchar(255) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `last_checked_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- =====================
--- TEMPLATE FIELDS (Dynamic Forms + Visual Positioning)
--- =====================
-CREATE TABLE IF NOT EXISTS `template_fields` (
-    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `template_id` INT UNSIGNED NOT NULL,
-    `slide_id` INT UNSIGNED DEFAULT NULL COMMENT 'Which slide this field appears on',
-    `field_name` VARCHAR(100) NOT NULL,
-    `field_label` VARCHAR(255) NOT NULL,
-    `field_type` ENUM('text', 'textarea', 'date', 'time', 'datetime', 'image', 'music', 'color', 'select', 'number') NOT NULL,
-    `field_subtype` VARCHAR(50) DEFAULT NULL COMMENT 'e.g., groom_name, bride_name, venue, parents',
-    `placeholder` VARCHAR(255) DEFAULT NULL,
-    `default_value` TEXT DEFAULT NULL,
-    `sample_value` VARCHAR(255) DEFAULT NULL COMMENT 'Sample data for template preview',
-    `is_required` TINYINT(1) NOT NULL DEFAULT 1,
-    `validation_rules` JSON DEFAULT NULL COMMENT '{"max_length": 100, "file_types": ["jpg","png"]}',
-    `display_order` INT NOT NULL DEFAULT 0,
-    `appears_at_timestamp` VARCHAR(20) DEFAULT NULL COMMENT 'When field appears in video (e.g., 00:05)',
-    `field_group` VARCHAR(50) DEFAULT NULL COMMENT 'Group fields together (e.g., event_details, photos)',
-    `help_text` VARCHAR(500) DEFAULT NULL,
-    -- Visual positioning for template builder
-    `position_x` INT DEFAULT 50 COMMENT 'Percentage from left (0-100)',
-    `position_y` INT DEFAULT 50 COMMENT 'Percentage from top (0-100)',
-    `width` INT DEFAULT NULL COMMENT 'Width in percentage (optional)',
-    `font_family` VARCHAR(100) DEFAULT 'Inter',
-    `font_size` INT DEFAULT 24,
-    `font_weight` INT DEFAULT 400,
-    `font_color` VARCHAR(7) DEFAULT '#000000',
-    `text_align` ENUM('left', 'center', 'right') DEFAULT 'center',
-    -- Animation settings
-    `animation_type` VARCHAR(50) DEFAULT 'fadeIn',
-    `animation_delay_ms` INT DEFAULT 0,
-    `animation_duration_ms` INT DEFAULT 500,
-    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`),
-    INDEX `idx_template_fields_template` (`template_id`),
-    INDEX `idx_template_fields_slide` (`slide_id`),
-    INDEX `idx_template_fields_group` (`field_group`),
-    INDEX `idx_template_fields_order` (`display_order`),
-    CONSTRAINT `fk_template_fields_template` FOREIGN KEY (`template_id`) REFERENCES `templates` (`id`) ON DELETE CASCADE,
-    CONSTRAINT `fk_template_fields_slide` FOREIGN KEY (`slide_id`) REFERENCES `template_slides` (`id`) ON DELETE SET NULL
+-- --------------------------------------------------------
+
+--
+-- Dumping data for table `custom_fonts`
+--
+
+-- --------------------------------------------------------
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `draft_orders`
+--
+
+CREATE TABLE `draft_orders` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `draft_token` varchar(64) NOT NULL COMMENT 'Unique token for recovery URLs',
+  `user_id` int(10) UNSIGNED DEFAULT NULL COMMENT 'Nullable for guest checkout',
+  `template_id` int(10) UNSIGNED NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `currency` enum('USD','INR') NOT NULL DEFAULT 'USD',
+  `customization_data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT 'All form field values' CHECK (json_valid(`customization_data`)),
+  `promo_code_id` int(10) UNSIGNED DEFAULT NULL,
+  `discount_amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `razorpay_order_id` varchar(255) DEFAULT NULL COMMENT 'Razorpay order ID for INR payments',
+  `stripe_payment_intent` varchar(255) DEFAULT NULL COMMENT 'Stripe PaymentIntent ID for USD payments',
+  `expires_at` timestamp NOT NULL COMMENT 'Auto-delete after this time',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- =====================
--- FIELD OPTIONS (For dropdowns/selects)
--- =====================
-CREATE TABLE IF NOT EXISTS `field_options` (
-    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `field_id` INT UNSIGNED NOT NULL,
-    `option_value` VARCHAR(255) NOT NULL,
-    `option_label` VARCHAR(255) NOT NULL,
-    `display_order` INT NOT NULL DEFAULT 0,
-    PRIMARY KEY (`id`),
-    INDEX `idx_field_options_field` (`field_id`),
-    CONSTRAINT `fk_field_options_field` FOREIGN KEY (`field_id`) REFERENCES `template_fields` (`id`) ON DELETE CASCADE
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `draft_order_uploads`
+--
+
+CREATE TABLE `draft_order_uploads` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `draft_id` int(10) UNSIGNED NOT NULL,
+  `field_name` varchar(100) NOT NULL,
+  `file_type` enum('image','music') NOT NULL,
+  `original_filename` varchar(255) NOT NULL,
+  `stored_filename` varchar(255) NOT NULL,
+  `file_path` varchar(500) NOT NULL,
+  `mime_type` varchar(100) NOT NULL,
+  `file_size` int(10) UNSIGNED NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- =====================
--- MUSIC PRESETS
--- =====================
-CREATE TABLE IF NOT EXISTS `music_presets` (
-    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `name` VARCHAR(255) NOT NULL,
-    `description` TEXT DEFAULT NULL,
-    `file_url` VARCHAR(500) NOT NULL,
-    `duration_seconds` INT UNSIGNED DEFAULT NULL,
-    `category` VARCHAR(50) DEFAULT NULL,
-    `is_active` TINYINT(1) NOT NULL DEFAULT 1,
-    PRIMARY KEY (`id`)
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `field_presets`
+--
+
+CREATE TABLE `field_presets` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `name` varchar(100) NOT NULL COMMENT 'Display name, e.g., Groom Name',
+  `field_name` varchar(100) NOT NULL COMMENT 'Technical name, e.g., groom_name',
+  `field_type` enum('text','textarea','date','time','datetime','image','music','color','select','number') NOT NULL DEFAULT 'text',
+  `placeholder` varchar(255) DEFAULT NULL,
+  `default_value` text DEFAULT NULL,
+  `sample_value` varchar(255) DEFAULT NULL COMMENT 'Sample data for preview',
+  `validation_rules` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`validation_rules`)),
+  `help_text` varchar(500) DEFAULT NULL,
+  `category` varchar(50) DEFAULT 'general' COMMENT 'Category: wedding, birthday, corporate, etc.',
+  `icon` varchar(50) DEFAULT 'text_fields',
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `display_order` int(11) NOT NULL DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- =====================
--- ORDERS TABLE
--- =====================
-CREATE TABLE IF NOT EXISTS `orders` (
-    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `order_number` VARCHAR(20) NOT NULL,
-    `user_id` INT UNSIGNED NOT NULL,
-    `template_id` INT UNSIGNED NOT NULL,
-    `status` ENUM('pending', 'paid', 'processing', 'completed', 'failed', 'refunded') NOT NULL DEFAULT 'pending' COMMENT 'Legacy status column - use payment_status and order_status instead',
-    `payment_status` ENUM('pending', 'paid', 'failed', 'refunded') NOT NULL DEFAULT 'pending',
-    `order_status` ENUM('awaiting_payment', 'queued', 'processing', 'completed', 'cancelled') NOT NULL DEFAULT 'awaiting_payment',
-    `amount` DECIMAL(10,2) NOT NULL,
-    `currency` ENUM('USD', 'INR') NOT NULL DEFAULT 'USD',
-    `promo_code_id` INT UNSIGNED DEFAULT NULL,
-    `payment_gateway` ENUM('stripe', 'razorpay') DEFAULT NULL,
-    `payment_id` VARCHAR(255) DEFAULT NULL,
-    `razorpay_order_id` VARCHAR(255) DEFAULT NULL,
-    `customization_data` JSON NOT NULL COMMENT 'Stores all form field values',
-    `output_video_url` VARCHAR(500) DEFAULT NULL,
-    `video_uploaded_at` TIMESTAMP NULL DEFAULT NULL,
-    `video_expires_at` TIMESTAMP NULL DEFAULT NULL,
-    `promo_code` VARCHAR(50) DEFAULT NULL,
-    `discount_amount` DECIMAL(10,2) DEFAULT 0.00,
-    `notes` TEXT DEFAULT NULL,
-    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    `paid_at` TIMESTAMP NULL DEFAULT NULL,
-    `completed_at` TIMESTAMP NULL DEFAULT NULL,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_orders_number` (`order_number`),
-    INDEX `idx_orders_user` (`user_id`),
-    INDEX `idx_orders_template` (`template_id`),
-    INDEX `idx_orders_status` (`status`),
-    INDEX `idx_orders_payment_status` (`payment_status`),
-    INDEX `idx_orders_order_status` (`order_status`),
-    INDEX `idx_orders_payment_id` (`payment_id`),
-    INDEX `idx_orders_promo` (`promo_code_id`),
-    CONSTRAINT `fk_orders_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
-    CONSTRAINT `fk_orders_template` FOREIGN KEY (`template_id`) REFERENCES `templates` (`id`)
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `homepage_sections`
+--
+
+CREATE TABLE `homepage_sections` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `section_title` varchar(255) NOT NULL COMMENT 'Display title (e.g., Mehandi, Christmas)',
+  `category_slug` varchar(100) DEFAULT NULL COMMENT 'Filter by category slug',
+  `subcategory` varchar(100) DEFAULT NULL COMMENT 'Filter by subcategory (e.g., mehandi, haldi)',
+  `filter_tags` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Filter by tags array' CHECK (json_valid(`filter_tags`)),
+  `banner_bg_color` varchar(7) NOT NULL DEFAULT '#a11045' COMMENT 'Banner background color',
+  `banner_svg_url` varchar(500) DEFAULT NULL COMMENT 'Uploaded SVG pattern path',
+  `banner_image_url` varchar(500) DEFAULT NULL COMMENT 'Category image (right side)',
+  `title_color` varchar(7) NOT NULL DEFAULT '#d4a853' COMMENT 'Section title color',
+  `title_font_style` varchar(50) DEFAULT 'italic' COMMENT 'Font style: normal, italic',
+  `grid_bg_color` varchar(7) NOT NULL DEFAULT '#f5f0e8' COMMENT 'Template container background',
+  `template_count` tinyint(3) UNSIGNED NOT NULL DEFAULT 4 COMMENT 'Number of templates (3-6)',
+  `display_order` int(11) NOT NULL DEFAULT 0 COMMENT 'Sort order on homepage',
+  `is_active` tinyint(1) NOT NULL DEFAULT 1 COMMENT 'Enable/disable section',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `svg_position` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'SVG positioning per breakpoint: {xs:{x,y,scale,rotation,opacity,zIndex}, ...}' CHECK (json_valid(`svg_position`)),
+  `image_position` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Image positioning per breakpoint: {xs:{x,y,scale,rotation,visible,zIndex}, ...}' CHECK (json_valid(`image_position`)),
+  `banner_heights` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Banner height per breakpoint: {xs:"80px", sm:"100px", ...}' CHECK (json_valid(`banner_heights`)),
+  `svg_animation` varchar(20) DEFAULT 'none' COMMENT 'SVG scroll animation: none, fade-in, slide-left, slide-right, slide-up, scale-in',
+  `image_animation` varchar(20) DEFAULT 'none' COMMENT 'Image scroll animation: none, fade-in, slide-left, slide-right, slide-up, scale-in',
+  `image_overflow` tinyint(1) DEFAULT 1 COMMENT 'Allow image to extend beyond container boundaries',
+  `visible_counts` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Templates visible per breakpoint: {xs:2, sm:3, md:4, lg:4, xl:4}' CHECK (json_valid(`visible_counts`))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- =====================
--- ORDER UPLOADS (Images/Music for orders)
--- =====================
-CREATE TABLE IF NOT EXISTS `order_uploads` (
-    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `order_id` INT UNSIGNED NOT NULL,
-    `field_name` VARCHAR(100) NOT NULL,
-    `file_type` ENUM('image', 'music') NOT NULL,
-    `original_filename` VARCHAR(255) NOT NULL,
-    `stored_filename` VARCHAR(255) NOT NULL,
-    `file_path` VARCHAR(500) NOT NULL,
-    `mime_type` VARCHAR(100) NOT NULL,
-    `file_size` INT UNSIGNED NOT NULL,
-    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`),
-    INDEX `idx_order_uploads_order` (`order_id`),
-    CONSTRAINT `fk_order_uploads_order` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `languages`
+--
+
+CREATE TABLE `languages` (
+  `code` varchar(10) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  `native_name` varchar(50) NOT NULL,
+  `script` varchar(50) NOT NULL,
+  `is_active` tinyint(1) DEFAULT 1,
+  `display_order` int(11) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- =====================
--- SUPPORT TICKETS
--- =====================
-CREATE TABLE IF NOT EXISTS `support_tickets` (
-    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `ticket_number` VARCHAR(20) NOT NULL,
-    `user_id` INT UNSIGNED NOT NULL,
-    `order_id` INT UNSIGNED DEFAULT NULL,
-    `subject` VARCHAR(255) NOT NULL,
-    `message` TEXT DEFAULT NULL COMMENT 'Initial message from user',
-    `priority` ENUM('low', 'medium', 'high') NOT NULL DEFAULT 'medium',
-    `status` ENUM('open', 'in_progress', 'resolved', 'closed') NOT NULL DEFAULT 'open',
-    `assigned_to` INT UNSIGNED DEFAULT NULL,
-    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    `resolved_at` TIMESTAMP NULL DEFAULT NULL,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_tickets_number` (`ticket_number`),
-    INDEX `idx_tickets_user` (`user_id`),
-    INDEX `idx_tickets_status` (`status`),
-    INDEX `idx_tickets_priority` (`priority`),
-    CONSTRAINT `fk_tickets_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
-    CONSTRAINT `fk_tickets_order` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`),
-    CONSTRAINT `fk_tickets_assigned` FOREIGN KEY (`assigned_to`) REFERENCES `users` (`id`)
+-- --------------------------------------------------------
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `orders`
+--
+
+CREATE TABLE `orders` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `order_number` varchar(20) NOT NULL,
+  `user_id` int(10) UNSIGNED NOT NULL,
+  `template_id` int(10) UNSIGNED NOT NULL,
+  `status` enum('pending','paid','processing','completed','failed','refunded') NOT NULL DEFAULT 'pending',
+  `amount` decimal(10,2) NOT NULL,
+  `currency` enum('USD','INR') NOT NULL DEFAULT 'USD',
+  `promo_code_id` int(10) UNSIGNED DEFAULT NULL,
+  `payment_gateway` enum('stripe','razorpay') DEFAULT NULL,
+  `payment_id` varchar(255) DEFAULT NULL,
+  `razorpay_order_id` varchar(255) DEFAULT NULL,
+  `payment_status` enum('pending','paid','failed','refunded') DEFAULT 'pending',
+  `order_status` enum('awaiting_payment','queued','processing','completed','cancelled') DEFAULT 'awaiting_payment',
+  `customization_data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT 'Stores all form field values' CHECK (json_valid(`customization_data`)),
+  `output_video_url` varchar(500) DEFAULT NULL,
+  `video_uploaded_at` timestamp NULL DEFAULT NULL,
+  `video_expires_at` timestamp NULL DEFAULT NULL,
+  `promo_code` varchar(50) DEFAULT NULL,
+  `discount_amount` decimal(10,2) DEFAULT 0.00,
+  `notes` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `paid_at` timestamp NULL DEFAULT NULL,
+  `completed_at` timestamp NULL DEFAULT NULL,
+  `selected_language` varchar(10) DEFAULT 'en',
+  `translation_mode` enum('self','translate') DEFAULT 'self',
+  `translation_fee` decimal(10,2) DEFAULT 0.00,
+  `campaign_id` int(10) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- =====================
--- TICKET MESSAGES
--- =====================
-CREATE TABLE IF NOT EXISTS `ticket_messages` (
-    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `ticket_id` INT UNSIGNED NOT NULL,
-    `sender_type` ENUM('user', 'admin') NOT NULL DEFAULT 'user',
-    `sender_id` INT UNSIGNED DEFAULT NULL,
-    `user_id` INT UNSIGNED DEFAULT NULL COMMENT 'Deprecated - use sender_id instead',
-    `message` TEXT NOT NULL,
-    `is_internal` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Internal staff notes',
-    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`),
-    INDEX `idx_ticket_messages_ticket` (`ticket_id`),
-    INDEX `idx_ticket_messages_sender` (`sender_type`, `sender_id`),
-    CONSTRAINT `fk_ticket_messages_ticket` FOREIGN KEY (`ticket_id`) REFERENCES `support_tickets` (`id`) ON DELETE CASCADE
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `order_uploads`
+--
+
+CREATE TABLE `order_uploads` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `order_id` int(10) UNSIGNED NOT NULL,
+  `field_name` varchar(100) NOT NULL,
+  `file_type` enum('image','music') NOT NULL,
+  `original_filename` varchar(255) NOT NULL,
+  `stored_filename` varchar(255) NOT NULL,
+  `file_path` varchar(500) NOT NULL,
+  `mime_type` varchar(100) NOT NULL,
+  `file_size` int(10) UNSIGNED NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- =====================
--- PROMO CODES
--- =====================
-CREATE TABLE IF NOT EXISTS `promo_codes` (
-    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `code` VARCHAR(50) NOT NULL,
-    `discount_type` ENUM('percentage', 'fixed') NOT NULL,
-    `discount_value` DECIMAL(10,2) NOT NULL,
-    `min_order_amount` DECIMAL(10,2) DEFAULT 0.00,
-    `max_uses` INT UNSIGNED DEFAULT NULL,
-    `used_count` INT UNSIGNED NOT NULL DEFAULT 0,
-    `valid_from` TIMESTAMP NULL DEFAULT NULL,
-    `valid_until` TIMESTAMP NULL DEFAULT NULL,
-    `is_active` TINYINT(1) NOT NULL DEFAULT 1,
-    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_promo_code` (`code`)
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `page_views`
+--
+
+CREATE TABLE `page_views` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `visitor_id` int(10) UNSIGNED NOT NULL,
+  `page_url` varchar(500) NOT NULL,
+  `page_type` enum('home','template','checkout','confirmation','blog','other') DEFAULT NULL,
+  `time_on_page` int(11) DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- =====================
--- VISITORS TABLE (Analytics)
--- =====================
-CREATE TABLE IF NOT EXISTS `visitors` (
-    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `session_id` VARCHAR(100) NOT NULL,
-    `user_id` INT UNSIGNED DEFAULT NULL,
-    `ip_address` VARCHAR(45) DEFAULT NULL,
-    `country_code` CHAR(2) DEFAULT NULL,
-    `country_name` VARCHAR(100) DEFAULT NULL,
-    `city` VARCHAR(100) DEFAULT NULL,
-    `region` VARCHAR(100) DEFAULT NULL,
-    `latitude` DECIMAL(10,6) DEFAULT NULL,
-    `longitude` DECIMAL(10,6) DEFAULT NULL,
-    `user_agent` TEXT DEFAULT NULL,
-    `referrer` VARCHAR(500) DEFAULT NULL,
-    `landing_page` VARCHAR(500) DEFAULT NULL,
-    `device_type` ENUM('desktop', 'mobile', 'tablet') DEFAULT 'desktop',
-    `browser` VARCHAR(50) DEFAULT NULL,
-    `os` VARCHAR(50) DEFAULT NULL,
-    `is_returning` TINYINT(1) NOT NULL DEFAULT 0,
-    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`),
-    INDEX `idx_visitors_session` (`session_id`),
-    INDEX `idx_visitors_user` (`user_id`),
-    INDEX `idx_visitors_country` (`country_code`),
-    INDEX `idx_visitors_date` (`created_at`),
-    CONSTRAINT `fk_visitors_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `promo_codes`
+--
+
+CREATE TABLE `promo_codes` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `code` varchar(50) NOT NULL,
+  `discount_type` enum('percentage','fixed') NOT NULL,
+  `discount_value` decimal(10,2) NOT NULL,
+  `min_order_amount` decimal(10,2) DEFAULT 0.00,
+  `max_uses` int(10) UNSIGNED DEFAULT NULL,
+  `used_count` int(10) UNSIGNED NOT NULL DEFAULT 0,
+  `valid_from` timestamp NULL DEFAULT NULL,
+  `valid_until` timestamp NULL DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- =====================
--- PAGE VIEWS TABLE (Funnel Tracking)
--- =====================
-CREATE TABLE IF NOT EXISTS `page_views` (
-    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `visitor_id` INT UNSIGNED NOT NULL,
-    `page_url` VARCHAR(500) NOT NULL,
-    `page_type` ENUM('home', 'template', 'templates_list', 'checkout', 'confirmation', 'blog', 'account', 'other') DEFAULT 'other',
-    `template_id` INT UNSIGNED DEFAULT NULL,
-    `time_on_page` INT UNSIGNED DEFAULT 0 COMMENT 'seconds',
-    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`),
-    INDEX `idx_page_views_visitor` (`visitor_id`),
-    INDEX `idx_page_views_type` (`page_type`),
-    INDEX `idx_page_views_date` (`created_at`),
-    CONSTRAINT `fk_page_views_visitor` FOREIGN KEY (`visitor_id`) REFERENCES `visitors` (`id`) ON DELETE CASCADE
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `settings`
+--
+
+CREATE TABLE `settings` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `setting_key` varchar(100) NOT NULL,
+  `setting_value` text DEFAULT NULL,
+  `setting_type` enum('string','number','boolean','json') NOT NULL DEFAULT 'string',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- =====================
--- BLOG POSTS TABLE
--- =====================
-CREATE TABLE IF NOT EXISTS `blog_posts` (
-    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `title` VARCHAR(255) NOT NULL,
-    `slug` VARCHAR(255) NOT NULL,
-    `excerpt` TEXT DEFAULT NULL,
-    `content` LONGTEXT NOT NULL,
-    `featured_image` VARCHAR(500) DEFAULT NULL,
-    `category` VARCHAR(100) DEFAULT NULL,
-    `tags` JSON DEFAULT NULL,
-    `status` ENUM('draft', 'published', 'archived') NOT NULL DEFAULT 'draft',
-    `author_id` INT UNSIGNED DEFAULT NULL,
-    `view_count` INT UNSIGNED NOT NULL DEFAULT 0,
-    `meta_title` VARCHAR(255) DEFAULT NULL,
-    `meta_description` TEXT DEFAULT NULL,
-    `published_at` TIMESTAMP NULL DEFAULT NULL,
-    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_blog_posts_slug` (`slug`),
-    INDEX `idx_blog_posts_status` (`status`),
-    INDEX `idx_blog_posts_category` (`category`),
-    INDEX `idx_blog_posts_published` (`published_at`),
-    CONSTRAINT `fk_blog_posts_author` FOREIGN KEY (`author_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `support_tickets`
+--
+
+CREATE TABLE `support_tickets` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `ticket_number` varchar(20) NOT NULL,
+  `user_id` int(10) UNSIGNED NOT NULL,
+  `order_id` int(10) UNSIGNED DEFAULT NULL,
+  `subject` varchar(255) NOT NULL,
+  `message` text DEFAULT NULL,
+  `priority` enum('low','medium','high') NOT NULL DEFAULT 'medium',
+  `status` enum('open','in_progress','resolved','closed') NOT NULL DEFAULT 'open',
+  `assigned_to` int(10) UNSIGNED DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `resolved_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- =====================
--- COMPETITORS TABLE
--- =====================
-CREATE TABLE IF NOT EXISTS `competitors` (
-    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `domain` VARCHAR(255) NOT NULL,
-    `name` VARCHAR(255) DEFAULT NULL,
-    `notes` TEXT DEFAULT NULL,
-    `last_checked_at` TIMESTAMP NULL DEFAULT NULL,
-    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_competitors_domain` (`domain`)
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `templates`
+--
+
+CREATE TABLE `templates` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `category` varchar(50) DEFAULT NULL,
+  `subcategory` varchar(100) DEFAULT NULL,
+  `cultural_tradition` varchar(50) DEFAULT NULL,
+  `price_usd` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `price_inr` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `discounted_price_usd` decimal(10,2) DEFAULT NULL,
+  `discounted_price_inr` decimal(10,2) DEFAULT NULL,
+  `thumbnail_url` varchar(500) DEFAULT NULL,
+  `preview_video_url` varchar(500) DEFAULT NULL,
+  `duration_seconds` int(10) UNSIGNED DEFAULT 30,
+  `aspect_ratio` varchar(10) DEFAULT '9:16',
+  `is_premium` tinyint(1) NOT NULL DEFAULT 0,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `view_count` int(10) UNSIGNED NOT NULL DEFAULT 0,
+  `purchase_count` int(10) UNSIGNED NOT NULL DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- =====================
--- SETTINGS TABLE (Application Configuration)
--- =====================
-CREATE TABLE IF NOT EXISTS `settings` (
-    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `setting_key` VARCHAR(100) NOT NULL,
-    `setting_value` TEXT DEFAULT NULL,
-    `setting_type` ENUM('string', 'number', 'boolean', 'json') NOT NULL DEFAULT 'string',
-    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_settings_key` (`setting_key`)
+-- --------------------------------------------------------
+
+-- --------------------------------------------------------
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `template_images`
+--
+
+CREATE TABLE `template_images` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `template_id` int(10) UNSIGNED NOT NULL,
+  `image_url` varchar(500) NOT NULL,
+  `display_order` int(11) NOT NULL DEFAULT 0,
+  `is_primary` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-SET FOREIGN_KEY_CHECKS = 1;
+-- --------------------------------------------------------
 
--- =====================
--- SAMPLE DATA: Admin User
--- =====================
-INSERT INTO `users` (`email`, `password_hash`, `name`, `role`, `status`) VALUES
-('admin@invitationvideos.com', '$2y$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4rdZD5iLNKlQjlGy', 'Admin User', 'admin', 'active');
--- Password: admin123 (change this!)
+-- --------------------------------------------------------
 
--- =====================
--- SAMPLE DATA: Wedding Template with Fields
--- =====================
-INSERT INTO `templates` (`title`, `slug`, `description`, `category`, `subcategory`, `cultural_tradition`, `price_usd`, `price_inr`, `duration_seconds`) VALUES
-('Floral Elegance', 'floral-elegance', 'A romantic, nature-inspired template perfect for spring and summer weddings.', 'wedding', 'ceremony', 'hindu', 29.00, 2499.00, 45);
+--
+-- Table structure for table `template_thumbnails`
+--
 
-SET @template_id = LAST_INSERT_ID();
+CREATE TABLE `template_thumbnails` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `template_id` int(10) UNSIGNED NOT NULL,
+  `language_code` varchar(10) NOT NULL DEFAULT 'en',
+  `thumbnail_url` varchar(500) NOT NULL,
+  `display_order` int(11) DEFAULT 0,
+  `is_primary` tinyint(1) DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `template_fields` (`template_id`, `field_name`, `field_label`, `field_type`, `field_subtype`, `placeholder`, `is_required`, `display_order`, `field_group`) VALUES
-(@template_id, 'groom_name', 'Groom''s Name', 'text', 'groom_name', 'Enter groom''s name', 1, 1, 'couple_details'),
-(@template_id, 'bride_name', 'Bride''s Name', 'text', 'bride_name', 'Enter bride''s name', 1, 2, 'couple_details'),
-(@template_id, 'groom_parents', 'Groom''s Parents', 'text', 'parents', 'Mr. & Mrs. Sharma', 0, 3, 'family_details'),
-(@template_id, 'bride_parents', 'Bride''s Parents', 'text', 'parents', 'Mr. & Mrs. Patel', 0, 4, 'family_details'),
-(@template_id, 'wedding_date', 'Wedding Date', 'date', 'event_date', NULL, 1, 5, 'event_details'),
-(@template_id, 'wedding_time', 'Ceremony Time', 'time', 'event_time', NULL, 1, 6, 'event_details'),
-(@template_id, 'venue_name', 'Venue Name', 'text', 'venue', 'The Grand Hotel', 1, 7, 'event_details'),
-(@template_id, 'venue_address', 'Venue Address', 'textarea', 'location', '123 Main St, City', 1, 8, 'event_details'),
-(@template_id, 'couple_photo', 'Main Couple Photo', 'image', 'main_photo', NULL, 1, 9, 'photos'),
-(@template_id, 'gallery_photo_1', 'Gallery Photo 1', 'image', 'gallery', NULL, 0, 10, 'photos'),
-(@template_id, 'gallery_photo_2', 'Gallery Photo 2', 'image', 'gallery', NULL, 0, 11, 'photos'),
-(@template_id, 'gallery_photo_3', 'Gallery Photo 3', 'image', 'gallery', NULL, 0, 12, 'photos'),
-(@template_id, 'background_music', 'Background Music', 'music', 'music', NULL, 0, 13, 'audio');
+-- --------------------------------------------------------
 
--- =====================
--- SAMPLE DATA: Music Presets
--- =====================
-INSERT INTO `music_presets` (`name`, `description`, `file_url`, `duration_seconds`, `category`) VALUES
-('Romantic Piano', 'Soft, elegant instrumental', '/assets/music/romantic-piano.mp3', 150, 'romantic'),
-('Upbeat Celebration', 'Energetic pop instrumental', '/assets/music/upbeat-celebration.mp3', 195, 'celebration'),
-('Classical Wedding', 'Traditional wedding march', '/assets/music/classical-wedding.mp3', 180, 'classical');
+--
+-- Table structure for table `ticket_messages`
+--
+
+CREATE TABLE `ticket_messages` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `ticket_id` int(10) UNSIGNED NOT NULL,
+  `sender_type` enum('user','admin') NOT NULL DEFAULT 'user',
+  `sender_id` int(10) UNSIGNED DEFAULT NULL,
+  `user_id` int(10) UNSIGNED DEFAULT NULL,
+  `message` text NOT NULL,
+  `is_internal` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'Internal staff notes',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
+--
+
+CREATE TABLE `users` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `google_id` varchar(255) DEFAULT NULL,
+  `password_hash` varchar(255) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `avatar_url` varchar(500) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `country_code` varchar(5) DEFAULT 'US',
+  `role` enum('customer','admin','editor') NOT NULL DEFAULT 'customer',
+  `status` enum('active','inactive','suspended') NOT NULL DEFAULT 'active',
+  `email_verified_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `last_login` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `visitors`
+--
+
+CREATE TABLE `visitors` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `session_id` varchar(100) NOT NULL,
+  `user_id` int(10) UNSIGNED DEFAULT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `country_code` char(2) DEFAULT NULL,
+  `country_name` varchar(100) DEFAULT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `region` varchar(100) DEFAULT NULL,
+  `latitude` decimal(10,6) DEFAULT NULL,
+  `longitude` decimal(10,6) DEFAULT NULL,
+  `user_agent` text DEFAULT NULL,
+  `referrer` varchar(500) DEFAULT NULL,
+  `landing_page` varchar(500) DEFAULT NULL,
+  `device_type` enum('desktop','mobile','tablet') DEFAULT NULL,
+  `browser` varchar(50) DEFAULT NULL,
+  `os` varchar(50) DEFAULT NULL,
+  `is_returning` tinyint(1) NOT NULL DEFAULT 0,
+  `utm_source` varchar(100) DEFAULT NULL,
+  `utm_medium` varchar(100) DEFAULT NULL,
+  `utm_campaign` varchar(255) DEFAULT NULL,
+  `utm_term` varchar(255) DEFAULT NULL,
+  `utm_content` varchar(255) DEFAULT NULL,
+  `campaign_id` int(10) UNSIGNED DEFAULT NULL,
+  `gclid` varchar(255) DEFAULT NULL,
+  `fbclid` varchar(255) DEFAULT NULL,
+  `traffic_source` enum('organic','paid','social','referral','direct','email') DEFAULT 'direct',
+  `created_at` timestamp NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `visitors`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `wishlist`
+--
+
+CREATE TABLE `wishlist` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `user_id` int(10) UNSIGNED NOT NULL,
+  `template_id` int(10) UNSIGNED NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `blog_posts`
+--
+ALTER TABLE `blog_posts`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `slug` (`slug`);
+
+--
+-- Indexes for table `campaigns`
+--
+ALTER TABLE `campaigns`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uk_slug` (`slug`),
+  ADD KEY `idx_status` (`status`),
+  ADD KEY `idx_source` (`utm_source`),
+  ADD KEY `idx_dates` (`start_date`,`end_date`),
+  ADD KEY `idx_created_by` (`created_by`);
+
+--
+-- Indexes for table `categories`
+--
+ALTER TABLE `categories`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `slug` (`slug`),
+  ADD KEY `idx_categories_parent` (`parent_id`);
+
+--
+-- Indexes for table `competitors`
+--
+ALTER TABLE `competitors`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `domain` (`domain`);
+
+--
+-- Indexes for table `draft_orders`
+--
+ALTER TABLE `draft_orders`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uk_draft_token` (`draft_token`),
+  ADD KEY `idx_draft_user` (`user_id`),
+  ADD KEY `idx_draft_template` (`template_id`),
+  ADD KEY `idx_draft_expires` (`expires_at`),
+  ADD KEY `idx_draft_razorpay` (`razorpay_order_id`),
+  ADD KEY `idx_draft_stripe` (`stripe_payment_intent`),
+  ADD KEY `fk_draft_promo` (`promo_code_id`);
+
+--
+-- Indexes for table `draft_order_uploads`
+--
+ALTER TABLE `draft_order_uploads`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_draft_uploads_draft` (`draft_id`);
+
+--
+-- Indexes for table `field_presets`
+--
+ALTER TABLE `field_presets`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_presets_category` (`category`),
+  ADD KEY `idx_presets_active` (`is_active`),
+  ADD KEY `idx_presets_order` (`display_order`);
+
+--
+-- Indexes for table `homepage_sections`
+--
+ALTER TABLE `homepage_sections`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_homepage_sections_order` (`display_order`),
+  ADD KEY `idx_homepage_sections_active` (`is_active`);
+
+--
+-- Indexes for table `languages`
+--
+ALTER TABLE `languages`
+  ADD PRIMARY KEY (`code`);
+
+--
+-- Indexes for table `orders`
+--
+ALTER TABLE `orders`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uk_orders_number` (`order_number`),
+  ADD KEY `idx_orders_user` (`user_id`),
+  ADD KEY `idx_orders_template` (`template_id`),
+  ADD KEY `idx_orders_status` (`status`),
+  ADD KEY `idx_orders_payment_id` (`payment_id`),
+  ADD KEY `idx_orders_promo` (`promo_code_id`),
+  ADD KEY `idx_orders_payment_status` (`payment_status`),
+  ADD KEY `idx_orders_order_status` (`order_status`),
+  ADD KEY `idx_orders_language` (`selected_language`),
+  ADD KEY `idx_orders_campaign` (`campaign_id`);
+
+--
+-- Indexes for table `order_uploads`
+--
+ALTER TABLE `order_uploads`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_order_uploads_order` (`order_id`);
+
+--
+-- Indexes for table `page_views`
+--
+ALTER TABLE `page_views`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `visitor_id` (`visitor_id`);
+
+--
+-- Indexes for table `promo_codes`
+--
+ALTER TABLE `promo_codes`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uk_promo_code` (`code`);
+
+--
+-- Indexes for table `settings`
+--
+ALTER TABLE `settings`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uk_settings_key` (`setting_key`);
+
+--
+-- Indexes for table `support_tickets`
+--
+ALTER TABLE `support_tickets`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uk_tickets_number` (`ticket_number`),
+  ADD KEY `idx_tickets_user` (`user_id`),
+  ADD KEY `idx_tickets_status` (`status`),
+  ADD KEY `idx_tickets_priority` (`priority`),
+  ADD KEY `fk_tickets_order` (`order_id`),
+  ADD KEY `fk_tickets_assigned` (`assigned_to`);
+
+--
+-- Indexes for table `templates`
+--
+ALTER TABLE `templates`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uk_templates_slug` (`slug`),
+  ADD KEY `idx_templates_category` (`category`),
+  ADD KEY `idx_templates_active` (`is_active`),
+  ADD KEY `idx_templates_premium` (`is_premium`),
+  ADD KEY `idx_templates_tradition` (`cultural_tradition`),
+  ADD KEY `idx_templates_discounted` (`discounted_price_usd`,`discounted_price_inr`);
+
+--
+-- Indexes for table `template_images`
+--
+ALTER TABLE `template_images`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_template_images_template` (`template_id`),
+  ADD KEY `idx_template_images_order` (`display_order`);
+
+--
+-- Indexes for table `template_thumbnails`
+--
+ALTER TABLE `template_thumbnails`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_template_lang` (`template_id`,`language_code`),
+  ADD KEY `idx_primary` (`template_id`,`language_code`,`is_primary`);
+
+--
+-- Indexes for table `ticket_messages`
+--
+ALTER TABLE `ticket_messages`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_ticket_messages_ticket` (`ticket_id`),
+  ADD KEY `fk_ticket_messages_user` (`user_id`);
+
+--
+-- Indexes for table `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uk_users_email` (`email`),
+  ADD KEY `idx_users_status` (`status`),
+  ADD KEY `idx_users_role` (`role`),
+  ADD KEY `idx_users_google_id` (`google_id`);
+
+--
+-- Indexes for table `visitors`
+--
+ALTER TABLE `visitors`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_visitors_country` (`country_code`),
+  ADD KEY `idx_visitors_date` (`created_at`),
+  ADD KEY `idx_visitors_session` (`session_id`),
+  ADD KEY `idx_visitors_utm_source` (`utm_source`),
+  ADD KEY `idx_visitors_utm_campaign` (`utm_campaign`),
+  ADD KEY `idx_visitors_campaign_id` (`campaign_id`),
+  ADD KEY `idx_visitors_traffic_source` (`traffic_source`);
+
+--
+-- Indexes for table `wishlist`
+--
+ALTER TABLE `wishlist`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uk_wishlist_user_template` (`user_id`,`template_id`),
+  ADD KEY `idx_wishlist_user` (`user_id`),
+  ADD KEY `idx_wishlist_template` (`template_id`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `blog_posts`
+--
+ALTER TABLE `blog_posts`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `campaigns`
+--
+ALTER TABLE `campaigns`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `categories`
+--
+ALTER TABLE `categories`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=98;
+
+--
+-- AUTO_INCREMENT for table `competitors`
+--
+ALTER TABLE `competitors`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `draft_orders`
+--
+ALTER TABLE `draft_orders`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `draft_order_uploads`
+--
+ALTER TABLE `draft_order_uploads`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `field_presets`
+--
+ALTER TABLE `field_presets`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=130;
+
+--
+-- AUTO_INCREMENT for table `homepage_sections`
+--
+ALTER TABLE `homepage_sections`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `orders`
+--
+ALTER TABLE `orders`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
+-- AUTO_INCREMENT for table `order_uploads`
+--
+ALTER TABLE `order_uploads`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `page_views`
+--
+ALTER TABLE `page_views`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `promo_codes`
+--
+ALTER TABLE `promo_codes`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `settings`
+--
+ALTER TABLE `settings`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+
+--
+-- AUTO_INCREMENT for table `support_tickets`
+--
+ALTER TABLE `support_tickets`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `templates`
+--
+ALTER TABLE `templates`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=205;
+
+--
+-- AUTO_INCREMENT for table `template_images`
+--
+ALTER TABLE `template_images`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `template_thumbnails`
+--
+ALTER TABLE `template_thumbnails`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=257;
+
+--
+-- AUTO_INCREMENT for table `ticket_messages`
+--
+ALTER TABLE `ticket_messages`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `users`
+--
+ALTER TABLE `users`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT for table `visitors`
+--
+ALTER TABLE `visitors`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=69;
+
+--
+-- AUTO_INCREMENT for table `wishlist`
+--
+ALTER TABLE `wishlist`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `categories`
+--
+ALTER TABLE `categories`
+  ADD CONSTRAINT `fk_category_parent` FOREIGN KEY (`parent_id`) REFERENCES `categories` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `draft_orders`
+--
+ALTER TABLE `draft_orders`
+  ADD CONSTRAINT `fk_draft_promo` FOREIGN KEY (`promo_code_id`) REFERENCES `promo_codes` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_draft_template` FOREIGN KEY (`template_id`) REFERENCES `templates` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_draft_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `draft_order_uploads`
+--
+ALTER TABLE `draft_order_uploads`
+  ADD CONSTRAINT `fk_draft_uploads_draft` FOREIGN KEY (`draft_id`) REFERENCES `draft_orders` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `orders`
+--
+ALTER TABLE `orders`
+  ADD CONSTRAINT `fk_orders_template` FOREIGN KEY (`template_id`) REFERENCES `templates` (`id`),
+  ADD CONSTRAINT `fk_orders_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+
+--
+-- Constraints for table `order_uploads`
+--
+ALTER TABLE `order_uploads`
+  ADD CONSTRAINT `fk_order_uploads_order` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `page_views`
+--
+ALTER TABLE `page_views`
+  ADD CONSTRAINT `page_views_ibfk_1` FOREIGN KEY (`visitor_id`) REFERENCES `visitors` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `support_tickets`
+--
+ALTER TABLE `support_tickets`
+  ADD CONSTRAINT `fk_tickets_assigned` FOREIGN KEY (`assigned_to`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `fk_tickets_order` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`),
+  ADD CONSTRAINT `fk_tickets_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+
+--
+-- Constraints for table `template_images`
+--
+ALTER TABLE `template_images`
+  ADD CONSTRAINT `fk_template_images_template` FOREIGN KEY (`template_id`) REFERENCES `templates` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `template_thumbnails`
+--
+ALTER TABLE `template_thumbnails`
+  ADD CONSTRAINT `fk_thumbnails_template` FOREIGN KEY (`template_id`) REFERENCES `templates` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `ticket_messages`
+--
+ALTER TABLE `ticket_messages`
+  ADD CONSTRAINT `fk_ticket_messages_ticket` FOREIGN KEY (`ticket_id`) REFERENCES `support_tickets` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_ticket_messages_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+
+--
+-- Constraints for table `wishlist`
+--
+ALTER TABLE `wishlist`
+  ADD CONSTRAINT `fk_wishlist_template` FOREIGN KEY (`template_id`) REFERENCES `templates` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_wishlist_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

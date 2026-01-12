@@ -69,19 +69,12 @@ try {
     );
     $templateId = Database::lastInsertId();
 
-    // Create initial slide for the template
-    Database::query(
-        "INSERT INTO template_slides (template_id, slide_order, duration_ms, background_color, transition_type)
-        VALUES (?, 0, 3000, '#ffffff', 'fade')",
-        [$templateId]
-    );
-
     echo json_encode([
         'success' => true,
         'template_id' => $templateId,
         'slug' => $slug,
         'message' => 'Template created successfully',
-        'redirect_url' => "/admin/template-builder.php?id={$templateId}"
+        'redirect_url' => "/admin/templates.php?action=edit&id={$templateId}"
     ]);
 
 } catch (Exception $e) {
