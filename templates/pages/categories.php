@@ -37,7 +37,8 @@ try {
                 'slug' => $cat['slug'],
                 'icon' => $cat['icon'],
                 'color' => $cat['color'],
-                'image' => $cat['image_url'] ?? '/assets/images/categories/' . $cat['slug'] . '.webp',
+                // Always use hardcoded webp path (ignore database image_url)
+                'image' => '/assets/images/categories/' . $cat['slug'] . '.webp',
                 'subcategories' => []
             ];
         } else if ($cat['parent_slug'] && isset($mainCategoriesWithSubs[$cat['parent_slug']])) {

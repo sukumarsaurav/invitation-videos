@@ -25,7 +25,8 @@ try {
                 'slug' => $cat['slug'],
                 'icon' => $cat['icon'],
                 'color' => $cat['color'],
-                'image' => $cat['image_url'] ?? '/assets/images/categories/' . $cat['slug'] . '.webp',
+                // Always use hardcoded webp path (ignore database image_url)
+                'image' => '/assets/images/categories/' . $cat['slug'] . '.webp',
             ];
             $categorySubcategories[$cat['slug']] = [];
         } else {

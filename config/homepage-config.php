@@ -48,7 +48,8 @@ try {
         if ($cat['slug'] === 'miscellaneous')
             continue;
 
-        $image = $cat['image_url'] ?? '/assets/images/categories/' . $cat['slug'] . '.webp';
+        // Always use hardcoded webp path (ignore database image_url)
+        $image = '/assets/images/categories/' . $cat['slug'] . '.webp';
 
         // Build homepage categories array
         $homepageCategories[] = [
