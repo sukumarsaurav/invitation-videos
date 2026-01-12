@@ -111,8 +111,34 @@ foreach ($navCategories as $slug => $cat) {
 $galleryCategories = $allCategories;
 $galleryTotalTemplates = $totalTemplates;
 
-// Cultural traditions
-$traditions = ['Hindu', 'Muslim', 'Christian', 'Sikh', 'Jewish', 'Chinese', 'Western'];
+// Cultural traditions - fetch distinct values from database
+$traditionsResult = Database::fetchAll(
+    "SELECT DISTINCT cultural_tradition FROM templates 
+     WHERE cultural_tradition IS NOT NULL AND cultural_tradition != '' AND is_active = 1 
+     ORDER BY cultural_tradition"
+);
+$traditions = array_column($traditionsResult ?? [], 'cultural_tradition');
+
+// Fallback if no traditions found
+if (empty($traditions)) {
+    $traditions = ['Hindu', 'Muslim', 'Christian', 'Sikh', 'Jewish', 'Chinese', 'Western'];
+}
+
+// Get subcategories for current category (for filter options)
+$subcategoryFilters = [];
+if ($category) {
+    $categoryCheck = Database::fetchOne(
+        "SELECT id, parent_id FROM categories WHERE slug = ? AND is_active = 1",
+        [$category]
+    );
+    if ($categoryCheck && $categoryCheck['parent_id'] === null) {
+        // Main category - get its subcategories
+        $subcategoryFilters = Database::fetchAll(
+            "SELECT name, slug FROM categories WHERE parent_id = ? AND is_active = 1 ORDER BY display_order",
+            [$categoryCheck['id']]
+        ) ?? [];
+    }
+}
 
 // Sort options
 $sortOptions = [
@@ -185,6 +211,24 @@ if ($category && isset($categoryTitles[$category])) {
                         <?php endforeach; ?>
                     </div>
                 </div>
+
+                <?php if (!empty($subcategoryFilters)): ?>
+                    <div class="h-px bg-slate-200 dark:bg-slate-800 my-2"></div>
+
+                    <!-- Event Types (Subcategories) -->
+                    <div class="py-4">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 px-1">Event Types</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <?php foreach ($subcategoryFilters as $subcat): ?>
+                                <a href="/templates?category=<?= $subcat['slug'] ?><?= $tradition ? '&tradition=' . $tradition : '' ?>"
+                                    class="inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-bold transition-all 
+                               <?= ($category === $subcat['slug']) ? 'border-primary bg-primary text-white' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 hover:border-primary hover:text-primary' ?>">
+                                    <?= htmlspecialchars($subcat['name']) ?>
+                                </a>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
 
                 <div class="h-px bg-slate-200 dark:bg-slate-800 my-2"></div>
 
@@ -391,6 +435,24 @@ if ($category && isset($categoryTitles[$category])) {
             </div>
         </div>
 
+        <!-- Subcategories (when viewing a main category) -->
+        <?php if (!empty($subcategoryFilters)): ?>
+            <div>
+                <h4 class="text-sm font-bold text-slate-500 uppercase tracking-wide mb-3">Event Type</h4>
+                <div class="flex flex-wrap gap-2" id="filter-subcategories">
+                    <?php
+                    $currentSubcat = $_GET['subcategory'] ?? null;
+                    foreach ($subcategoryFilters as $subcat):
+                        ?>
+                        <button type="button" data-subcategory="<?= $subcat['slug'] ?>"
+                            class="filter-subcat-btn px-4 py-2 rounded-full text-sm font-medium border transition-all <?= $currentSubcat === $subcat['slug'] ? 'border-primary bg-primary text-white' : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300' ?>">
+                            <?= htmlspecialchars($subcat['name']) ?>
+                        </button>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        <?php endif; ?>
+
         <!-- Traditions -->
         <div>
             <h4 class="text-sm font-bold text-slate-500 uppercase tracking-wide mb-3">Cultural Tradition</h4>
@@ -457,6 +519,7 @@ if ($category && isset($categoryTitles[$category])) {
     let isLoading = false;
     let hasMore = <?= $hasMore ? 'true' : 'false' ?>;
     let selectedCategory = '<?= $category ?? '' ?>';
+    let selectedSubcategory = '<?= $_GET['subcategory'] ?? '' ?>';
     let selectedTradition = '<?= $tradition ?? '' ?>';
     let currentSort = '<?= $sort ?>';
 
@@ -527,9 +590,34 @@ if ($category && isset($categoryTitles[$category])) {
         });
     });
 
+    // Subcategory filter buttons
+    document.querySelectorAll('.filter-subcat-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            // Toggle: click again to deselect
+            if (this.classList.contains('bg-primary')) {
+                this.classList.remove('border-primary', 'bg-primary', 'text-white');
+                this.classList.add('border-slate-200', 'dark:border-slate-700', 'text-slate-600', 'dark:text-slate-300');
+                selectedSubcategory = '';
+            } else {
+                document.querySelectorAll('.filter-subcat-btn').forEach(b => {
+                    b.classList.remove('border-primary', 'bg-primary', 'text-white');
+                    b.classList.add('border-slate-200', 'dark:border-slate-700', 'text-slate-600', 'dark:text-slate-300');
+                });
+                this.classList.remove('border-slate-200', 'dark:border-slate-700', 'text-slate-600', 'dark:text-slate-300');
+                this.classList.add('border-primary', 'bg-primary', 'text-white');
+                selectedSubcategory = this.dataset.subcategory;
+            }
+        });
+    });
+
     function applyFilters() {
         const params = new URLSearchParams();
-        if (selectedCategory) params.set('category', selectedCategory);
+        // If subcategory is selected, use that as the category instead
+        if (selectedSubcategory) {
+            params.set('category', selectedSubcategory);
+        } else if (selectedCategory) {
+            params.set('category', selectedCategory);
+        }
         if (selectedTradition) params.set('tradition', selectedTradition);
         if (currentSort !== 'popular') params.set('sort', currentSort);
         window.location.href = '/templates' + (params.toString() ? '?' + params.toString() : '');

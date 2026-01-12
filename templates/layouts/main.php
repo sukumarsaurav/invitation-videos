@@ -855,6 +855,15 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
                         <span class="lg:hidden text-sm font-bold text-slate-900 dark:text-white">
                             <?= Security::escape($mobilePageTitle) ?>
                         </span>
+                    <?php elseif (isset($_GET['active']) && !empty($mainCategories)): ?>
+                        <!-- Mobile: Category name on categories page -->
+                        <?php
+                        $activeCatSlug = $_GET['active'];
+                        $activeCatName = isset($mainCategories[$activeCatSlug]) ? $mainCategories[$activeCatSlug]['name'] : ucfirst($activeCatSlug);
+                        ?>
+                        <span class="sm:hidden text-sm font-bold text-slate-900 dark:text-white truncate max-w-[150px]">
+                            <?= Security::escape($activeCatName) ?>
+                        </span>
                     <?php endif; ?>
 
                     <!-- Desktop Navigation with Mega Menu -->
@@ -1159,22 +1168,22 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
             <div class="border-t border-slate-200 dark:border-slate-700 my-3"></div>
 
             <?php if (isset($_SESSION['user_id'])): ?>
-                        <a href="/my-orders"
-                            class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
-                            My Orders
-                        </a>
-                        <a href="/wishlist"
-                            class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
-                            My Wishlist
-                        </a>
-                        <a href="/my-tickets"
-                            class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
-                            My Tickets
-                        </a>
-                        <a href="/logout"
-                            class="block px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 font-medium transition-colors">
-                            Logout
-                        </a>
+                <a href="/my-orders"
+                    class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                    My Orders
+                </a>
+                <a href="/wishlist"
+                    class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                    My Wishlist
+                </a>
+                <a href="/my-tickets"
+                    class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                    My Tickets
+                </a>
+                <a href="/logout"
+                    class="block px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 font-medium transition-colors">
+                    Logout
+                </a>
             <?php endif; ?>
 
             <!-- Support Links (smaller, lighter) -->
@@ -1190,12 +1199,12 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
 
             <!-- Get Started Free Button (bottom) -->
             <?php if (!isset($_SESSION['user_id'])): ?>
-                        <div class="pt-4">
-                            <a href="/register"
-                                class="block px-4 py-3 rounded-lg bg-primary text-white text-center font-bold shadow-lg shadow-primary/30 hover:bg-primary/90 transition-colors">
-                                Get Started Free
-                            </a>
-                        </div>
+                <div class="pt-4">
+                    <a href="/register"
+                        class="block px-4 py-3 rounded-lg bg-primary text-white text-center font-bold shadow-lg shadow-primary/30 hover:bg-primary/90 transition-colors">
+                        Get Started Free
+                    </a>
+                </div>
             <?php endif; ?>
         </nav>
     </div>
@@ -1206,13 +1215,13 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
     </main>
     <!-- Floating Help Button - Only on landing page -->
     <?php if (($isHomePage ?? false)): ?>
-                <a href="/support"
-                    class="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 flex items-center justify-center w-12 h-12 sm:w-auto sm:h-auto sm:px-4 sm:py-3 font-bold rounded-full shadow-xl hover:scale-105 transition-all group"
-                    style="background-color: var(--footer-text-color, #1e293b); color: var(--footer-bg-color, #ffffff);"
-                    title="Need help?">
-                    <span class="material-symbols-outlined text-xl">support_agent</span>
-                    <span class="hidden sm:group-hover:inline whitespace-nowrap text-sm">Need Help?</span>
-                </a>
+        <a href="/support"
+            class="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 flex items-center justify-center w-12 h-12 sm:w-auto sm:h-auto sm:px-4 sm:py-3 font-bold rounded-full shadow-xl hover:scale-105 transition-all group"
+            style="background-color: var(--footer-text-color, #1e293b); color: var(--footer-bg-color, #ffffff);"
+            title="Need help?">
+            <span class="material-symbols-outlined text-xl">support_agent</span>
+            <span class="hidden sm:group-hover:inline whitespace-nowrap text-sm">Need Help?</span>
+        </a>
     <?php endif; ?>
 
 
@@ -1346,17 +1355,17 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
                         <h4 class="font-bold mb-4">Latest Articles</h4>
                         <ul class="space-y-2 text-sm text-slate-500">
                             <?php if (!empty($footerBlogs)): ?>
-                                        <?php foreach ($footerBlogs as $blog): ?>
-                                                    <li>
-                                                        <a href="/blog/<?= Security::escape($blog['slug']) ?>"
-                                                            class="hover:text-primary transition-colors line-clamp-1"
-                                                            title="<?= Security::escape($blog['title']) ?>">
-                                                            <?= Security::escape($blog['title']) ?>
-                                                        </a>
-                                                    </li>
-                                        <?php endforeach; ?>
+                                <?php foreach ($footerBlogs as $blog): ?>
+                                    <li>
+                                        <a href="/blog/<?= Security::escape($blog['slug']) ?>"
+                                            class="hover:text-primary transition-colors line-clamp-1"
+                                            title="<?= Security::escape($blog['title']) ?>">
+                                            <?= Security::escape($blog['title']) ?>
+                                        </a>
+                                    </li>
+                                <?php endforeach; ?>
                             <?php else: ?>
-                                        <li><a href="/blog" class="hover:text-primary transition-colors">Visit Our Blog</a></li>
+                                <li><a href="/blog" class="hover:text-primary transition-colors">Visit Our Blog</a></li>
                             <?php endif; ?>
                         </ul>
                     </div>
