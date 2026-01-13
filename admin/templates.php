@@ -356,13 +356,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['form_action'])) {
             'preview_video_url' => Security::sanitizeString($_POST['preview_video_url'] ?? ''),
             'thumbnail_url' => $_POST['thumbnail_url'] ?? ($template['thumbnail_url'] ?? ''),
             'duration_seconds' => intval($_POST['duration_seconds'] ?? 30),
+            'remotion_composition_id' => !empty($_POST['remotion_composition_id']) ? Security::sanitizeString($_POST['remotion_composition_id']) : null,
+            'default_music_url' => !empty($_POST['default_music_url']) ? Security::sanitizeString($_POST['default_music_url']) : null,
             'is_premium' => isset($_POST['is_premium']) ? 1 : 0,
             'is_active' => isset($_POST['is_active']) ? 1 : 0,
         ];
 
         if ($_POST['form_action'] === 'create') {
-            $sql = "INSERT INTO templates (title, slug, description, category, subcategory, cultural_tradition, price_usd, price_inr, discounted_price_usd, discounted_price_inr, preview_video_url, thumbnail_url, duration_seconds, is_premium, is_active)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            $sql = "INSERT INTO templates (title, slug, description, category, subcategory, cultural_tradition, price_usd, price_inr, discounted_price_usd, discounted_price_inr, preview_video_url, thumbnail_url, duration_seconds, remotion_composition_id, default_music_url, is_premium, is_active)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             Database::query($sql, array_values($data));
             $newTemplateId = Database::lastInsertId();
 
@@ -379,7 +381,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['form_action'])) {
             header('Location: /admin/templates.php?action=edit&id=' . $newTemplateId . '&success=created');
             exit;
         } elseif ($_POST['form_action'] === 'update' && $templateId) {
-            $sql = "UPDATE templates SET title=?, slug=?, description=?, category=?, subcategory=?, cultural_tradition=?, price_usd=?, price_inr=?, discounted_price_usd=?, discounted_price_inr=?, preview_video_url=?, thumbnail_url=?, duration_seconds=?, is_premium=?, is_active=? WHERE id=?";
+            $sql = "UPDATE templates SET title=?, slug=?, description=?, category=?, subcategory=?, cultural_tradition=?, price_usd=?, price_inr=?, discounted_price_usd=?, discounted_price_inr=?, preview_video_url=?, thumbnail_url=?, duration_seconds=?, remotion_composition_id=?, default_music_url=?, is_premium=?, is_active=? WHERE id=?";
             $params = array_values($data);
             $params[] = $templateId;
             Database::query($sql, $params);
@@ -950,6 +952,54 @@ function getYouTubeEmbedUrl($url)
                 </div>
             </div>
 
+            <!-- Remotion Integration -->
+            <div
+                class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                <h3 class="text-lg font-bold mb-2">🎬 Remotion Integration</h3>
+                <p class="text-sm text-slate-500 mb-4">Connect this template to a Remotion video composition for automated
+                    rendering.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <label class="flex flex-col gap-2">
+                        <span class="text-sm font-medium flex items-center gap-2">
+                            Composition ID
+                            <span
+                                class="text-xs px-2 py-0.5 rounded bg-purple-100 text-purple-700 font-mono">Important</span>
+                        </span>
+                        <input type="text" name="remotion_composition_id"
+                            class="h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 font-mono"
+                            value="<?= Security::escape($template['remotion_composition_id'] ?? '') ?>"
+                            placeholder="e.g., RoyalWeddingGold">
+                        <p class="text-xs text-slate-500">Must exactly match the Composition ID in <code
+                                class="bg-slate-100 px-1 rounded">remotion-studio/src/Root.tsx</code></p>
+                    </label>
+
+                    <label class="flex flex-col gap-2">
+                        <span class="text-sm font-medium">Default Music URL <span
+                                class="text-slate-400 font-normal">Optional</span></span>
+                        <input type="text" name="default_music_url"
+                            class="h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20"
+                            value="<?= Security::escape($template['default_music_url'] ?? '') ?>"
+                            placeholder="/uploads/audio/wedding-default.mp3">
+                        <p class="text-xs text-slate-500">Fallback music if customer doesn't upload their own</p>
+                    </label>
+                </div>
+
+                <?php if (!empty($template['remotion_composition_id'])): ?>
+                    <div class="mt-4 p-3 rounded-lg bg-green-50 border border-green-200 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-green-600">check_circle</span>
+                        <span class="text-sm text-green-700">Linked to Remotion composition: <code
+                                class="font-mono font-bold"><?= Security::escape($template['remotion_composition_id']) ?></code></span>
+                    </div>
+                <?php else: ?>
+                    <div class="mt-4 p-3 rounded-lg bg-amber-50 border border-amber-200 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-amber-600">warning</span>
+                        <span class="text-sm text-amber-700">No Remotion composition linked. Videos cannot be auto-rendered
+                            until you set the Composition ID.</span>
+                    </div>
+                <?php endif; ?>
+            </div>
+
             <!-- Categories & Tags -->
             <div
                 class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
@@ -1188,7 +1238,8 @@ function getYouTubeEmbedUrl($url)
                                                 <div class="flex-1">
                                                     <p class="font-medium text-sm"><?= Security::escape($field['name']) ?></p>
                                                     <p class="text-xs text-slate-500"><?= $field['field_type'] ?> •
-                                                        <?= Security::escape($field['field_name']) ?></p>
+                                                        <?= Security::escape($field['field_name']) ?>
+                                                    </p>
                                                 </div>
                                                 <label class="flex items-center gap-1.5 text-xs">
                                                     <input type="checkbox" class="field-required rounded text-primary"
@@ -1725,7 +1776,8 @@ function getYouTubeEmbedUrl($url)
                 <?php foreach ($fieldPresetsByCategory as $category => $presets): ?>
                     <div class="mb-6">
                         <h4 class="font-bold text-sm uppercase text-slate-400 mb-3">
-                            <?= ucfirst(str_replace('_', ' ', $category)) ?></h4>
+                            <?= ucfirst(str_replace('_', ' ', $category)) ?>
+                        </h4>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             <?php foreach ($presets as $preset): ?>
                                 <button type="button" onclick="addFieldPreset(<?= json_encode($preset) ?>)"

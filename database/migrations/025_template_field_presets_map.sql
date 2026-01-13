@@ -17,3 +17,4 @@ CREATE TABLE IF NOT EXISTS `template_field_presets` (
     CONSTRAINT `fk_template_fields_template` FOREIGN KEY (`template_id`) REFERENCES `templates` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_template_fields_preset` FOREIGN KEY (`preset_id`) REFERENCES `field_presets` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+ 
