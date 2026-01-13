@@ -1780,7 +1780,8 @@ function getYouTubeEmbedUrl($url)
                         </h4>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             <?php foreach ($presets as $preset): ?>
-                                <button type="button" onclick="addFieldPreset(<?= json_encode($preset) ?>)"
+                                <button type="button"
+                                    onclick="addFieldPreset(<?= htmlspecialchars(json_encode($preset), ENT_QUOTES, 'UTF-8') ?>)"
                                     class="preset-option flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800 hover:bg-primary/10 hover:border-primary rounded-lg border border-slate-200 dark:border-slate-700 text-left transition-all"
                                     data-preset-id="<?= $preset['id'] ?>">
                                     <span
