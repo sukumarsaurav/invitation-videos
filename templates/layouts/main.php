@@ -582,8 +582,6 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
     <!-- Self-hosted fonts - preload for fast text rendering -->
     <link rel="preload" href="/assets/fonts/plus-jakarta-sans-variable.woff2" as="font" type="font/woff2" crossorigin>
 
-    <!-- Preconnect for CDN -->
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
     <!-- Main CSS - loaded async to prevent render blocking -->
     <link rel="preload" href="/assets/css/app.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -753,9 +751,9 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
             crossorigin>
     </noscript>
 
-    <!-- Alpine.js Collapse Plugin + Core - deferred -->
-    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Alpine.js Collapse Plugin + Core - self-hosted for better cache control -->
+    <script defer src="/assets/js/vendor/alpine-collapse.min.js"></script>
+    <script defer src="/assets/js/vendor/alpine.min.js"></script>
 
 </head>
 

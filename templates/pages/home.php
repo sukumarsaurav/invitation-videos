@@ -877,7 +877,8 @@ $sectionColors = [
 <div class="fixed bottom-0 left-0 right-0 z-40 sm:hidden shadow-lg" style="background-color: #2c0914;">
     <div class="grid grid-cols-4 py-2">
         <!-- Home Tab (Active) -->
-        <a href="/" class="flex flex-col items-center gap-0.5 py-1 text-primary" aria-label="Go to Home page">
+        <a href="/" class="flex flex-col items-center gap-0.5 py-1" style="color: #ffd700;"
+            aria-label="Go to Home page">
             <span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">home</span>
             <span class="text-[10px] font-medium">Home</span>
         </a>

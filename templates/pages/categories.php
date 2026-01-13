@@ -189,7 +189,7 @@ $metaDescription = 'Browse all template categories for video invitations includi
             <span class="text-[10px] font-medium">Home</span>
         </a>
         <!-- Category Tab (Active) -->
-        <a href="/categories" class="flex flex-col items-center gap-0.5 py-1 text-primary"
+        <a href="/categories" class="flex flex-col items-center gap-0.5 py-1" style="color: #ffd700;"
             aria-label="Browse Categories">
             <span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">category</span>
             <span class="text-[10px] font-medium">Categories</span>
