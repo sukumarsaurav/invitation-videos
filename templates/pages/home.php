@@ -438,47 +438,41 @@ $sectionColors = [
 
 <!-- How It Works -->
 
-<section id="how-it-works" class="py-12" style="background-color: var(--footer-bg-color, #ffffff);">
+<section id="how-it-works" class="py-12 bg-slate-50 dark:bg-slate-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
         <div class="text-center mb-10">
-            <h2 class="text-2xl sm:text-3xl font-bold mb-3" style="color: var(--footer-text-color, #0f172a);">How It
-                Works</h2>
-            <p style="color: var(--footer-text-color, #64748b); opacity: 0.8;">Create your invitation in 3 easy steps
-            </p>
+            <h2 class="text-2xl sm:text-3xl font-bold mb-3 text-slate-900 dark:text-white">How It Works</h2>
+            <p class="text-slate-600 dark:text-slate-300">Create your invitation in 3 easy steps</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div
-                class="text-center p-6 rounded-2xl bg-white/10 dark:bg-black/10 backdrop-blur-sm border border-white/20 dark:border-black/20">
+                class="text-center p-6 rounded-2xl bg-white dark:bg-slate-900 shadow-sm border border-slate-200 dark:border-slate-700">
                 <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                     <span class="material-symbols-outlined text-3xl text-primary">grid_view</span>
                 </div>
-                <h3 class="font-bold text-lg mb-2" style="color: var(--footer-text-color, #0f172a);">1. Choose Template
-                </h3>
-                <p class="text-sm" style="color: var(--footer-text-color, #64748b); opacity: 0.8;">Browse our collection
-                    and select the perfect
+                <h3 class="font-bold text-lg mb-2 text-slate-900 dark:text-white">1. Choose Template</h3>
+                <p class="text-sm text-slate-600 dark:text-slate-400">Browse our collection and select the perfect
                     design for your event.</p>
             </div>
 
             <div
-                class="text-center p-6 rounded-2xl bg-white/10 dark:bg-black/10 backdrop-blur-sm border border-white/20 dark:border-black/20">
+                class="text-center p-6 rounded-2xl bg-white dark:bg-slate-900 shadow-sm border border-slate-200 dark:border-slate-700">
                 <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                     <span class="material-symbols-outlined text-3xl text-primary">edit</span>
                 </div>
-                <h3 class="font-bold text-lg mb-2" style="color: var(--footer-text-color, #0f172a);">2. Customize</h3>
-                <p class="text-sm" style="color: var(--footer-text-color, #64748b); opacity: 0.8;">Add your details,
-                    photos, and music to personalize
+                <h3 class="font-bold text-lg mb-2 text-slate-900 dark:text-white">2. Customize</h3>
+                <p class="text-sm text-slate-600 dark:text-slate-400">Add your details, photos, and music to personalize
                     your invitation.</p>
             </div>
 
             <div
-                class="text-center p-6 rounded-2xl bg-white/10 dark:bg-black/10 backdrop-blur-sm border border-white/20 dark:border-black/20">
+                class="text-center p-6 rounded-2xl bg-white dark:bg-slate-900 shadow-sm border border-slate-200 dark:border-slate-700">
                 <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                     <span class="material-symbols-outlined text-3xl text-primary">share</span>
                 </div>
-                <h3 class="font-bold text-lg mb-2" style="color: var(--footer-text-color, #0f172a);">3. Share</h3>
-                <p class="text-sm" style="color: var(--footer-text-color, #64748b); opacity: 0.8;">Download your HD
-                    video and share it with friends
+                <h3 class="font-bold text-lg mb-2 text-slate-900 dark:text-white">3. Share</h3>
+                <p class="text-sm text-slate-600 dark:text-slate-400">Download your HD video and share it with friends
                     and family.</p>
             </div>
         </div>
@@ -883,23 +877,25 @@ $sectionColors = [
 <div class="fixed bottom-0 left-0 right-0 z-40 sm:hidden shadow-lg" style="background-color: #2c0914;">
     <div class="grid grid-cols-4 py-2">
         <!-- Home Tab (Active) -->
-        <a href="/" class="flex flex-col items-center gap-0.5 py-1 text-primary">
+        <a href="/" class="flex flex-col items-center gap-0.5 py-1 text-primary" aria-label="Go to Home page">
             <span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">home</span>
             <span class="text-[10px] font-medium">Home</span>
         </a>
         <!-- Category Tab -->
-        <a href="/categories" class="flex flex-col items-center gap-0.5 py-1" style="color: #b69b5b;">
+        <a href="/categories" class="flex flex-col items-center gap-0.5 py-1" style="color: #e8d9a6;"
+            aria-label="Browse Categories">
             <span class="material-symbols-outlined text-xl">category</span>
-            <span class="text-[10px] font-medium">Category</span>
+            <span class="text-[10px] font-medium">Categories</span>
         </a>
         <!-- Wishlist Tab -->
-        <a href="/wishlist" class="flex flex-col items-center gap-0.5 py-1" style="color: #b69b5b;">
+        <a href="/wishlist" class="flex flex-col items-center gap-0.5 py-1" style="color: #e8d9a6;"
+            aria-label="View Wishlist">
             <span class="material-symbols-outlined text-xl">favorite_border</span>
             <span class="text-[10px] font-medium">Wishlist</span>
         </a>
         <!-- Profile Tab -->
         <a href="<?= isset($_SESSION['user_id']) ? '/profile' : '/login' ?>"
-            class="flex flex-col items-center gap-0.5 py-1" style="color: #b69b5b;">
+            class="flex flex-col items-center gap-0.5 py-1" style="color: #e8d9a6;" aria-label="Go to Profile">
             <span class="material-symbols-outlined text-xl">person</span>
             <span class="text-[10px] font-medium">Profile</span>
         </a>

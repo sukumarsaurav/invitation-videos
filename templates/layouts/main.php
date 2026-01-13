@@ -618,8 +618,12 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
         <link rel="stylesheet" href="/assets/css/app.css">
     </noscript>
 
-    <!-- Section Positioning CSS for responsive homepage banners -->
-    <link rel="stylesheet" href="/assets/css/section-positioning.css">
+    <!-- Section Positioning CSS for responsive homepage banners - loaded async to prevent render blocking -->
+    <link rel="preload" href="/assets/css/section-positioning.css" as="style"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="/assets/css/section-positioning.css">
+    </noscript>
 
     <!-- Dynamic Theme Color Overrides (loaded after app.css) -->
     <style>
@@ -1388,9 +1392,12 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
 
                         <h4 class="font-bold mb-4">Legal</h4>
                         <ul class="space-y-2 text-sm text-slate-500">
-                            <li><a href="/privacy" class="hover:text-primary transition-colors">Privacy Policy</a></li>
-                            <li><a href="/terms" class="hover:text-primary transition-colors">Terms of Service</a></li>
-                            <li><a href="/refund" class="hover:text-primary transition-colors">Refund Policy</a></li>
+                            <li><a href="/privacy" class="hover:text-primary transition-colors"
+                                    aria-label="Read our Privacy Policy">Privacy Policy</a></li>
+                            <li><a href="/terms" class="hover:text-primary transition-colors"
+                                    aria-label="Read our Terms of Service">Terms of Service</a></li>
+                            <li><a href="/refund" class="hover:text-primary transition-colors"
+                                    aria-label="Read our Refund Policy">Refund Policy</a></li>
                         </ul>
                     </div>
                 </div>
@@ -1503,7 +1510,8 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
                         <p class="text-sm text-slate-300">
                             <span class="font-semibold text-white">We value your privacy.</span>
                             We use cookies to analyze site traffic and improve your experience.
-                            <a href="/privacy" class="underline hover:text-primary">Learn more</a>
+                            <a href="/privacy" class="underline hover:text-primary"
+                                aria-label="Read our privacy policy">Privacy Policy</a>
                         </p>
                     </div>
                     <div class="flex items-center gap-3 flex-shrink-0">
