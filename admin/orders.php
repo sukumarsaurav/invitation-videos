@@ -15,19 +15,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_video'])) {
     $orderId = intval($_POST['order_id']);
     $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
 
-    // For AJAX requests, we'll return JSON
+    // For AJAX requests, set JSON header early and handle all errors
     if ($isAjax) {
         header('Content-Type: application/json');
+        
+        // Custom error handler for AJAX
+        set_error_handler(function($errno, $errstr, $errfile, $errline) {
+            error_log("Video upload PHP error: $errstr in $errfile:$errline");
+            echo json_encode(['success' => false, 'error' => "Server error: $errstr"]);
+            exit;
+        });
     }
 
     try {
+        // Log upload attempt
+        error_log("Video upload attempt for order #$orderId - POST size: " . ($_SERVER['CONTENT_LENGTH'] ?? 'unknown'));
+        error_log("PHP upload_max_filesize: " . ini_get('upload_max_filesize') . ", post_max_size: " . ini_get('post_max_size'));
+        
         if (!isset($_FILES['video_file'])) {
-            throw new Exception('No file uploaded');
+            throw new Exception('No file uploaded. Check server upload limits.');
         }
 
         if ($_FILES['video_file']['error'] !== UPLOAD_ERR_OK) {
             $uploadErrors = [
-                UPLOAD_ERR_INI_SIZE => 'File exceeds server upload limit',
+                UPLOAD_ERR_INI_SIZE => 'File exceeds server upload limit (' . ini_get('upload_max_filesize') . ')',
                 UPLOAD_ERR_FORM_SIZE => 'File exceeds form upload limit',
                 UPLOAD_ERR_PARTIAL => 'File was only partially uploaded',
                 UPLOAD_ERR_NO_FILE => 'No file was uploaded',
@@ -35,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_video'])) {
                 UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk',
                 UPLOAD_ERR_EXTENSION => 'Upload blocked by extension',
             ];
-            $errorMsg = $uploadErrors[$_FILES['video_file']['error']] ?? 'Unknown upload error';
+            $errorMsg = $uploadErrors[$_FILES['video_file']['error']] ?? 'Unknown upload error (code: ' . $_FILES['video_file']['error'] . ')';
             throw new Exception($errorMsg);
         }
 
@@ -113,8 +124,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_video'])) {
 
         header('Location: /admin/orders.php?action=view&id=' . $orderId . '&error=' . urlencode($e->getMessage()));
         exit;
+    } catch (Throwable $t) {
+        error_log("Video upload fatal error for order #$orderId: " . $t->getMessage());
+
+        if ($isAjax) {
+            echo json_encode(['success' => false, 'error' => 'Server error: ' . $t->getMessage()]);
+            exit;
+        }
+
+        header('Location: /admin/orders.php?action=view&id=' . $orderId . '&error=' . urlencode('Server error occurred'));
+        exit;
     }
 }
+
 
 
 // Handle status update

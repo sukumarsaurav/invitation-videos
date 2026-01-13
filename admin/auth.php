@@ -55,7 +55,15 @@ function getAdminUser(): ?array
  */
 function requireAdminAuth(): void
 {
+    $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+
     if (!isAuthenticated()) {
+        if ($isAjax) {
+            header('Content-Type: application/json');
+            http_response_code(401);
+            echo json_encode(['success' => false, 'error' => 'Session expired. Please log in again.']);
+            exit;
+        }
         // Store the intended URL for redirect after login
         $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
         header('Location: /login');
@@ -63,6 +71,12 @@ function requireAdminAuth(): void
     }
 
     if (!isAdmin()) {
+        if ($isAjax) {
+            header('Content-Type: application/json');
+            http_response_code(403);
+            echo json_encode(['success' => false, 'error' => 'Access denied. Admin privileges required.']);
+            exit;
+        }
         // User is logged in but not an admin
         http_response_code(403);
         die('<h1>Access Denied</h1><p>You do not have admin privileges.</p><p><a href="/">Go to Home</a></p>');
@@ -74,6 +88,14 @@ function requireAdminAuth(): void
         // Session expired
         session_destroy();
         session_start();
+
+        if ($isAjax) {
+            header('Content-Type: application/json');
+            http_response_code(401);
+            echo json_encode(['success' => false, 'error' => 'Session expired. Please log in again.']);
+            exit;
+        }
+
         $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
         $_SESSION['error'] = 'Your session has expired. Please log in again.';
         header('Location: /login');
