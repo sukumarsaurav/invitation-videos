@@ -882,20 +882,20 @@ $sectionColors = [
             <span class="text-[10px] font-medium">Home</span>
         </a>
         <!-- Category Tab -->
-        <a href="/categories" class="flex flex-col items-center gap-0.5 py-1" style="color: #e8d9a6;"
+        <a href="/categories" class="flex flex-col items-center gap-0.5 py-1" style="color: #ffffff;"
             aria-label="Browse Categories">
             <span class="material-symbols-outlined text-xl">category</span>
             <span class="text-[10px] font-medium">Categories</span>
         </a>
         <!-- Wishlist Tab -->
-        <a href="/wishlist" class="flex flex-col items-center gap-0.5 py-1" style="color: #e8d9a6;"
+        <a href="/wishlist" class="flex flex-col items-center gap-0.5 py-1" style="color: #ffffff;"
             aria-label="View Wishlist">
             <span class="material-symbols-outlined text-xl">favorite_border</span>
             <span class="text-[10px] font-medium">Wishlist</span>
         </a>
         <!-- Profile Tab -->
         <a href="<?= isset($_SESSION['user_id']) ? '/profile' : '/login' ?>"
-            class="flex flex-col items-center gap-0.5 py-1" style="color: #e8d9a6;" aria-label="Go to Profile">
+            class="flex flex-col items-center gap-0.5 py-1" style="color: #ffffff;" aria-label="Go to Profile">
             <span class="material-symbols-outlined text-xl">person</span>
             <span class="text-[10px] font-medium">Profile</span>
         </a>
