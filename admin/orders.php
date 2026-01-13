@@ -89,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_video'])) {
         // Log success
         error_log("Video uploaded successfully for order #$orderId: $videoUrl");
 
-        // Send order completed email
+        // Send order completed email (don't let email failures affect upload success)
         try {
             $orderData = Database::fetchOne(
                 "SELECT o.*, t.title as template_title FROM orders o LEFT JOIN templates t ON o.template_id = t.id WHERE o.id = ?",
@@ -101,8 +101,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_video'])) {
                 $orderData['output_video_url'] = $videoUrl;
                 $orderData['video_expires_at'] = $expiresAt;
                 EmailService::sendOrderCompletedEmail($orderData, $userData);
+                error_log("Order completed email sent for order #$orderId");
             }
-        } catch (Exception $emailError) {
+        } catch (Throwable $emailError) {
+            // Catch ALL errors including class not found - email failure should NOT fail the upload
             error_log("Order completed email failed for order #$orderId: " . $emailError->getMessage());
         }
 
