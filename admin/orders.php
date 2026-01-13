@@ -353,26 +353,53 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
                         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                             <?php foreach ($orderUploads as $upload): ?>
                                 <?php
-                                // Convert absolute server path to web URL
-                                $webUrl = '/uploads/' . $upload['stored_filename'];
+                                // Construct web URL from file_path
+                                // file_path contains absolute server path like /home/.../public_html/uploads/filename.ext
+                                // We need to extract /uploads/filename.ext
+                                $filePath = $upload['file_path'] ?? '';
+                                $storedFilename = $upload['stored_filename'] ?? '';
+
+                                // Try multiple methods to get the web URL
+                                if (!empty($storedFilename)) {
+                                    $webUrl = '/uploads/' . $storedFilename;
+                                } elseif (strpos($filePath, '/uploads/') !== false) {
+                                    // Extract from full path
+                                    $webUrl = substr($filePath, strpos($filePath, '/uploads/'));
+                                } elseif (strpos($filePath, 'uploads/') !== false) {
+                                    $webUrl = '/' . substr($filePath, strpos($filePath, 'uploads/'));
+                                } else {
+                                    // Fallback: just use the basename
+                                    $webUrl = '/uploads/' . basename($filePath);
+                                }
                                 ?>
                                 <div class="group relative">
                                     <?php if ($upload['file_type'] === 'image'): ?>
                                         <div class="aspect-square rounded-lg overflow-hidden bg-slate-100 border border-slate-200">
                                             <img src="<?= Security::escape($webUrl) ?>"
-                                                alt="<?= Security::escape($upload['field_name']) ?>" class="w-full h-full object-cover">
+                                                alt="<?= Security::escape($upload['field_name']) ?>" class="w-full h-full object-cover"
+                                                onerror="this.onerror=null; this.src='/assets/images/placeholder.jpg'; this.parentElement.innerHTML='<div class=\'flex flex-col items-center justify-center h-full text-slate-400\'><span class=\'material-symbols-outlined text-3xl\'>broken_image</span><span class=\'text-xs mt-1\'>Image not found</span></div>';">
                                         </div>
                                     <?php else: ?>
+                                        <!-- Audio file with player -->
                                         <div
-                                            class="aspect-square rounded-lg overflow-hidden bg-slate-100 border border-slate-200 flex items-center justify-center">
-                                            <span class="material-symbols-outlined text-4xl text-slate-400">audio_file</span>
+                                            class="aspect-square rounded-lg overflow-hidden bg-slate-100 border border-slate-200 flex flex-col items-center justify-center p-3">
+                                            <span class="material-symbols-outlined text-4xl text-primary mb-2">audio_file</span>
+                                            <audio controls class="w-full h-8" style="max-width: 100%;">
+                                                <source src="<?= Security::escape($webUrl) ?>"
+                                                    type="<?= Security::escape($upload['mime_type'] ?? 'audio/mpeg') ?>">
+                                                Your browser does not support audio.
+                                            </audio>
                                         </div>
                                     <?php endif; ?>
                                     <p class="text-xs text-slate-500 mt-2 truncate capitalize">
                                         <?= str_replace('_', ' ', $upload['field_name']) ?>
                                     </p>
+                                    <p class="text-xs text-slate-400 truncate"
+                                        title="<?= Security::escape($upload['original_filename'] ?? '') ?>">
+                                        <?= Security::escape($upload['original_filename'] ?? basename($filePath)) ?>
+                                    </p>
                                     <a href="<?= Security::escape($webUrl) ?>"
-                                        download="<?= Security::escape($upload['original_filename']) ?>"
+                                        download="<?= Security::escape($upload['original_filename'] ?? basename($filePath)) ?>"
                                         class="absolute top-2 right-2 p-1.5 bg-white/90 rounded-lg shadow opacity-0 group-hover:opacity-100 transition-opacity">
                                         <span class="material-symbols-outlined text-sm">download</span>
                                     </a>
@@ -380,6 +407,41 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
                             <?php endforeach; ?>
                         </div>
                     </div>
+                </div>
+            <?php endif; ?>
+
+            <!-- Debug: Show actual file paths (add ?debug=1 to URL to see) -->
+            <?php if (!empty($orderUploads) && isset($_GET['debug'])): ?>
+                <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-4">
+                    <h4 class="font-bold text-yellow-800 mb-2">🔧 Debug: File Upload Data</h4>
+                    <?php foreach ($orderUploads as $upload): ?>
+                        <?php
+                        // Replicate the URL logic for debug
+                        $filePath = $upload['file_path'] ?? '';
+                        $storedFilename = $upload['stored_filename'] ?? '';
+                        if (!empty($storedFilename)) {
+                            $debugUrl = '/uploads/' . $storedFilename;
+                        } elseif (strpos($filePath, '/uploads/') !== false) {
+                            $debugUrl = substr($filePath, strpos($filePath, '/uploads/'));
+                        } elseif (strpos($filePath, 'uploads/') !== false) {
+                            $debugUrl = '/' . substr($filePath, strpos($filePath, 'uploads/'));
+                        } else {
+                            $debugUrl = '/uploads/' . basename($filePath);
+                        }
+                        ?>
+                        <div class="text-xs font-mono bg-white p-2 rounded mb-2 overflow-x-auto">
+                            <p><strong>field_name:</strong> <?= Security::escape($upload['field_name'] ?? 'NULL') ?></p>
+                            <p><strong>file_type:</strong> <?= Security::escape($upload['file_type'] ?? 'NULL') ?></p>
+                            <p><strong>stored_filename:</strong> <?= Security::escape($upload['stored_filename'] ?? 'NULL') ?></p>
+                            <p><strong>file_path:</strong> <?= Security::escape($upload['file_path'] ?? 'NULL') ?></p>
+                            <p><strong>original_filename:</strong> <?= Security::escape($upload['original_filename'] ?? 'NULL') ?>
+                            </p>
+                            <p><strong>mime_type:</strong> <?= Security::escape($upload['mime_type'] ?? 'NULL') ?></p>
+                            <p class="text-green-700"><strong>Generated webUrl:</strong> <?= Security::escape($debugUrl) ?></p>
+                            <p><a href="<?= Security::escape($debugUrl) ?>" target="_blank" class="text-blue-600 underline">Test
+                                    Link</a></p>
+                        </div>
+                    <?php endforeach; ?>
                 </div>
             <?php endif; ?>
 

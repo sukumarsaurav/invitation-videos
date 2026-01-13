@@ -222,31 +222,43 @@ class DraftOrderService
      */
     private function moveUploads(int $draftId, int $orderId): void
     {
+        error_log("moveUploads: Starting to move uploads from draft #{$draftId} to order #{$orderId}");
+
         // Get all draft uploads
         $uploads = \Database::fetchAll(
             "SELECT * FROM draft_order_uploads WHERE draft_id = ?",
             [$draftId]
         );
 
+        error_log("moveUploads: Found " . count($uploads) . " uploads to move");
+
         foreach ($uploads as $upload) {
-            \Database::query(
-                "INSERT INTO order_uploads (order_id, field_name, file_type, original_filename, stored_filename, file_path, mime_type, file_size)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                [
-                    $orderId,
-                    $upload['field_name'],
-                    $upload['file_type'],
-                    $upload['original_filename'],
-                    $upload['stored_filename'],
-                    $upload['file_path'],
-                    $upload['mime_type'],
-                    $upload['file_size']
-                ]
-            );
+            error_log("moveUploads: Copying file '{$upload['stored_filename']}' (type: {$upload['file_type']})");
+
+            try {
+                \Database::query(
+                    "INSERT INTO order_uploads (order_id, field_name, file_type, original_filename, stored_filename, file_path, mime_type, file_size)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    [
+                        $orderId,
+                        $upload['field_name'],
+                        $upload['file_type'],
+                        $upload['original_filename'],
+                        $upload['stored_filename'],
+                        $upload['file_path'],
+                        $upload['mime_type'],
+                        $upload['file_size']
+                    ]
+                );
+                error_log("moveUploads: Successfully inserted upload for field '{$upload['field_name']}'");
+            } catch (\Exception $e) {
+                error_log("moveUploads: ERROR inserting upload - " . $e->getMessage());
+            }
         }
 
         // Delete draft uploads (files stay, just change ownership)
         \Database::query("DELETE FROM draft_order_uploads WHERE draft_id = ?", [$draftId]);
+        error_log("moveUploads: Deleted draft uploads for draft #{$draftId}");
     }
 
     /**

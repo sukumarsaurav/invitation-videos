@@ -135,6 +135,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
+        // IMPORTANT: Handle file uploads IMMEDIATELY at each step, not just final step
+        // Files are stored temporarily and the paths saved in session
+        if (!isset($_SESSION['customize_uploads'])) {
+            $_SESSION['customize_uploads'] = [];
+        }
+
+        foreach ($_FILES as $fieldName => $file) {
+            if (!empty($file['tmp_name']) && $file['error'] === UPLOAD_ERR_OK) {
+                $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+                $storedFilename = uniqid() . '_' . $fieldName . '.' . $extension;
+                $filePath = UPLOAD_PATH . $storedFilename;
+
+                if (move_uploaded_file($file['tmp_name'], $filePath)) {
+                    // Store file info in session for later when draft is created
+                    $_SESSION['customize_uploads'][$fieldName] = [
+                        'stored_filename' => $storedFilename,
+                        'file_path' => $filePath,
+                        'original_filename' => $file['name'],
+                        'mime_type' => $file['type'],
+                        'file_size' => $file['size']
+                    ];
+                    error_log("customize.php: Saved upload for field '{$fieldName}' to {$filePath}");
+                } else {
+                    error_log("customize.php: Failed to move uploaded file for field '{$fieldName}'");
+                }
+            }
+        }
+
         // Store timezone
         if (!empty($_POST['user_timezone'])) {
             $_SESSION['user_timezone'] = $_POST['user_timezone'];
@@ -208,22 +236,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $draftId = $draft['id'];
             $draftToken = $draft['draft_token'];
 
-            // Handle file uploads - save to draft_order_uploads
-            foreach ($_FILES as $fieldName => $file) {
-                if (!empty($file['tmp_name'])) {
-                    $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-                    $storedFilename = uniqid() . '_' . $fieldName . '.' . $extension;
-                    $filePath = UPLOAD_PATH . $storedFilename;
+            // Add all uploads from session (collected from all steps)
+            $sessionUploads = $_SESSION['customize_uploads'] ?? [];
+            error_log("customize.php: Final step - found " . count($sessionUploads) . " uploads in session");
 
-                    if (move_uploaded_file($file['tmp_name'], $filePath)) {
-                        $draftService->addUpload($draftId, $fieldName, $file, $filePath);
-                    }
-                }
+            foreach ($sessionUploads as $fieldName => $uploadInfo) {
+                $fileInfo = [
+                    'name' => $uploadInfo['original_filename'],
+                    'type' => $uploadInfo['mime_type'],
+                    'size' => $uploadInfo['file_size']
+                ];
+                $draftService->addUpload(
+                    $draftId,
+                    $fieldName,
+                    $fileInfo,
+                    $uploadInfo['file_path']
+                );
+                error_log("customize.php: Added upload record for field '{$fieldName}'");
             }
 
             // Clear session data
             unset($_SESSION['customize_data']);
             unset($_SESSION['customize_template']);
+            unset($_SESSION['customize_uploads']);
 
             // Redirect to checkout with draft token
             header('Location: /checkout/' . $draftToken);
@@ -235,6 +270,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Get stored values for current step
 $storedValues = $_SESSION['customize_data'] ?? [];
+$storedUploads = $_SESSION['customize_uploads'] ?? [];
 
 // Calculate progress
 $progressPercent = $totalSteps > 0 ? round((($currentStepIndex + 1) / $totalSteps) * 100) : 0;
