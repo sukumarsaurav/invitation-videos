@@ -134,6 +134,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_action'])) {
             Database::query("UPDATE template_thumbnails SET is_primary = 1 WHERE id = ?", [$thumbId]);
             echo json_encode(['success' => true]);
             exit;
+
+        case 'save_template_fields':
+            $templateId = intval($_POST['template_id'] ?? 0);
+            $fields = json_decode($_POST['fields'] ?? '[]', true);
+
+            if ($templateId <= 0) {
+                echo json_encode(['success' => false, 'error' => 'Invalid template ID']);
+                exit;
+            }
+
+            // Clear existing field mappings
+            Database::query("DELETE FROM template_field_presets WHERE template_id = ?", [$templateId]);
+
+            // Insert new mappings
+            if (is_array($fields)) {
+                foreach ($fields as $order => $field) {
+                    $presetId = intval($field['preset_id'] ?? 0);
+                    $stepNumber = intval($field['step_number'] ?? 1);
+                    $isRequired = isset($field['is_required']) ? (int) $field['is_required'] : 1;
+
+                    if ($presetId > 0) {
+                        Database::query(
+                            "INSERT INTO template_field_presets (template_id, preset_id, is_required, display_order, step_number) VALUES (?, ?, ?, ?, ?)",
+                            [$templateId, $presetId, $isRequired, $order, $stepNumber]
+                        );
+                    }
+                }
+            }
+
+            echo json_encode(['success' => true, 'message' => 'Fields saved successfully']);
+            exit;
+
+        case 'get_template_fields':
+            $templateId = intval($_POST['template_id'] ?? 0);
+
+            $fields = Database::fetchAll(
+                "SELECT tfp.*, fp.name, fp.field_name, fp.field_type, fp.placeholder, fp.icon, fp.help_text, fp.sample_value, fp.category as preset_category
+                 FROM template_field_presets tfp
+                 JOIN field_presets fp ON tfp.preset_id = fp.id
+                 WHERE tfp.template_id = ?
+                 ORDER BY tfp.step_number, tfp.display_order",
+                [$templateId]
+            );
+
+            echo json_encode(['success' => true, 'fields' => $fields]);
+            exit;
     }
 }
 
@@ -475,6 +521,34 @@ if ($templateId) {
     $templatePujas = array_column(Database::fetchAll("SELECT puja_id FROM template_puja_map WHERE template_id = ?", [$templateId]), 'puja_id');
     $templateFestivals = array_column(Database::fetchAll("SELECT festival_id FROM template_festival_map WHERE template_id = ?", [$templateId]), 'festival_id');
     $templateLanguages = array_column(Database::fetchAll("SELECT language_id FROM template_language_map WHERE template_id = ?", [$templateId]), 'language_id');
+}
+
+// Fetch all field presets for the Required Fields editor
+$allFieldPresets = Database::fetchAll(
+    "SELECT id, name, field_name, field_type, placeholder, icon, help_text, category 
+     FROM field_presets 
+     WHERE is_active = 1 
+     ORDER BY category, display_order"
+);
+
+// Group field presets by category for easier display
+$fieldPresetsByCategory = [];
+foreach ($allFieldPresets as $preset) {
+    $cat = $preset['category'] ?? 'general';
+    $fieldPresetsByCategory[$cat][] = $preset;
+}
+
+// Get template's currently assigned fields (for edit mode)
+$templateFields = [];
+if ($templateId) {
+    $templateFields = Database::fetchAll(
+        "SELECT tfp.*, fp.name, fp.field_name, fp.field_type, fp.placeholder, fp.icon, fp.help_text, fp.category as preset_category
+         FROM template_field_presets tfp
+         JOIN field_presets fp ON tfp.preset_id = fp.id
+         WHERE tfp.template_id = ?
+         ORDER BY tfp.step_number, tfp.display_order",
+        [$templateId]
+    );
 }
 
 // Helper function to save category mappings
@@ -1054,383 +1128,481 @@ function getYouTubeEmbedUrl($url)
                 </div>
             </div>
 
-            </div>
-
-            <!-- Sidebar -->
-            <div class="space-y-6">
-
-                <!-- Status -->
+            <!-- Required Fields for Checkout -->
+            <?php if ($action === 'edit' && $templateId): ?>
                 <div
                     class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
-                    <h3 class="text-lg font-bold mb-4">Status</h3>
-
-                    <div class="space-y-3">
-                        <label class="flex items-center gap-3 cursor-pointer">
-                            <input type="checkbox" name="is_active" value="1" <?= ($template['is_active'] ?? 1) ? 'checked' : '' ?> class="rounded border-slate-300 text-primary focus:ring-primary">
-                            <span class="text-sm font-medium">Active (visible to users)</span>
-                        </label>
-
-                        <label class="flex items-center gap-3 cursor-pointer">
-                            <input type="checkbox" name="is_premium" value="1" <?= ($template['is_premium'] ?? 0) ? 'checked' : '' ?> class="rounded border-slate-300 text-primary focus:ring-primary">
-                            <span class="text-sm font-medium">Premium Template</span>
-                        </label>
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-lg font-bold">Required Fields</h3>
+                            <p class="text-sm text-slate-500">Select which fields customers must fill during checkout</p>
+                        </div>
+                        <button type="button" onclick="openFieldSelector()"
+                            class="flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-white text-sm font-bold py-2 px-4 rounded-lg transition-colors">
+                            <span class="material-symbols-outlined text-lg">add</span>
+                            Add Field
+                        </button>
                     </div>
 
-                    <div class="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
-                        <button type="submit"
-                            class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-4 rounded-lg shadow-sm shadow-primary/30 transition-all flex items-center justify-center gap-2">
+                    <!-- Steps Tabs -->
+                    <div class="border-b border-slate-200 dark:border-slate-700 mb-4">
+                        <div class="flex gap-1 -mb-px" id="step-tabs">
+                            <button type="button" data-step="1" onclick="switchStep(1)"
+                                class="step-tab px-4 py-2.5 text-sm font-medium border-b-2 border-primary text-primary transition-colors">
+                                Step 1: Event Details
+                            </button>
+                            <button type="button" data-step="2" onclick="switchStep(2)"
+                                class="step-tab px-4 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-primary transition-colors">
+                                Step 2: Personal Info
+                            </button>
+                            <button type="button" data-step="3" onclick="switchStep(3)"
+                                class="step-tab px-4 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-primary transition-colors">
+                                Step 3: Media & Extras
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Fields Container for Each Step -->
+                    <div id="fields-container">
+                        <?php for ($step = 1; $step <= 3; $step++): ?>
+                            <div class="step-panel <?= $step > 1 ? 'hidden' : '' ?>" data-step="<?= $step ?>">
+                                <div class="space-y-2 sortable-fields" data-step="<?= $step ?>">
+                                    <?php
+                                    $stepFields = array_filter($templateFields, fn($f) => ($f['step_number'] ?? 1) == $step);
+                                    if (empty($stepFields)):
+                                        ?>
+                                        <div class="no-fields-msg text-center py-8 text-slate-400">
+                                            <span class="material-symbols-outlined text-3xl">input</span>
+                                            <p class="text-sm mt-2">No fields in Step <?= $step ?></p>
+                                            <p class="text-xs">Click "Add Field" to add customization fields</p>
+                                        </div>
+                                    <?php else:
+                                        foreach ($stepFields as $field):
+                                            ?>
+                                            <div class="field-item flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 cursor-move"
+                                                data-preset-id="<?= $field['preset_id'] ?>" data-step="<?= $step ?>"
+                                                data-required="<?= $field['is_required'] ?>">
+                                                <span class="material-symbols-outlined text-slate-400 drag-handle">drag_indicator</span>
+                                                <span
+                                                    class="material-symbols-outlined text-primary"><?= Security::escape($field['icon'] ?? 'text_fields') ?></span>
+                                                <div class="flex-1">
+                                                    <p class="font-medium text-sm"><?= Security::escape($field['name']) ?></p>
+                                                    <p class="text-xs text-slate-500"><?= $field['field_type'] ?> •
+                                                        <?= Security::escape($field['field_name']) ?></p>
+                                                </div>
+                                                <label class="flex items-center gap-1.5 text-xs">
+                                                    <input type="checkbox" class="field-required rounded text-primary"
+                                                        <?= $field['is_required'] ? 'checked' : '' ?>>
+                                                    <span class="text-slate-500">Required</span>
+                                                </label>
+                                                <select class="field-step text-xs border-0 bg-transparent text-slate-500 cursor-pointer"
+                                                    onchange="moveFieldToStep(this)">
+                                                    <option value="1" <?= $step == 1 ? 'selected' : '' ?>>Step 1</option>
+                                                    <option value="2" <?= $step == 2 ? 'selected' : '' ?>>Step 2</option>
+                                                    <option value="3" <?= $step == 3 ? 'selected' : '' ?>>Step 3</option>
+                                                </select>
+                                                <button type="button" onclick="removeField(this)"
+                                                    class="p-1.5 hover:bg-red-50 rounded text-slate-400 hover:text-red-500 transition-colors">
+                                                    <span class="material-symbols-outlined text-lg">close</span>
+                                                </button>
+                                            </div>
+                                            <?php
+                                        endforeach;
+                                    endif;
+                                    ?>
+                                </div>
+                            </div>
+                        <?php endfor; ?>
+                    </div>
+
+                    <!-- Save Fields Button -->
+                    <div class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                        <button type="button" onclick="saveTemplateFields()"
+                            class="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-5 rounded-lg transition-colors">
                             <span class="material-symbols-outlined text-lg">save</span>
-                            <?= $action === 'new' ? 'Create Template' : 'Save Changes' ?>
+                            Save Fields
                         </button>
                     </div>
                 </div>
+            <?php endif; ?>
 
-                <!-- Media -->
-                <div
-                    class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
-                    <h3 class="text-lg font-bold mb-4">Media</h3>
+        </div>
 
-                    <div class="space-y-4">
-                        <div>
-                            <label class="text-sm font-medium block mb-2">Thumbnail Image</label>
-                            <div id="thumbnail-preview"
-                                class="aspect-[9/16] rounded-lg bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors overflow-hidden"
-                                onclick="document.getElementById('thumbnail-input').click()"
-                                style="<?= !empty($template['thumbnail_url']) ? "background-image: url('" . Security::escape($template['thumbnail_url']) . "'); background-size: cover; background-position: center;" : '' ?>">
-                                <?php if (empty($template['thumbnail_url'])): ?>
-                                        <div class="text-center">
-                                            <span class="material-symbols-outlined text-3xl text-slate-400">cloud_upload</span>
-                                            <p class="text-xs text-slate-500 mt-1">Click to upload</p>
-                                        </div>
-                                <?php endif; ?>
-                            </div>
-                            <input type="file" id="thumbnail-input" name="thumbnail" accept="image/*" class="hidden"
-                                onchange="previewThumbnail(this)">
+        <!-- Sidebar -->
+        <div class="space-y-6">
+
+            <!-- Status -->
+            <div
+                class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                <h3 class="text-lg font-bold mb-4">Status</h3>
+
+                <div class="space-y-3">
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" name="is_active" value="1" <?= ($template['is_active'] ?? 1) ? 'checked' : '' ?> class="rounded border-slate-300 text-primary focus:ring-primary">
+                        <span class="text-sm font-medium">Active (visible to users)</span>
+                    </label>
+
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" name="is_premium" value="1" <?= ($template['is_premium'] ?? 0) ? 'checked' : '' ?> class="rounded border-slate-300 text-primary focus:ring-primary">
+                        <span class="text-sm font-medium">Premium Template</span>
+                    </label>
+                </div>
+
+                <div class="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
+                    <button type="submit"
+                        class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-4 rounded-lg shadow-sm shadow-primary/30 transition-all flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-lg">save</span>
+                        <?= $action === 'new' ? 'Create Template' : 'Save Changes' ?>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Media -->
+            <div
+                class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                <h3 class="text-lg font-bold mb-4">Media</h3>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-sm font-medium block mb-2">Thumbnail Image</label>
+                        <div id="thumbnail-preview"
+                            class="aspect-[9/16] rounded-lg bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors overflow-hidden"
+                            onclick="document.getElementById('thumbnail-input').click()"
+                            style="<?= !empty($template['thumbnail_url']) ? "background-image: url('" . Security::escape($template['thumbnail_url']) . "'); background-size: cover; background-position: center;" : '' ?>">
+                            <?php if (empty($template['thumbnail_url'])): ?>
+                                <div class="text-center">
+                                    <span class="material-symbols-outlined text-3xl text-slate-400">cloud_upload</span>
+                                    <p class="text-xs text-slate-500 mt-1">Click to upload</p>
+                                </div>
+                            <?php endif; ?>
                         </div>
+                        <input type="file" id="thumbnail-input" name="thumbnail" accept="image/*" class="hidden"
+                            onchange="previewThumbnail(this)">
+                    </div>
 
-                        <div>
-                            <label class="text-sm font-medium block mb-2">YouTube Preview Video URL</label>
-                            <input type="text" name="preview_video_url" id="youtube-url"
-                                class="w-full h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
-                                value="<?= Security::escape($template['preview_video_url'] ?? '') ?>"
-                                placeholder="https://youtube.com/watch?v=..." onchange="updateYouTubePreview()">
+                    <div>
+                        <label class="text-sm font-medium block mb-2">YouTube Preview Video URL</label>
+                        <input type="text" name="preview_video_url" id="youtube-url"
+                            class="w-full h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+                            value="<?= Security::escape($template['preview_video_url'] ?? '') ?>"
+                            placeholder="https://youtube.com/watch?v=..." onchange="updateYouTubePreview()">
 
-                            <!-- YouTube Preview -->
-                            <?php $embedUrl = getYouTubeEmbedUrl($template['preview_video_url'] ?? ''); ?>
-                            <div id="youtube-preview" class="mt-3 <?= empty($embedUrl) ? 'hidden' : '' ?>">
-                                <iframe id="youtube-iframe" src="<?= $embedUrl ?>" class="w-full aspect-video rounded-lg"
-                                    frameborder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowfullscreen></iframe>
-                            </div>
+                        <!-- YouTube Preview -->
+                        <?php $embedUrl = getYouTubeEmbedUrl($template['preview_video_url'] ?? ''); ?>
+                        <div id="youtube-preview" class="mt-3 <?= empty($embedUrl) ? 'hidden' : '' ?>">
+                            <iframe id="youtube-iframe" src="<?= $embedUrl ?>" class="w-full aspect-video rounded-lg"
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen></iframe>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <?php if ($action === 'edit' && $templateId): ?>
-                        <!-- Gallery Images -->
-                        <div
-                            class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
-                            <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-lg font-bold">Gallery Images</h3>
-                                <button type="button" onclick="document.getElementById('gallery-input').click()"
-                                    class="flex items-center gap-1 text-primary text-sm font-bold hover:underline">
-                                    <span class="material-symbols-outlined text-lg">add_photo_alternate</span>
-                                    Add Image
+            <?php if ($action === 'edit' && $templateId): ?>
+                <!-- Gallery Images -->
+                <div
+                    class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold">Gallery Images</h3>
+                        <button type="button" onclick="document.getElementById('gallery-input').click()"
+                            class="flex items-center gap-1 text-primary text-sm font-bold hover:underline">
+                            <span class="material-symbols-outlined text-lg">add_photo_alternate</span>
+                            Add Image
+                        </button>
+                    </div>
+                    <input type="file" id="gallery-input" accept="image/*" class="hidden" onchange="uploadGalleryImage(this)">
+
+                    <div id="gallery-container" class="grid grid-cols-3 gap-2">
+                        <?php foreach ($galleryImages as $img): ?>
+                            <div class="relative group aspect-[9/16] rounded-lg overflow-hidden bg-slate-100"
+                                data-image-id="<?= $img['id'] ?>">
+                                <img src="<?= Security::escape($img['image_url']) ?>" alt="Gallery image"
+                                    class="w-full h-full object-cover">
+                                <button type="button" onclick="deleteGalleryImage(<?= $img['id'] ?>)"
+                                    class="absolute top-1 right-1 size-6 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-sm">close</span>
                                 </button>
                             </div>
-                            <input type="file" id="gallery-input" accept="image/*" class="hidden" onchange="uploadGalleryImage(this)">
+                        <?php endforeach; ?>
 
-                            <div id="gallery-container" class="grid grid-cols-3 gap-2">
-                                <?php foreach ($galleryImages as $img): ?>
-                                        <div class="relative group aspect-[9/16] rounded-lg overflow-hidden bg-slate-100"
-                                            data-image-id="<?= $img['id'] ?>">
-                                            <img src="<?= Security::escape($img['image_url']) ?>" alt="Gallery image"
-                                                class="w-full h-full object-cover">
-                                            <button type="button" onclick="deleteGalleryImage(<?= $img['id'] ?>)"
-                                                class="absolute top-1 right-1 size-6 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <?php if (empty($galleryImages)): ?>
+                            <div id="no-gallery-msg" class="col-span-3 text-center py-6 text-slate-400">
+                                <span class="material-symbols-outlined text-3xl">collections</span>
+                                <p class="text-sm mt-1">No gallery images yet</p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-3">Add multiple preview images for the template. These will be shown as
+                        a gallery on the template detail page.</p>
+                </div>
+
+                <!-- Language-Specific Thumbnails -->
+                <div
+                    class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-lg font-bold">Language Thumbnails</h3>
+                            <p class="text-xs text-slate-500">Upload different thumbnails for each language. Users will see
+                                these based on their language selection.</p>
+                        </div>
+                    </div>
+
+                    <!-- Language Tabs -->
+                    <div class="border-b border-slate-200 dark:border-slate-700 mb-4">
+                        <div class="flex gap-1 -mb-px overflow-x-auto" id="lang-tabs">
+                            <?php
+                            $languages = Database::fetchAll("SELECT code, name, native_name FROM languages ORDER BY display_order");
+                            foreach ($languages as $idx => $lang):
+                                $isFirst = ($idx === 0);
+                                ?>
+                                <button type="button" data-lang="<?= $lang['code'] ?>"
+                                    onclick="switchLangTab('<?= $lang['code'] ?>')"
+                                    class="lang-tab px-4 py-2 text-sm font-medium border-b-2 whitespace-nowrap transition-colors <?= $isFirst ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-primary' ?>">
+                                    <?= Security::escape($lang['native_name']) ?>
+                                    <span class="text-xs text-slate-400">(<?= $lang['code'] ?>)</span>
+                                </button>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+
+                    <!-- Language Content Panels -->
+                    <?php foreach ($languages as $idx => $lang):
+                        $langThumbnails = Database::fetchAll(
+                            "SELECT * FROM template_thumbnails WHERE template_id = ? AND language_code = ? ORDER BY is_primary DESC, display_order",
+                            [$templateId, $lang['code']]
+                        );
+                        $isFirst = ($idx === 0);
+                        ?>
+                        <div class="lang-panel <?= $isFirst ? '' : 'hidden' ?>" data-lang="<?= $lang['code'] ?>">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-sm font-medium text-slate-700"><?= Security::escape($lang['name']) ?>
+                                    Thumbnails</span>
+                                <button type="button"
+                                    onclick="document.getElementById('lang-thumb-input-<?= $lang['code'] ?>').click()"
+                                    class="flex items-center gap-1 text-primary text-sm font-bold hover:underline">
+                                    <span class="material-symbols-outlined text-lg">add_photo_alternate</span>
+                                    Add
+                                </button>
+                            </div>
+                            <input type="file" id="lang-thumb-input-<?= $lang['code'] ?>" accept="image/*" class="hidden"
+                                onchange="uploadLangThumbnail(this, '<?= $lang['code'] ?>')">
+
+                            <div class="grid grid-cols-4 gap-2 lang-thumb-grid" data-lang="<?= $lang['code'] ?>">
+                                <?php foreach ($langThumbnails as $thumb): ?>
+                                    <div class="relative group aspect-[9/16] rounded-lg overflow-hidden bg-slate-100 <?= $thumb['is_primary'] ? 'ring-2 ring-primary' : '' ?>"
+                                        data-thumb-id="<?= $thumb['id'] ?>">
+                                        <img src="<?= Security::escape($thumb['thumbnail_url']) ?>" alt="Language thumbnail"
+                                            class="w-full h-full object-cover">
+                                        <?php if ($thumb['is_primary']): ?>
+                                            <span
+                                                class="absolute top-1 left-1 bg-primary text-white text-xs px-1.5 py-0.5 rounded">Primary</span>
+                                        <?php endif; ?>
+                                        <div
+                                            class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+                                            <button type="button"
+                                                onclick="setLangThumbPrimary(<?= $thumb['id'] ?>, '<?= $lang['code'] ?>')"
+                                                class="size-7 rounded-full bg-white text-primary flex items-center justify-center"
+                                                title="Set as primary">
+                                                <span class="material-symbols-outlined text-sm">star</span>
+                                            </button>
+                                            <button type="button"
+                                                onclick="deleteLangThumbnail(<?= $thumb['id'] ?>, '<?= $lang['code'] ?>')"
+                                                class="size-7 rounded-full bg-red-500 text-white flex items-center justify-center"
+                                                title="Delete">
                                                 <span class="material-symbols-outlined text-sm">close</span>
                                             </button>
                                         </div>
+                                    </div>
                                 <?php endforeach; ?>
 
-                                <?php if (empty($galleryImages)): ?>
-                                        <div id="no-gallery-msg" class="col-span-3 text-center py-6 text-slate-400">
-                                            <span class="material-symbols-outlined text-3xl">collections</span>
-                                            <p class="text-sm mt-1">No gallery images yet</p>
-                                        </div>
+                                <?php if (empty($langThumbnails)): ?>
+                                    <div class="col-span-4 text-center py-6 text-slate-400 no-thumbs-msg">
+                                        <span class="material-symbols-outlined text-2xl">image</span>
+                                        <p class="text-xs mt-1">No <?= strtolower($lang['name']) ?> thumbnails yet</p>
+                                    </div>
                                 <?php endif; ?>
                             </div>
-                            <p class="text-xs text-slate-400 mt-3">Add multiple preview images for the template. These will be shown as
-                                a gallery on the template detail page.</p>
                         </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
 
-                        <!-- Language-Specific Thumbnails -->
-                        <div
-                            class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
-                            <div class="flex items-center justify-between mb-4">
-                                <div>
-                                    <h3 class="text-lg font-bold">Language Thumbnails</h3>
-                                    <p class="text-xs text-slate-500">Upload different thumbnails for each language. Users will see
-                                        these based on their language selection.</p>
-                                </div>
-                            </div>
+        </div>
+    </form>
 
-                            <!-- Language Tabs -->
-                            <div class="border-b border-slate-200 dark:border-slate-700 mb-4">
-                                <div class="flex gap-1 -mb-px overflow-x-auto" id="lang-tabs">
-                                    <?php
-                                    $languages = Database::fetchAll("SELECT code, name, native_name FROM languages ORDER BY display_order");
-                                    foreach ($languages as $idx => $lang):
-                                        $isFirst = ($idx === 0);
-                                        ?>
-                                            <button type="button" data-lang="<?= $lang['code'] ?>"
-                                                onclick="switchLangTab('<?= $lang['code'] ?>')"
-                                                class="lang-tab px-4 py-2 text-sm font-medium border-b-2 whitespace-nowrap transition-colors <?= $isFirst ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-primary' ?>">
-                                                <?= Security::escape($lang['native_name']) ?>
-                                                <span class="text-xs text-slate-400">(<?= $lang['code'] ?>)</span>
-                                            </button>
-                                    <?php endforeach; ?>
-                                </div>
-                            </div>
+    <script>
+        function generateSlug(title) {
+            const slug = title.toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/(^-|-$)/g, '');
+            document.getElementById('slug-input').value = slug;
+        }
 
-                            <!-- Language Content Panels -->
-                            <?php foreach ($languages as $idx => $lang):
-                                $langThumbnails = Database::fetchAll(
-                                    "SELECT * FROM template_thumbnails WHERE template_id = ? AND language_code = ? ORDER BY is_primary DESC, display_order",
-                                    [$templateId, $lang['code']]
-                                );
-                                $isFirst = ($idx === 0);
-                                ?>
-                                    <div class="lang-panel <?= $isFirst ? '' : 'hidden' ?>" data-lang="<?= $lang['code'] ?>">
-                                        <div class="flex items-center justify-between mb-3">
-                                            <span class="text-sm font-medium text-slate-700"><?= Security::escape($lang['name']) ?>
-                                                Thumbnails</span>
-                                            <button type="button"
-                                                onclick="document.getElementById('lang-thumb-input-<?= $lang['code'] ?>').click()"
-                                                class="flex items-center gap-1 text-primary text-sm font-bold hover:underline">
-                                                <span class="material-symbols-outlined text-lg">add_photo_alternate</span>
-                                                Add
-                                            </button>
-                                        </div>
-                                        <input type="file" id="lang-thumb-input-<?= $lang['code'] ?>" accept="image/*" class="hidden"
-                                            onchange="uploadLangThumbnail(this, '<?= $lang['code'] ?>')">
+        function previewThumbnail(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const preview = document.getElementById('thumbnail-preview');
+                    preview.style.backgroundImage = `url('${e.target.result}')`;
+                    preview.style.backgroundSize = 'cover';
+                    preview.style.backgroundPosition = 'center';
+                    preview.innerHTML = '';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
 
-                                        <div class="grid grid-cols-4 gap-2 lang-thumb-grid" data-lang="<?= $lang['code'] ?>">
-                                            <?php foreach ($langThumbnails as $thumb): ?>
-                                                    <div class="relative group aspect-[9/16] rounded-lg overflow-hidden bg-slate-100 <?= $thumb['is_primary'] ? 'ring-2 ring-primary' : '' ?>"
-                                                        data-thumb-id="<?= $thumb['id'] ?>">
-                                                        <img src="<?= Security::escape($thumb['thumbnail_url']) ?>" alt="Language thumbnail"
-                                                            class="w-full h-full object-cover">
-                                                        <?php if ($thumb['is_primary']): ?>
-                                                                <span
-                                                                    class="absolute top-1 left-1 bg-primary text-white text-xs px-1.5 py-0.5 rounded">Primary</span>
-                                                        <?php endif; ?>
-                                                        <div
-                                                            class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
-                                                            <button type="button"
-                                                                onclick="setLangThumbPrimary(<?= $thumb['id'] ?>, '<?= $lang['code'] ?>')"
-                                                                class="size-7 rounded-full bg-white text-primary flex items-center justify-center"
-                                                                title="Set as primary">
-                                                                <span class="material-symbols-outlined text-sm">star</span>
-                                                            </button>
-                                                            <button type="button"
-                                                                onclick="deleteLangThumbnail(<?= $thumb['id'] ?>, '<?= $lang['code'] ?>')"
-                                                                class="size-7 rounded-full bg-red-500 text-white flex items-center justify-center"
-                                                                title="Delete">
-                                                                <span class="material-symbols-outlined text-sm">close</span>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                            <?php endforeach; ?>
+        function updateYouTubePreview() {
+            const url = document.getElementById('youtube-url').value;
+            const preview = document.getElementById('youtube-preview');
+            const iframe = document.getElementById('youtube-iframe');
 
-                                            <?php if (empty($langThumbnails)): ?>
-                                                    <div class="col-span-4 text-center py-6 text-slate-400 no-thumbs-msg">
-                                                        <span class="material-symbols-outlined text-2xl">image</span>
-                                                        <p class="text-xs mt-1">No <?= strtolower($lang['name']) ?> thumbnails yet</p>
-                                                    </div>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-                            <?php endforeach; ?>
-                        </div>
-                <?php endif; ?>
+            let videoId = '';
+            const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&?]+)/);
+            if (match) {
+                videoId = match[1];
+            }
 
-            </div>
-        </form>
+            if (videoId) {
+                iframe.src = `https://www.youtube.com/embed/${videoId}`;
+                preview.classList.remove('hidden');
+            } else {
+                preview.classList.add('hidden');
+            }
+        }
 
-        <script>
-                function generateSlug(title) {
-                    const slug = title.toLowerCase()
-                        .replace(/[^a-z0-9]+/g, '-')
-                        .replace(/(^-|-$)/g, '');
-                    document.getElementById('slug-input').value = slug;
-                }
+        // Gallery Image Functions
+        async function uploadGalleryImage(input) {
+            if (!input.files || !input.files[0]) return;
 
-                function previewThumbnail(input) {
-                    if (input.files && input.files[0]) {
-                        const reader = new FileReader();
-                        reader.onload = function (e) {
-                            const preview = document.getElementById('thumbnail-preview');
-                            preview.style.backgroundImage = `url('${e.target.result}')`;
-                            preview.style.backgroundSize = 'cover';
-                            preview.style.backgroundPosition = 'center';
-                            preview.innerHTML = '';
-                        };
-                        reader.readAsDataURL(input.files[0]);
-                    }
-                }
+            const formData = new FormData();
+            formData.append('gallery_image', input.files[0]);
+            formData.append('template_id', '<?= $templateId ?>');
+            formData.append('<?= CSRF_TOKEN_NAME ?>', '<?= Security::generateCSRFToken() ?>');
 
-                function updateYouTubePreview() {
-                    const url = document.getElementById('youtube-url').value;
-                    const preview = document.getElementById('youtube-preview');
-                    const iframe = document.getElementById('youtube-iframe');
+            try {
+                const response = await fetch(window.location.href, {
+                    method: 'POST',
+                    body: formData
+                });
 
-                    let videoId = '';
-                    const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&?]+)/);
-                    if (match) {
-                        videoId = match[1];
-                    }
+                const result = await response.json();
+                if (result.success) {
+                    // Remove "no images" message if present
+                    const noMsg = document.getElementById('no-gallery-msg');
+                    if (noMsg) noMsg.remove();
 
-                    if (videoId) {
-                        iframe.src = `https://www.youtube.com/embed/${videoId}`;
-                        preview.classList.remove('hidden');
-                    } else {
-                        preview.classList.add('hidden');
-                    }
-                }
-
-                // Gallery Image Functions
-                async function uploadGalleryImage(input) {
-                    if (!input.files || !input.files[0]) return;
-
-                    const formData = new FormData();
-                    formData.append('gallery_image', input.files[0]);
-                    formData.append('template_id', '<?= $templateId ?>');
-                    formData.append('<?= CSRF_TOKEN_NAME ?>', '<?= Security::generateCSRFToken() ?>');
-
-                    try {
-                        const response = await fetch(window.location.href, {
-                            method: 'POST',
-                            body: formData
-                        });
-
-                        const result = await response.json();
-                        if (result.success) {
-                            // Remove "no images" message if present
-                            const noMsg = document.getElementById('no-gallery-msg');
-                            if (noMsg) noMsg.remove();
-
-                            // Add new image to gallery
-                            const container = document.getElementById('gallery-container');
-                            const div = document.createElement('div');
-                            div.className = 'relative group aspect-[9/16] rounded-lg overflow-hidden bg-slate-100';
-                            div.dataset.imageId = result.image_id;
-                            div.innerHTML = `
+                    // Add new image to gallery
+                    const container = document.getElementById('gallery-container');
+                    const div = document.createElement('div');
+                    div.className = 'relative group aspect-[9/16] rounded-lg overflow-hidden bg-slate-100';
+                    div.dataset.imageId = result.image_id;
+                    div.innerHTML = `
                 <img src="${result.image_url}" alt="Gallery image" class="w-full h-full object-cover">
                 <button type="button" onclick="deleteGalleryImage(${result.image_id})"
                         class="absolute top-1 right-1 size-6 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <span class="material-symbols-outlined text-sm">close</span>
                 </button>
             `;
-                            container.appendChild(div);
-                        } else {
-                            alert(result.error || 'Failed to upload image');
-                        }
-                    } catch (err) {
-                        alert('Upload error: ' + err.message);
-                    }
-
-                    // Reset input
-                    input.value = '';
+                    container.appendChild(div);
+                } else {
+                    alert(result.error || 'Failed to upload image');
                 }
+            } catch (err) {
+                alert('Upload error: ' + err.message);
+            }
 
-                async function deleteGalleryImage(imageId) {
-                    if (!confirm('Delete this gallery image?')) return;
+            // Reset input
+            input.value = '';
+        }
 
-                    const formData = new FormData();
-                    formData.append('ajax_action', 'delete_gallery_image');
-                    formData.append('image_id', imageId);
-                    formData.append('<?= CSRF_TOKEN_NAME ?>', '<?= Security::generateCSRFToken() ?>');
+        async function deleteGalleryImage(imageId) {
+            if (!confirm('Delete this gallery image?')) return;
 
-                    try {
-                        const response = await fetch(window.location.href, {
-                            method: 'POST',
-                            body: formData
-                        });
+            const formData = new FormData();
+            formData.append('ajax_action', 'delete_gallery_image');
+            formData.append('image_id', imageId);
+            formData.append('<?= CSRF_TOKEN_NAME ?>', '<?= Security::generateCSRFToken() ?>');
 
-                        const result = await response.json();
-                        if (result.success) {
-                            document.querySelector(`[data-image-id="${imageId}"]`).remove();
+            try {
+                const response = await fetch(window.location.href, {
+                    method: 'POST',
+                    body: formData
+                });
 
-                            // Show "no images" message if container is empty
-                            const container = document.getElementById('gallery-container');
-                            if (container.children.length === 0) {
-                                container.innerHTML = `
+                const result = await response.json();
+                if (result.success) {
+                    document.querySelector(`[data-image-id="${imageId}"]`).remove();
+
+                    // Show "no images" message if container is empty
+                    const container = document.getElementById('gallery-container');
+                    if (container.children.length === 0) {
+                        container.innerHTML = `
                     <div id="no-gallery-msg" class="col-span-3 text-center py-6 text-slate-400">
                         <span class="material-symbols-outlined text-3xl">collections</span>
                         <p class="text-sm mt-1">No gallery images yet</p>
                     </div>
                 `;
-                            }
-                        }
-                    } catch (err) {
-                        alert('Delete error: ' + err.message);
                     }
                 }
-                // Language Thumbnail Tab Switching
-                function switchLangTab(langCode) {
-                    // Update tab styles
-                    document.querySelectorAll('.lang-tab').forEach(tab => {
-                        if (tab.dataset.lang === langCode) {
-                            tab.classList.add('border-primary', 'text-primary');
-                            tab.classList.remove('border-transparent', 'text-slate-500');
-                        } else {
-                            tab.classList.remove('border-primary', 'text-primary');
-                            tab.classList.add('border-transparent', 'text-slate-500');
-                        }
-                    });
-
-                    // Show/hide panels
-                    document.querySelectorAll('.lang-panel').forEach(panel => {
-                        if (panel.dataset.lang === langCode) {
-                            panel.classList.remove('hidden');
-                        } else {
-                            panel.classList.add('hidden');
-                        }
-                    });
+            } catch (err) {
+                alert('Delete error: ' + err.message);
+            }
+        }
+        // Language Thumbnail Tab Switching
+        function switchLangTab(langCode) {
+            // Update tab styles
+            document.querySelectorAll('.lang-tab').forEach(tab => {
+                if (tab.dataset.lang === langCode) {
+                    tab.classList.add('border-primary', 'text-primary');
+                    tab.classList.remove('border-transparent', 'text-slate-500');
+                } else {
+                    tab.classList.remove('border-primary', 'text-primary');
+                    tab.classList.add('border-transparent', 'text-slate-500');
                 }
+            });
 
-                // Upload language-specific thumbnail
-                async function uploadLangThumbnail(input, langCode) {
-                    if (!input.files || !input.files[0]) return;
+            // Show/hide panels
+            document.querySelectorAll('.lang-panel').forEach(panel => {
+                if (panel.dataset.lang === langCode) {
+                    panel.classList.remove('hidden');
+                } else {
+                    panel.classList.add('hidden');
+                }
+            });
+        }
 
-                    const formData = new FormData();
-                    formData.append('ajax_action', 'upload_lang_thumbnail');
-                    formData.append('lang_thumbnail', input.files[0]);
-                    formData.append('language_code', langCode);
-                    formData.append('template_id', '<?= $templateId ?>');
-                    formData.append('<?= CSRF_TOKEN_NAME ?>', '<?= Security::generateCSRFToken() ?>');
+        // Upload language-specific thumbnail
+        async function uploadLangThumbnail(input, langCode) {
+            if (!input.files || !input.files[0]) return;
 
-                    try {
-                        const response = await fetch(window.location.href, {
-                            method: 'POST',
-                            body: formData
-                        });
+            const formData = new FormData();
+            formData.append('ajax_action', 'upload_lang_thumbnail');
+            formData.append('lang_thumbnail', input.files[0]);
+            formData.append('language_code', langCode);
+            formData.append('template_id', '<?= $templateId ?>');
+            formData.append('<?= CSRF_TOKEN_NAME ?>', '<?= Security::generateCSRFToken() ?>');
 
-                        const result = await response.json();
-                        if (result.success) {
-                            const grid = document.querySelector(`.lang-thumb-grid[data-lang="${langCode}"]`);
+            try {
+                const response = await fetch(window.location.href, {
+                    method: 'POST',
+                    body: formData
+                });
 
-                            // Remove "no thumbnails" message if present
-                            const noMsg = grid.querySelector('.no-thumbs-msg');
-                            if (noMsg) noMsg.remove();
+                const result = await response.json();
+                if (result.success) {
+                    const grid = document.querySelector(`.lang-thumb-grid[data-lang="${langCode}"]`);
 
-                            // Add new thumbnail
-                            const div = document.createElement('div');
-                            div.className = `relative group aspect-[9/16] rounded-lg overflow-hidden bg-slate-100 ${result.is_primary ? 'ring-2 ring-primary' : ''}`;
-                            div.dataset.thumbId = result.thumb_id;
-                            div.innerHTML = `
+                    // Remove "no thumbnails" message if present
+                    const noMsg = grid.querySelector('.no-thumbs-msg');
+                    if (noMsg) noMsg.remove();
+
+                    // Add new thumbnail
+                    const div = document.createElement('div');
+                    div.className = `relative group aspect-[9/16] rounded-lg overflow-hidden bg-slate-100 ${result.is_primary ? 'ring-2 ring-primary' : ''}`;
+                    div.dataset.thumbId = result.thumb_id;
+                    div.innerHTML = `
                     <img src="${result.image_url}" alt="Language thumbnail" class="w-full h-full object-cover">
                     ${result.is_primary ? '<span class="absolute top-1 left-1 bg-primary text-white text-xs px-1.5 py-0.5 rounded">Primary</span>' : ''}
                     <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
@@ -1444,95 +1616,348 @@ function getYouTubeEmbedUrl($url)
                         </button>
                     </div>
                 `;
-                            grid.appendChild(div);
-                        } else {
-                            alert(result.error || 'Failed to upload thumbnail');
-                        }
-                    } catch (err) {
-                        alert('Upload error: ' + err.message);
-                    }
-
-                    input.value = '';
+                    grid.appendChild(div);
+                } else {
+                    alert(result.error || 'Failed to upload thumbnail');
                 }
+            } catch (err) {
+                alert('Upload error: ' + err.message);
+            }
 
-                // Delete language thumbnail
-                async function deleteLangThumbnail(thumbId, langCode) {
-                    if (!confirm('Delete this thumbnail?')) return;
+            input.value = '';
+        }
 
-                    const formData = new FormData();
-                    formData.append('ajax_action', 'delete_lang_thumbnail');
-                    formData.append('thumb_id', thumbId);
-                    formData.append('<?= CSRF_TOKEN_NAME ?>', '<?= Security::generateCSRFToken() ?>');
+        // Delete language thumbnail
+        async function deleteLangThumbnail(thumbId, langCode) {
+            if (!confirm('Delete this thumbnail?')) return;
 
-                    try {
-                        const response = await fetch(window.location.href, {
-                            method: 'POST',
-                            body: formData
-                        });
+            const formData = new FormData();
+            formData.append('ajax_action', 'delete_lang_thumbnail');
+            formData.append('thumb_id', thumbId);
+            formData.append('<?= CSRF_TOKEN_NAME ?>', '<?= Security::generateCSRFToken() ?>');
 
-                        const result = await response.json();
-                        if (result.success) {
-                            const thumb = document.querySelector(`[data-thumb-id="${thumbId}"]`);
-                            if (thumb) thumb.remove();
+            try {
+                const response = await fetch(window.location.href, {
+                    method: 'POST',
+                    body: formData
+                });
 
-                            // Show "no thumbnails" message if empty
-                            const grid = document.querySelector(`.lang-thumb-grid[data-lang="${langCode}"]`);
-                            if (grid && grid.children.length === 0) {
-                                grid.innerHTML = `
+                const result = await response.json();
+                if (result.success) {
+                    const thumb = document.querySelector(`[data-thumb-id="${thumbId}"]`);
+                    if (thumb) thumb.remove();
+
+                    // Show "no thumbnails" message if empty
+                    const grid = document.querySelector(`.lang-thumb-grid[data-lang="${langCode}"]`);
+                    if (grid && grid.children.length === 0) {
+                        grid.innerHTML = `
                         <div class="col-span-4 text-center py-6 text-slate-400 no-thumbs-msg">
                             <span class="material-symbols-outlined text-2xl">image</span>
                             <p class="text-xs mt-1">No thumbnails yet</p>
                         </div>
                     `;
-                            }
-                        }
-                    } catch (err) {
-                        alert('Delete error: ' + err.message);
                     }
                 }
+            } catch (err) {
+                alert('Delete error: ' + err.message);
+            }
+        }
 
-                // Set language thumbnail as primary
-                async function setLangThumbPrimary(thumbId, langCode) {
-                    const formData = new FormData();
-                    formData.append('ajax_action', 'set_lang_thumb_primary');
-                    formData.append('thumb_id', thumbId);
-                    formData.append('language_code', langCode);
-                    formData.append('template_id', '<?= $templateId ?>');
-                    formData.append('<?= CSRF_TOKEN_NAME ?>', '<?= Security::generateCSRFToken() ?>');
+        // Set language thumbnail as primary
+        async function setLangThumbPrimary(thumbId, langCode) {
+            const formData = new FormData();
+            formData.append('ajax_action', 'set_lang_thumb_primary');
+            formData.append('thumb_id', thumbId);
+            formData.append('language_code', langCode);
+            formData.append('template_id', '<?= $templateId ?>');
+            formData.append('<?= CSRF_TOKEN_NAME ?>', '<?= Security::generateCSRFToken() ?>');
 
-                    try {
-                        const response = await fetch(window.location.href, {
-                            method: 'POST',
-                            body: formData
-                        });
+            try {
+                const response = await fetch(window.location.href, {
+                    method: 'POST',
+                    body: formData
+                });
 
-                        const result = await response.json();
-                        if (result.success) {
-                            const grid = document.querySelector(`.lang-thumb-grid[data-lang="${langCode}"]`);
+                const result = await response.json();
+                if (result.success) {
+                    const grid = document.querySelector(`.lang-thumb-grid[data-lang="${langCode}"]`);
 
-                            // Remove primary styling from all
-                            grid.querySelectorAll('[data-thumb-id]').forEach(el => {
-                                el.classList.remove('ring-2', 'ring-primary');
-                                const badge = el.querySelector('.bg-primary.text-white.text-xs');
-                                if (badge) badge.remove();
-                            });
+                    // Remove primary styling from all
+                    grid.querySelectorAll('[data-thumb-id]').forEach(el => {
+                        el.classList.remove('ring-2', 'ring-primary');
+                        const badge = el.querySelector('.bg-primary.text-white.text-xs');
+                        if (badge) badge.remove();
+                    });
 
-                            // Add primary styling to selected
-                            const selectedThumb = grid.querySelector(`[data-thumb-id="${thumbId}"]`);
-                            if (selectedThumb) {
-                                selectedThumb.classList.add('ring-2', 'ring-primary');
-                                const img = selectedThumb.querySelector('img');
-                                const badge = document.createElement('span');
-                                badge.className = 'absolute top-1 left-1 bg-primary text-white text-xs px-1.5 py-0.5 rounded';
-                                badge.textContent = 'Primary';
-                                selectedThumb.insertBefore(badge, img.nextSibling);
-                            }
-                        }
-                    } catch (err) {
-                        alert('Error: ' + err.message);
+                    // Add primary styling to selected
+                    const selectedThumb = grid.querySelector(`[data-thumb-id="${thumbId}"]`);
+                    if (selectedThumb) {
+                        selectedThumb.classList.add('ring-2', 'ring-primary');
+                        const img = selectedThumb.querySelector('img');
+                        const badge = document.createElement('span');
+                        badge.className = 'absolute top-1 left-1 bg-primary text-white text-xs px-1.5 py-0.5 rounded';
+                        badge.textContent = 'Primary';
+                        selectedThumb.insertBefore(badge, img.nextSibling);
                     }
                 }
-            </script>
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        }
+    </script>
+
+    <!-- Field Selector Modal -->
+    <div id="field-selector-modal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/50" onclick="closeFieldSelector()"></div>
+        <div
+            class="absolute inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[700px] md:max-h-[85vh] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700">
+                <div>
+                    <h3 class="text-lg font-bold">Add Field Preset</h3>
+                    <p class="text-sm text-slate-500">Select a field to add to this template</p>
+                </div>
+                <button onclick="closeFieldSelector()" class="p-2 hover:bg-slate-100 rounded-lg text-slate-500">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-4">
+                <?php foreach ($fieldPresetsByCategory as $category => $presets): ?>
+                    <div class="mb-6">
+                        <h4 class="font-bold text-sm uppercase text-slate-400 mb-3">
+                            <?= ucfirst(str_replace('_', ' ', $category)) ?></h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <?php foreach ($presets as $preset): ?>
+                                <button type="button" onclick="addFieldPreset(<?= json_encode($preset) ?>)"
+                                    class="preset-option flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800 hover:bg-primary/10 hover:border-primary rounded-lg border border-slate-200 dark:border-slate-700 text-left transition-all"
+                                    data-preset-id="<?= $preset['id'] ?>">
+                                    <span
+                                        class="material-symbols-outlined text-primary"><?= Security::escape($preset['icon'] ?? 'text_fields') ?></span>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="font-medium text-sm truncate"><?= Security::escape($preset['name']) ?></p>
+                                        <p class="text-xs text-slate-500"><?= $preset['field_type'] ?></p>
+                                    </div>
+                                </button>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+
+                <?php if (empty($fieldPresetsByCategory)): ?>
+                    <div class="text-center py-12 text-slate-400">
+                        <span class="material-symbols-outlined text-4xl">inventory_2</span>
+                        <p class="mt-2">No field presets available</p>
+                        <a href="/admin/field-presets.php?action=new" class="text-primary font-bold mt-2 inline-block">Create
+                            Field Presets →</a>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+                <p class="text-xs text-slate-500">
+                    <span class="material-symbols-outlined text-sm align-middle">info</span>
+                    Click to add fields. Manage presets in <a href="/admin/field-presets.php"
+                        class="text-primary font-bold">Field Presets</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript for Required Fields Management -->
+    <script>
+        let currentStep = 1;
+
+        function openFieldSelector() {
+            document.getElementById('field-selector-modal').classList.remove('hidden');
+            updatePresetAvailability();
+        }
+
+        function closeFieldSelector() {
+            document.getElementById('field-selector-modal').classList.add('hidden');
+        }
+
+        function updatePresetAvailability() {
+            // Get all currently added preset IDs
+            const addedIds = new Set();
+            document.querySelectorAll('.field-item').forEach(item => {
+                addedIds.add(item.dataset.presetId);
+            });
+
+            // Disable/enable preset options based on whether they're already added
+            document.querySelectorAll('.preset-option').forEach(option => {
+                const presetId = option.dataset.presetId;
+                if (addedIds.has(presetId)) {
+                    option.classList.add('opacity-50', 'pointer-events-none');
+                    option.querySelector('p.font-medium').innerHTML += ' <span class="text-xs text-green-600">(Added)</span>';
+                }
+            });
+        }
+
+        function switchStep(step) {
+            currentStep = step;
+
+            // Update tab styles
+            document.querySelectorAll('.step-tab').forEach(tab => {
+                if (parseInt(tab.dataset.step) === step) {
+                    tab.classList.add('border-primary', 'text-primary');
+                    tab.classList.remove('border-transparent', 'text-slate-500');
+                } else {
+                    tab.classList.remove('border-primary', 'text-primary');
+                    tab.classList.add('border-transparent', 'text-slate-500');
+                }
+            });
+
+            // Show/hide panels
+            document.querySelectorAll('.step-panel').forEach(panel => {
+                if (parseInt(panel.dataset.step) === step) {
+                    panel.classList.remove('hidden');
+                } else {
+                    panel.classList.add('hidden');
+                }
+            });
+        }
+
+        function addFieldPreset(preset) {
+            const container = document.querySelector(`.sortable-fields[data-step="${currentStep}"]`);
+
+            // Remove "no fields" message if present
+            const noFieldsMsg = container.querySelector('.no-fields-msg');
+            if (noFieldsMsg) noFieldsMsg.remove();
+
+            // Check if already added
+            if (document.querySelector(`.field-item[data-preset-id="${preset.id}"]`)) {
+                alert('This field is already added to the template');
+                return;
+            }
+
+            // Create field item HTML
+            const fieldHtml = `
+                    <div class="field-item flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 cursor-move"
+                        data-preset-id="${preset.id}"
+                        data-step="${currentStep}"
+                        data-required="1">
+                        <span class="material-symbols-outlined text-slate-400 drag-handle">drag_indicator</span>
+                        <span class="material-symbols-outlined text-primary">${preset.icon || 'text_fields'}</span>
+                        <div class="flex-1">
+                            <p class="font-medium text-sm">${preset.name}</p>
+                            <p class="text-xs text-slate-500">${preset.field_type} • ${preset.field_name}</p>
+                        </div>
+                        <label class="flex items-center gap-1.5 text-xs">
+                            <input type="checkbox" class="field-required rounded text-primary" checked>
+                            <span class="text-slate-500">Required</span>
+                        </label>
+                        <select class="field-step text-xs border-0 bg-transparent text-slate-500 cursor-pointer" onchange="moveFieldToStep(this)">
+                            <option value="1" ${currentStep == 1 ? 'selected' : ''}>Step 1</option>
+                            <option value="2" ${currentStep == 2 ? 'selected' : ''}>Step 2</option>
+                            <option value="3" ${currentStep == 3 ? 'selected' : ''}>Step 3</option>
+                        </select>
+                        <button type="button" onclick="removeField(this)" class="p-1.5 hover:bg-red-50 rounded text-slate-400 hover:text-red-500 transition-colors">
+                            <span class="material-symbols-outlined text-lg">close</span>
+                        </button>
+                    </div>
+                `;
+
+            container.insertAdjacentHTML('beforeend', fieldHtml);
+            closeFieldSelector();
+        }
+
+        function removeField(button) {
+            const fieldItem = button.closest('.field-item');
+            const container = fieldItem.parentElement;
+            fieldItem.remove();
+
+            // Show "no fields" message if container is empty
+            if (container.querySelectorAll('.field-item').length === 0) {
+                const step = container.dataset.step;
+                container.innerHTML = `
+                        <div class="no-fields-msg text-center py-8 text-slate-400">
+                            <span class="material-symbols-outlined text-3xl">input</span>
+                            <p class="text-sm mt-2">No fields in Step ${step}</p>
+                            <p class="text-xs">Click "Add Field" to add customization fields</p>
+                        </div>
+                    `;
+            }
+        }
+
+        function moveFieldToStep(select) {
+            const fieldItem = select.closest('.field-item');
+            const newStep = parseInt(select.value);
+            const oldStep = parseInt(fieldItem.dataset.step);
+
+            if (newStep === oldStep) return;
+
+            // Get target container
+            const targetContainer = document.querySelector(`.sortable-fields[data-step="${newStep}"]`);
+            const sourceContainer = fieldItem.parentElement;
+
+            // Remove "no fields" message from target if present
+            const noFieldsMsg = targetContainer.querySelector('.no-fields-msg');
+            if (noFieldsMsg) noFieldsMsg.remove();
+
+            // Update field data and move it
+            fieldItem.dataset.step = newStep;
+            targetContainer.appendChild(fieldItem);
+
+            // Check if source container is now empty
+            if (sourceContainer.querySelectorAll('.field-item').length === 0) {
+                sourceContainer.innerHTML = `
+                        <div class="no-fields-msg text-center py-8 text-slate-400">
+                            <span class="material-symbols-outlined text-3xl">input</span>
+                            <p class="text-sm mt-2">No fields in Step ${oldStep}</p>
+                            <p class="text-xs">Click "Add Field" to add customization fields</p>
+                        </div>
+                    `;
+            }
+        }
+
+        async function saveTemplateFields() {
+            const fields = [];
+
+            // Collect all fields from all steps
+            [1, 2, 3].forEach(step => {
+                const container = document.querySelector(`.sortable-fields[data-step="${step}"]`);
+                container.querySelectorAll('.field-item').forEach((item, order) => {
+                    fields.push({
+                        preset_id: item.dataset.presetId,
+                        step_number: step,
+                        is_required: item.querySelector('.field-required').checked ? 1 : 0
+                    });
+                });
+            });
+
+            const formData = new FormData();
+            formData.append('ajax_action', 'save_template_fields');
+            formData.append('template_id', '<?= $templateId ?>');
+            formData.append('fields', JSON.stringify(fields));
+            formData.append('<?= CSRF_TOKEN_NAME ?>', '<?= Security::generateCSRFToken() ?>');
+
+            try {
+                const response = await fetch(window.location.href, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    // Show success message
+                    const btn = document.querySelector('button[onclick="saveTemplateFields()"]');
+                    const originalHtml = btn.innerHTML;
+                    btn.innerHTML = '<span class="material-symbols-outlined text-lg">check</span> Saved!';
+                    btn.classList.remove('bg-green-600');
+                    btn.classList.add('bg-green-700');
+                    setTimeout(() => {
+                        btn.innerHTML = originalHtml;
+                        btn.classList.add('bg-green-600');
+                        btn.classList.remove('bg-green-700');
+                    }, 2000);
+                } else {
+                    alert(result.error || 'Failed to save fields');
+                }
+            } catch (err) {
+                alert('Error saving fields: ' + err.message);
+            }
+        }
+    </script>
 
 <?php endif; ?>
 
