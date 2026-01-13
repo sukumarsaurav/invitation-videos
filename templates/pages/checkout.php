@@ -99,7 +99,9 @@ foreach ($templateFields as $field) {
 }
 
 // Check if we have any customization fields
-$hasCustomizationFields = !empty($templateFields);
+// For drafts coming from customize.php, data is already collected, so skip showing fields
+// Only show fields for legacy orders that haven't been through the customize flow
+$hasCustomizationFields = !empty($templateFields) && !$isDraft;
 
 // Get existing customization data (for editing)
 $existingData = [];
@@ -712,20 +714,36 @@ $pageTitle = 'Checkout - ' . $order['order_number'];
             name: 'Invitation Videos',
             description: 'Video Invitation',
             order_id: razorpay_order_id,
-            handler: function (response) {
+            handler: async function (response) {
                 // Verify payment on server
-                fetch('/api/verify-razorpay', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        order_id: orderId,
-                        razorpay_payment_id: response.razorpay_payment_id,
-                        razorpay_order_id: response.razorpay_order_id,
-                        razorpay_signature: response.razorpay_signature
-                    })
-                }).then(() => {
-                    window.location.href = '/order/' + orderId + '/confirmation';
-                });
+                try {
+                    const verifyResponse = await fetch('/api/verify-razorpay', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            order_id: orderId,
+                            draft_token: draftToken,
+                            is_draft: isDraft,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_signature: response.razorpay_signature
+                        })
+                    });
+
+                    const result = await verifyResponse.json();
+
+                    if (result.success && result.order_id) {
+                        // Redirect to confirmation with the REAL order ID
+                        window.location.href = '/order/' + result.order_id + '/confirmation';
+                    } else if (result.redirect) {
+                        window.location.href = result.redirect;
+                    } else {
+                        throw new Error(result.error || 'Payment verification failed');
+                    }
+                } catch (err) {
+                    alert('Payment completed but verification failed. Please contact support.');
+                    console.error('Verify error:', err);
+                }
             },
             theme: { color: '#7f13ec' }
         };

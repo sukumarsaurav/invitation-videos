@@ -286,16 +286,13 @@ class DynamicFormRenderer
     private function renderMusicSelector(string $name, array $field, $value): string
     {
         $presets = $this->getMusicPresets();
-        $required = $field['is_required'] ?? false;
 
         $html = '<div class="music-selector space-y-3">';
 
         if (empty($presets)) {
-            // No presets available - show file upload directly
-            $html .= '<div class="text-center py-6 text-slate-500 bg-slate-50 dark:bg-slate-800 rounded-xl">';
-            $html .= '<span class="material-symbols-outlined text-3xl mb-2 block">music_note</span>';
-            $html .= '<p class="text-sm font-medium">Background Music</p>';
-            $html .= '<p class="text-xs mb-4">Upload your own music track or skip this step</p>';
+            // No presets - show simple upload message
+            $html .= '<div class="text-center py-4 text-slate-500">';
+            $html .= '<p class="text-sm">Upload your own music track below</p>';
             $html .= '</div>';
         } else {
             foreach ($presets as $preset) {
@@ -313,39 +310,16 @@ class DynamicFormRenderer
             }
         }
 
-        // Custom upload option with visible feedback
-        $html .= '<div class="mt-3 p-4 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-primary transition-colors">';
-        $html .= '<label class="flex items-center gap-3 cursor-pointer">';
-        $html .= '<span class="material-symbols-outlined text-2xl text-primary">upload_file</span>';
-        $html .= '<div class="flex-1">';
-        $html .= '<span class="block font-medium text-sm">Upload your own track</span>';
-        $html .= '<span class="block text-xs text-slate-500" id="' . $name . '_filename">MP3 format recommended (max 10MB)</span>';
-        $html .= '</div>';
-        $html .= '<input type="file" name="' . $name . '_custom" accept="audio/mpeg,audio/mp3,audio/*" class="hidden" onchange="updateMusicFilename(this, \'' . $name . '_filename\')">';
+        // Custom upload option
+        $html .= '<div class="mt-2">';
+        $html .= '<label class="flex items-center gap-2 text-primary font-medium cursor-pointer hover:underline">';
+        $html .= '<span class="material-symbols-outlined text-lg">upload_file</span>';
+        $html .= '<span>Upload your own track (MP3)</span>';
+        $html .= '<input type="file" name="' . $name . '_custom" accept="audio/mpeg,audio/mp3" class="hidden">';
         $html .= '</label>';
         $html .= '</div>';
 
-        // Skip option (only if not required)
-        if (!$required) {
-            $html .= '<label class="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors">';
-            $html .= '<input type="radio" name="' . $name . '" value="skip" class="text-primary">';
-            $html .= '<span class="text-sm text-slate-600 dark:text-slate-400">Use default template music</span>';
-            $html .= '</label>';
-        }
-
         $html .= '</div>';
-
-        // JavaScript for filename display
-        $html .= '<script>
-            function updateMusicFilename(input, spanId) {
-                const span = document.getElementById(spanId);
-                if (input.files && input.files[0]) {
-                    span.textContent = input.files[0].name;
-                    span.classList.add("text-primary", "font-medium");
-                    span.classList.remove("text-slate-500");
-                }
-            }
-        </script>';
 
         return $html;
     }

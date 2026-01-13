@@ -270,13 +270,16 @@ function createRazorpayOrder(array $input): void
 function verifyRazorpayPayment(array $input): void
 {
     require_once __DIR__ . '/../../src/Payment/RazorpayService.php';
+    require_once __DIR__ . '/../../src/Services/DraftOrderService.php';
 
     $orderId = intval($input['order_id'] ?? 0);
     $razorpayPaymentId = $input['razorpay_payment_id'] ?? '';
     $razorpayOrderId = $input['razorpay_order_id'] ?? '';
     $razorpaySignature = $input['razorpay_signature'] ?? '';
+    $isDraft = !empty($input['is_draft']);
+    $draftToken = $input['draft_token'] ?? null;
 
-    if (!$orderId || !$razorpayPaymentId || !$razorpayOrderId || !$razorpaySignature) {
+    if (!$razorpayPaymentId || !$razorpayOrderId || !$razorpaySignature) {
         http_response_code(400);
         echo json_encode(['error' => 'Missing required parameters']);
         return;
@@ -291,31 +294,64 @@ function verifyRazorpayPayment(array $input): void
         return;
     }
 
-    // Update order status (update both old and new columns for compatibility)
-    Database::query(
-        "UPDATE orders SET 
-            status = 'paid',
-            payment_status = 'paid',
-            order_status = 'queued',
-            payment_id = ?,
-            payment_gateway = 'razorpay',
-            paid_at = NOW()
-         WHERE id = ? AND (status = 'pending' OR payment_status = 'pending')",
-        [$razorpayPaymentId, $orderId]
-    );
+    $realOrderId = null;
 
-    // Increment template purchase count
-    $order = Database::fetchOne("SELECT template_id FROM orders WHERE id = ?", [$orderId]);
-    if ($order) {
+    // Handle draft orders - convert to real order
+    if ($isDraft && $draftToken) {
+        $draftService = new \InvitationVideos\Services\DraftOrderService();
+        $draft = $draftService->getDraftByToken($draftToken);
+
+        if (!$draft) {
+            // Try to find by razorpay_order_id
+            $draft = $draftService->getDraftByRazorpayOrderId($razorpayOrderId);
+        }
+
+        if ($draft) {
+            // Convert draft to real order
+            $realOrderId = $draftService->convertToOrder($draft, $razorpayPaymentId, 'razorpay');
+            error_log("Razorpay Verify: Converted draft #{$draft['id']} to order #{$realOrderId}");
+        } else {
+            http_response_code(404);
+            echo json_encode(['error' => 'Draft order not found']);
+            return;
+        }
+    } else {
+        // Legacy: Update existing order in orders table
+        if (!$orderId) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Order ID required for legacy orders']);
+            return;
+        }
+
         Database::query(
-            "UPDATE templates SET purchase_count = purchase_count + 1 WHERE id = ?",
-            [$order['template_id']]
+            "UPDATE orders SET 
+                status = 'paid',
+                payment_status = 'paid',
+                order_status = 'queued',
+                payment_id = ?,
+                payment_gateway = 'razorpay',
+                paid_at = NOW()
+             WHERE id = ? AND (status = 'pending' OR payment_status = 'pending')",
+            [$razorpayPaymentId, $orderId]
         );
+
+        // Increment template purchase count
+        $order = Database::fetchOne("SELECT template_id FROM orders WHERE id = ?", [$orderId]);
+        if ($order) {
+            Database::query(
+                "UPDATE templates SET purchase_count = purchase_count + 1 WHERE id = ?",
+                [$order['template_id']]
+            );
+        }
+
+        $realOrderId = $orderId;
     }
 
     echo json_encode([
         'success' => true,
         'message' => 'Payment verified successfully',
-        'redirect' => '/order/' . $orderId . '/confirmation',
+        'order_id' => $realOrderId,
+        'redirect' => '/order/' . $realOrderId . '/confirmation',
     ]);
 }
+
