@@ -352,10 +352,14 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
                     <div class="p-6">
                         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                             <?php foreach ($orderUploads as $upload): ?>
+                                <?php
+                                // Convert absolute server path to web URL
+                                $webUrl = '/uploads/' . $upload['stored_filename'];
+                                ?>
                                 <div class="group relative">
                                     <?php if ($upload['file_type'] === 'image'): ?>
                                         <div class="aspect-square rounded-lg overflow-hidden bg-slate-100 border border-slate-200">
-                                            <img src="<?= Security::escape($upload['file_path']) ?>"
+                                            <img src="<?= Security::escape($webUrl) ?>"
                                                 alt="<?= Security::escape($upload['field_name']) ?>" class="w-full h-full object-cover">
                                         </div>
                                     <?php else: ?>
@@ -367,7 +371,8 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
                                     <p class="text-xs text-slate-500 mt-2 truncate capitalize">
                                         <?= str_replace('_', ' ', $upload['field_name']) ?>
                                     </p>
-                                    <a href="<?= Security::escape($upload['file_path']) ?>" download
+                                    <a href="<?= Security::escape($webUrl) ?>"
+                                        download="<?= Security::escape($upload['original_filename']) ?>"
                                         class="absolute top-2 right-2 p-1.5 bg-white/90 rounded-lg shadow opacity-0 group-hover:opacity-100 transition-opacity">
                                         <span class="material-symbols-outlined text-sm">download</span>
                                     </a>
