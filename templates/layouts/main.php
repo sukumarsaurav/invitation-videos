@@ -91,34 +91,7 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
 <html lang="en" class="light">
 
 <head>
-    <!-- Google Tag Manager (Delayed for Performance) -->
-    <script>
-        window.dataLayer = window.dataLayer || [];
 
-        // Delayed GTM loader - fires on interaction or 3s timeout
-        (function () {
-            var gtmLoaded = false;
-            function loadGTM() {
-                if (gtmLoaded) return;
-                gtmLoaded = true;
-
-                dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
-                var script = document.createElement('script');
-                script.async = true;
-                script.src = 'https://www.googletagmanager.com/gtm.js?id=GTM-NGZWTLGW';
-                document.head.appendChild(script);
-            }
-
-            // Load on user interaction (scroll, click, touch, keypress)
-            ['scroll', 'click', 'touchstart', 'keydown'].forEach(function (event) {
-                window.addEventListener(event, loadGTM, { once: true, passive: true });
-            });
-
-            // Fallback: load after 3 seconds regardless
-            setTimeout(loadGTM, 3000);
-        })();
-    </script>
-    <!-- End Google Tag Manager -->
 
     <!-- Social Media Schema (Entity SEO) -->
     <script type="application/ld+json">
@@ -788,10 +761,7 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
 
 <body
     class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display min-h-screen flex flex-col">
-    <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NGZWTLGW" height="0" width="0"
-            style="display:none;visibility:hidden"></iframe></noscript>
-    <!-- End Google Tag Manager (noscript) -->
+
 
     <!-- Header -->
     <header class="sticky top-0 z-50 border-b border-slate-200 dark:border-slate-800 backdrop-blur-sm shadow-sm"
