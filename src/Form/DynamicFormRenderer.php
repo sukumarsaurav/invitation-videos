@@ -12,17 +12,40 @@ class DynamicFormRenderer
 {
 
     /**
-     * Get all fields for a template, grouped by field_group
+     * Get all fields for a template, grouped by step_number (mapped to field_group)
+     * Uses the new template_field_presets table that links to field_presets
      */
     public function getFields(int $templateId): array
     {
-        $sql = "SELECT * FROM template_fields 
-                WHERE template_id = ? 
-                ORDER BY field_group, display_order";
+        $sql = "SELECT 
+                    tfp.id,
+                    tfp.template_id,
+                    tfp.preset_id,
+                    tfp.is_required,
+                    tfp.display_order,
+                    tfp.step_number,
+                    fp.name as field_label,
+                    fp.field_name,
+                    fp.field_type,
+                    fp.placeholder,
+                    fp.help_text,
+                    fp.sample_value,
+                    fp.validation_rules,
+                    fp.category,
+                    CASE 
+                        WHEN tfp.step_number = 1 THEN 'event_details'
+                        WHEN tfp.step_number = 2 THEN 'photos'
+                        WHEN tfp.step_number = 3 THEN 'audio'
+                        ELSE 'general'
+                    END as field_group
+                FROM template_field_presets tfp
+                JOIN field_presets fp ON tfp.preset_id = fp.id
+                WHERE tfp.template_id = ? AND fp.is_active = 1
+                ORDER BY tfp.step_number, tfp.display_order";
 
         $fields = Database::fetchAll($sql, [$templateId]);
 
-        // Group fields
+        // Group fields by field_group (derived from step_number)
         $grouped = [];
         foreach ($fields as $field) {
             $group = $field['field_group'] ?? 'general';
@@ -295,22 +318,26 @@ class DynamicFormRenderer
     {
         $errors = [];
         $fields = Database::fetchAll(
-            "SELECT * FROM template_fields WHERE template_id = ?",
+            "SELECT tfp.is_required, fp.field_name, fp.name as field_label, fp.field_type, fp.validation_rules
+             FROM template_field_presets tfp
+             JOIN field_presets fp ON tfp.preset_id = fp.id
+             WHERE tfp.template_id = ?",
             [$templateId]
         );
 
         foreach ($fields as $field) {
             $name = $field['field_name'];
+            $label = $field['field_label'] ?? $field['field_name'];
             $value = $data[$name] ?? null;
 
             // Check required fields
             if ($field['is_required']) {
                 if ($field['field_type'] === 'image') {
                     if (empty($files[$name]['tmp_name'])) {
-                        $errors[$name] = $field['field_label'] . ' is required';
+                        $errors[$name] = $label . ' is required';
                     }
                 } elseif (empty($value)) {
-                    $errors[$name] = $field['field_label'] . ' is required';
+                    $errors[$name] = $label . ' is required';
                 }
             }
 
@@ -319,7 +346,7 @@ class DynamicFormRenderer
                 $rules = json_decode($field['validation_rules'], true);
 
                 if (!empty($rules['max_length']) && strlen($value) > $rules['max_length']) {
-                    $errors[$name] = $field['field_label'] . ' exceeds maximum length';
+                    $errors[$name] = $label . ' exceeds maximum length';
                 }
             }
 
