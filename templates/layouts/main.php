@@ -127,7 +127,7 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
       "@type": "Organization",
       "name": "<?php echo APP_NAME ?? 'InvitationVideos'; ?>",
       "url": "https://invitationvideos.com",
-      "logo": "https://invitationvideos.com/assets/images/inivitationVideoslogo.png",
+      "logo": "https://invitationvideos.com/assets/images/logo-64.webp",
       "sameAs": [
         "<?= SOCIAL_FACEBOOK ?>",
         "<?= SOCIAL_INSTAGRAM ?>",
@@ -832,7 +832,7 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
 
                     <!-- Logo -->
                     <a href="/" class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                        <img src="/assets/images/inivitationVideoslogo.png" alt="<?= APP_NAME ?? 'InvitationVideos' ?>"
+                        <img src="/assets/images/logo-64.webp" alt="<?= APP_NAME ?? 'InvitationVideos' ?>"
                             class="h-9 sm:h-10 w-auto" width="40" height="40" loading="eager" fetchpriority="high">
                         <h2 class="hidden sm:block text-lg sm:text-xl font-bold leading-tight tracking-tight">
                             <?= APP_NAME ?? 'Invitation Videos' ?>
@@ -1108,8 +1108,8 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
         <!-- Drawer Header -->
         <div class="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800">
             <a href="/" class="flex items-center gap-2">
-                <img src="/assets/images/inivitationVideoslogo.png" alt="<?= APP_NAME ?? 'InvitationVideos' ?>"
-                    class="h-8 w-auto" width="32" height="32">
+                <img src="/assets/images/logo-64.webp" alt="<?= APP_NAME ?? 'InvitationVideos' ?>" class="h-8 w-auto"
+                    width="32" height="32">
                 <span class="font-bold text-lg"><?= APP_NAME ?? 'Invitation Videos' ?></span>
             </a>
             <button onclick="closeMobileDrawer()"
@@ -1243,7 +1243,7 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
                 class="w-full flex items-center justify-between px-4 py-4 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                 :aria-expanded="footerOpen" aria-controls="footerContent">
                 <div class="flex items-center gap-2">
-                    <img src="/assets/images/inivitationVideoslogo.png" alt="<?= APP_NAME ?? 'InvitationVideos' ?>"
+                    <img src="/assets/images/logo-64.webp" alt="<?= APP_NAME ?? 'InvitationVideos' ?>"
                         class="h-6 w-auto" width="24" height="24" loading="lazy">
                     <span class="font-medium text-sm"><?= APP_NAME ?? 'Invitation Videos' ?></span>
                 </div>
@@ -1271,9 +1271,8 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
                     <!-- Column 1: Brand + Social -->
                     <div class="col-span-2 sm:col-span-3 lg:col-span-1">
                         <div class="flex items-center gap-2 mb-4">
-                            <img src="/assets/images/inivitationVideoslogo.png"
-                                alt="<?= APP_NAME ?? 'InvitationVideos' ?>" class="h-8 w-auto" width="32" height="32"
-                                loading="lazy">
+                            <img src="/assets/images/logo-64.webp" alt="<?= APP_NAME ?? 'InvitationVideos' ?>"
+                                class="h-8 w-auto" width="32" height="32" loading="lazy">
                             <span class="font-bold text-lg"><?= APP_NAME ?? 'Invitation Videos' ?></span>
                         </div>
                         <p class="text-sm text-slate-500 mb-4">Create stunning video invitations for your special
