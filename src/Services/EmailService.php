@@ -30,7 +30,7 @@ class EmailService
             self::$mailer->SMTPAuth = true;
             self::$mailer->Username = MAIL_USERNAME;
             self::$mailer->Password = MAIL_PASSWORD;
-            self::$mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            self::$mailer->SMTPSecure = (MAIL_PORT == 465) ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
 
             // Default sender
             self::$mailer->setFrom(MAIL_FROM_ADDRESS, MAIL_FROM_NAME);
