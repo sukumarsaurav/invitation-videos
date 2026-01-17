@@ -95,25 +95,34 @@ Database::query(
 try {
     $emailServicePath = __DIR__ . '/../../src/Services/EmailService.php';
 
+    // Load vendor autoloader first
+    require_once __DIR__ . '/../../vendor/autoload.php';
+
     // Only attempt email if the file exists and can be loaded
     if (file_exists($emailServicePath)) {
         require_once $emailServicePath;
 
         // Check if the class was loaded and PHPMailer is available
-        if (
-            class_exists('\\InvitationVideos\\Services\\EmailService') &&
-            class_exists('\\PHPMailer\\PHPMailer\\PHPMailer')
-        ) {
+        $emailServiceExists = class_exists('InvitationVideos\Services\EmailService');
+        $phpMailerExists = class_exists('PHPMailer\PHPMailer\PHPMailer');
 
+        error_log("Email check for order #$orderId: EmailService=$emailServiceExists, PHPMailer=$phpMailerExists");
+
+        if ($emailServiceExists && $phpMailerExists) {
             $orderData = Database::fetchOne("SELECT * FROM orders WHERE id = ?", [$orderId]);
             $userData = Database::fetchOne("SELECT * FROM users WHERE id = ?", [$orderData['user_id']]);
 
             if ($orderData && $userData) {
-                \InvitationVideos\Services\EmailService::sendOrderCompletedEmail($orderData, $userData);
+                $result = \InvitationVideos\Services\EmailService::sendOrderCompletedEmail($orderData, $userData);
+                error_log("Completion email for order #$orderId sent: " . ($result ? 'SUCCESS' : 'FAILED'));
+            } else {
+                error_log("Email skipped for order #$orderId: Order or user data not found");
             }
         } else {
             error_log("Email skipped for order #$orderId: EmailService or PHPMailer not available");
         }
+    } else {
+        error_log("Email skipped for order #$orderId: EmailService.php not found at $emailServicePath");
     }
 } catch (Throwable $e) {
     error_log("Failed to send completion email for order #$orderId: " . $e->getMessage());
