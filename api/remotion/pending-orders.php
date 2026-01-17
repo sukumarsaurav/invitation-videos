@@ -57,9 +57,34 @@ $orders = Database::fetchAll("
     ORDER BY o.created_at ASC
 ");
 
+// Helper function to fix malformed URLs
+function fixAssetUrl($value)
+{
+    if (!is_string($value))
+        return $value;
+
+    // Check if it looks like a URL with embedded server path
+    // e.g., https://invitationvideos.com/home/u277468165/.../uploads/file.ext
+    if (preg_match('#^https?://([^/]+)/home/[^/]+/.+/uploads/(.+)$#', $value, $matches)) {
+        return 'https://' . $matches[1] . '/uploads/' . $matches[2];
+    }
+
+    // Fix paths with /config/../uploads/
+    if (preg_match('#^https?://([^/]+).+/config/\.\./uploads/(.+)$#', $value, $matches)) {
+        return 'https://' . $matches[1] . '/uploads/' . $matches[2];
+    }
+
+    return $value;
+}
+
 // Decode customization data and fetch uploaded files
 foreach ($orders as &$order) {
     $order['customization_data'] = json_decode($order['customization_data'], true) ?? [];
+
+    // Clean up any malformed URLs in customization_data
+    foreach ($order['customization_data'] as $key => $value) {
+        $order['customization_data'][$key] = fixAssetUrl($value);
+    }
 
     // Get uploaded files for this order
     $uploads = Database::fetchAll(
