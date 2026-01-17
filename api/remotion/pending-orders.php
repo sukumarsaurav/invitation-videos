@@ -71,8 +71,22 @@ foreach ($orders as &$order) {
 
     // Merge uploads into customization data
     foreach ($uploads as $upload) {
-        // Convert relative path to full URL
-        $fullUrl = 'https://' . $_SERVER['HTTP_HOST'] . $upload['file_path'];
+        // Extract the web-accessible path from the file_path
+        // file_path may contain full server paths like /home/.../public_html/uploads/file.ext
+        $filePath = $upload['file_path'];
+
+        // Try to extract /uploads/... from the path
+        if (preg_match('#/uploads/(.+)$#', $filePath, $matches)) {
+            $webPath = '/uploads/' . $matches[1];
+        } elseif (strpos($filePath, '/uploads/') === 0) {
+            // Already a relative path
+            $webPath = $filePath;
+        } else {
+            // Fallback: just use basename
+            $webPath = '/uploads/' . basename($filePath);
+        }
+
+        $fullUrl = 'https://' . $_SERVER['HTTP_HOST'] . $webPath;
         $order['customization_data'][$upload['field_name']] = $fullUrl;
     }
 
