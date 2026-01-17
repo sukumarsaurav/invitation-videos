@@ -143,17 +143,13 @@ header('Content-Type: text/html; charset=utf-8');
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($testEmail)):
             // Try to send email with PHPMailer
             if ($phpmailerExists && class_exists('PHPMailer\PHPMailer\PHPMailer')):
-                use PHPMailer\PHPMailer\PHPMailer;
-                use PHPMailer\PHPMailer\SMTP;
-                use PHPMailer\PHPMailer\Exception;
-                
                 ob_start(); // Capture debug output
                 
                 try {
-                    $mail = new PHPMailer(true);
+                    $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
                     
                     // Enable verbose debug output
-                    $mail->SMTPDebug = SMTP::DEBUG_SERVER;
+                    $mail->SMTPDebug = \PHPMailer\PHPMailer\SMTP::DEBUG_SERVER;
                     $mail->Debugoutput = function($str, $level) {
                         echo htmlspecialchars($str) . "\n";
                     };
@@ -168,9 +164,9 @@ header('Content-Type: text/html; charset=utf-8');
                     
                     // Set encryption based on port
                     if (MAIL_PORT == 465) {
-                        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+                        $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
                     } else {
-                        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                        $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
                     }
                     
                     // Timeout settings
@@ -201,7 +197,7 @@ header('Content-Type: text/html; charset=utf-8');
                     $mail->send();
                     $sendResult = true;
                     
-                } catch (Exception $e) {
+                } catch (\Exception $e) {
                     $sendResult = false;
                     echo "\n\n❌ EXCEPTION: " . $e->getMessage();
                 }
