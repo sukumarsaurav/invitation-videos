@@ -310,14 +310,64 @@ class DynamicFormRenderer
             }
         }
 
-        // Custom upload option
-        $html .= '<div class="mt-2">';
-        $html .= '<label class="flex items-center gap-2 text-primary font-medium cursor-pointer hover:underline">';
-        $html .= '<span class="material-symbols-outlined text-lg">upload_file</span>';
-        $html .= '<span>Upload your own track (MP3)</span>';
-        $html .= '<input type="file" name="' . $name . '_custom" accept="audio/mpeg,audio/mp3" class="hidden">';
-        $html .= '</label>';
+        // Custom upload option with progress indicator
+        $uploadId = $name . '_custom';
+        $html .= '<div class="mt-4 border-t border-slate-200 dark:border-slate-700 pt-4">';
+        $html .= '<p class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Or upload your own track:</p>';
+        $html .= '<div class="border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-primary rounded-xl p-4 text-center cursor-pointer transition-all" 
+            id="' . $uploadId . '_dropzone" 
+            onclick="document.getElementById(\'' . $uploadId . '\').click()">';
+        $html .= '<div id="' . $uploadId . '_placeholder" class="flex flex-col items-center gap-2">';
+        $html .= '<span class="material-symbols-outlined text-3xl text-slate-400">music_note</span>';
+        $html .= '<p class="text-sm font-medium">Click to upload MP3</p>';
+        $html .= '<p class="text-xs text-slate-500">Max 20MB</p>';
         $html .= '</div>';
+        $html .= '<div id="' . $uploadId . '_selected" class="hidden items-center justify-between gap-3">';
+        $html .= '<div class="flex items-center gap-3">';
+        $html .= '<span class="material-symbols-outlined text-2xl text-primary">audio_file</span>';
+        $html .= '<div class="text-left">';
+        $html .= '<p id="' . $uploadId . '_filename" class="text-sm font-medium text-slate-800 dark:text-slate-200"></p>';
+        $html .= '<p id="' . $uploadId . '_size" class="text-xs text-slate-500"></p>';
+        $html .= '</div>';
+        $html .= '</div>';
+        $html .= '<button type="button" class="p-2 rounded-full hover:bg-red-100 text-red-500 transition-colors" onclick="event.stopPropagation(); clearMusicFile(\'' . $uploadId . '\')">';
+        $html .= '<span class="material-symbols-outlined">close</span>';
+        $html .= '</button>';
+        $html .= '</div>';
+        $html .= '</div>';
+        $html .= '<input type="file" id="' . $uploadId . '" name="' . $name . '_custom" accept="audio/mpeg,audio/mp3" class="hidden" onchange="handleMusicSelect(this, \'' . $uploadId . '\')">';
+        $html .= '</div>';
+
+        // Add JavaScript for music file handling (inline for simplicity)
+        $html .= '<script>
+            function handleMusicSelect(input, uploadId) {
+                const file = input.files[0];
+                if (!file) return;
+                
+                // Validate file size (20MB)
+                if (file.size > 20 * 1024 * 1024) {
+                    alert("File size must be less than 20MB");
+                    input.value = "";
+                    return;
+                }
+                
+                // Show selected file info
+                document.getElementById(uploadId + "_placeholder").classList.add("hidden");
+                document.getElementById(uploadId + "_selected").classList.remove("hidden");
+                document.getElementById(uploadId + "_selected").classList.add("flex");
+                document.getElementById(uploadId + "_filename").textContent = file.name;
+                document.getElementById(uploadId + "_size").textContent = (file.size / (1024 * 1024)).toFixed(2) + " MB";
+                document.getElementById(uploadId + "_dropzone").classList.add("border-primary", "bg-primary/5");
+            }
+            
+            function clearMusicFile(uploadId) {
+                document.getElementById(uploadId).value = "";
+                document.getElementById(uploadId + "_placeholder").classList.remove("hidden");
+                document.getElementById(uploadId + "_selected").classList.add("hidden");
+                document.getElementById(uploadId + "_selected").classList.remove("flex");
+                document.getElementById(uploadId + "_dropzone").classList.remove("border-primary", "bg-primary/5");
+            }
+        </script>';
 
         $html .= '</div>';
 
