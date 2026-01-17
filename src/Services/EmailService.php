@@ -77,11 +77,20 @@ class EmailService
      */
     private static function render(string $templateName, array $data = []): string
     {
+        // Extract data variables (name, email, orderNumber, etc.)
         extract($data);
 
+        // Render the content template
         ob_start();
         include __DIR__ . '/../../templates/emails/' . $templateName . '.php';
         $content = ob_get_clean();
+
+        // Make sure $content is available for base.php
+        // Also ensure $appName and $appUrl are available
+        if (!isset($appName))
+            $appName = APP_NAME ?? 'Invitation Videos';
+        if (!isset($appUrl))
+            $appUrl = APP_URL ?? 'https://invitationvideos.com';
 
         // Wrap in base layout
         ob_start();

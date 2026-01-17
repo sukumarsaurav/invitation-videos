@@ -3,7 +3,6 @@
  * Order Completed / Download Ready Email Template
  * Sent when admin uploads the final video
  */
-ob_start();
 
 $daysLeft = ceil((strtotime($expiresAt) - time()) / 86400);
 ?>
@@ -90,7 +89,8 @@ $daysLeft = ceil((strtotime($expiresAt) - time()) / 86400);
                     <tr>
                         <td style="padding-right: 12px; vertical-align: top;">📸</td>
                         <td style="font-size: 15px; color: #475569;">Post as a <strong>Reel</strong> or
-                            <strong>Story</strong> on Instagram</td>
+                            <strong>Story</strong> on Instagram
+                        </td>
                     </tr>
                 </table>
             </td>
@@ -128,4 +128,4 @@ $daysLeft = ceil((strtotime($expiresAt) - time()) / 86400);
     </strong>
 </p>
 <?php
-$content = ob_get_clean();
+// Content is captured by EmailService::render()

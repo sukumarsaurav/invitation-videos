@@ -3,7 +3,6 @@
  * Payment Received / Invoice Email Template
  * Sent after successful payment
  */
-ob_start();
 ?>
 <!-- Invoice Header -->
 <div style="text-align: center; margin-bottom: 32px;">
@@ -133,4 +132,4 @@ ob_start();
     </strong>
 </p>
 <?php
-$content = ob_get_clean();
+// Content is captured by EmailService::render()
