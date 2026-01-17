@@ -91,17 +91,31 @@ Database::query(
     [$videoUrl, $expiresAt, $orderId]
 );
 
-// Send notification email
+// Send notification email (non-fatal - don't let email failure affect upload success)
 try {
-    require_once __DIR__ . '/../../src/Services/EmailService.php';
+    $emailServicePath = __DIR__ . '/../../src/Services/EmailService.php';
 
-    $orderData = Database::fetchOne("SELECT * FROM orders WHERE id = ?", [$orderId]);
-    $userData = Database::fetchOne("SELECT * FROM users WHERE id = ?", [$orderData['user_id']]);
+    // Only attempt email if the file exists and can be loaded
+    if (file_exists($emailServicePath)) {
+        require_once $emailServicePath;
 
-    if ($orderData && $userData) {
-        \InvitationVideos\Services\EmailService::sendOrderCompletedEmail($orderData, $userData);
+        // Check if the class was loaded and PHPMailer is available
+        if (
+            class_exists('\\InvitationVideos\\Services\\EmailService') &&
+            class_exists('\\PHPMailer\\PHPMailer\\PHPMailer')
+        ) {
+
+            $orderData = Database::fetchOne("SELECT * FROM orders WHERE id = ?", [$orderId]);
+            $userData = Database::fetchOne("SELECT * FROM users WHERE id = ?", [$orderData['user_id']]);
+
+            if ($orderData && $userData) {
+                \InvitationVideos\Services\EmailService::sendOrderCompletedEmail($orderData, $userData);
+            }
+        } else {
+            error_log("Email skipped for order #$orderId: EmailService or PHPMailer not available");
+        }
     }
-} catch (Exception $e) {
+} catch (Throwable $e) {
     error_log("Failed to send completion email for order #$orderId: " . $e->getMessage());
 }
 
