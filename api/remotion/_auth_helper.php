@@ -35,7 +35,8 @@ function verifyRemotionToken(): ?array
         $signature = $parts[1];
 
         // Verify signature
-        $expectedSignature = hash('sha256', $parts[0] . getenv('APP_SECRET'));
+        $appSecret = getenv('APP_SECRET') ?: 'default-secret-change-me';
+        $expectedSignature = hash('sha256', $parts[0] . $appSecret);
         if (!hash_equals($expectedSignature, $signature)) {
             return null;
         }
