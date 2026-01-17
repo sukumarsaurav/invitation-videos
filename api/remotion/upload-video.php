@@ -109,7 +109,14 @@ try {
         error_log("Email check for order #$orderId: EmailService=$emailServiceExists, PHPMailer=$phpMailerExists");
 
         if ($emailServiceExists && $phpMailerExists) {
-            $orderData = Database::fetchOne("SELECT * FROM orders WHERE id = ?", [$orderId]);
+            // Join with templates to get template_title
+            $orderData = Database::fetchOne(
+                "SELECT o.*, t.title as template_title 
+                 FROM orders o 
+                 LEFT JOIN templates t ON o.template_id = t.id 
+                 WHERE o.id = ?",
+                [$orderId]
+            );
             $userData = Database::fetchOne("SELECT * FROM users WHERE id = ?", [$orderData['user_id']]);
 
             if ($orderData && $userData) {
