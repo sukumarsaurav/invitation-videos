@@ -5,6 +5,9 @@
  * Verifies the Authorization header token for Remotion API requests.
  */
 
+// Load environment variables FIRST
+require_once __DIR__ . '/../../config/config.php';
+
 /**
  * Verify the Remotion Studio authentication token
  * 
