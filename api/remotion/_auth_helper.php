@@ -40,6 +40,15 @@ function verifyRemotionToken(): ?array
         // Verify signature
         $appSecret = getenv('APP_SECRET') ?: 'default-secret-change-me';
         $expectedSignature = hash('sha256', $parts[0] . $appSecret);
+
+        // DEBUG - remove after fixing
+        error_log("DEBUG Token Verification:");
+        error_log("  Payload: " . $parts[0]);
+        error_log("  APP_SECRET length: " . strlen($appSecret));
+        error_log("  Expected sig: " . $expectedSignature);
+        error_log("  Got sig: " . $signature);
+        error_log("  Match: " . (hash_equals($expectedSignature, $signature) ? 'YES' : 'NO'));
+
         if (!hash_equals($expectedSignature, $signature)) {
             return null;
         }
