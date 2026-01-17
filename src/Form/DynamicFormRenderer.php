@@ -314,19 +314,26 @@ class DynamicFormRenderer
         $uploadId = $name . '_custom';
         $html .= '<div class="mt-4 border-t border-slate-200 dark:border-slate-700 pt-4">';
         $html .= '<p class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Or upload your own track:</p>';
+
+        // Dropzone
         $html .= '<div class="border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-primary rounded-xl p-4 text-center cursor-pointer transition-all" 
             id="' . $uploadId . '_dropzone" 
             onclick="document.getElementById(\'' . $uploadId . '\').click()">';
+
+        // Placeholder state
         $html .= '<div id="' . $uploadId . '_placeholder" class="flex flex-col items-center gap-2">';
         $html .= '<span class="material-symbols-outlined text-3xl text-slate-400">music_note</span>';
         $html .= '<p class="text-sm font-medium">Click to upload MP3</p>';
         $html .= '<p class="text-xs text-slate-500">Max 20MB</p>';
         $html .= '</div>';
-        $html .= '<div id="' . $uploadId . '_selected" class="hidden items-center justify-between gap-3">';
+
+        // Selected file state
+        $html .= '<div id="' . $uploadId . '_selected" class="hidden">';
+        $html .= '<div class="flex items-center justify-between gap-3">';
         $html .= '<div class="flex items-center gap-3">';
         $html .= '<span class="material-symbols-outlined text-2xl text-primary">audio_file</span>';
         $html .= '<div class="text-left">';
-        $html .= '<p id="' . $uploadId . '_filename" class="text-sm font-medium text-slate-800 dark:text-slate-200"></p>';
+        $html .= '<p id="' . $uploadId . '_filename" class="text-sm font-medium text-slate-800 dark:text-slate-200 truncate max-w-[200px]"></p>';
         $html .= '<p id="' . $uploadId . '_size" class="text-xs text-slate-500"></p>';
         $html .= '</div>';
         $html .= '</div>';
@@ -334,11 +341,25 @@ class DynamicFormRenderer
         $html .= '<span class="material-symbols-outlined">close</span>';
         $html .= '</button>';
         $html .= '</div>';
+
+        // Progress bar (shown during form submission)
+        $html .= '<div id="' . $uploadId . '_progress" class="hidden mt-3">';
+        $html .= '<div class="flex items-center justify-between text-xs text-slate-600 mb-1">';
+        $html .= '<span>Uploading...</span>';
+        $html .= '<span id="' . $uploadId . '_percent">0%</span>';
         $html .= '</div>';
+        $html .= '<div class="h-2 bg-slate-200 rounded-full overflow-hidden">';
+        $html .= '<div id="' . $uploadId . '_bar" class="h-full bg-primary rounded-full transition-all duration-300" style="width: 0%"></div>';
+        $html .= '</div>';
+        $html .= '</div>';
+
+        $html .= '</div>'; // End selected state
+        $html .= '</div>'; // End dropzone
+
         $html .= '<input type="file" id="' . $uploadId . '" name="' . $name . '_custom" accept="audio/mpeg,audio/mp3" class="hidden" onchange="handleMusicSelect(this, \'' . $uploadId . '\')">';
         $html .= '</div>';
 
-        // Add JavaScript for music file handling (inline for simplicity)
+        // Add JavaScript for music file handling
         $html .= '<script>
             function handleMusicSelect(input, uploadId) {
                 const file = input.files[0];
@@ -354,19 +375,92 @@ class DynamicFormRenderer
                 // Show selected file info
                 document.getElementById(uploadId + "_placeholder").classList.add("hidden");
                 document.getElementById(uploadId + "_selected").classList.remove("hidden");
-                document.getElementById(uploadId + "_selected").classList.add("flex");
                 document.getElementById(uploadId + "_filename").textContent = file.name;
                 document.getElementById(uploadId + "_size").textContent = (file.size / (1024 * 1024)).toFixed(2) + " MB";
                 document.getElementById(uploadId + "_dropzone").classList.add("border-primary", "bg-primary/5");
+                document.getElementById(uploadId + "_dropzone").onclick = null; // Disable click when file selected
             }
             
             function clearMusicFile(uploadId) {
                 document.getElementById(uploadId).value = "";
                 document.getElementById(uploadId + "_placeholder").classList.remove("hidden");
                 document.getElementById(uploadId + "_selected").classList.add("hidden");
-                document.getElementById(uploadId + "_selected").classList.remove("flex");
+                document.getElementById(uploadId + "_progress").classList.add("hidden");
                 document.getElementById(uploadId + "_dropzone").classList.remove("border-primary", "bg-primary/5");
+                document.getElementById(uploadId + "_dropzone").onclick = function() {
+                    document.getElementById(uploadId).click();
+                };
             }
+            
+            // Hook into form submission to show upload progress
+            document.addEventListener("DOMContentLoaded", function() {
+                const form = document.getElementById("customize-form");
+                if (!form) return;
+                
+                form.addEventListener("submit", function(e) {
+                    // Check if there are any file inputs with files
+                    const fileInputs = form.querySelectorAll("input[type=file]");
+                    let hasFiles = false;
+                    let totalSize = 0;
+                    
+                    fileInputs.forEach(function(input) {
+                        if (input.files && input.files.length > 0) {
+                            hasFiles = true;
+                            totalSize += input.files[0].size;
+                        }
+                    });
+                    
+                    if (!hasFiles || totalSize < 1024 * 1024) return; // Only intercept for large files
+                    
+                    e.preventDefault();
+                    
+                    // Show progress bar for music uploads
+                    const musicProgressDiv = document.querySelector("[id$=_custom_progress]");
+                    if (musicProgressDiv) {
+                        musicProgressDiv.classList.remove("hidden");
+                    }
+                    
+                    // Create FormData and use XHR for progress
+                    const formData = new FormData(form);
+                    const xhr = new XMLHttpRequest();
+                    
+                    xhr.upload.addEventListener("progress", function(evt) {
+                        if (evt.lengthComputable) {
+                            const percent = Math.round((evt.loaded / evt.total) * 100);
+                            
+                            // Update all progress bars
+                            document.querySelectorAll("[id$=_custom_bar]").forEach(function(bar) {
+                                bar.style.width = percent + "%";
+                            });
+                            document.querySelectorAll("[id$=_custom_percent]").forEach(function(pct) {
+                                pct.textContent = percent + "%";
+                            });
+                        }
+                    });
+                    
+                    xhr.addEventListener("load", function() {
+                        if (xhr.status >= 200 && xhr.status < 400) {
+                            // Success - follow redirect or reload
+                            if (xhr.responseURL) {
+                                window.location.href = xhr.responseURL;
+                            } else {
+                                window.location.reload();
+                            }
+                        } else {
+                            alert("Upload failed. Please try again.");
+                            window.location.reload();
+                        }
+                    });
+                    
+                    xhr.addEventListener("error", function() {
+                        alert("Upload failed. Please check your connection.");
+                        window.location.reload();
+                    });
+                    
+                    xhr.open("POST", form.action || window.location.href);
+                    xhr.send(formData);
+                });
+            });
         </script>';
 
         $html .= '</div>';
