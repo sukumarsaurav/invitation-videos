@@ -141,14 +141,10 @@ RewriteRule ^ index.php [L]
 # ETags Configuration
 FileETag MTime Size
 
-# PHP settings (if allowed by host)
+# PHP settings (if allowed by host - only works with mod_php, not PHP-FPM)
 <IfModule mod_php.c>
-    php_value upload_max_filesize 10M
-    php_value post_max_size 12M
-    php_value max_execution_time 300
+    php_value upload_max_filesize 50M
+    php_value post_max_size 55M
+    php_value max_execution_time 600
+    php_value max_input_time 600
 </IfModule>
-# Increase file upload limits for music files
-php_value upload_max_filesize 50M
-php_value post_max_size 55M
-php_value max_execution_time 600
-php_value max_input_time 600
