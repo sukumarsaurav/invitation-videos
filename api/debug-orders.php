@@ -43,7 +43,7 @@ $recentDrafts = Database::fetchAll(
 foreach ($recentDrafts as &$draft) {
     $draft['customization_data'] = json_decode($draft['customization_data'], true);
     $draft['uploads'] = Database::fetchAll(
-        "SELECT field_name, file_type, original_filename, mime_type FROM draft_order_uploads WHERE draft_order_id = ?",
+        "SELECT field_name, file_type, original_filename, mime_type FROM draft_order_uploads WHERE draft_id = ?",
         [$draft['id']]
     );
 }
