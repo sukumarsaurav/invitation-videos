@@ -360,11 +360,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['form_action'])) {
             'default_music_url' => !empty($_POST['default_music_url']) ? Security::sanitizeString($_POST['default_music_url']) : null,
             'is_premium' => isset($_POST['is_premium']) ? 1 : 0,
             'is_active' => isset($_POST['is_active']) ? 1 : 0,
+            'ai_caricature_enabled' => isset($_POST['ai_caricature_enabled']) ? 1 : 0,
         ];
 
         if ($_POST['form_action'] === 'create') {
-            $sql = "INSERT INTO templates (title, slug, description, category, subcategory, cultural_tradition, price_usd, price_inr, discounted_price_usd, discounted_price_inr, preview_video_url, thumbnail_url, duration_seconds, remotion_composition_id, default_music_url, is_premium, is_active)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            $sql = "INSERT INTO templates (title, slug, description, category, subcategory, cultural_tradition, price_usd, price_inr, discounted_price_usd, discounted_price_inr, preview_video_url, thumbnail_url, duration_seconds, remotion_composition_id, default_music_url, is_premium, is_active, ai_caricature_enabled)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             Database::query($sql, array_values($data));
             $newTemplateId = Database::lastInsertId();
 
@@ -381,7 +382,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['form_action'])) {
             header('Location: /admin/templates.php?action=edit&id=' . $newTemplateId . '&success=created');
             exit;
         } elseif ($_POST['form_action'] === 'update' && $templateId) {
-            $sql = "UPDATE templates SET title=?, slug=?, description=?, category=?, subcategory=?, cultural_tradition=?, price_usd=?, price_inr=?, discounted_price_usd=?, discounted_price_inr=?, preview_video_url=?, thumbnail_url=?, duration_seconds=?, remotion_composition_id=?, default_music_url=?, is_premium=?, is_active=? WHERE id=?";
+            $sql = "UPDATE templates SET title=?, slug=?, description=?, category=?, subcategory=?, cultural_tradition=?, price_usd=?, price_inr=?, discounted_price_usd=?, discounted_price_inr=?, preview_video_url=?, thumbnail_url=?, duration_seconds=?, remotion_composition_id=?, default_music_url=?, is_premium=?, is_active=?, ai_caricature_enabled=? WHERE id=?";
             $params = array_values($data);
             $params[] = $templateId;
             Database::query($sql, $params);
@@ -1296,6 +1297,15 @@ function getYouTubeEmbedUrl($url)
                     <label class="flex items-center gap-3 cursor-pointer">
                         <input type="checkbox" name="is_premium" value="1" <?= ($template['is_premium'] ?? 0) ? 'checked' : '' ?> class="rounded border-slate-300 text-primary focus:ring-primary">
                         <span class="text-sm font-medium">Premium Template</span>
+                    </label>
+
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" name="ai_caricature_enabled" value="1" <?= ($template['ai_caricature_enabled'] ?? 0) ? 'checked' : '' ?>
+                            class="rounded border-slate-300 text-purple-600 focus:ring-purple-500">
+                        <div>
+                            <span class="text-sm font-medium">AI Caricature</span>
+                            <p class="text-xs text-slate-500">Enable dress selection for AI-generated caricatures</p>
+                        </div>
                     </label>
                 </div>
 
