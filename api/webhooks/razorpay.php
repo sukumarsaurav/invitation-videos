@@ -14,8 +14,10 @@ ob_start();
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../src/Payment/RazorpayService.php';
 require_once __DIR__ . '/../../src/Services/EmailService.php';
+require_once __DIR__ . '/../../src/Services/AIGenerationService.php';
 
 use InvitationVideos\Services\EmailService;
+use InvitationVideos\Services\AIGenerationService;
 
 // Set headers for webhook
 header('Content-Type: application/json');
@@ -184,6 +186,9 @@ function handlePaymentCaptured(array $payment): void
 
         error_log("Razorpay Webhook: Order #{$order['id']} marked as paid");
 
+        // Queue AI caricature generation if dress was selected
+        queueAiGenerationIfNeeded($order['id']);
+
         // Send payment confirmation email
         try {
             $user = Database::fetchOne("SELECT * FROM users WHERE id = ?", [$order['user_id']]);
@@ -201,6 +206,55 @@ function handlePaymentCaptured(array $payment): void
         }
     } else {
         error_log("Razorpay Webhook: Could not find order or draft for razorpay_order_id: $razorpayOrderId");
+    }
+}
+
+/**
+ * Queue AI generation if order has dress/color selected
+ */
+function queueAiGenerationIfNeeded(int $orderId): void
+{
+    try {
+        $aiService = new AIGenerationService();
+
+        // Check if AI generation is enabled
+        if (!$aiService->isEnabled()) {
+            return;
+        }
+
+        // Get order with customization data
+        $order = Database::fetchOne("SELECT * FROM orders WHERE id = ?", [$orderId]);
+        if (!$order) {
+            return;
+        }
+
+        // Parse customization data to check for dress selection
+        $customizationData = json_decode($order['customization_data'] ?? '{}', true);
+        $dressId = $customizationData['ai_dress_id'] ?? null;
+        $colorId = $customizationData['ai_color_id'] ?? null;
+
+        if (!$dressId) {
+            // No dress selected, skip AI generation
+            return;
+        }
+
+        // Get a reference image from uploads if available
+        $originalImageUrl = null;
+        $uploads = Database::fetchAll(
+            "SELECT file_path FROM order_uploads WHERE order_id = ? AND (field_name LIKE '%photo%' OR field_name LIKE '%image%') LIMIT 1",
+            [$orderId]
+        );
+        if (!empty($uploads)) {
+            $originalImageUrl = $uploads[0]['file_path'];
+        }
+
+        // Queue the AI generation
+        $queueId = $aiService->queueGeneration($orderId, $dressId, $colorId, $originalImageUrl ?? '');
+
+        error_log("Razorpay Webhook: Queued AI generation #{$queueId} for order #{$orderId}");
+
+    } catch (Exception $e) {
+        error_log("Razorpay Webhook: Failed to queue AI generation for order #{$orderId}: " . $e->getMessage());
     }
 }
 

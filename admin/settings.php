@@ -68,6 +68,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             setSetting('youtube_url', Security::sanitizeString($_POST['youtube_url'] ?? ''));
             $success = 'Social media links updated successfully!';
         }
+
+        if ($action === 'ai') {
+            setSetting('ai_generation_enabled', isset($_POST['ai_generation_enabled']) ? '1' : '0', 'boolean');
+            setSetting('ai_image_provider', $_POST['ai_image_provider'] ?? 'openai');
+            setSetting('ai_openai_api_key', Security::sanitizeString($_POST['ai_openai_api_key'] ?? ''));
+            setSetting('ai_openai_model', $_POST['ai_openai_model'] ?? 'dall-e-3');
+            setSetting('ai_max_retries', Security::sanitizeString($_POST['ai_max_retries'] ?? '3'));
+            setSetting('ai_cost_per_image_cents', Security::sanitizeString($_POST['ai_cost_per_image_cents'] ?? '8'));
+            $success = 'AI settings updated successfully!';
+        }
     } else {
         $error = 'Invalid form submission. Please try again.';
     }
@@ -99,6 +109,14 @@ $settings = [
     'instagram_url' => getSetting('instagram_url', ''),
     'twitter_url' => getSetting('twitter_url', ''),
     'youtube_url' => getSetting('youtube_url', ''),
+
+    // AI
+    'ai_generation_enabled' => getSetting('ai_generation_enabled', '1') === '1',
+    'ai_image_provider' => getSetting('ai_image_provider', 'openai'),
+    'ai_openai_api_key' => getSetting('ai_openai_api_key', ''),
+    'ai_openai_model' => getSetting('ai_openai_model', 'dall-e-3'),
+    'ai_max_retries' => getSetting('ai_max_retries', '3'),
+    'ai_cost_per_image_cents' => getSetting('ai_cost_per_image_cents', '8'),
 ];
 
 $pageTitle = 'Settings';
@@ -153,6 +171,11 @@ $currentTab = $_GET['tab'] ?? 'general';
                     class="flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors border-t border-slate-100 <?= $currentTab === 'social' ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-50' ?>">
                     <span class="material-symbols-outlined text-lg">share</span>
                     Social Media
+                </a>
+                <a href="?tab=ai"
+                    class="flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors border-t border-slate-100 <?= $currentTab === 'ai' ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-50' ?>">
+                    <span class="material-symbols-outlined text-lg">auto_awesome</span>
+                    AI Generation
                 </a>
             </nav>
         </div>
@@ -411,6 +434,100 @@ $currentTab = $_GET['tab'] ?? 'general';
                                     value="<?= Security::escape($settings['youtube_url']) ?>"
                                     placeholder="https://youtube.com/@yourchannel"
                                     class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                            </div>
+                        </div>
+
+                        <div class="px-6 py-4 bg-slate-50 border-t border-slate-200">
+                            <button type="submit"
+                                class="px-6 py-2.5 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 transition-colors">
+                                Save Changes
+                            </button>
+                        </div>
+                    </form>
+                <?php endif; ?>
+
+                <?php if ($currentTab === 'ai'): ?>
+                    <!-- AI Generation Settings -->
+                    <form method="POST">
+                        <?= Security::csrfField() ?>
+                        <input type="hidden" name="action" value="ai">
+
+                        <div class="p-6 border-b border-slate-200">
+                            <h2 class="text-lg font-bold text-slate-900">AI Image Generation</h2>
+                            <p class="text-sm text-slate-500 mt-1">Configure AI caricature generation settings</p>
+                        </div>
+
+                        <div class="p-6 space-y-5">
+                            <label class="flex items-center gap-3 cursor-pointer p-4 bg-slate-50 rounded-lg">
+                                <input type="checkbox" name="ai_generation_enabled" value="1"
+                                    <?= $settings['ai_generation_enabled'] ? 'checked' : '' ?>
+                                    class="w-5 h-5 rounded border-slate-300 text-primary focus:ring-primary/20">
+                                <div>
+                                    <span class="font-medium text-slate-700">Enable AI Generation</span>
+                                    <p class="text-sm text-slate-500">Turn on/off AI caricature feature globally</p>
+                                </div>
+                            </label>
+
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">AI Provider</label>
+                                <select name="ai_image_provider"
+                                    class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                                    <option value="openai" <?= $settings['ai_image_provider'] === 'openai' ? 'selected' : '' ?>>OpenAI DALL-E</option>
+                                    <option value="stability" disabled>Stability AI (Coming Soon)</option>
+                                    <option value="replicate" disabled>Replicate (Coming Soon)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">OpenAI API Key</label>
+                                <input type="password" name="ai_openai_api_key"
+                                    value="<?= Security::escape($settings['ai_openai_api_key']) ?>" placeholder="sk-..."
+                                    class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                                <p class="text-xs text-slate-500 mt-1">Get your API key from <a
+                                        href="https://platform.openai.com/api-keys" target="_blank"
+                                        class="text-primary hover:underline">OpenAI Dashboard</a></p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">DALL-E Model</label>
+                                <select name="ai_openai_model"
+                                    class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                                    <option value="dall-e-3" <?= $settings['ai_openai_model'] === 'dall-e-3' ? 'selected' : '' ?>>DALL-E 3 ($0.04-0.08 per image)</option>
+                                    <option value="dall-e-2" <?= $settings['ai_openai_model'] === 'dall-e-2' ? 'selected' : '' ?>>DALL-E 2 ($0.02 per image)</option>
+                                </select>
+                            </div>
+
+                            <div class="grid sm:grid-cols-2 gap-5">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Max Retries</label>
+                                    <input type="number" name="ai_max_retries" min="1" max="10"
+                                        value="<?= Security::escape($settings['ai_max_retries']) ?>"
+                                        class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                                    <p class="text-xs text-slate-500 mt-1">Maximum retry attempts for failed generations</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Cost per Image
+                                        (cents)</label>
+                                    <input type="number" name="ai_cost_per_image_cents" min="1" max="100"
+                                        value="<?= Security::escape($settings['ai_cost_per_image_cents']) ?>"
+                                        class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                                    <p class="text-xs text-slate-500 mt-1">For cost tracking (approx. 4-8 cents)</p>
+                                </div>
+                            </div>
+
+                            <div class="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-amber-600">info</span>
+                                    <div>
+                                        <p class="font-medium text-amber-800">Quick Links</p>
+                                        <div class="mt-2 space-y-1 text-sm text-amber-700">
+                                            <p><a href="/admin/dress-designs.php" class="underline">Manage Dress Designs</a>
+                                                - Add/edit outfit styles and prompts</p>
+                                            <p><a href="/admin/ai-queue.php" class="underline">AI Queue Monitor</a> - View
+                                                generation status and retry failed jobs</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 

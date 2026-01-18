@@ -12,6 +12,9 @@
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../src/Core/Security.php';
 require_once __DIR__ . '/../../src/Form/DynamicFormRenderer.php';
+require_once __DIR__ . '/../../src/Services/DressDesignService.php';
+
+use InvitationVideos\Services\DressDesignService;
 
 // Support both slug and ID for template lookup
 $templateSlug = $_GET['template_slug'] ?? null;
@@ -91,6 +94,17 @@ $stepIcons = [
     3 => 'music_note'
 ];
 
+// Check if this template has AI caricature enabled
+$isAiCaricatureEnabled = !empty($template['ai_caricature_enabled']);
+$dressDesigns = [];
+$hasDressStep = false;
+
+if ($isAiCaricatureEnabled) {
+    $dressService = new DressDesignService();
+    $dressDesigns = $dressService->getDesignsForTemplate($templateId);
+    $hasDressStep = count($dressDesigns) > 0;
+}
+
 // Check which steps actually have fields
 $availableSteps = [];
 foreach ($stepGroups as $stepNum => $groups) {
@@ -101,11 +115,16 @@ foreach ($stepGroups as $stepNum => $groups) {
 $totalSteps = count($availableSteps);
 
 // Get current step index in available steps
+// For AI templates with dress step, 'dress' is step 0.5 (before step 1)
+$isDressStep = ($step === 0 && isset($_GET['dress']) && $hasDressStep);
 $currentStepIndex = array_search($step, $availableSteps);
 if ($currentStepIndex === false && $step > 0) {
     $currentStepIndex = 0;
     $step = $availableSteps[0] ?? 1;
 }
+
+// Adjust total steps count if dress step exists
+$effectiveTotalSteps = $totalSteps + ($hasDressStep ? 1 : 0);
 
 // Session storage for multi-step form data
 if (!isset($_SESSION['customize_data'])) {
@@ -133,6 +152,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($key !== CSRF_TOKEN_NAME && $key !== 'user_timezone') {
                 $_SESSION['customize_data'][$key] = $value;
             }
+        }
+
+        // Handle dress/color selection for AI templates
+        if ($isDressStep && isset($_POST['dress_id'])) {
+            $_SESSION['customize_dress_id'] = intval($_POST['dress_id']);
+            $_SESSION['customize_color_id'] = !empty($_POST['color_id']) ? intval($_POST['color_id']) : null;
+
+            // Store in customize_data as well for draft creation
+            $_SESSION['customize_data']['ai_dress_id'] = $_SESSION['customize_dress_id'];
+            $_SESSION['customize_data']['ai_color_id'] = $_SESSION['customize_color_id'];
         }
 
         // IMPORTANT: Handle file uploads IMMEDIATELY at each step, not just final step
@@ -199,12 +228,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['user_timezone'] = $_POST['user_timezone'];
         }
 
-        // Determine next step
-        $nextStepIndex = $currentStepIndex + 1;
-
         // Helper function to check if request is XHR
         $isXhrRequest = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
             strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+
+        // Handle dress step redirect - go to first regular step
+        if ($isDressStep) {
+            $redirectUrl = '/template/' . $templateSlug . '?step=' . ($availableSteps[0] ?? 1);
+
+            if ($isXhrRequest) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => true, 'redirect' => $redirectUrl]);
+                exit;
+            }
+
+            header('Location: ' . $redirectUrl);
+            exit;
+        }
+
+        // Determine next step
+        $nextStepIndex = $currentStepIndex + 1;
 
         if ($nextStepIndex < $totalSteps) {
             // Go to next step
@@ -619,7 +662,13 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                         ₹<?= number_format($template['price_inr'] ?? 0, 0) ?>
                     </p>
                 </div>
-                <a href="/template/<?= Security::escape($templateSlug) ?>?step=<?= $availableSteps[0] ?? 1 ?>"
+                <?php
+                // For AI templates, start with dress step; otherwise go to first form step
+                $customizeUrl = $hasDressStep
+                    ? '/template/' . Security::escape($templateSlug) . '?step=0&dress=1'
+                    : '/template/' . Security::escape($templateSlug) . '?step=' . ($availableSteps[0] ?? 1);
+                ?>
+                <a href="<?= $customizeUrl ?>"
                     class="flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all">
                     <span>Customize</span>
                     <span class="material-symbols-outlined text-lg">arrow_forward</span>
@@ -635,106 +684,142 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
 
         <div class="max-w-3xl mx-auto">
 
-            <!-- Form Section -->
+            <?php if ($isDressStep): ?>
+                <!-- ==================== DRESS SELECTION STEP ==================== -->
+                <form id="customize-form" method="POST" class="space-y-6">
+                    <?= Security::csrfField() ?>
 
-            <!-- Progress Indicator (only show if more than 1 step) -->
-            <?php if ($totalSteps > 1): ?>
-                <div class="mb-6">
-                    <!-- Step Circles with Connecting Lines -->
-                    <div class="flex items-center justify-center py-4">
-                        <?php foreach ($availableSteps as $idx => $s): ?>
-                            <div class="flex items-center <?= $idx < count($availableSteps) - 1 ? 'flex-1' : '' ?>">
-                                <!-- Step Circle -->
-                                <div
-                                    class="size-10 rounded-full flex items-center justify-center text-sm font-bold transition-all shrink-0
-                                    <?= $s < $step ? 'bg-green-500 text-white' : ($s === $step ? 'bg-primary text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400') ?>">
-                                    <?php if ($s < $step): ?>
-                                        <span class="material-symbols-outlined text-lg">check</span>
-                                    <?php else: ?>
-                                        <?= $idx + 1 ?>
-                                    <?php endif; ?>
-                                </div>
-                                <!-- Connecting Line -->
-                                <?php if ($idx < count($availableSteps) - 1): ?>
-                                    <div
-                                        class="flex-1 h-0.5 mx-2 <?= $s < $step ? 'bg-green-500' : 'bg-slate-200 dark:bg-slate-700' ?>">
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                    <!-- Current Step Title -->
-                    <div class="text-center">
-                        <h2 class="font-bold text-slate-900 dark:text-white text-lg">
-                            <?= $stepTitles[$step] ?? 'Details' ?>
-                        </h2>
-                    </div>
-                </div>
-            <?php endif; ?>
+                    <!-- Include dress selection component -->
+                    <?php include __DIR__ . '/../components/dress-selection.php'; ?>
 
-            <?php if (!empty($errors['general'])): ?>
-                <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
-                    <span class="material-symbols-outlined">error</span>
-                    <?= Security::escape($errors['general']) ?>
-                </div>
-            <?php endif; ?>
-
-            <!-- Form -->
-            <form id="customize-form" method="POST" enctype="multipart/form-data" class="space-y-6">
-                <?= Security::csrfField() ?>
-                <input type="hidden" name="user_timezone" id="user_timezone" value="">
-
-                <?= $formRenderer->renderByGroups($templateId, $stepGroups[$step] ?? [], $storedValues) ?>
-
-                <!-- Navigation Buttons -->
-                <div class="flex items-center justify-between gap-4 pt-6 border-t border-slate-200 dark:border-slate-700">
-                    <?php if ($currentStepIndex > 0): ?>
-                        <a href="/template/<?= Security::escape($templateSlug) ?>?step=<?= $availableSteps[$currentStepIndex - 1] ?>"
-                            class="hidden md:flex items-center gap-2 px-6 py-3 rounded-lg border border-slate-200 dark:border-slate-700 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                            <span class="material-symbols-outlined">arrow_back</span>
-                            Back
-                        </a>
-                    <?php else: ?>
+                    <!-- Navigation -->
+                    <div class="flex items-center justify-between gap-4 pt-6 border-t border-slate-200 dark:border-slate-700">
                         <a href="/template/<?= Security::escape($templateSlug) ?>"
-                            class="hidden md:flex items-center gap-2 px-6 py-3 rounded-lg border border-slate-200 dark:border-slate-700 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                            class="flex items-center gap-2 px-6 py-3 rounded-lg border border-slate-200 dark:border-slate-700 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                             <span class="material-symbols-outlined">arrow_back</span>
                             Back
                         </a>
-                    <?php endif; ?>
-
-                    <button type="submit"
-                        class="hidden md:flex flex-1 sm:flex-initial items-center justify-center gap-2 px-8 py-3 rounded-lg bg-primary text-white font-bold hover:bg-primary/90 shadow-lg shadow-primary/25 transition-colors">
-                        <?php if ($currentStepIndex < $totalSteps - 1): ?>
+                        <button type="submit"
+                            class="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-8 py-3 rounded-lg bg-primary text-white font-bold hover:bg-primary/90 shadow-lg shadow-primary/25 transition-colors">
                             <span>Next Step</span>
                             <span class="material-symbols-outlined">arrow_forward</span>
-                        <?php else: ?>
-                            <span>Continue to Checkout</span>
-                            <span class="material-symbols-outlined">shopping_cart</span>
-                        <?php endif; ?>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Fixed Bottom Bar for Mobile (dress step) -->
+                <div
+                    class="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
+                    <button type="submit" form="customize-form"
+                        class="w-full flex items-center justify-center gap-2 px-8 py-3 rounded-lg bg-primary text-white font-bold hover:bg-primary/90 shadow-lg shadow-primary/25 transition-colors">
+                        <span>Next Step</span>
+                        <span class="material-symbols-outlined">arrow_forward</span>
                     </button>
                 </div>
-            </form>
-        </div>
+                <div class="h-20 md:hidden"></div>
 
-        <!-- Fixed Bottom Bar for Mobile (customize steps) -->
-        <div
-            class="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
-            <button type="submit" form="customize-form"
-                class="w-full flex items-center justify-center gap-2 px-8 py-3 rounded-lg bg-primary text-white font-bold hover:bg-primary/90 shadow-lg shadow-primary/25 transition-colors">
-                <?php if ($currentStepIndex < $totalSteps - 1): ?>
-                    <span>Next Step</span>
-                    <span class="material-symbols-outlined">arrow_forward</span>
-                <?php else: ?>
-                    <span>Continue to Checkout</span>
-                    <span class="material-symbols-outlined">shopping_cart</span>
-                <?php endif; ?>
-            </button>
-        </div>
+            <?php else: ?>
+                <!-- Form Section -->
 
-        <!-- Spacer for fixed bottom bar on mobile -->
-        <div class="h-20 md:hidden"></div>
+                <!-- Progress Indicator (only show if more than 1 step) -->
+                        <?php if ($totalSteps > 1): ?>
+                    <div class="mb-6">
+                        <!-- Step Circles with Connecting Lines -->
+                        <div class="flex items-center justify-center py-4">
+                                        <?php foreach ($availableSteps as $idx => $s): ?>
+                                <div class="flex items-center <?= $idx < count($availableSteps) - 1 ? 'flex-1' : '' ?>">
+                                    <!-- Step Circle -->
+                                    <div
+                                        class="size-10 rounded-full flex items-center justify-center text-sm font-bold transition-all shrink-0
+                                    <?= $s < $step ? 'bg-green-500 text-white' : ($s === $step ? 'bg-primary text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400') ?>">
+                                                        <?php if ($s < $step): ?>
+                                            <span class="material-symbols-outlined text-lg">check</span>
+                                                        <?php else: ?>
+                                                                <?= $idx + 1 ?>
+                                                        <?php endif; ?>
+                                    </div>
+                                    <!-- Connecting Line -->
+                                                    <?php if ($idx < count($availableSteps) - 1): ?>
+                                        <div
+                                            class="flex-1 h-0.5 mx-2 <?= $s < $step ? 'bg-green-500' : 'bg-slate-200 dark:bg-slate-700' ?>">
+                                        </div>
+                                                    <?php endif; ?>
+                                </div>
+                                        <?php endforeach; ?>
+                        </div>
+                        <!-- Current Step Title -->
+                        <div class="text-center">
+                            <h2 class="font-bold text-slate-900 dark:text-white text-lg">
+                                            <?= $stepTitles[$step] ?? 'Details' ?>
+                            </h2>
+                        </div>
+                    </div>
+                        <?php endif; ?>
 
-    <?php endif; ?>
+                        <?php if (!empty($errors['general'])): ?>
+                    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
+                        <span class="material-symbols-outlined">error</span>
+                                    <?= Security::escape($errors['general']) ?>
+                    </div>
+                        <?php endif; ?>
+
+                <!-- Form -->
+                <form id="customize-form" method="POST" enctype="multipart/form-data" class="space-y-6">
+                   <?= Security::csrfField() ?>
+                    <input type="hidden" name="user_timezone" id="user_timezone" value="">
+
+               <?= $formRenderer->renderByGroups($templateId, $stepGroups[$step] ?? [], $storedValues) ?>
+
+                    <!-- Navigation Buttons -->
+                    <div class="flex items-center justify-between gap-4 pt-6 border-t border-slate-200 dark:border-slate-700">
+                   <?php if ($currentStepIndex > 0): ?>
+                            <a href="/template/<?= Security::escape($templateSlug) ?>?step=<?= $availableSteps[$currentStepIndex - 1] ?>"
+                                class="hidden md:flex items-center gap-2 px-6 py-3 rounded-lg border border-slate-200 dark:border-slate-700 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                                <span class="material-symbols-outlined">arrow_back</span>
+                                Back
+                            </a>
+                      <?php else: ?>
+                            <a href="/template/<?= Security::escape($templateSlug) ?>"
+                                class="hidden md:flex items-center gap-2 px-6 py-3 rounded-lg border border-slate-200 dark:border-slate-700 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                                <span class="material-symbols-outlined">arrow_back</span>
+                                Back
+                            </a>
+                      <?php endif; ?>
+
+                        <button type="submit"
+                            class="hidden md:flex flex-1 sm:flex-initial items-center justify-center gap-2 px-8 py-3 rounded-lg bg-primary text-white font-bold hover:bg-primary/90 shadow-lg shadow-primary/25 transition-colors">
+                     <?php if ($currentStepIndex < $totalSteps - 1): ?>
+                                <span>Next Step</span>
+                                <span class="material-symbols-outlined">arrow_forward</span>
+                          <?php else: ?>
+                                <span>Continue to Checkout</span>
+                                <span class="material-symbols-outlined">shopping_cart</span>
+                          <?php endif; ?>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Fixed Bottom Bar for Mobile (customize steps) -->
+            <div
+                class="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
+                <button type="submit" form="customize-form"
+                    class="w-full flex items-center justify-center gap-2 px-8 py-3 rounded-lg bg-primary text-white font-bold hover:bg-primary/90 shadow-lg shadow-primary/25 transition-colors">
+             <?php if ($currentStepIndex < $totalSteps - 1): ?>
+                        <span>Next Step</span>
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                  <?php else: ?>
+                        <span>Continue to Checkout</span>
+                        <span class="material-symbols-outlined">shopping_cart</span>
+                  <?php endif; ?>
+                </button>
+            </div>
+
+            <!-- Spacer for fixed bottom bar on mobile -->
+            <div class="h-20 md:hidden"></div>
+
+        <?php endif; ?> <!-- end if isDressStep else -->
+    <?php endif; ?> <!-- end if step === 0 else -->
 
 </div>
 
