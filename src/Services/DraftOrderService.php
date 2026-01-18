@@ -172,14 +172,22 @@ class DraftOrderService
         // Generate order number
         $orderNumber = 'ORD-' . strtoupper(substr(uniqid(), -8));
 
-        // Insert into orders table
+        // Create organized order directory
+        $orderFilesDir = 'orders/' . $orderNumber;
+        $fullOrderDir = UPLOAD_PATH . $orderFilesDir . '/';
+        if (!is_dir($fullOrderDir)) {
+            mkdir($fullOrderDir, 0755, true);
+        }
+        error_log("convertToOrder: Created order directory: {$fullOrderDir}");
+
+        // Insert into orders table with files_directory
         \Database::query(
             "INSERT INTO orders (
                 order_number, user_id, template_id, amount, currency, 
                 customization_data, status, payment_status, order_status,
                 payment_gateway, payment_id, razorpay_order_id,
-                promo_code_id, discount_amount, paid_at
-            ) VALUES (?, ?, ?, ?, ?, ?, 'paid', 'paid', 'queued', ?, ?, ?, ?, ?, NOW())",
+                promo_code_id, discount_amount, files_directory, paid_at
+            ) VALUES (?, ?, ?, ?, ?, ?, 'paid', 'paid', 'queued', ?, ?, ?, ?, ?, ?, NOW())",
             [
                 $orderNumber,
                 $draft['user_id'],
@@ -193,14 +201,15 @@ class DraftOrderService
                 $paymentId,
                 $draft['razorpay_order_id'],
                 $draft['promo_code_id'],
-                $draft['discount_amount'] ?? 0
+                $draft['discount_amount'] ?? 0,
+                $orderFilesDir
             ]
         );
 
         $orderId = (int) \Database::lastInsertId();
 
-        // Move uploaded files from draft_order_uploads to order_uploads
-        $this->moveUploads($draft['id'], $orderId);
+        // Move uploaded files from draft directory to order directory
+        $this->moveUploads($draft['id'], $orderId, $draft['files_directory'] ?? null, $fullOrderDir);
 
         // Delete the draft
         $this->deleteDraft($draft['id']);
@@ -219,8 +228,10 @@ class DraftOrderService
      * 
      * @param int $draftId Draft order ID
      * @param int $orderId New order ID
+     * @param string|null $draftFilesDir Draft files directory (relative path)
+     * @param string|null $orderDir Order files directory (full path)
      */
-    private function moveUploads(int $draftId, int $orderId): void
+    private function moveUploads(int $draftId, int $orderId, ?string $draftFilesDir = null, ?string $orderDir = null): void
     {
         error_log("moveUploads: Starting to move uploads from draft #{$draftId} to order #{$orderId}");
 
@@ -233,7 +244,27 @@ class DraftOrderService
         error_log("moveUploads: Found " . count($uploads) . " uploads to move");
 
         foreach ($uploads as $upload) {
-            error_log("moveUploads: Copying file '{$upload['stored_filename']}' (type: {$upload['file_type']})");
+            error_log("moveUploads: Processing file '{$upload['stored_filename']}' (type: {$upload['file_type']})");
+
+            $newFilePath = $upload['file_path']; // Default: keep same path
+
+            // If we have both source and destination directories, move the file physically
+            if ($draftFilesDir && $orderDir) {
+                $oldPath = $upload['file_path'];
+
+                if (file_exists($oldPath)) {
+                    $newFilePath = $orderDir . $upload['stored_filename'];
+
+                    if (rename($oldPath, $newFilePath)) {
+                        error_log("moveUploads: Moved file from {$oldPath} to {$newFilePath}");
+                    } else {
+                        error_log("moveUploads: Failed to move file, keeping at original location");
+                        $newFilePath = $oldPath;
+                    }
+                } else {
+                    error_log("moveUploads: Source file not found: {$oldPath}");
+                }
+            }
 
             try {
                 \Database::query(
@@ -245,20 +276,32 @@ class DraftOrderService
                         $upload['file_type'],
                         $upload['original_filename'],
                         $upload['stored_filename'],
-                        $upload['file_path'],
+                        $newFilePath,
                         $upload['mime_type'],
                         $upload['file_size']
                     ]
                 );
-                error_log("moveUploads: Successfully inserted upload for field '{$upload['field_name']}'");
+                error_log("moveUploads: Successfully inserted upload for field '{$upload['field_name']}' with path {$newFilePath}");
             } catch (\Exception $e) {
                 error_log("moveUploads: ERROR inserting upload - " . $e->getMessage());
             }
         }
 
-        // Delete draft uploads (files stay, just change ownership)
+        // Delete draft uploads from database
         \Database::query("DELETE FROM draft_order_uploads WHERE draft_id = ?", [$draftId]);
         error_log("moveUploads: Deleted draft uploads for draft #{$draftId}");
+
+        // Clean up empty draft directory
+        if ($draftFilesDir) {
+            $fullDraftDir = UPLOAD_PATH . $draftFilesDir;
+            if (is_dir($fullDraftDir)) {
+                $remainingFiles = glob($fullDraftDir . '/*');
+                if (empty($remainingFiles)) {
+                    rmdir($fullDraftDir);
+                    error_log("moveUploads: Removed empty draft directory: {$fullDraftDir}");
+                }
+            }
+        }
     }
 
     /**

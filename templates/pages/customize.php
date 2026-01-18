@@ -136,14 +136,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // IMPORTANT: Handle file uploads IMMEDIATELY at each step, not just final step
-        // Files are stored temporarily and the paths saved in session
+        // Files are stored in organized draft directory and paths saved in session
         if (!isset($_SESSION['customize_uploads'])) {
             $_SESSION['customize_uploads'] = [];
         }
 
+        // Create/get organized draft directory for this session
+        if (!isset($_SESSION['customize_draft_dir'])) {
+            $draftDirName = bin2hex(random_bytes(8)); // 16-char unique name
+            $_SESSION['customize_draft_dir'] = 'drafts/' . $draftDirName . '/';
+            $fullDraftDir = UPLOAD_PATH . $_SESSION['customize_draft_dir'];
+            if (!is_dir($fullDraftDir)) {
+                mkdir($fullDraftDir, 0755, true);
+            }
+        }
+        $draftDir = UPLOAD_PATH . $_SESSION['customize_draft_dir'];
+
         // DEBUG: Log all received files
         error_log("customize.php: POST received. Step={$step}, FILES count=" . count($_FILES));
         error_log("customize.php: FILES keys: " . implode(', ', array_keys($_FILES)));
+        error_log("customize.php: Using draft dir: " . $draftDir);
 
         foreach ($_FILES as $fieldName => $file) {
             error_log("customize.php: Processing file '{$fieldName}': name={$file['name']}, type={$file['type']}, size={$file['size']}, error={$file['error']}, tmp_name={$file['tmp_name']}");
@@ -151,12 +163,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!empty($file['tmp_name']) && $file['error'] === UPLOAD_ERR_OK) {
                 $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
                 $storedFilename = uniqid() . '_' . $fieldName . '.' . $extension;
-                $filePath = UPLOAD_PATH . $storedFilename;
+                $filePath = $draftDir . $storedFilename;
 
                 error_log("customize.php: Attempting to move '{$file['tmp_name']}' to '{$filePath}'");
-                error_log("customize.php: UPLOAD_PATH = " . UPLOAD_PATH);
-                error_log("customize.php: Upload dir exists: " . (is_dir(UPLOAD_PATH) ? 'yes' : 'no'));
-                error_log("customize.php: Upload dir writable: " . (is_writable(UPLOAD_PATH) ? 'yes' : 'no'));
+                error_log("customize.php: Draft dir exists: " . (is_dir($draftDir) ? 'yes' : 'no'));
+                error_log("customize.php: Draft dir writable: " . (is_writable($draftDir) ? 'yes' : 'no'));
 
                 if (move_uploaded_file($file['tmp_name'], $filePath)) {
                     // Store file info in session for later when draft is created
