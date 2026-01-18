@@ -206,7 +206,7 @@ class FileOrganizer
      * @param string $domain Domain name (default from SERVER)
      * @return string Full URL
      */
-    public static function getFullUrl(string $filePath, string $domain = null): string
+    public static function getFullUrl(string $filePath, ?string $domain = null): string
     {
         $domain = $domain ?? ($_SERVER['HTTP_HOST'] ?? 'invitationvideos.com');
         $publicUrl = self::getPublicUrl($filePath);
