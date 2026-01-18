@@ -171,10 +171,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Determine next step
         $nextStepIndex = $currentStepIndex + 1;
 
+        // Helper function to check if request is XHR
+        $isXhrRequest = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+            strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+
         if ($nextStepIndex < $totalSteps) {
             // Go to next step
             $nextStep = $availableSteps[$nextStepIndex];
-            header('Location: /template/' . $templateSlug . '?step=' . $nextStep);
+            $redirectUrl = '/template/' . $templateSlug . '?step=' . $nextStep;
+
+            // For XHR requests, return JSON with redirect URL
+            if ($isXhrRequest) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => true, 'redirect' => $redirectUrl]);
+                exit;
+            }
+
+            header('Location: ' . $redirectUrl);
             exit;
         } else {
             // Final step - create draft order (not real order until payment succeeds)
@@ -261,7 +274,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             unset($_SESSION['customize_uploads']);
 
             // Redirect to checkout with draft token
-            header('Location: /checkout/' . $draftToken);
+            $checkoutUrl = '/checkout/' . $draftToken;
+
+            // For XHR requests, return JSON with redirect URL
+            if ($isXhrRequest) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => true, 'redirect' => $checkoutUrl]);
+                exit;
+            }
+
+            header('Location: ' . $checkoutUrl);
             exit;
 
         }

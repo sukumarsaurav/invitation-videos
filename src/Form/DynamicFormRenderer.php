@@ -440,12 +440,19 @@ class DynamicFormRenderer
                     
                     xhr.addEventListener("load", function() {
                         if (xhr.status >= 200 && xhr.status < 400) {
-                            // Success - follow redirect or reload
-                            if (xhr.responseURL) {
-                                window.location.href = xhr.responseURL;
-                            } else {
-                                window.location.reload();
+                            // Success - parse JSON response for redirect URL
+                            try {
+                                var response = JSON.parse(xhr.responseText);
+                                if (response.success && response.redirect) {
+                                    window.location.href = response.redirect;
+                                    return;
+                                }
+                            } catch (e) {
+                                // Not JSON, might be a direct HTML response
+                                console.log("Response was not JSON, reloading page");
                             }
+                            // Fallback: reload the page
+                            window.location.reload();
                         } else {
                             alert("Upload failed. Please try again.");
                             window.location.reload();
@@ -458,6 +465,7 @@ class DynamicFormRenderer
                     });
                     
                     xhr.open("POST", form.action || window.location.href);
+                    xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
                     xhr.send(formData);
                 });
             });
