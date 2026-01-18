@@ -141,11 +141,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['customize_uploads'] = [];
         }
 
+        // DEBUG: Log all received files
+        error_log("customize.php: POST received. Step={$step}, FILES count=" . count($_FILES));
+        error_log("customize.php: FILES keys: " . implode(', ', array_keys($_FILES)));
+
         foreach ($_FILES as $fieldName => $file) {
+            error_log("customize.php: Processing file '{$fieldName}': name={$file['name']}, type={$file['type']}, size={$file['size']}, error={$file['error']}, tmp_name={$file['tmp_name']}");
+
             if (!empty($file['tmp_name']) && $file['error'] === UPLOAD_ERR_OK) {
                 $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
                 $storedFilename = uniqid() . '_' . $fieldName . '.' . $extension;
                 $filePath = UPLOAD_PATH . $storedFilename;
+
+                error_log("customize.php: Attempting to move '{$file['tmp_name']}' to '{$filePath}'");
+                error_log("customize.php: UPLOAD_PATH = " . UPLOAD_PATH);
+                error_log("customize.php: Upload dir exists: " . (is_dir(UPLOAD_PATH) ? 'yes' : 'no'));
+                error_log("customize.php: Upload dir writable: " . (is_writable(UPLOAD_PATH) ? 'yes' : 'no'));
 
                 if (move_uploaded_file($file['tmp_name'], $filePath)) {
                     // Store file info in session for later when draft is created
@@ -156,12 +167,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'mime_type' => $file['type'],
                         'file_size' => $file['size']
                     ];
-                    error_log("customize.php: Saved upload for field '{$fieldName}' to {$filePath}");
+                    error_log("customize.php: SUCCESS - Saved upload for field '{$fieldName}' to {$filePath}");
                 } else {
-                    error_log("customize.php: Failed to move uploaded file for field '{$fieldName}'");
+                    error_log("customize.php: FAILED - Could not move uploaded file for field '{$fieldName}'");
+                    error_log("customize.php: Last PHP error: " . print_r(error_get_last(), true));
+                }
+            } else {
+                if (empty($file['tmp_name'])) {
+                    error_log("customize.php: Skipping '{$fieldName}' - no tmp_name");
+                } else {
+                    error_log("customize.php: Skipping '{$fieldName}' - error code: {$file['error']}");
                 }
             }
         }
+
+        error_log("customize.php: Session uploads after processing: " . json_encode(array_keys($_SESSION['customize_uploads'] ?? [])));
 
         // Store timezone
         if (!empty($_POST['user_timezone'])) {
