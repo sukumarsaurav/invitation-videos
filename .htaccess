@@ -147,3 +147,8 @@ FileETag MTime Size
     php_value post_max_size 12M
     php_value max_execution_time 300
 </IfModule>
+# Increase file upload limits for music files
+php_value upload_max_filesize 50M
+php_value post_max_size 55M
+php_value max_execution_time 600
+php_value max_input_time 600
