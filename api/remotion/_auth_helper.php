@@ -23,18 +23,27 @@ function verifyRemotionToken(): ?array
     // METHOD 1: Direct API Key Auth (Simplest)
     // Header: Authorization: ApiKey <key>
     // ============================================
+    // ============================================
+    // METHOD 1: Direct API Key Auth (Simplest)
+    // Header: Authorization: ApiKey <key>
+    // ============================================
     if (preg_match('/^ApiKey\s+(.+)$/i', $authHeader, $matches)) {
         $apiKey = $matches[1];
-        $expectedApiKey = getenv('REMOTION_API_KEY');
 
-        if (!empty($expectedApiKey) && hash_equals($expectedApiKey, $apiKey)) {
-            // API key is valid - return first admin user
+        // Check against REMOTION_API_KEY (SaaS default)
+        $remotionApiKey = getenv('REMOTION_API_KEY');
+        if (!empty($remotionApiKey) && hash_equals($remotionApiKey, $apiKey)) {
             require_once __DIR__ . '/../../config/database.php';
-            $user = Database::fetchOne(
-                "SELECT id, email, name, role FROM users WHERE role = 'admin' ORDER BY id ASC LIMIT 1"
-            );
-            return $user ?: null;
+            return Database::fetchOne("SELECT id, email, name, role FROM users WHERE role = 'admin' ORDER BY id ASC LIMIT 1") ?: null;
         }
+
+        // Check against RENDERER_SECRET_KEY (Boomerang renderer)
+        $rendererSecret = getenv('RENDERER_SECRET_KEY');
+        if (!empty($rendererSecret) && hash_equals($rendererSecret, $apiKey)) {
+            require_once __DIR__ . '/../../config/database.php';
+            return Database::fetchOne("SELECT id, email, name, role FROM users WHERE role = 'admin' ORDER BY id ASC LIMIT 1") ?: null;
+        }
+
         return null;
     }
 

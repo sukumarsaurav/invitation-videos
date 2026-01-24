@@ -156,44 +156,22 @@ class RazorpayService
             $expectedSignature = hash_hmac('sha256', $payload, RAZORPAY_WEBHOOK_SECRET);
 
             if (!hash_equals($expectedSignature, $signature)) {
-                return ['type' => 'error', 'error' => 'Invalid signature'];
+                return ['success' => false, 'error' => 'Invalid signature'];
             }
 
             $event = json_decode($payload, true);
 
-            switch ($event['event']) {
-                case 'payment.captured':
-                    $payment = $event['payload']['payment']['entity'];
-                    return [
-                        'type' => 'payment_captured',
-                        'payment_id' => $payment['id'],
-                        'order_id' => $payment['order_id'],
-                        'amount' => $payment['amount'] / 100,
-                        'notes' => $payment['notes'] ?? []
-                    ];
-
-                case 'payment.failed':
-                    $payment = $event['payload']['payment']['entity'];
-                    return [
-                        'type' => 'payment_failed',
-                        'payment_id' => $payment['id'],
-                        'error' => $payment['error_description'] ?? 'Payment failed'
-                    ];
-
-                case 'refund.created':
-                    $refund = $event['payload']['refund']['entity'];
-                    return [
-                        'type' => 'refund_created',
-                        'refund_id' => $refund['id'],
-                        'payment_id' => $refund['payment_id']
-                    ];
-
-                default:
-                    return ['type' => 'unhandled', 'event_type' => $event['event']];
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return ['success' => false, 'error' => 'Invalid JSON payload'];
             }
 
+            return [
+                'success' => true,
+                'event' => $event
+            ];
+
         } catch (\Exception $e) {
-            return ['type' => 'error', 'error' => $e->getMessage()];
+            return ['success' => false, 'error' => $e->getMessage()];
         }
     }
 
