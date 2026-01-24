@@ -7,7 +7,7 @@
 <!-- Welcome Header -->
 <div style="text-align: center; margin-bottom: 32px;">
     <div
-        style="width: 80px; height: 80px; background: linear-gradient(135deg, #7f13ec 0%, #a855f7 100%); border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+        style="width: 80px; height: 80px; background: linear-gradient(135deg, #970747 0%, #c4195e 100%); border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
         <span style="font-size: 40px;">🎉</span>
     </div>
     <h1 style="margin: 0 0 8px; font-size: 28px; font-weight: 700; color: #0f172a;">
@@ -77,7 +77,7 @@
 <!-- CTA Button -->
 <div style="text-align: center; margin: 32px 0;">
     <a href="<?= $appUrl ?>/templates" class="button"
-        style="display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #7f13ec 0%, #a855f7 100%); color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; border-radius: 12px; box-shadow: 0 4px 14px rgba(127, 19, 236, 0.4);">
+        style="display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #970747 0%, #c4195e 100%); color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; border-radius: 12px; box-shadow: 0 4px 14px rgba(151, 7, 71, 0.4);">
         Browse Templates
     </a>
 </div>

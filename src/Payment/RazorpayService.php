@@ -215,7 +215,7 @@ class RazorpayService
                 'contact' => $user['phone'] ?? ''
             ],
             'theme' => [
-                'color' => '#7f13ec'
+                'color' => '#970747'
             ]
         ];
     }

@@ -32,10 +32,8 @@ $selectedColorId = $_SESSION['customize_color_id'] ?? null;
         <?php foreach ($dressDesigns as $dress): ?>
             <label class="dress-option cursor-pointer group">
                 <input type="radio" name="dress_id" value="<?= $dress['id'] ?>" class="sr-only peer"
-                    <?= $selectedDressId == $dress['id'] ? 'checked' : '' ?>
-                data-dress-id="
-            <?= $dress['id'] ?>"
-                required>
+                    <?= $selectedDressId == $dress['id'] ? 'checked' : '' ?> data-dress-id="
+            <?= $dress['id'] ?>" required>
                 <div class="relative overflow-hidden rounded-xl border-2 transition-all
                     peer-checked:border-primary peer-checked:ring-2 peer-checked:ring-primary/20
                     border-slate-200 dark:border-slate-700 hover:border-primary/50
@@ -141,7 +139,7 @@ $selectedColorId = $_SESSION['customize_color_id'] ?? null;
 
 <style>
     .dress-option input:checked+div {
-        border-color: var(--color-primary, #7f13ec);
+        border-color: var(--color-primary, #970747);
         box-shadow: 0 0 0 3px rgba(127, 19, 236, 0.15);
     }
 

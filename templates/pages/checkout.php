@@ -160,7 +160,7 @@ function renderCheckoutField($field, $existingData = [])
             break;
 
         case 'color':
-            $html .= '<input type="color" name="' . $fieldName . '" ' . $required . ' class="h-11 w-full rounded-lg border border-slate-200 cursor-pointer" value="' . ($value ?: '#7f13ec') . '">';
+            $html .= '<input type="color" name="' . $fieldName . '" ' . $required . ' class="h-11 w-full rounded-lg border border-slate-200 cursor-pointer" value="' . ($value ?: '#970747') . '">';
             break;
 
         case 'image':
@@ -745,7 +745,7 @@ $pageTitle = 'Checkout - ' . $order['order_number'];
                     console.error('Verify error:', err);
                 }
             },
-            theme: { color: '#7f13ec' }
+            theme: { color: '#970747' }
         };
 
         const rzp = new Razorpay(options);

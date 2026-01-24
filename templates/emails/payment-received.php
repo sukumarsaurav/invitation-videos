@@ -119,7 +119,7 @@
 <!-- CTA Button -->
 <div style="text-align: center; margin: 32px 0;">
     <a href="<?= $appUrl ?>/my-orders" class="button"
-        style="display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #7f13ec 0%, #a855f7 100%); color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; border-radius: 12px; box-shadow: 0 4px 14px rgba(127, 19, 236, 0.4);">
+        style="display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #970747 0%, #c4195e 100%); color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; border-radius: 12px; box-shadow: 0 4px 14px rgba(151, 7, 71, 0.4);">
         View My Orders
     </a>
 </div>

@@ -307,7 +307,7 @@
 
 .carousel-dot.active,
 .carousel-dot:hover {
-    background: var(--color-primary, #7f13ec);
+    background: var(--color-primary, #970747);
 }
 
 /* Active dot is wider */

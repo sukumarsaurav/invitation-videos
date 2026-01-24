@@ -55,37 +55,25 @@ try {
 }
 
 
-
-// Fetch CMS theme settings
-$cmsSettings = [];
-try {
-    $cmsSettingsRows = Database::fetchAll("SELECT setting_key, setting_value FROM settings WHERE setting_key LIKE 'hero_%' OR setting_key LIKE 'theme_%' OR setting_key LIKE 'category_%' OR setting_key LIKE 'header_%' OR setting_key LIKE 'footer_%'");
-    foreach ($cmsSettingsRows as $row) {
-        $cmsSettings[$row['setting_key']] = $row['setting_value'];
-    }
-} catch (Exception $e) {
-    // Settings table may not exist yet
-}
-
-// Default CMS values
-$themePrimaryColor = $cmsSettings['theme_primary_color'] ?? '#7f13ec';
-$themeTextPrimary = $cmsSettings['theme_text_primary'] ?? '#0f172a';
-$themeTextSecondary = $cmsSettings['theme_text_secondary'] ?? '#64748b';
-$themeBgLight = $cmsSettings['theme_bg_light'] ?? '#f7f6f8';
-$themeBgDark = $cmsSettings['theme_bg_dark'] ?? '#191022';
-$heroImageDesktop = $cmsSettings['hero_image_desktop'] ?? '';
-$heroImageMobile = $cmsSettings['hero_image_mobile'] ?? '';
-$heroTitle = $cmsSettings['hero_title'] ?? 'Create Beautiful <span class="text-primary">Invitation Videos</span>';
-$heroSubtitle = $cmsSettings['hero_subtitle'] ?? 'Stunning video invitations for weddings, birthdays, and special events. Easy to customize, ready to share.';
-$categoryDisplayMode = $cmsSettings['category_display_mode'] ?? 'icon';
+// Theme Colors - Hardcoded Brand Colors (maroon/gold theme)
+$themePrimaryColor = '#970747';
+$themeTextPrimary = '#b69b5b';
+$themeTextSecondary = '#404040';
+$themeBgLight = '#fdf7f3';
+$themeBgDark = '#2c0914';
+$heroImageDesktop = '';
+$heroImageMobile = '';
+$heroTitle = 'Create Beautiful <span class="text-primary">Invitation Videos</span>';
+$heroSubtitle = 'Stunning video invitations for weddings, birthdays, and special events. Easy to customize, ready to share.';
+$categoryDisplayMode = 'icon';
 // Header colors
-$headerBgColor = $cmsSettings['header_bg_color'] ?? '#ffffff';
-$headerTextColor = $cmsSettings['header_text_color'] ?? '#1e293b';
-$headerHoverColor = $cmsSettings['header_hover_color'] ?? '#7f13ec';
+$headerBgColor = '#2c0914';
+$headerTextColor = '#b69b5b';
+$headerHoverColor = '#fdf7f3';
 // Footer colors
-$footerBgColor = $cmsSettings['footer_bg_color'] ?? '#ffffff';
-$footerTextColor = $cmsSettings['footer_text_color'] ?? '#1e293b';
-$footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
+$footerBgColor = '#2c0914';
+$footerTextColor = '#b69b5b';
+$footerHoverColor = '#fdf7f3';
 ?>
 <!DOCTYPE html>
 <html lang="en" class="light">
@@ -475,11 +463,11 @@ $footerHoverColor = $cmsSettings['footer_hover_color'] ?? '#7f13ec';
         }
 
         .text-primary {
-            color: var(--color-primary, #7f13ec)
+            color: var(--color-primary, #970747)
         }
 
         .bg-primary {
-            background-color: var(--color-primary, #7f13ec)
+            background-color: var(--color-primary, #970747)
         }
 
         .text-white {
