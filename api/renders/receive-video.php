@@ -61,7 +61,7 @@ if (!isset($_FILES['video']) || $_FILES['video']['error'] !== UPLOAD_ERR_OK) {
 }
 
 // Verify order exists
-$order = Database::fetch("SELECT id, order_number, order_status FROM orders WHERE id = ?", [$orderId]);
+$order = Database::fetchOne("SELECT id, order_number, order_status FROM orders WHERE id = ?", [$orderId]);
 
 if (!$order) {
     http_response_code(404);
@@ -110,7 +110,7 @@ try {
     require_once __DIR__ . '/../../src/Services/EmailService.php';
 
     // Get full order and user details for email
-    $orderDetails = Database::fetch("
+    $orderDetails = Database::fetchOne("
         SELECT o.*, t.title as template_title, u.email, u.name
         FROM orders o
         JOIN templates t ON o.template_id = t.id

@@ -240,13 +240,23 @@ $sql = "SELECT o.*, t.title as template_title, t.thumbnail_url, u.name as custom
         LIMIT $perPage OFFSET $offset";
 $orders = Database::fetchAll($sql, $params);
 
-// Get stats
+// Get stats - single optimized query instead of 5 separate queries
+$statsQuery = Database::fetchOne("
+    SELECT 
+        SUM(CASE WHEN order_status = 'awaiting_payment' AND created_at > DATE_SUB(NOW(), INTERVAL 24 HOUR) THEN 1 ELSE 0 END) as new_count,
+        SUM(CASE WHEN order_status = 'queued' THEN 1 ELSE 0 END) as queued_count,
+        SUM(CASE WHEN order_status = 'processing' THEN 1 ELSE 0 END) as processing_count,
+        SUM(CASE WHEN order_status = 'completed' THEN 1 ELSE 0 END) as completed_count,
+        COALESCE(SUM(CASE WHEN payment_status = 'paid' AND DATE(created_at) = CURDATE() THEN amount ELSE 0 END), 0) as revenue_today
+    FROM orders
+");
+
 $stats = [
-    'new' => Database::fetchOne("SELECT COUNT(*) as c FROM orders WHERE order_status = 'awaiting_payment' AND created_at > DATE_SUB(NOW(), INTERVAL 24 HOUR)")['c'] ?? 0,
-    'queued' => Database::fetchOne("SELECT COUNT(*) as c FROM orders WHERE order_status = 'queued'")['c'] ?? 0,
-    'processing' => Database::fetchOne("SELECT COUNT(*) as c FROM orders WHERE order_status = 'processing'")['c'] ?? 0,
-    'completed' => Database::fetchOne("SELECT COUNT(*) as c FROM orders WHERE order_status = 'completed'")['c'] ?? 0,
-    'revenue_today' => Database::fetchOne("SELECT COALESCE(SUM(amount), 0) as r FROM orders WHERE payment_status = 'paid' AND DATE(created_at) = CURDATE()")['r'] ?? 0,
+    'new' => (int) ($statsQuery['new_count'] ?? 0),
+    'queued' => (int) ($statsQuery['queued_count'] ?? 0),
+    'processing' => (int) ($statsQuery['processing_count'] ?? 0),
+    'completed' => (int) ($statsQuery['completed_count'] ?? 0),
+    'revenue_today' => (float) ($statsQuery['revenue_today'] ?? 0),
 ];
 
 $pendingTickets = 0;
