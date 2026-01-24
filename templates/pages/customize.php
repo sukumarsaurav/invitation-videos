@@ -190,19 +190,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             error_log("customize.php: Processing file '{$fieldName}': name={$file['name']}, type={$file['type']}, size={$file['size']}, error={$file['error']}, tmp_name={$file['tmp_name']}");
 
             if (!empty($file['tmp_name']) && $file['error'] === UPLOAD_ERR_OK) {
+                // Validate file size
+                if ($file['size'] > UPLOAD_MAX_SIZE) {
+                    error_log("customize.php: File '{$fieldName}' rejected - size {$file['size']} exceeds limit " . UPLOAD_MAX_SIZE);
+                    continue;
+                }
+
                 $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
                 $storedFilename = uniqid() . '_' . $fieldName . '.' . $extension;
-                
+
                 // Full path for actual file storage
                 $fullPath = $draftDir . $storedFilename;
-                
+
                 // Web-relative path for database storage (standardized format)
                 $webPath = '/uploads/' . $_SESSION['customize_draft_dir'] . $storedFilename;
 
                 error_log("customize.php: Attempting to move '{$file['tmp_name']}' to '{$fullPath}'");
-                error_log("customize.php: Web path will be: {$webPath}");
-                error_log("customize.php: Draft dir exists: " . (is_dir($draftDir) ? 'yes' : 'no'));
-                error_log("customize.php: Draft dir writable: " . (is_writable($draftDir) ? 'yes' : 'no'));
 
                 if (move_uploaded_file($file['tmp_name'], $fullPath)) {
                     // Store file info with WEB-RELATIVE path (standardized)
@@ -290,7 +293,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } else {
                     $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '';
                     if ($ip && $ip !== '127.0.0.1' && $ip !== '::1') {
-                        $geoData = @file_get_contents("https://ipapi.co/{$ip}/json/");
+                        // Use timeout to prevent page hang if API is slow
+                        $context = stream_context_create(['http' => ['timeout' => 2]]);
+                        $geoData = @file_get_contents("https://ipapi.co/{$ip}/json/", false, $context);
                         if ($geoData) {
                             $geo = json_decode($geoData, true);
                             $_SESSION['user_country'] = $geo['country_code'] ?? 'US';

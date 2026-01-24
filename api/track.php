@@ -5,11 +5,6 @@
  * Receives page view data from the frontend and logs it
  */
 
-// TEMPORARY: Enable error reporting for debugging
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 header('Content-Type: application/json');
 
 // Only accept POST requests
@@ -19,26 +14,26 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-require_once __DIR__ . '/../config/database.php';
-require_once __DIR__ . '/../src/Services/VisitorTracker.php';
-
-// Check consent
-if (!VisitorTracker::hasConsent()) {
-    echo json_encode(['success' => false, 'reason' => 'no_consent']);
-    exit;
-}
-
-// Get request data
-$input = file_get_contents('php://input');
-$data = json_decode($input, true);
-
-if (!$data) {
-    http_response_code(400);
-    echo json_encode(['error' => 'Invalid JSON']);
-    exit;
-}
-
 try {
+    require_once __DIR__ . '/../config/database.php';
+    require_once __DIR__ . '/../src/Services/VisitorTracker.php';
+
+    // Check consent
+    if (!VisitorTracker::hasConsent()) {
+        echo json_encode(['success' => false, 'reason' => 'no_consent']);
+        exit;
+    }
+
+    // Get request data
+    $input = file_get_contents('php://input');
+    $data = json_decode($input, true);
+
+    if (!$data) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Invalid JSON']);
+        exit;
+    }
+
     // Get or create visitor
     $visitorId = VisitorTracker::getOrCreateVisitor();
 
@@ -60,12 +55,19 @@ try {
     ]);
 
 } catch (Throwable $e) {
-    // TEMPORARY: Show actual error for debugging
-    http_response_code(500);
-    echo json_encode([
-        'error' => $e->getMessage(),
-        'file' => $e->getFile(),
-        'line' => $e->getLine(),
-        'trace' => $e->getTraceAsString()
-    ]);
+    // Log the error but return clean response
+    error_log("track.php ERROR: " . $e->getMessage() . " in " . $e->getFile() . ":" . $e->getLine());
+
+    // In production, don't expose internal errors
+    if (defined('APP_DEBUG') && APP_DEBUG) {
+        http_response_code(500);
+        echo json_encode([
+            'error' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine()
+        ]);
+    } else {
+        // Silent fail for tracking - don't break user experience
+        echo json_encode(['success' => false, 'reason' => 'internal_error']);
+    }
 }

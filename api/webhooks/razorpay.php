@@ -42,9 +42,38 @@ try {
 
     $event = $result['event'];
     $eventType = $event['event'] ?? '';
+    $eventId = $event['event_id'] ?? null;
+
+    // Idempotency check - prevent duplicate event processing
+    if ($eventId) {
+        $existingEvent = Database::fetchOne(
+            "SELECT 1 FROM webhook_events WHERE event_id = ?",
+            [$eventId]
+        );
+
+        if ($existingEvent) {
+            // Already processed this event
+            error_log("Razorpay Webhook: Event {$eventId} already processed, skipping");
+            echo json_encode(['status' => 'already_processed', 'event_id' => $eventId]);
+            exit;
+        }
+
+        // Record this event as being processed
+        try {
+            Database::query(
+                "INSERT INTO webhook_events (event_id, event_type, gateway) VALUES (?, ?, 'razorpay')",
+                [$eventId, $eventType]
+            );
+        } catch (Exception $e) {
+            // If insert fails (duplicate key), another process got here first
+            error_log("Razorpay Webhook: Event {$eventId} race condition, skipping");
+            echo json_encode(['status' => 'already_processed', 'event_id' => $eventId]);
+            exit;
+        }
+    }
 
     // Log the event
-    error_log("Razorpay Webhook: Received event type: $eventType");
+    error_log("Razorpay Webhook: Processing event type: $eventType (ID: $eventId)");
 
     switch ($eventType) {
         // Payment Events

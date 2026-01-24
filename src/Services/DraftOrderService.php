@@ -197,62 +197,99 @@ class DraftOrderService
      * @param array $draft Draft order data
      * @param string $paymentId Payment ID from gateway
      * @param string $gateway 'razorpay' or 'stripe'
-     * @return int New order ID
+     * @return int New order ID (or existing order ID if already converted)
      */
     public function convertToOrder(array $draft, string $paymentId, string $gateway): int
     {
-        // Generate order number
-        $orderNumber = 'ORD-' . strtoupper(substr(uniqid(), -8));
+        // Start transaction to prevent race conditions
+        \Database::beginTransaction();
 
-        // Create organized order directory
-        $orderFilesDir = 'orders/' . $orderNumber;
-        $fullOrderDir = UPLOAD_PATH . $orderFilesDir . '/';
-        if (!is_dir($fullOrderDir)) {
-            mkdir($fullOrderDir, 0755, true);
+        try {
+            // Check if this draft was already converted (race condition protection)
+            // Use razorpay_order_id or stripe_payment_intent to find existing order
+            $existingOrder = null;
+            if (!empty($draft['razorpay_order_id'])) {
+                $existingOrder = \Database::fetchOne(
+                    "SELECT id FROM orders WHERE razorpay_order_id = ? FOR UPDATE",
+                    [$draft['razorpay_order_id']]
+                );
+            } elseif (!empty($draft['stripe_payment_intent'])) {
+                $existingOrder = \Database::fetchOne(
+                    "SELECT id FROM orders WHERE payment_id = ? FOR UPDATE",
+                    [$draft['stripe_payment_intent']]
+                );
+            }
+
+            if ($existingOrder) {
+                // Already converted - return existing order ID
+                \Database::commit();
+                error_log("convertToOrder: Draft already converted to order #{$existingOrder['id']}");
+                return (int) $existingOrder['id'];
+            }
+
+            // Generate order number
+            $orderNumber = 'ORD-' . strtoupper(substr(uniqid(), -8));
+
+            // Create organized order directory
+            $orderFilesDir = 'orders/' . $orderNumber;
+            $fullOrderDir = UPLOAD_PATH . $orderFilesDir . '/';
+            if (!is_dir($fullOrderDir)) {
+                mkdir($fullOrderDir, 0755, true);
+            }
+            error_log("convertToOrder: Created order directory: {$fullOrderDir}");
+
+            // Insert into orders table with files_directory
+            \Database::query(
+                "INSERT INTO orders (
+                    order_number, user_id, template_id, amount, currency, 
+                    customization_data, status, payment_status, order_status,
+                    payment_gateway, payment_id, razorpay_order_id,
+                    promo_code_id, discount_amount, files_directory, paid_at
+                ) VALUES (?, ?, ?, ?, ?, ?, 'paid', 'paid', 'queued', ?, ?, ?, ?, ?, ?, NOW())",
+                [
+                    $orderNumber,
+                    $draft['user_id'],
+                    $draft['template_id'],
+                    $draft['amount'],
+                    $draft['currency'],
+                    is_array($draft['customization_data'])
+                    ? json_encode($draft['customization_data'])
+                    : $draft['customization_data'],
+                    $gateway,
+                    $paymentId,
+                    $draft['razorpay_order_id'],
+                    $draft['promo_code_id'],
+                    $draft['discount_amount'] ?? 0,
+                    $orderFilesDir
+                ]
+            );
+
+            $orderId = (int) \Database::lastInsertId();
+
+            // Move uploaded files from draft directory to order directory
+            $this->moveUploads($draft['id'], $orderId, $draft['files_directory'] ?? null, $fullOrderDir);
+
+            // Delete the draft
+            $this->deleteDraft($draft['id']);
+
+            // Increment template purchase count
+            \Database::query(
+                "UPDATE templates SET purchase_count = purchase_count + 1 WHERE id = ?",
+                [$draft['template_id']]
+            );
+
+            // Commit transaction
+            \Database::commit();
+            error_log("convertToOrder: Successfully created order #{$orderId} from draft #{$draft['id']}");
+
+            return $orderId;
+
+        } catch (\Exception $e) {
+            // Rollback on any failure
+            \Database::rollback();
+            error_log("convertToOrder: FAILED - " . $e->getMessage());
+            throw $e;
         }
-        error_log("convertToOrder: Created order directory: {$fullOrderDir}");
-
-        // Insert into orders table with files_directory
-        \Database::query(
-            "INSERT INTO orders (
-                order_number, user_id, template_id, amount, currency, 
-                customization_data, status, payment_status, order_status,
-                payment_gateway, payment_id, razorpay_order_id,
-                promo_code_id, discount_amount, files_directory, paid_at
-            ) VALUES (?, ?, ?, ?, ?, ?, 'paid', 'paid', 'queued', ?, ?, ?, ?, ?, ?, NOW())",
-            [
-                $orderNumber,
-                $draft['user_id'],
-                $draft['template_id'],
-                $draft['amount'],
-                $draft['currency'],
-                is_array($draft['customization_data'])
-                ? json_encode($draft['customization_data'])
-                : $draft['customization_data'],
-                $gateway,
-                $paymentId,
-                $draft['razorpay_order_id'],
-                $draft['promo_code_id'],
-                $draft['discount_amount'] ?? 0,
-                $orderFilesDir
-            ]
-        );
-
-        $orderId = (int) \Database::lastInsertId();
-
-        // Move uploaded files from draft directory to order directory
-        $this->moveUploads($draft['id'], $orderId, $draft['files_directory'] ?? null, $fullOrderDir);
-
-        // Delete the draft
-        $this->deleteDraft($draft['id']);
-
-        // Increment template purchase count
-        \Database::query(
-            "UPDATE templates SET purchase_count = purchase_count + 1 WHERE id = ?",
-            [$draft['template_id']]
-        );
-
-        return $orderId;
     }
 
     /**
