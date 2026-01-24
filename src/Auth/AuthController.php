@@ -48,7 +48,20 @@ class AuthController
             [$email]
         );
 
-        if ($user && Security::verifyPassword($password, $user['password_hash'])) {
+        if (!$user) {
+            $_SESSION['error'] = 'Invalid email or password';
+            header('Location: /login');
+            exit;
+        }
+
+        // Check if user has a password (OAuth users may not have one)
+        if (empty($user['password_hash'])) {
+            $_SESSION['error'] = 'This account was created with Google. Please use "Continue with Google" to sign in.';
+            header('Location: /login');
+            exit;
+        }
+
+        if (Security::verifyPassword($password, $user['password_hash'])) {
             // Login successful
             session_regenerate_id(true);
 
