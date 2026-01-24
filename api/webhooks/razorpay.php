@@ -189,6 +189,9 @@ function handlePaymentCaptured(array $payment): void
         // Queue AI caricature generation if dress was selected
         queueAiGenerationIfNeeded($order['id']);
 
+        // Dispatch render job to Cloud Run
+        dispatchRenderJob($order['id']);
+
         // Send payment confirmation email
         try {
             $user = Database::fetchOne("SELECT * FROM users WHERE id = ?", [$order['user_id']]);
@@ -438,3 +441,113 @@ function handleDisputeLost(array $dispute): void
     }
 }
 
+/**
+ * Dispatch render job to Cloud Run
+ */
+function dispatchRenderJob(int $orderId): void
+{
+    try {
+        // Get Cloud Run URL from environment
+        $cloudRunUrl = getenv('CLOUD_RUN_URL');
+        if (empty($cloudRunUrl)) {
+            error_log("dispatchRenderJob: CLOUD_RUN_URL not configured, skipping render dispatch for order #{$orderId}");
+            return;
+        }
+
+        // Fetch order with template info
+        $order = Database::fetchOne("
+            SELECT 
+                o.id,
+                o.order_number,
+                o.template_id,
+                o.customization_data,
+                t.remotion_composition_id,
+                t.default_music_url,
+                t.duration_seconds,
+                t.render_fps,
+                t.render_width,
+                t.render_height
+            FROM orders o
+            JOIN templates t ON o.template_id = t.id
+            WHERE o.id = ?
+        ", [$orderId]);
+
+        if (!$order) {
+            error_log("dispatchRenderJob: Order #{$orderId} not found");
+            return;
+        }
+
+        if (empty($order['remotion_composition_id'])) {
+            error_log("dispatchRenderJob: Template for order #{$orderId} has no remotion_composition_id - manual processing required");
+            return;
+        }
+
+        // Get uploaded files
+        $uploads = Database::fetchAll(
+            "SELECT field_name, file_path FROM order_uploads WHERE order_id = ?",
+            [$orderId]
+        );
+
+        // Build customization data with asset URLs
+        $customizationData = json_decode($order['customization_data'] ?? '{}', true) ?: [];
+
+        foreach ($uploads as $upload) {
+            $filePath = $upload['file_path'];
+            // Extract web path from full path
+            if (preg_match('#/uploads/(.+)$#', $filePath, $matches)) {
+                $webPath = '/uploads/' . $matches[1];
+            } elseif (strpos($filePath, 'orders/') !== false) {
+                $webPath = '/uploads/' . substr($filePath, strpos($filePath, 'orders/'));
+            } else {
+                $webPath = '/uploads/' . basename($filePath);
+            }
+            $customizationData[$upload['field_name']] = 'https://invitationvideos.com' . $webPath;
+        }
+
+        // Add default music if needed
+        if (empty($customizationData['music_url']) && !empty($order['default_music_url'])) {
+            $customizationData['music_url'] = $order['default_music_url'];
+        }
+
+        // Build render payload
+        $payload = [
+            'order_id' => (int) $order['id'],
+            'order_number' => $order['order_number'],
+            'template_id' => $order['remotion_composition_id'],
+            'input_props' => $customizationData,
+            'template_settings' => [
+                'duration' => (int) ($order['duration_seconds'] ?? 30),
+                'fps' => (int) ($order['render_fps'] ?? 30),
+                'width' => (int) ($order['render_width'] ?? 1080),
+                'height' => (int) ($order['render_height'] ?? 1920),
+            ],
+            'callback_url' => 'https://invitationvideos.com/api/renders/receive-video.php',
+            'status_url' => 'https://invitationvideos.com/api/remotion/update-order.php',
+            'secret_key' => getenv('RENDERER_SECRET_KEY') ?: 'rmtn_render_secret_key'
+        ];
+
+        // Dispatch to Cloud Run
+        $ch = curl_init($cloudRunUrl . '/render');
+        curl_setopt_array($ch, [
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => json_encode($payload),
+            CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 10,
+            CURLOPT_CONNECTTIMEOUT => 5
+        ]);
+
+        $result = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode >= 200 && $httpCode < 300) {
+            error_log("dispatchRenderJob: Successfully dispatched render for order #{$orderId} (HTTP {$httpCode})");
+        } else {
+            error_log("dispatchRenderJob: Failed to dispatch render for order #{$orderId} (HTTP {$httpCode}): {$result}");
+        }
+
+    } catch (Exception $e) {
+        error_log("dispatchRenderJob: Error dispatching render for order #{$orderId}: " . $e->getMessage());
+    }
+}

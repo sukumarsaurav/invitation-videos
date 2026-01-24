@@ -1,0 +1,909 @@
+[
+  {
+    "protoPayload": {
+      "@type": "type.googleapis.com/google.cloud.audit.AuditLog",
+      "status": {
+        "code": 10,
+        "message": "Exception calling IAM: There were concurrent policy changes. Please retry the whole read-modify-write with exponential backoff."
+      },
+      "authenticationInfo": {
+        "principalEmail": "service-agent-manager@system.gserviceaccount.com"
+      },
+      "requestMetadata": {
+        "callerIp": "private",
+        "requestAttributes": {},
+        "destinationAttributes": {}
+      },
+      "serviceName": "cloudresourcemanager.googleapis.com",
+      "methodName": "SetIamPolicy",
+      "authorizationInfo": [
+        {
+          "resource": "projects/invitation-videos",
+          "permission": "resourcemanager.projects.setIamPolicy",
+          "granted": true,
+          "resourceAttributes": {
+            "service": "cloudresourcemanager.googleapis.com",
+            "name": "projects/invitation-videos",
+            "type": "cloudresourcemanager.googleapis.com/Project"
+          },
+          "permissionType": "ADMIN_WRITE"
+        }
+      ],
+      "resourceName": "projects/invitation-videos",
+      "request": {
+        "resource": "160470961566",
+        "@type": "type.googleapis.com/google.iam.v1.SetIamPolicyRequest",
+        "policy": {
+          "etag": "BwZJDHLlZoI=",
+          "bindings": [
+            {
+              "members": [
+                "serviceAccount:service-160470961566@gcp-sa-cloudtasks.iam.gserviceaccount.com"
+              ],
+              "role": "roles/cloudtasks.serviceAgent"
+            },
+            {
+              "members": [
+                "user:sukumarsaurav@gmail.com"
+              ],
+              "role": "roles/owner"
+            },
+            {
+              "members": [
+                "serviceAccountId:101047893402248176558"
+              ],
+              "role": "roles/editor"
+            }
+          ]
+        }
+      }
+    },
+    "insertId": "ktgu92ehbl0s",
+    "resource": {
+      "type": "project",
+      "labels": {
+        "project_id": "invitation-videos"
+      }
+    },
+    "timestamp": "2026-01-23T11:28:04.928984Z",
+    "severity": "ERROR",
+    "logName": "projects/invitation-videos/logs/cloudaudit.googleapis.com%2Factivity",
+    "receiveTimestamp": "2026-01-23T11:28:06.800074442Z"
+  },
+  {
+    "protoPayload": {
+      "@type": "type.googleapis.com/google.cloud.audit.AuditLog",
+      "status": {
+        "code": 10,
+        "message": "Exception calling IAM: There were concurrent policy changes. Please retry the whole read-modify-write with exponential backoff."
+      },
+      "authenticationInfo": {
+        "principalEmail": "service-agent-manager@system.gserviceaccount.com"
+      },
+      "requestMetadata": {
+        "callerIp": "private",
+        "requestAttributes": {},
+        "destinationAttributes": {}
+      },
+      "serviceName": "cloudresourcemanager.googleapis.com",
+      "methodName": "SetIamPolicy",
+      "authorizationInfo": [
+        {
+          "resource": "projects/invitation-videos",
+          "permission": "resourcemanager.projects.setIamPolicy",
+          "granted": true,
+          "resourceAttributes": {
+            "service": "cloudresourcemanager.googleapis.com",
+            "name": "projects/invitation-videos",
+            "type": "cloudresourcemanager.googleapis.com/Project"
+          },
+          "permissionType": "ADMIN_WRITE"
+        }
+      ],
+      "resourceName": "projects/invitation-videos",
+      "request": {
+        "@type": "type.googleapis.com/google.iam.v1.SetIamPolicyRequest",
+        "resource": "160470961566",
+        "policy": {
+          "bindings": [
+            {
+              "role": "roles/cloudtasks.serviceAgent",
+              "members": [
+                "serviceAccount:service-160470961566@gcp-sa-cloudtasks.iam.gserviceaccount.com"
+              ]
+            },
+            {
+              "members": [
+                "user:sukumarsaurav@gmail.com"
+              ],
+              "role": "roles/owner"
+            },
+            {
+              "members": [
+                "serviceAccountId:106005344396661030205"
+              ],
+              "role": "roles/pubsub.serviceAgent"
+            }
+          ],
+          "etag": "BwZJDHLlZoI="
+        }
+      }
+    },
+    "insertId": "a1nt6leh35pg",
+    "resource": {
+      "type": "project",
+      "labels": {
+        "project_id": "invitation-videos"
+      }
+    },
+    "timestamp": "2026-01-23T11:28:04.932138Z",
+    "severity": "ERROR",
+    "logName": "projects/invitation-videos/logs/cloudaudit.googleapis.com%2Factivity",
+    "receiveTimestamp": "2026-01-23T11:28:06.617116581Z"
+  },
+  {
+    "protoPayload": {
+      "@type": "type.googleapis.com/google.cloud.audit.AuditLog",
+      "status": {
+        "code": 10,
+        "message": "Exception calling IAM: There were concurrent policy changes. Please retry the whole read-modify-write with exponential backoff."
+      },
+      "authenticationInfo": {
+        "principalEmail": "service-agent-manager@system.gserviceaccount.com"
+      },
+      "requestMetadata": {
+        "callerIp": "private",
+        "requestAttributes": {},
+        "destinationAttributes": {}
+      },
+      "serviceName": "cloudresourcemanager.googleapis.com",
+      "methodName": "SetIamPolicy",
+      "authorizationInfo": [
+        {
+          "resource": "projects/invitation-videos",
+          "permission": "resourcemanager.projects.setIamPolicy",
+          "granted": true,
+          "resourceAttributes": {
+            "service": "cloudresourcemanager.googleapis.com",
+            "name": "projects/invitation-videos",
+            "type": "cloudresourcemanager.googleapis.com/Project"
+          },
+          "permissionType": "ADMIN_WRITE"
+        }
+      ],
+      "resourceName": "projects/invitation-videos",
+      "request": {
+        "policy": {
+          "bindings": [
+            {
+              "role": "roles/cloudtasks.serviceAgent",
+              "members": [
+                "serviceAccount:service-160470961566@gcp-sa-cloudtasks.iam.gserviceaccount.com"
+              ]
+            },
+            {
+              "role": "roles/owner",
+              "members": [
+                "user:sukumarsaurav@gmail.com"
+              ]
+            },
+            {
+              "role": "roles/run.serviceAgent",
+              "members": [
+                "serviceAccountId:114655203029199150783"
+              ]
+            }
+          ],
+          "etag": "BwZJDHLlZoI="
+        },
+        "resource": "160470961566",
+        "@type": "type.googleapis.com/google.iam.v1.SetIamPolicyRequest"
+      }
+    },
+    "insertId": "-m4t46heh2noi",
+    "resource": {
+      "type": "project",
+      "labels": {
+        "project_id": "invitation-videos"
+      }
+    },
+    "timestamp": "2026-01-23T11:28:05.128604Z",
+    "severity": "ERROR",
+    "logName": "projects/invitation-videos/logs/cloudaudit.googleapis.com%2Factivity",
+    "receiveTimestamp": "2026-01-23T11:28:07.391041634Z"
+  },
+  {
+    "protoPayload": {
+      "@type": "type.googleapis.com/google.cloud.audit.AuditLog",
+      "status": {
+        "code": 10,
+        "message": "Exception calling IAM: There were concurrent policy changes. Please retry the whole read-modify-write with exponential backoff. The request's ETag '\\007\\006I\\014s\\200\\254`' did not match the current policy's ETag '\\007\\006I\\014s\\226vg'."
+      },
+      "authenticationInfo": {
+        "principalEmail": "service-agent-manager@system.gserviceaccount.com"
+      },
+      "requestMetadata": {
+        "callerIp": "private",
+        "requestAttributes": {},
+        "destinationAttributes": {}
+      },
+      "serviceName": "cloudresourcemanager.googleapis.com",
+      "methodName": "SetIamPolicy",
+      "authorizationInfo": [
+        {
+          "resource": "projects/invitation-videos",
+          "permission": "resourcemanager.projects.setIamPolicy",
+          "granted": true,
+          "resourceAttributes": {
+            "service": "cloudresourcemanager.googleapis.com",
+            "name": "projects/invitation-videos",
+            "type": "cloudresourcemanager.googleapis.com/Project"
+          },
+          "permissionType": "ADMIN_WRITE"
+        }
+      ],
+      "resourceName": "projects/invitation-videos",
+      "request": {
+        "@type": "type.googleapis.com/google.iam.v1.SetIamPolicyRequest",
+        "policy": {
+          "bindings": [
+            {
+              "role": "roles/cloudtasks.serviceAgent",
+              "members": [
+                "serviceAccount:service-160470961566@gcp-sa-cloudtasks.iam.gserviceaccount.com"
+              ]
+            },
+            {
+              "members": [
+                "serviceAccount:service-160470961566@containerregistry.iam.gserviceaccount.com"
+              ],
+              "role": "roles/containerregistry.ServiceAgent"
+            },
+            {
+              "members": [
+                "user:sukumarsaurav@gmail.com"
+              ],
+              "role": "roles/owner"
+            },
+            {
+              "members": [
+                "serviceAccountId:106005344396661030205"
+              ],
+              "role": "roles/pubsub.serviceAgent"
+            }
+          ],
+          "etag": "BwZJDHOArGA="
+        },
+        "resource": "160470961566"
+      }
+    },
+    "insertId": "a1nt6leh35qu",
+    "resource": {
+      "type": "project",
+      "labels": {
+        "project_id": "invitation-videos"
+      }
+    },
+    "timestamp": "2026-01-23T11:28:07.826458Z",
+    "severity": "ERROR",
+    "logName": "projects/invitation-videos/logs/cloudaudit.googleapis.com%2Factivity",
+    "receiveTimestamp": "2026-01-23T11:28:08.618623576Z"
+  },
+  {
+    "protoPayload": {
+      "@type": "type.googleapis.com/google.cloud.audit.AuditLog",
+      "status": {
+        "code": 10,
+        "message": "Exception calling IAM: There were concurrent policy changes. Please retry the whole read-modify-write with exponential backoff."
+      },
+      "authenticationInfo": {
+        "principalEmail": "service-agent-manager@system.gserviceaccount.com"
+      },
+      "requestMetadata": {
+        "callerIp": "private",
+        "requestAttributes": {},
+        "destinationAttributes": {}
+      },
+      "serviceName": "cloudresourcemanager.googleapis.com",
+      "methodName": "SetIamPolicy",
+      "authorizationInfo": [
+        {
+          "resource": "projects/invitation-videos",
+          "permission": "resourcemanager.projects.setIamPolicy",
+          "granted": true,
+          "resourceAttributes": {
+            "service": "cloudresourcemanager.googleapis.com",
+            "name": "projects/invitation-videos",
+            "type": "cloudresourcemanager.googleapis.com/Project"
+          },
+          "permissionType": "ADMIN_WRITE"
+        }
+      ],
+      "resourceName": "projects/invitation-videos",
+      "request": {
+        "@type": "type.googleapis.com/google.iam.v1.SetIamPolicyRequest",
+        "policy": {
+          "etag": "BwZJDHOx2tw=",
+          "bindings": [
+            {
+              "members": [
+                "serviceAccount:service-160470961566@gcp-sa-cloudtasks.iam.gserviceaccount.com"
+              ],
+              "role": "roles/cloudtasks.serviceAgent"
+            },
+            {
+              "members": [
+                "serviceAccount:service-160470961566@containerregistry.iam.gserviceaccount.com"
+              ],
+              "role": "roles/containerregistry.ServiceAgent"
+            },
+            {
+              "role": "roles/editor",
+              "members": [
+                "serviceAccount:160470961566-compute@developer.gserviceaccount.com"
+              ]
+            },
+            {
+              "members": [
+                "user:sukumarsaurav@gmail.com"
+              ],
+              "role": "roles/owner"
+            },
+            {
+              "members": [
+                "serviceAccount:service-160470961566@gcp-sa-pubsub.iam.gserviceaccount.com"
+              ],
+              "role": "roles/pubsub.serviceAgent"
+            },
+            {
+              "members": [
+                "serviceAccount:service-160470961566@serverless-robot-prod.iam.gserviceaccount.com"
+              ],
+              "role": "roles/run.serviceAgent"
+            },
+            {
+              "members": [
+                "serviceAccountId:103907590531415996898"
+              ],
+              "role": "roles/cloudbuild.serviceAgent"
+            }
+          ]
+        },
+        "resource": "160470961566"
+      }
+    },
+    "insertId": "-4zqizuehgdp2",
+    "resource": {
+      "type": "project",
+      "labels": {
+        "project_id": "invitation-videos"
+      }
+    },
+    "timestamp": "2026-01-23T11:28:20.329078Z",
+    "severity": "ERROR",
+    "logName": "projects/invitation-videos/logs/cloudaudit.googleapis.com%2Factivity",
+    "receiveTimestamp": "2026-01-23T11:28:21.526523137Z"
+  },
+  {
+    "protoPayload": {
+      "@type": "type.googleapis.com/google.cloud.audit.AuditLog",
+      "status": {
+        "code": 1
+      },
+      "authenticationInfo": {
+        "principalEmail": "sukumarsaurav@gmail.com",
+        "principalSubject": "user:sukumarsaurav@gmail.com",
+        "oauthInfo": {
+          "oauthClientId": "32555940559.apps.googleusercontent.com"
+        }
+      },
+      "requestMetadata": {
+        "requestAttributes": {},
+        "destinationAttributes": {}
+      },
+      "serviceName": "cloudbuild.googleapis.com",
+      "methodName": "google.devtools.cloudbuild.v1.CloudBuild.CreateBuild",
+      "authorizationInfo": [
+        {
+          "resource": "projects/invitation-videos",
+          "permission": "cloudbuild.builds.create",
+          "granted": true,
+          "resourceAttributes": {
+            "service": "cloudbuild.googleapis.com",
+            "name": "projects//locations/global/builds",
+            "type": "cloudbuild.googleapis.com/Build"
+          },
+          "permissionType": "ADMIN_WRITE"
+        }
+      ],
+      "resourceName": "projects/invitation-videos/builds",
+      "resourceLocation": {
+        "currentLocations": [
+          "global"
+        ]
+      }
+    },
+    "insertId": "-ars1aye1dty0",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "",
+        "project_id": "invitation-videos",
+        "build_id": "29e95d39-9eec-411a-b948-c0d601bb6f05"
+      }
+    },
+    "timestamp": "2026-01-24T16:41:30.673820Z",
+    "severity": "ERROR",
+    "logName": "projects/invitation-videos/logs/cloudaudit.googleapis.com%2Factivity",
+    "operation": {
+      "id": "operations/build/invitation-videos/MjllOTVkMzktOWVlYy00MTFhLWI5NDgtYzBkNjAxYmI2ZjA1",
+      "producer": "cloudbuild.googleapis.com",
+      "last": true
+    },
+    "receiveTimestamp": "2026-01-24T16:41:31.088853676Z"
+  },
+  {
+    "protoPayload": {
+      "@type": "type.googleapis.com/google.cloud.audit.AuditLog",
+      "status": {
+        "code": 1
+      },
+      "authenticationInfo": {
+        "principalEmail": "sukumarsaurav@gmail.com",
+        "principalSubject": "user:sukumarsaurav@gmail.com",
+        "oauthInfo": {
+          "oauthClientId": "32555940559.apps.googleusercontent.com"
+        }
+      },
+      "requestMetadata": {
+        "requestAttributes": {},
+        "destinationAttributes": {}
+      },
+      "serviceName": "cloudbuild.googleapis.com",
+      "methodName": "google.devtools.cloudbuild.v1.CloudBuild.CreateBuild",
+      "authorizationInfo": [
+        {
+          "resource": "projects/invitation-videos",
+          "permission": "cloudbuild.builds.create",
+          "granted": true,
+          "resourceAttributes": {
+            "service": "cloudbuild.googleapis.com",
+            "name": "projects//locations/global/builds",
+            "type": "cloudbuild.googleapis.com/Build"
+          },
+          "permissionType": "ADMIN_WRITE"
+        }
+      ],
+      "resourceName": "projects/invitation-videos/builds",
+      "resourceLocation": {
+        "currentLocations": [
+          "global"
+        ]
+      }
+    },
+    "insertId": "-t4oryge1ccx2",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "29e95d39-9eec-411a-b948-c0d601bb6f05",
+        "build_trigger_id": "",
+        "project_id": "invitation-videos"
+      }
+    },
+    "timestamp": "2026-01-24T16:41:31.389846Z",
+    "severity": "ERROR",
+    "logName": "projects/invitation-videos/logs/cloudaudit.googleapis.com%2Factivity",
+    "operation": {
+      "id": "operations/build/invitation-videos/MjllOTVkMzktOWVlYy00MTFhLWI5NDgtYzBkNjAxYmI2ZjA1",
+      "producer": "cloudbuild.googleapis.com",
+      "last": true
+    },
+    "receiveTimestamp": "2026-01-24T16:41:31.834283232Z"
+  },
+  {
+    "protoPayload": {
+      "@type": "type.googleapis.com/google.cloud.audit.AuditLog",
+      "status": {
+        "code": 9
+      },
+      "authenticationInfo": {
+        "principalEmail": "sukumarsaurav@gmail.com",
+        "principalSubject": "user:sukumarsaurav@gmail.com",
+        "oauthInfo": {
+          "oauthClientId": "32555940559.apps.googleusercontent.com"
+        }
+      },
+      "requestMetadata": {
+        "requestAttributes": {},
+        "destinationAttributes": {}
+      },
+      "serviceName": "cloudbuild.googleapis.com",
+      "methodName": "google.devtools.cloudbuild.v1.CloudBuild.CreateBuild",
+      "authorizationInfo": [
+        {
+          "resource": "projects/invitation-videos",
+          "permission": "cloudbuild.builds.create",
+          "granted": true,
+          "resourceAttributes": {
+            "service": "cloudbuild.googleapis.com",
+            "name": "projects//locations/global/builds",
+            "type": "cloudbuild.googleapis.com/Build"
+          },
+          "permissionType": "ADMIN_WRITE"
+        }
+      ],
+      "resourceName": "projects/invitation-videos/builds",
+      "resourceLocation": {
+        "currentLocations": [
+          "global"
+        ]
+      }
+    },
+    "insertId": "-ars1aye1du68",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "2435777f-7e12-4a60-b72d-6410daccbbf4",
+        "build_trigger_id": "",
+        "project_id": "invitation-videos"
+      }
+    },
+    "timestamp": "2026-01-24T16:43:03.760722Z",
+    "severity": "ERROR",
+    "logName": "projects/invitation-videos/logs/cloudaudit.googleapis.com%2Factivity",
+    "operation": {
+      "id": "operations/build/invitation-videos/MjQzNTc3N2YtN2UxMi00YTYwLWI3MmQtNjQxMGRhY2NiYmY0",
+      "producer": "cloudbuild.googleapis.com",
+      "last": true
+    },
+    "receiveTimestamp": "2026-01-24T16:43:04.185084452Z"
+  },
+  {
+    "protoPayload": {
+      "@type": "type.googleapis.com/google.cloud.audit.AuditLog",
+      "status": {
+        "code": 1
+      },
+      "authenticationInfo": {
+        "principalEmail": "sukumarsaurav@gmail.com",
+        "principalSubject": "user:sukumarsaurav@gmail.com",
+        "oauthInfo": {
+          "oauthClientId": "32555940559.apps.googleusercontent.com"
+        }
+      },
+      "requestMetadata": {
+        "requestAttributes": {},
+        "destinationAttributes": {}
+      },
+      "serviceName": "cloudbuild.googleapis.com",
+      "methodName": "google.devtools.cloudbuild.v1.CloudBuild.CreateBuild",
+      "authorizationInfo": [
+        {
+          "resource": "projects/invitation-videos",
+          "permission": "cloudbuild.builds.create",
+          "granted": true,
+          "resourceAttributes": {
+            "service": "cloudbuild.googleapis.com",
+            "name": "projects//locations/global/builds",
+            "type": "cloudbuild.googleapis.com/Build"
+          },
+          "permissionType": "ADMIN_WRITE"
+        }
+      ],
+      "resourceName": "projects/invitation-videos/builds",
+      "resourceLocation": {
+        "currentLocations": [
+          "global"
+        ]
+      }
+    },
+    "insertId": "lob2aodo6zk",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "",
+        "build_id": "a420a640-6476-498b-9ea2-634f0dc6fd8d",
+        "project_id": "invitation-videos"
+      }
+    },
+    "timestamp": "2026-01-24T16:50:46.399550Z",
+    "severity": "ERROR",
+    "logName": "projects/invitation-videos/logs/cloudaudit.googleapis.com%2Factivity",
+    "operation": {
+      "id": "operations/build/invitation-videos/YTQyMGE2NDAtNjQ3Ni00OThiLTllYTItNjM0ZjBkYzZmZDhk",
+      "producer": "cloudbuild.googleapis.com",
+      "last": true
+    },
+    "receiveTimestamp": "2026-01-24T16:50:46.555098088Z"
+  },
+  {
+    "protoPayload": {
+      "@type": "type.googleapis.com/google.cloud.audit.AuditLog",
+      "status": {
+        "code": 1
+      },
+      "authenticationInfo": {
+        "principalEmail": "sukumarsaurav@gmail.com",
+        "principalSubject": "user:sukumarsaurav@gmail.com",
+        "oauthInfo": {
+          "oauthClientId": "32555940559.apps.googleusercontent.com"
+        }
+      },
+      "requestMetadata": {
+        "requestAttributes": {},
+        "destinationAttributes": {}
+      },
+      "serviceName": "cloudbuild.googleapis.com",
+      "methodName": "google.devtools.cloudbuild.v1.CloudBuild.CreateBuild",
+      "authorizationInfo": [
+        {
+          "resource": "projects/invitation-videos",
+          "permission": "cloudbuild.builds.create",
+          "granted": true,
+          "resourceAttributes": {
+            "service": "cloudbuild.googleapis.com",
+            "name": "projects//locations/global/builds",
+            "type": "cloudbuild.googleapis.com/Build"
+          },
+          "permissionType": "ADMIN_WRITE"
+        }
+      ],
+      "resourceName": "projects/invitation-videos/builds",
+      "resourceLocation": {
+        "currentLocations": [
+          "global"
+        ]
+      }
+    },
+    "insertId": "lob2aodo6zo",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "invitation-videos",
+        "build_trigger_id": "",
+        "build_id": "a420a640-6476-498b-9ea2-634f0dc6fd8d"
+      }
+    },
+    "timestamp": "2026-01-24T16:50:46.983478Z",
+    "severity": "ERROR",
+    "logName": "projects/invitation-videos/logs/cloudaudit.googleapis.com%2Factivity",
+    "operation": {
+      "id": "operations/build/invitation-videos/YTQyMGE2NDAtNjQ3Ni00OThiLTllYTItNjM0ZjBkYzZmZDhk",
+      "producer": "cloudbuild.googleapis.com",
+      "last": true
+    },
+    "receiveTimestamp": "2026-01-24T16:50:47.555412109Z"
+  },
+  {
+    "protoPayload": {
+      "@type": "type.googleapis.com/google.cloud.audit.AuditLog",
+      "status": {
+        "code": 9
+      },
+      "authenticationInfo": {
+        "principalEmail": "sukumarsaurav@gmail.com",
+        "principalSubject": "user:sukumarsaurav@gmail.com",
+        "oauthInfo": {
+          "oauthClientId": "32555940559.apps.googleusercontent.com"
+        }
+      },
+      "requestMetadata": {
+        "requestAttributes": {},
+        "destinationAttributes": {}
+      },
+      "serviceName": "cloudbuild.googleapis.com",
+      "methodName": "google.devtools.cloudbuild.v1.CloudBuild.CreateBuild",
+      "authorizationInfo": [
+        {
+          "resource": "projects/invitation-videos",
+          "permission": "cloudbuild.builds.create",
+          "granted": true,
+          "resourceAttributes": {
+            "service": "cloudbuild.googleapis.com",
+            "name": "projects//locations/global/builds",
+            "type": "cloudbuild.googleapis.com/Build"
+          },
+          "permissionType": "ADMIN_WRITE"
+        }
+      ],
+      "resourceName": "projects/invitation-videos/builds",
+      "resourceLocation": {
+        "currentLocations": [
+          "global"
+        ]
+      }
+    },
+    "insertId": "lob2aodo7vc",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "invitation-videos",
+        "build_trigger_id": "",
+        "build_id": "ac54c0e9-c479-4c4d-9603-6856304e2165"
+      }
+    },
+    "timestamp": "2026-01-24T16:55:32.945117Z",
+    "severity": "ERROR",
+    "logName": "projects/invitation-videos/logs/cloudaudit.googleapis.com%2Factivity",
+    "operation": {
+      "id": "operations/build/invitation-videos/YWM1NGMwZTktYzQ3OS00YzRkLTk2MDMtNjg1NjMwNGUyMTY1",
+      "producer": "cloudbuild.googleapis.com",
+      "last": true
+    },
+    "receiveTimestamp": "2026-01-24T16:55:33.795088579Z"
+  },
+  {
+    "protoPayload": {
+      "@type": "type.googleapis.com/google.cloud.audit.AuditLog",
+      "status": {
+        "code": 9
+      },
+      "authenticationInfo": {
+        "principalEmail": "sukumarsaurav@gmail.com",
+        "principalSubject": "user:sukumarsaurav@gmail.com",
+        "oauthInfo": {
+          "oauthClientId": "32555940559.apps.googleusercontent.com"
+        }
+      },
+      "requestMetadata": {
+        "requestAttributes": {},
+        "destinationAttributes": {}
+      },
+      "serviceName": "cloudbuild.googleapis.com",
+      "methodName": "google.devtools.cloudbuild.v1.CloudBuild.CreateBuild",
+      "authorizationInfo": [
+        {
+          "resource": "projects/invitation-videos",
+          "permission": "cloudbuild.builds.create",
+          "granted": true,
+          "resourceAttributes": {
+            "service": "cloudbuild.googleapis.com",
+            "name": "projects//locations/global/builds",
+            "type": "cloudbuild.googleapis.com/Build"
+          },
+          "permissionType": "ADMIN_WRITE"
+        }
+      ],
+      "resourceName": "projects/invitation-videos/builds",
+      "resourceLocation": {
+        "currentLocations": [
+          "global"
+        ]
+      }
+    },
+    "insertId": "-ars1aye1dwe8",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "346b6df7-9833-4d74-bd91-6efde595041b",
+        "build_trigger_id": "",
+        "project_id": "invitation-videos"
+      }
+    },
+    "timestamp": "2026-01-24T16:58:19.628191Z",
+    "severity": "ERROR",
+    "logName": "projects/invitation-videos/logs/cloudaudit.googleapis.com%2Factivity",
+    "operation": {
+      "id": "operations/build/invitation-videos/MzQ2YjZkZjctOTgzMy00ZDc0LWJkOTEtNmVmZGU1OTUwNDFi",
+      "producer": "cloudbuild.googleapis.com",
+      "last": true
+    },
+    "receiveTimestamp": "2026-01-24T16:58:20.154738340Z"
+  },
+  {
+    "protoPayload": {
+      "@type": "type.googleapis.com/google.cloud.audit.AuditLog",
+      "status": {
+        "code": 9
+      },
+      "authenticationInfo": {
+        "principalEmail": "sukumarsaurav@gmail.com",
+        "principalSubject": "user:sukumarsaurav@gmail.com",
+        "oauthInfo": {
+          "oauthClientId": "32555940559.apps.googleusercontent.com"
+        }
+      },
+      "requestMetadata": {
+        "requestAttributes": {},
+        "destinationAttributes": {}
+      },
+      "serviceName": "cloudbuild.googleapis.com",
+      "methodName": "google.devtools.cloudbuild.v1.CloudBuild.CreateBuild",
+      "authorizationInfo": [
+        {
+          "resource": "projects/invitation-videos",
+          "permission": "cloudbuild.builds.create",
+          "granted": true,
+          "resourceAttributes": {
+            "service": "cloudbuild.googleapis.com",
+            "name": "projects//locations/global/builds",
+            "type": "cloudbuild.googleapis.com/Build"
+          },
+          "permissionType": "ADMIN_WRITE"
+        }
+      ],
+      "resourceName": "projects/invitation-videos/builds",
+      "resourceLocation": {
+        "currentLocations": [
+          "global"
+        ]
+      }
+    },
+    "insertId": "-ars1aye1dxcq",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "invitation-videos",
+        "build_trigger_id": "",
+        "build_id": "079e700a-0991-4ad0-825b-e332af349ea2"
+      }
+    },
+    "timestamp": "2026-01-24T17:03:04.237120Z",
+    "severity": "ERROR",
+    "logName": "projects/invitation-videos/logs/cloudaudit.googleapis.com%2Factivity",
+    "operation": {
+      "id": "operations/build/invitation-videos/MDc5ZTcwMGEtMDk5MS00YWQwLTgyNWItZTMzMmFmMzQ5ZWEy",
+      "producer": "cloudbuild.googleapis.com",
+      "last": true
+    },
+    "receiveTimestamp": "2026-01-24T17:03:04.449348068Z"
+  },
+  {
+    "protoPayload": {
+      "@type": "type.googleapis.com/google.cloud.audit.AuditLog",
+      "status": {
+        "code": 9
+      },
+      "authenticationInfo": {
+        "principalEmail": "sukumarsaurav@gmail.com",
+        "principalSubject": "user:sukumarsaurav@gmail.com",
+        "oauthInfo": {
+          "oauthClientId": "32555940559.apps.googleusercontent.com"
+        }
+      },
+      "requestMetadata": {
+        "requestAttributes": {},
+        "destinationAttributes": {}
+      },
+      "serviceName": "cloudbuild.googleapis.com",
+      "methodName": "google.devtools.cloudbuild.v1.CloudBuild.CreateBuild",
+      "authorizationInfo": [
+        {
+          "resource": "projects/invitation-videos",
+          "permission": "cloudbuild.builds.create",
+          "granted": true,
+          "resourceAttributes": {
+            "service": "cloudbuild.googleapis.com",
+            "name": "projects//locations/global/builds",
+            "type": "cloudbuild.googleapis.com/Build"
+          },
+          "permissionType": "ADMIN_WRITE"
+        }
+      ],
+      "resourceName": "projects/invitation-videos/builds",
+      "resourceLocation": {
+        "currentLocations": [
+          "global"
+        ]
+      }
+    },
+    "insertId": "-t4oryge1ck5e",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "",
+        "build_id": "c197293c-7bae-434c-80a7-993d0b82bb41",
+        "project_id": "invitation-videos"
+      }
+    },
+    "timestamp": "2026-01-24T17:14:35.062406Z",
+    "severity": "ERROR",
+    "logName": "projects/invitation-videos/logs/cloudaudit.googleapis.com%2Factivity",
+    "operation": {
+      "id": "operations/build/invitation-videos/YzE5NzI5M2MtN2JhZS00MzRjLTgwYTctOTkzZDBiODJiYjQx",
+      "producer": "cloudbuild.googleapis.com",
+      "last": true
+    },
+    "receiveTimestamp": "2026-01-24T17:14:35.969485214Z"
+  }
+]
