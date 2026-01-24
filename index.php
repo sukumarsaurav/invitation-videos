@@ -5,13 +5,10 @@
  * All requests are routed through this file
  */
 
-// Error reporting for development
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-// Load configuration
+// Load configuration (handles error reporting based on APP_DEBUG)
 require_once __DIR__ . '/config/config.php';
 require_once __DIR__ . '/config/database.php';
+
 
 // Load core classes
 require_once __DIR__ . '/src/Core/Security.php';
