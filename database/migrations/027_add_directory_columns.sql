@@ -1,14 +1,12 @@
 -- ============================================
 -- Migration 027: Add Directory Columns
 -- ============================================
--- 
 -- This migration adds directory organization columns for:
 -- 1. Templates - permanent assets directory
 -- 2. Orders - temporary files with auto-expiry
 -- 3. Draft Orders - temporary draft files
---
 -- Run this on production database
--- ============================================
+-- ==========================================
 
 -- Add assets_directory to templates
 -- Stores relative path: 'templates/sacred-blossoms-wedding'

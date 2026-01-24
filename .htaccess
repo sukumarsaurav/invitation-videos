@@ -141,10 +141,11 @@ RewriteRule ^ index.php [L]
 # ETags Configuration
 FileETag MTime Size
 
-# PHP settings (if allowed by host - only works with mod_php, not PHP-FPM)
+# PHP settings for video rendering (if allowed by host - only works with mod_php, not PHP-FPM)
 <IfModule mod_php.c>
-    php_value upload_max_filesize 50M
-    php_value post_max_size 55M
+    php_value upload_max_filesize 100M
+    php_value post_max_size 105M
     php_value max_execution_time 600
     php_value max_input_time 600
+    php_value memory_limit 256M
 </IfModule>

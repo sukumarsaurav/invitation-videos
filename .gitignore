@@ -5,6 +5,11 @@
 .env.local
 .env.*.local
 
+# Renderer environment (contains GCP secrets)
+renderer/.env
+renderer/.env.local
+.gcp-config
+
 # Dependencies
 /vendor/
 /node_modules/
