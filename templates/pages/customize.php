@@ -312,13 +312,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             require_once __DIR__ . '/../../src/Services/DraftOrderService.php';
             $draftService = new \InvitationVideos\Services\DraftOrderService();
 
+            // Pass files directory via internal key (extracted inside createDraft)
+            if (!empty($_SESSION['customize_draft_dir'])) {
+                $allData['_files_directory'] = $_SESSION['customize_draft_dir'];
+            }
+
             $draft = $draftService->createDraft(
                 $templateId,
                 $amount,
                 $currency,
                 $allData,
-                $_SESSION['customize_draft_dir'] ?? null,
-                $_SESSION['user_id']
+                $_SESSION['user_id'] ?? null
             );
 
             $draftId = $draft['id'];

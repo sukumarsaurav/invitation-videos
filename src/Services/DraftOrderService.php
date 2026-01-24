@@ -21,8 +21,7 @@ class DraftOrderService
      * @param int $templateId Template ID
      * @param float $amount Order amount
      * @param string $currency 'USD' or 'INR'
-     * @param array $customizationData Form field values
-     * @param string|null $filesDirectory Relative path to draft files folder
+     * @param array $customizationData Form field values (may include '_files_directory' key)
      * @param int|null $userId User ID (null for guests)
      * @return array Draft order data with token
      */
@@ -31,11 +30,17 @@ class DraftOrderService
         float $amount,
         string $currency,
         array $customizationData,
-        ?string $filesDirectory = null,
         ?int $userId = null
     ): array {
         $draftToken = $this->generateToken();
         $expiresAt = date('Y-m-d H:i:s', strtotime('+' . self::EXPIRY_DAYS . ' days'));
+
+        // Extract files_directory if passed in customization data (internal use)
+        $filesDirectory = null;
+        if (isset($customizationData['_files_directory'])) {
+            $filesDirectory = $customizationData['_files_directory'];
+            unset($customizationData['_files_directory']); // Don't store in JSON
+        }
 
         \Database::query(
             "INSERT INTO draft_orders (draft_token, user_id, template_id, amount, currency, customization_data, files_directory, expires_at)
@@ -74,6 +79,30 @@ class DraftOrderService
              FROM draft_orders d
              JOIN templates t ON d.template_id = t.id
              WHERE d.draft_token = ? AND d.expires_at > NOW()",
+            [$token]
+        );
+
+        if ($draft && isset($draft['customization_data'])) {
+            $draft['customization_data'] = json_decode($draft['customization_data'], true);
+        }
+
+        return $draft;
+    }
+
+    /**
+     * Get draft order by token WITHOUT expiry check
+     * Used for payment verification where we need the draft even if technically expired
+     * 
+     * @param string $token Draft token
+     * @return array|null Draft order data or null if not found
+     */
+    public function getDraftByTokenForVerification(string $token): ?array
+    {
+        $draft = \Database::fetchOne(
+            "SELECT d.*, t.title as template_title, t.thumbnail_url, t.slug as template_slug
+             FROM draft_orders d
+             JOIN templates t ON d.template_id = t.id
+             WHERE d.draft_token = ?",
             [$token]
         );
 

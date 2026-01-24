@@ -279,6 +279,14 @@ function verifyRazorpayPayment(array $input): void
     $isDraft = !empty($input['is_draft']);
     $draftToken = $input['draft_token'] ?? null;
 
+    // Debug logging
+    error_log("verifyRazorpayPayment: Called with input: " . json_encode([
+        'order_id' => $orderId,
+        'is_draft' => $isDraft,
+        'draft_token' => $draftToken,
+        'razorpay_order_id' => $razorpayOrderId
+    ]));
+
     if (!$razorpayPaymentId || !$razorpayOrderId || !$razorpaySignature) {
         http_response_code(400);
         echo json_encode(['error' => 'Missing required parameters']);
@@ -289,28 +297,37 @@ function verifyRazorpayPayment(array $input): void
     $isValid = $razorpayService->verifyPayment($razorpayPaymentId, $razorpayOrderId, $razorpaySignature);
 
     if (!$isValid) {
+        error_log("verifyRazorpayPayment: Signature verification FAILED");
         http_response_code(400);
         echo json_encode(['error' => 'Payment verification failed']);
         return;
     }
 
+    error_log("verifyRazorpayPayment: Signature verification PASSED");
+
     $realOrderId = null;
 
     // Handle draft orders - convert to real order
     if ($isDraft && $draftToken) {
+        error_log("verifyRazorpayPayment: Looking up draft with token: {$draftToken}");
         $draftService = new \InvitationVideos\Services\DraftOrderService();
-        $draft = $draftService->getDraftByToken($draftToken);
+
+        // Use lenient lookup (no expiry check) for payment verification
+        $draft = $draftService->getDraftByTokenForVerification($draftToken);
 
         if (!$draft) {
+            error_log("verifyRazorpayPayment: Draft NOT found by token, trying by razorpay_order_id: {$razorpayOrderId}");
             // Try to find by razorpay_order_id
             $draft = $draftService->getDraftByRazorpayOrderId($razorpayOrderId);
         }
 
         if ($draft) {
+            error_log("verifyRazorpayPayment: Found draft ID #{$draft['id']}, converting to order...");
             // Convert draft to real order
             $realOrderId = $draftService->convertToOrder($draft, $razorpayPaymentId, 'razorpay');
             error_log("Razorpay Verify: Converted draft #{$draft['id']} to order #{$realOrderId}");
         } else {
+            error_log("verifyRazorpayPayment: Draft NOT found by token OR razorpay_order_id. Token: {$draftToken}, RazorpayOrderId: {$razorpayOrderId}");
             http_response_code(404);
             echo json_encode(['error' => 'Draft order not found']);
             return;
