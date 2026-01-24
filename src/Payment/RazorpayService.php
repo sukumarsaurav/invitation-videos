@@ -64,6 +64,7 @@ class RazorpayService
             return true;
 
         } catch (\Exception $e) {
+            error_log("Razorpay Verify Error: " . $e->getMessage());
             return false;
         }
     }
