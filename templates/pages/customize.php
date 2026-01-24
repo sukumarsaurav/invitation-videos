@@ -192,22 +192,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!empty($file['tmp_name']) && $file['error'] === UPLOAD_ERR_OK) {
                 $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
                 $storedFilename = uniqid() . '_' . $fieldName . '.' . $extension;
-                $filePath = $draftDir . $storedFilename;
+                
+                // Full path for actual file storage
+                $fullPath = $draftDir . $storedFilename;
+                
+                // Web-relative path for database storage (standardized format)
+                $webPath = '/uploads/' . $_SESSION['customize_draft_dir'] . $storedFilename;
 
-                error_log("customize.php: Attempting to move '{$file['tmp_name']}' to '{$filePath}'");
+                error_log("customize.php: Attempting to move '{$file['tmp_name']}' to '{$fullPath}'");
+                error_log("customize.php: Web path will be: {$webPath}");
                 error_log("customize.php: Draft dir exists: " . (is_dir($draftDir) ? 'yes' : 'no'));
                 error_log("customize.php: Draft dir writable: " . (is_writable($draftDir) ? 'yes' : 'no'));
 
-                if (move_uploaded_file($file['tmp_name'], $filePath)) {
-                    // Store file info in session for later when draft is created
+                if (move_uploaded_file($file['tmp_name'], $fullPath)) {
+                    // Store file info with WEB-RELATIVE path (standardized)
                     $_SESSION['customize_uploads'][$fieldName] = [
                         'stored_filename' => $storedFilename,
-                        'file_path' => $filePath,
+                        'file_path' => $webPath,  // Web-relative, not absolute
                         'original_filename' => $file['name'],
                         'mime_type' => $file['type'],
                         'file_size' => $file['size']
                     ];
-                    error_log("customize.php: SUCCESS - Saved upload for field '{$fieldName}' to {$filePath}");
+                    error_log("customize.php: SUCCESS - Saved upload for field '{$fieldName}' with web path {$webPath}");
                 } else {
                     error_log("customize.php: FAILED - Could not move uploaded file for field '{$fieldName}'");
                     error_log("customize.php: Last PHP error: " . print_r(error_get_last(), true));

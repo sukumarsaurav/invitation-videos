@@ -257,15 +257,23 @@ class DraftOrderService
 
     /**
      * Move uploads from draft to order
+    /**
+     * Move uploads from draft to order
      * 
      * @param int $draftId Draft order ID
      * @param int $orderId New order ID
-     * @param string|null $draftFilesDir Draft files directory (relative path)
+     * @param string|null $draftFilesDir Draft files directory (relative path like 'drafts/abc123/')
      * @param string|null $orderDir Order files directory (full path)
      */
     private function moveUploads(int $draftId, int $orderId, ?string $draftFilesDir = null, ?string $orderDir = null): void
     {
         error_log("moveUploads: Starting to move uploads from draft #{$draftId} to order #{$orderId}");
+
+        // Get project root (parent of UPLOAD_PATH which ends in 'uploads/')
+        $projectRoot = rtrim(UPLOAD_PATH, '/');
+        if (substr($projectRoot, -7) === 'uploads') {
+            $projectRoot = dirname($projectRoot);
+        }
 
         // Get all draft uploads
         $uploads = \Database::fetchAll(
@@ -273,62 +281,56 @@ class DraftOrderService
             [$draftId]
         );
 
-        error_log("moveUploads: Found " . count($uploads) . " uploads to move");
+        error_log("moveUploads: Found " . count($uploads) . " uploads to move. Project root: {$projectRoot}");
+
+        // Calculate new web path prefix for order files
+        $orderWebDir = null;
+        if ($orderDir) {
+            // Extract web-relative path from order directory
+            if (preg_match('#/uploads/(.+)$#', $orderDir, $matches)) {
+                $orderWebDir = '/uploads/' . rtrim($matches[1], '/') . '/';
+            }
+        }
 
         foreach ($uploads as $upload) {
-            error_log("moveUploads: Processing file '{$upload['stored_filename']}' (type: {$upload['file_type']})");
+            error_log("moveUploads: Processing file '{$upload['stored_filename']}' (DB path: {$upload['file_path']})");
 
-            $newFilePath = $upload['file_path']; // Default: keep same path
+            $oldWebPath = $upload['file_path'];  // Should be like /uploads/drafts/abc/photo.jpg
+            $newWebPath = $oldWebPath;  // Default: keep same
+            $fileMoved = false;
 
-            // Determine source path
-            $oldPath = $upload['file_path'];
+            // If we have an order directory, move the file
+            if ($orderDir && $orderWebDir) {
+                // Convert web path to full path for file operations
+                $oldFullPath = $projectRoot . $oldWebPath;
+                $newFullPath = $orderDir . $upload['stored_filename'];
+                $newWebPath = $orderWebDir . $upload['stored_filename'];
 
-            // If we have an order directory, we want to move the file
-            if ($orderDir) {
-                // If old path is relative (web path), try to make it absolute
-                if (!file_exists($oldPath) && strpos($oldPath, '/') === 0) {
-                    // Try relative to UPLOAD_PATH's parent (project root) or UPLOAD_PATH itself
-                    // If upload['file_path'] is like '/uploads/drafts/...' and UPLOAD_PATH ends in 'uploads/'
+                error_log("moveUploads: Attempting move from {$oldFullPath} to {$newFullPath}");
 
-                    // Check common relative path scenarios
-                    $possiblePaths = [
-                        $oldPath,
-                        UPLOAD_PATH . basename($oldPath), // Flat upload structure
-                        dirname(UPLOAD_PATH) . $oldPath // Project root + web path
-                    ];
-
-                    if ($draftFilesDir) {
-                        $possiblePaths[] = UPLOAD_PATH . $draftFilesDir . basename($oldPath);
-                    }
-
-                    foreach ($possiblePaths as $path) {
-                        if (file_exists($path)) {
-                            $oldPath = $path;
-                            break;
-                        }
-                    }
-                }
-
-                if (file_exists($oldPath)) {
-                    $newFilePath = $orderDir . $upload['stored_filename'];
-
-                    if (rename($oldPath, $newFilePath)) {
-                        error_log("moveUploads: Moved file from {$oldPath} to {$newFilePath}");
+                if (file_exists($oldFullPath)) {
+                    if (rename($oldFullPath, $newFullPath)) {
+                        error_log("moveUploads: Successfully moved file");
+                        $fileMoved = true;
                     } else {
-                        error_log("moveUploads: Failed to move file from {$oldPath}, keeping at original location");
-                        // Fallback: copy and delete?
-                        if (copy($oldPath, $newFilePath)) {
-                            @unlink($oldPath);
-                            error_log("moveUploads: Copied file instead.");
+                        // Fallback: try copy
+                        if (copy($oldFullPath, $newFullPath)) {
+                            @unlink($oldFullPath);
+                            error_log("moveUploads: Copied file (rename failed)");
+                            $fileMoved = true;
                         } else {
-                            $newFilePath = $oldPath;
+                            error_log("moveUploads: Failed to move or copy file, keeping original path");
+                            $newWebPath = $oldWebPath;
                         }
                     }
                 } else {
-                    error_log("moveUploads: Source file not found: {$oldPath}. DB Path: {$upload['file_path']}");
+                    error_log("moveUploads: Source file not found at {$oldFullPath}");
+                    // Keep original web path since we can't move it
+                    $newWebPath = $oldWebPath;
                 }
             }
 
+            // Insert into order_uploads with web-relative path
             try {
                 \Database::query(
                     "INSERT INTO order_uploads (order_id, field_name, file_type, original_filename, stored_filename, file_path, mime_type, file_size)
@@ -339,12 +341,12 @@ class DraftOrderService
                         $upload['file_type'],
                         $upload['original_filename'],
                         $upload['stored_filename'],
-                        $newFilePath,
+                        $newWebPath,  // Always web-relative
                         $upload['mime_type'],
                         $upload['file_size']
                     ]
                 );
-                error_log("moveUploads: Successfully inserted upload for field '{$upload['field_name']}' with path {$newFilePath}");
+                error_log("moveUploads: Inserted order_upload with path {$newWebPath}");
             } catch (\Exception $e) {
                 error_log("moveUploads: ERROR inserting upload - " . $e->getMessage());
             }
@@ -373,12 +375,20 @@ class DraftOrderService
      * @param int $draftId Draft order ID
      * @param string $fieldName Form field name
      * @param array $fileInfo File upload info
-     * @param string $storedPath Stored file path
+     * @param string $storedPath Stored file path (should be web-relative like /uploads/...)
      */
     public function addUpload(int $draftId, string $fieldName, array $fileInfo, string $storedPath): void
     {
         $storedFilename = basename($storedPath);
         $fileType = strpos($fileInfo['type'], 'audio') !== false ? 'music' : 'image';
+
+        // Normalize to web-relative path if absolute path was passed
+        if (strpos($storedPath, '/uploads/') !== 0) {
+            if (preg_match('#/uploads/(.+)$#', $storedPath, $matches)) {
+                $storedPath = '/uploads/' . $matches[1];
+                error_log("addUpload: Normalized path to web-relative: {$storedPath}");
+            }
+        }
 
         \Database::query(
             "INSERT INTO draft_order_uploads (draft_id, field_name, file_type, original_filename, stored_filename, file_path, mime_type, file_size)

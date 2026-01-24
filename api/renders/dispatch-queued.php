@@ -93,14 +93,17 @@ $customizationData = json_decode($order['customization_data'] ?? '{}', true) ?: 
 
 foreach ($uploads as $upload) {
     $filePath = $upload['file_path'];
-    // Extract web path from full path
-    if (preg_match('#/uploads/(.+)$#', $filePath, $matches)) {
-        $webPath = '/uploads/' . $matches[1];
-    } elseif (strpos($filePath, 'orders/') !== false) {
-        $webPath = '/uploads/' . substr($filePath, strpos($filePath, 'orders/'));
+
+    // file_path should be web-relative (e.g., /uploads/orders/ORD-123/photo.jpg)
+    // For legacy absolute paths, extract the web portion
+    if (strpos($filePath, '/uploads/') === 0) {
+        $webPath = $filePath;  // Already standardized
+    } elseif (preg_match('#/uploads/(.+)$#', $filePath, $matches)) {
+        $webPath = '/uploads/' . $matches[1];  // Extract from absolute
     } else {
-        $webPath = '/uploads/' . basename($filePath);
+        $webPath = '/uploads/' . basename($filePath);  // Fallback
     }
+
     $customizationData[$upload['field_name']] = 'https://invitationvideos.com' . $webPath;
 }
 

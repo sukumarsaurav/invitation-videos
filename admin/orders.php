@@ -377,36 +377,23 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
                         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                             <?php foreach ($orderUploads as $upload): ?>
                                 <?php
-                                // Construct web URL from file_path
-                                // file_path contains absolute server path like /home/.../public_html/uploads/orders/ORD-123/filename.ext
-                                // OR relative path like orders/ORD-123/filename.ext
-                                // We need to extract /uploads/orders/ORD-123/filename.ext
+                                // file_path should now be web-relative (e.g., /uploads/orders/ORD-123/photo.jpg)
+                                // For legacy data with absolute paths, we extract the web portion
                                 $filePath = $upload['file_path'] ?? '';
-                                $storedFilename = $upload['stored_filename'] ?? '';
-                                $orderFilesDir = $viewOrder['files_directory'] ?? '';
 
-                                // Try multiple methods to get the web URL
-                                if (!empty($orderFilesDir) && !empty($storedFilename)) {
-                                    // Best: Use order's files_directory + stored filename
-                                    $webUrl = '/uploads/' . trim($orderFilesDir, '/') . '/' . $storedFilename;
-                                } elseif (strpos($filePath, '/uploads/orders/') !== false) {
-                                    // Extract from full path including /orders/ subdirectory
-                                    $webUrl = substr($filePath, strpos($filePath, '/uploads/'));
-                                } elseif (strpos($filePath, '/uploads/') !== false) {
-                                    // Extract from full path
-                                    $webUrl = substr($filePath, strpos($filePath, '/uploads/'));
-                                } elseif (strpos($filePath, 'orders/') !== false) {
-                                    // Relative path starting with orders/
-                                    $webUrl = '/uploads/' . substr($filePath, strpos($filePath, 'orders/'));
-                                } elseif (strpos($filePath, 'uploads/') !== false) {
-                                    $webUrl = '/' . substr($filePath, strpos($filePath, 'uploads/'));
-                                } elseif (!empty($storedFilename)) {
-                                    // Fallback: stored filename in order directory
-                                    $orderNumber = $viewOrder['order_number'] ?? '';
-                                    $webUrl = '/uploads/orders/' . $orderNumber . '/' . $storedFilename;
+                                if (strpos($filePath, '/uploads/') === 0) {
+                                    // Already web-relative (standardized format)
+                                    $webUrl = $filePath;
+                                } elseif (preg_match('#/uploads/(.+)$#', $filePath, $matches)) {
+                                    // Legacy: extract web-relative from absolute path
+                                    $webUrl = '/uploads/' . $matches[1];
                                 } else {
-                                    // Last fallback: just use the basename
-                                    $webUrl = '/uploads/' . basename($filePath);
+                                    // Fallback: use stored_filename with order directory
+                                    $orderFilesDir = $viewOrder['files_directory'] ?? '';
+                                    $storedFilename = $upload['stored_filename'] ?? basename($filePath);
+                                    $webUrl = !empty($orderFilesDir)
+                                        ? '/uploads/' . trim($orderFilesDir, '/') . '/' . $storedFilename
+                                        : '/uploads/' . $storedFilename;
                                 }
                                 ?>
                                 <div class="group relative">
@@ -451,14 +438,15 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
             <?php if (!empty($orderUploads) && isset($_GET['debug'])): ?>
                 <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-4">
                     <h4 class="font-bold text-yellow-800 mb-2">🔧 Debug: File Upload Data</h4>
-                    <p class="text-xs text-yellow-700 mb-2"><strong>Order files_directory:</strong> <?= Security::escape($viewOrder['files_directory'] ?? 'NOT SET') ?></p>
+                    <p class="text-xs text-yellow-700 mb-2"><strong>Order files_directory:</strong>
+                        <?= Security::escape($viewOrder['files_directory'] ?? 'NOT SET') ?></p>
                     <?php foreach ($orderUploads as $upload): ?>
                         <?php
                         // Replicate the URL logic for debug
                         $filePath = $upload['file_path'] ?? '';
                         $storedFilename = $upload['stored_filename'] ?? '';
                         $orderFilesDir = $viewOrder['files_directory'] ?? '';
-                        
+
                         if (!empty($orderFilesDir) && !empty($storedFilename)) {
                             $debugUrl = '/uploads/' . trim($orderFilesDir, '/') . '/' . $storedFilename;
                         } elseif (strpos($filePath, '/uploads/orders/') !== false) {
