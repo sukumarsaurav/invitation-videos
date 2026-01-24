@@ -22,6 +22,7 @@ class DraftOrderService
      * @param float $amount Order amount
      * @param string $currency 'USD' or 'INR'
      * @param array $customizationData Form field values
+     * @param string|null $filesDirectory Relative path to draft files folder
      * @param int|null $userId User ID (null for guests)
      * @return array Draft order data with token
      */
@@ -30,14 +31,15 @@ class DraftOrderService
         float $amount,
         string $currency,
         array $customizationData,
+        ?string $filesDirectory = null,
         ?int $userId = null
     ): array {
         $draftToken = $this->generateToken();
         $expiresAt = date('Y-m-d H:i:s', strtotime('+' . self::EXPIRY_DAYS . ' days'));
 
         \Database::query(
-            "INSERT INTO draft_orders (draft_token, user_id, template_id, amount, currency, customization_data, expires_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO draft_orders (draft_token, user_id, template_id, amount, currency, customization_data, files_directory, expires_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
             [
                 $draftToken,
                 $userId,
@@ -45,6 +47,7 @@ class DraftOrderService
                 $amount,
                 $currency,
                 json_encode($customizationData),
+                $filesDirectory,
                 $expiresAt
             ]
         );
@@ -248,9 +251,34 @@ class DraftOrderService
 
             $newFilePath = $upload['file_path']; // Default: keep same path
 
-            // If we have both source and destination directories, move the file physically
-            if ($draftFilesDir && $orderDir) {
-                $oldPath = $upload['file_path'];
+            // Determine source path
+            $oldPath = $upload['file_path'];
+
+            // If we have an order directory, we want to move the file
+            if ($orderDir) {
+                // If old path is relative (web path), try to make it absolute
+                if (!file_exists($oldPath) && strpos($oldPath, '/') === 0) {
+                    // Try relative to UPLOAD_PATH's parent (project root) or UPLOAD_PATH itself
+                    // If upload['file_path'] is like '/uploads/drafts/...' and UPLOAD_PATH ends in 'uploads/'
+
+                    // Check common relative path scenarios
+                    $possiblePaths = [
+                        $oldPath,
+                        UPLOAD_PATH . basename($oldPath), // Flat upload structure
+                        dirname(UPLOAD_PATH) . $oldPath // Project root + web path
+                    ];
+
+                    if ($draftFilesDir) {
+                        $possiblePaths[] = UPLOAD_PATH . $draftFilesDir . basename($oldPath);
+                    }
+
+                    foreach ($possiblePaths as $path) {
+                        if (file_exists($path)) {
+                            $oldPath = $path;
+                            break;
+                        }
+                    }
+                }
 
                 if (file_exists($oldPath)) {
                     $newFilePath = $orderDir . $upload['stored_filename'];
@@ -258,11 +286,17 @@ class DraftOrderService
                     if (rename($oldPath, $newFilePath)) {
                         error_log("moveUploads: Moved file from {$oldPath} to {$newFilePath}");
                     } else {
-                        error_log("moveUploads: Failed to move file, keeping at original location");
-                        $newFilePath = $oldPath;
+                        error_log("moveUploads: Failed to move file from {$oldPath}, keeping at original location");
+                        // Fallback: copy and delete?
+                        if (copy($oldPath, $newFilePath)) {
+                            @unlink($oldPath);
+                            error_log("moveUploads: Copied file instead.");
+                        } else {
+                            $newFilePath = $oldPath;
+                        }
                     }
                 } else {
-                    error_log("moveUploads: Source file not found: {$oldPath}");
+                    error_log("moveUploads: Source file not found: {$oldPath}. DB Path: {$upload['file_path']}");
                 }
             }
 
