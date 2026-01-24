@@ -47,6 +47,9 @@ RewriteRule ^ index.php [L]
     Header set X-Content-Type-Options "nosniff"
     Header set X-Frame-Options "DENY"
     Header set X-XSS-Protection "1; mode=block"
+    
+    # Permissions Policy - Allow Razorpay biometrics & sensor features for fraud detection
+    Header set Permissions-Policy "accelerometer=*, gyroscope=*, magnetometer=*"
 </IfModule>
 
 # Prevent access to sensitive files

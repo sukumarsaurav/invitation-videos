@@ -18,5 +18,9 @@
     "background_color": "#fdf7f3",
     "display": "standalone",
     "start_url": "/",
-    "scope": "/"
+    "scope": "/",
+    "serviceworker": {
+        "src": "/sw.js",
+        "scope": "/"
+    }
 }
