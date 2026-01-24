@@ -58,16 +58,13 @@ try {
     // Log the error but return clean response
     error_log("track.php ERROR: " . $e->getMessage() . " in " . $e->getFile() . ":" . $e->getLine());
 
-    // In production, don't expose internal errors
-    if (defined('APP_DEBUG') && APP_DEBUG) {
-        http_response_code(500);
-        echo json_encode([
-            'error' => $e->getMessage(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine()
-        ]);
-    } else {
-        // Silent fail for tracking - don't break user experience
-        echo json_encode(['success' => false, 'reason' => 'internal_error']);
-    }
+    // TEMPORARY DEBUGGING: Always show error details
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'error' => $e->getMessage(),
+        'file' => basename($e->getFile()),
+        'line' => $e->getLine(),
+        'trace' => $e->getTraceAsString()
+    ]);
 }

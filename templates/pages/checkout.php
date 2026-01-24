@@ -693,7 +693,7 @@ $pageTitle = 'Checkout - ' . $order['order_number'];
 
     async function processRazorpayPayment() {
         // Create Razorpay order
-        const response = await fetch('/api/create-razorpay-order', {
+        const response = await fetch('/api/payments/index.php?action=create-razorpay-order', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -717,7 +717,7 @@ $pageTitle = 'Checkout - ' . $order['order_number'];
             handler: async function (response) {
                 // Verify payment on server
                 try {
-                    const verifyResponse = await fetch('/api/verify-razorpay', {
+                    const verifyResponse = await fetch('/api/payments/index.php?action=verify-razorpay', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
