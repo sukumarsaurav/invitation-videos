@@ -56,18 +56,23 @@ try {
 
         // Add uploads to customization data (resolving full URLs)
         $uploads = Database::fetchAll(
-            "SELECT field_name, file_path FROM order_uploads WHERE order_id = ?",
+            "SELECT field_name, file_path, s3_url FROM order_uploads WHERE order_id = ?",
             [$order['id']]
         );
 
         foreach ($uploads as $upload) {
-            $webPath = $upload['file_path'];
-            // Normalize path if needed
-            if (!str_starts_with($webPath, 'http')) {
-                if (str_starts_with($webPath, '/uploads/')) {
-                    $webPath = 'https://' . $_SERVER['HTTP_HOST'] . $webPath;
-                } else if (preg_match('#/uploads/(.+)$#', $webPath, $matches)) {
-                    $webPath = 'https://' . $_SERVER['HTTP_HOST'] . '/uploads/' . $matches[1];
+            // Prefer S3 URL if available (faster for Lambda)
+            if (!empty($upload['s3_url'])) {
+                $webPath = $upload['s3_url'];
+            } else {
+                $webPath = $upload['file_path'];
+                // Normalize path if needed (fallback to local server)
+                if (!str_starts_with($webPath, 'http')) {
+                    if (str_starts_with($webPath, '/uploads/')) {
+                        $webPath = 'https://' . $_SERVER['HTTP_HOST'] . $webPath;
+                    } else if (preg_match('#/uploads/(.+)$#', $webPath, $matches)) {
+                        $webPath = 'https://' . $_SERVER['HTTP_HOST'] . '/uploads/' . $matches[1];
+                    }
                 }
             }
             $customization[$upload['field_name']] = $webPath;
