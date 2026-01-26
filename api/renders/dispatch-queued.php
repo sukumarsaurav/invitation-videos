@@ -112,62 +112,17 @@ if (empty($customizationData['music_url']) && !empty($order['default_music_url']
     $customizationData['music_url'] = $order['default_music_url'];
 }
 
-// Build render payload
-$payload = [
-    'order_id' => (int) $order['id'],
-    'order_number' => $order['order_number'],
-    'template_id' => $order['remotion_composition_id'],
-    'input_props' => $customizationData,
-    'template_settings' => [
-        'duration' => (int) ($order['duration_seconds'] ?? 30),
-        'fps' => (int) ($order['render_fps'] ?? 30),
-        'width' => (int) ($order['render_width'] ?? 1080),
-        'height' => (int) ($order['render_height'] ?? 1920),
-    ],
-    'callback_url' => 'https://invitationvideos.com/api/renders/receive-video.php',
-    'status_url' => 'https://invitationvideos.com/api/remotion/update-order.php',
-    'secret_key' => getenv('RENDERER_SECRET_KEY') ?: 'rmtn_render_secret_key'
-];
-
-// Update status to queued (in case it was stuck)
+// Update status to queued
 Database::query("UPDATE orders SET order_status = 'queued' WHERE id = ?", [$orderId]);
 
-// Dispatch to Cloud Run
-$ch = curl_init($cloudRunUrl . '/render');
-curl_setopt_array($ch, [
-    CURLOPT_POST => true,
-    CURLOPT_POSTFIELDS => json_encode($payload),
-    CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_TIMEOUT => 15,
-    CURLOPT_CONNECTTIMEOUT => 10
+// In the new AWS Lambda architecture, the Orchestrator polls for queued orders.
+// So setting status to 'queued' is sufficient to trigger the process on the next poll cycle.
+
+echo json_encode([
+    'success' => true,
+    'message' => 'Render job queued for AWS Lambda',
+    'order_id' => $orderId,
+    'order_number' => $order['order_number'],
+    'status' => 'queued'
 ]);
 
-$result = curl_exec($ch);
-$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-$curlError = curl_error($ch);
-curl_close($ch);
-
-if ($httpCode >= 200 && $httpCode < 300) {
-    error_log("dispatch-queued: Successfully dispatched render for order #{$orderId} (HTTP {$httpCode})");
-    echo json_encode([
-        'success' => true,
-        'message' => 'Render job dispatched successfully',
-        'order_id' => $orderId,
-        'order_number' => $order['order_number'],
-        'template' => $order['template_title'],
-        'composition_id' => $order['remotion_composition_id'],
-        'cloud_run_response' => json_decode($result, true)
-    ]);
-} else {
-    error_log("dispatch-queued: Failed to dispatch render for order #{$orderId} (HTTP {$httpCode}): {$result}");
-    http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'error' => 'Failed to dispatch to Cloud Run',
-        'http_code' => $httpCode,
-        'curl_error' => $curlError,
-        'response' => $result,
-        'cloud_run_url' => $cloudRunUrl . '/render'
-    ]);
-}

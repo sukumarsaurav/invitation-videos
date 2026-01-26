@@ -4,7 +4,7 @@
 # ============================================
 # 
 # "Budget Guard" Configuration:
-# - 2GB RAM, 1 CPU
+# - 4GB RAM, 2 CPU (minimum for reliable Remotion + Chrome)
 # - min-instances=0 (zero idle cost)
 # - max-instances=1 (impossible to have surprise bills)
 # - concurrency=1 (no competing renders)
@@ -75,8 +75,8 @@ gcloud run deploy "$SERVICE_NAME" \
     --image "$IMAGE_NAME" \
     --platform managed \
     --region "$REGION" \
-    --memory 2GiB \
-    --cpu 1 \
+    --memory 4Gi \
+    --cpu 2 \
     --concurrency 1 \
     --timeout 15m \
     --min-instances 0 \
@@ -99,8 +99,8 @@ echo "║   Service URL: $SERVICE_URL"
 echo "║                                                               ║"
 echo "║   Budget Guard Settings Applied:                              ║"
 echo "║   ├── Region: us-central1 (Free Tier ✓)                      ║"
-echo "║   ├── Memory: 2GiB (Safe for Remotion)                       ║"
-echo "║   ├── CPU: 1 (Free Tier friendly)                            ║"
+echo "║   ├── Memory: 4GiB (Reliable for Remotion+Chrome)            ║"
+echo "║   ├── CPU: 2 (Faster renders, still cost-effective)          ║"
 echo "║   ├── Concurrency: 1 (No competing renders)                  ║"
 echo "║   ├── Min instances: 0 (Zero idle cost)                      ║"
 echo "║   └── Max instances: 1 (No surprise bills!)                  ║"

@@ -35,7 +35,7 @@ if (!$orderId && !$orderNumber) {
 
 // Build query based on provided identifier
 if ($orderId) {
-    $order = Database::fetch("
+    $order = Database::fetchOne("
         SELECT 
             id,
             order_number,
@@ -48,7 +48,7 @@ if ($orderId) {
         WHERE id = ?
     ", [$orderId]);
 } else {
-    $order = Database::fetch("
+    $order = Database::fetchOne("
         SELECT 
             id,
             order_number,

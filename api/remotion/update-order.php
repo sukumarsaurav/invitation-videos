@@ -1,103 +1,107 @@
 <?php
 /**
- * Update Order Status from Remotion
+ * Update Order API
  * 
- * Updates order status during/after rendering.
- * 
- * POST /api/remotion/update-order.php
- * Headers: Authorization: Bearer <token>
- * Body: { "order_id": int, "status": string, "video_url"?: string }
+ * Called by: AWS Lambda Orchestrator
+ * Method: POST
+ * Body: { "order_id": 123, "status": "completed", "video_url": "..." }
  */
 
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
-
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    exit(0);
-}
-
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(['success' => false, 'error' => 'Method not allowed']);
-    exit;
-}
 
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/_auth_helper.php';
 
-$user = verifyRemotionToken();
-if (!$user) {
+// Verify authentication
+if (!verifyRemotionAuth()) {
     http_response_code(401);
     echo json_encode(['success' => false, 'error' => 'Unauthorized']);
     exit;
 }
 
+// Get input
 $input = json_decode(file_get_contents('php://input'), true);
-$orderId = intval($input['order_id'] ?? 0);
-$status = $input['status'] ?? '';
-$videoUrl = $input['video_url'] ?? null;
+$orderId = $input['order_id'] ?? null;
+$status = $input['status'] ?? null;
 
 if (!$orderId || !$status) {
     http_response_code(400);
-    echo json_encode(['success' => false, 'error' => 'order_id and status required']);
+    echo json_encode(['success' => false, 'error' => 'Missing required fields']);
     exit;
 }
 
-// Validate status
-$validStatuses = ['queued', 'processing', 'completed', 'failed'];
-if (!in_array($status, $validStatuses)) {
-    http_response_code(400);
-    echo json_encode(['success' => false, 'error' => 'Invalid status']);
-    exit;
-}
-
-// Build update query
-$updates = ['order_status = ?'];
-$params = [$status];
-
-if ($status === 'completed') {
-    $updates[] = 'completed_at = NOW()';
-
-    if ($videoUrl) {
-        $updates[] = 'output_video_url = ?';
-        $updates[] = 'video_uploaded_at = NOW()';
-        $updates[] = 'video_expires_at = DATE_ADD(NOW(), INTERVAL 7 DAY)';
-        $params[] = $videoUrl;
+try {
+    $order = Database::fetchOne("SELECT * FROM orders WHERE id = ?", [$orderId]);
+    if (!$order) {
+        http_response_code(404);
+        echo json_encode(['success' => false, 'error' => 'Order not found']);
+        exit;
     }
+
+    if ($status === 'processing') {
+        Database::query("UPDATE orders SET order_status = 'processing' WHERE id = ?", [$orderId]);
+    } elseif ($status === 'completed') {
+        $videoUrl = $input['video_url'] ?? null;
+        if (!$videoUrl) {
+            throw new Exception("Video URL required for completed status");
+        }
+
+        // Calculate expiry (7 days)
+        $expiresAt = date('Y-m-d H:i:s', strtotime('+7 days'));
+
+        Database::query("
+            UPDATE orders 
+            SET order_status = 'completed',
+                output_video_url = ?,
+                video_uploaded_at = NOW(),
+                video_expires_at = ?,
+                completed_at = NOW()
+            WHERE id = ?
+        ", [$videoUrl, $expiresAt, $orderId]);
+
+        // Send email
+        sendCompletionEmail($orderId, $videoUrl);
+    } elseif ($status === 'failed') {
+        $error = $input['error'] ?? 'Unknown error';
+        error_log("Render failed for order #{$order['order_number']}: $error");
+
+        // Mark as failed but maybe don't expose full error to user yet?
+        // Or keep as processing/queued to retry?
+        // For now, mark as failed so admin can intervene.
+        Database::query("UPDATE orders SET order_status = 'failed' WHERE id = ?", [$orderId]);
+    }
+
+    echo json_encode(['success' => true]);
+
+} catch (Exception $e) {
+    http_response_code(500);
+    error_log("Update order failed: " . $e->getMessage());
+    echo json_encode(['success' => false, 'error' => $e->getMessage()]);
 }
 
-if ($status === 'processing') {
-    // Mark processing start time in notes
-    $updates[] = "notes = CONCAT(COALESCE(notes, ''), '\n[Render started: ', NOW(), ']')";
-}
-
-$params[] = $orderId;
-
-Database::query(
-    "UPDATE orders SET " . implode(', ', $updates) . " WHERE id = ?",
-    $params
-);
-
-// If completed with video, send notification email
-if ($status === 'completed' && $videoUrl) {
+/**
+ * Send completion email
+ */
+function sendCompletionEmail($orderId, $videoUrl)
+{
     try {
         require_once __DIR__ . '/../../src/Services/EmailService.php';
 
-        $order = Database::fetchOne("SELECT * FROM orders WHERE id = ?", [$orderId]);
-        $userData = Database::fetchOne("SELECT * FROM users WHERE id = ?", [$order['user_id']]);
+        $orderDetails = Database::fetchOne("
+            SELECT o.*, t.title as template_title, u.email, u.name
+            FROM orders o
+            JOIN templates t ON o.template_id = t.id
+            JOIN users u ON o.user_id = u.id
+            WHERE o.id = ?
+        ", [$orderId]);
 
-        if ($order && $userData) {
-            $order['output_video_url'] = $videoUrl;
-            \InvitationVideos\Services\EmailService::sendOrderCompletedEmail($order, $userData);
+        if ($orderDetails) {
+            $user = ['email' => $orderDetails['email'], 'name' => $orderDetails['name']];
+            $order = array_merge($orderDetails, ['output_video_url' => $videoUrl]);
+
+            \InvitationVideos\Services\EmailService::sendOrderCompletedEmail($order, $user);
         }
     } catch (Exception $e) {
-        error_log("Failed to send completion email for order #$orderId: " . $e->getMessage());
+        error_log("Failed to send email: " . $e->getMessage());
     }
 }
-
-echo json_encode([
-    'success' => true,
-    'message' => "Order #{$orderId} updated to {$status}",
-]);
