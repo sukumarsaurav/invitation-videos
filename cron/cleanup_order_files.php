@@ -4,7 +4,7 @@
  * Cleanup Order Files Cron Job
  * 
  * Deletes order files 7 days after first download.
- * Also cleans up expired draft directories.
+ * Also cleans up expired draft directories and S3 order folders.
  * 
  * Cron schedule (daily at 3 AM):
  * 0 3 * * * /usr/bin/php /home/u277468165/domains/invitationvideos.com/public_html/cron/cleanup_order_files.php
@@ -21,6 +21,9 @@ if (php_sapi_name() !== 'cli' && !defined('CRON_ALLOWED')) {
 
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../src/Services/S3UploadService.php';
+
+use InvitationVideos\Services\S3UploadService;
 
 echo "=== Order Files Cleanup - " . date('Y-m-d H:i:s') . " ===\n\n";
 
@@ -28,13 +31,14 @@ $startTime = microtime(true);
 $stats = [
     'orders_cleaned' => 0,
     'drafts_cleaned' => 0,
+    's3_cleaned' => 0,
     'files_deleted' => 0,
     'bytes_freed' => 0,
     'errors' => 0,
 ];
 
 // ============================================
-// 1. Clean up expired order files
+// 1. Clean up expired order files (local + S3)
 // ============================================
 echo "Checking for expired order files...\n";
 
@@ -53,6 +57,7 @@ foreach ($expiredOrders as $order) {
 
     echo "  - Order {$order['order_number']}: ";
 
+    // Delete local files
     if (is_dir($dir)) {
         // Get size before deletion
         $size = getDirectorySize($dir);
@@ -61,15 +66,26 @@ foreach ($expiredOrders as $order) {
         if (deleteDirectoryRecursive($dir)) {
             $stats['orders_cleaned']++;
             $stats['bytes_freed'] += $size;
-            echo "deleted (freed " . formatBytes($size) . ")\n";
+            echo "local deleted (freed " . formatBytes($size) . ")";
         } else {
             $stats['errors']++;
-            echo "FAILED to delete\n";
+            echo "FAILED to delete local";
             error_log("Cleanup: Failed to delete order directory: {$dir}");
         }
     } else {
-        echo "directory not found, marking as cleaned\n";
+        echo "local not found";
     }
+
+    // Delete S3 files for this order
+    if (S3UploadService::isConfigured()) {
+        if (S3UploadService::deleteOrderFolder($order['order_number'])) {
+            $stats['s3_cleaned']++;
+            echo ", S3 deleted";
+        } else {
+            echo ", S3 failed";
+        }
+    }
+    echo "\n";
 
     // Mark as cleaned in database
     Database::query(

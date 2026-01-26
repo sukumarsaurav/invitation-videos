@@ -1,0 +1,70 @@
+{
+    "version": "1.0",
+    "lastUpdated": "2026-01-26",
+    "compositions": [
+        {
+            "id": "FirstTemplate",
+            "name": "Simple Invitation",
+            "description": "Elegant animated invitation with golden text on cinematic video background",
+            "category": "General",
+            "duration": 10,
+            "fps": 30,
+            "width": 1080,
+            "height": 1920,
+            "aspectRatio": "9:16",
+            "requiredFields": [
+                "title",
+                "eventName",
+                "eventDate"
+            ],
+            "optionalFields": [
+                "subtitle",
+                "eventTime",
+                "eventVenue",
+                "primaryColor",
+                "secondaryColor",
+                "backgroundVideoUrl"
+            ]
+        },
+        {
+            "id": "CaricatureTemplate",
+            "name": "AI Caricature Wedding",
+            "description": "Wedding invitation with AI-generated couple caricature",
+            "category": "Wedding",
+            "duration": 10,
+            "fps": 30,
+            "width": 1080,
+            "height": 1920,
+            "aspectRatio": "9:16",
+            "requiredFields": [
+                "groomName",
+                "brideName",
+                "eventDate",
+                "caricatureImageUrl"
+            ],
+            "optionalFields": [
+                "backgroundVideoUrl",
+                "caricaturePosition"
+            ]
+        },
+        {
+            "id": "BaseVideoTemplate",
+            "name": "Custom Video Template",
+            "description": "Flexible template with customizable text and image overlays",
+            "category": "General",
+            "duration": 10,
+            "fps": 30,
+            "width": 1080,
+            "height": 1920,
+            "aspectRatio": "9:16",
+            "requiredFields": [
+                "backgroundVideoUrl"
+            ],
+            "optionalFields": [
+                "textFields",
+                "imageOverlays",
+                "musicUrl"
+            ]
+        }
+    ]
+}

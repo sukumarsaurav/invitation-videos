@@ -141,6 +141,7 @@ try {
 function handlePaymentCaptured(array $payment): void
 {
     require_once __DIR__ . '/../../src/Services/DraftOrderService.php';
+    require_once __DIR__ . '/../../src/Services/S3UploadService.php';
 
     $razorpayOrderId = $payment['order_id'] ?? null;
     $razorpayPaymentId = $payment['id'] ?? null;
@@ -215,10 +216,13 @@ function handlePaymentCaptured(array $payment): void
 
         error_log("Razorpay Webhook: Order #{$order['id']} marked as paid");
 
+        // Sync order uploads to S3 for fast Lambda access
+        syncOrderUploadsToS3($order['id']);
+
         // Queue AI caricature generation if dress was selected
         queueAiGenerationIfNeeded($order['id']);
 
-        // Dispatch render job to Cloud Run
+        // Queue render job for AWS Lambda (orchestrator polls for queued orders)
         dispatchRenderJob($order['id']);
 
         // Send payment confirmation email
@@ -471,31 +475,21 @@ function handleDisputeLost(array $dispute): void
 }
 
 /**
- * Dispatch render job to Cloud Run
+ * Queue render job for AWS Lambda
+ * 
+ * In the AWS Lambda architecture, the orchestrator polls for orders with order_status='queued'.
+ * Setting the status to 'queued' is sufficient - the orchestrator picks it up automatically.
  */
 function dispatchRenderJob(int $orderId): void
 {
     try {
-        // Get Cloud Run URL from environment
-        $cloudRunUrl = getenv('CLOUD_RUN_URL');
-        if (empty($cloudRunUrl)) {
-            error_log("dispatchRenderJob: CLOUD_RUN_URL not configured, skipping render dispatch for order #{$orderId}");
-            return;
-        }
-
         // Fetch order with template info
         $order = Database::fetchOne("
             SELECT 
                 o.id,
                 o.order_number,
-                o.template_id,
-                o.customization_data,
-                t.remotion_composition_id,
-                t.default_music_url,
-                t.duration_seconds,
-                t.render_fps,
-                t.render_width,
-                t.render_height
+                o.order_status,
+                t.remotion_composition_id
             FROM orders o
             JOIN templates t ON o.template_id = t.id
             WHERE o.id = ?
@@ -511,72 +505,45 @@ function dispatchRenderJob(int $orderId): void
             return;
         }
 
-        // Get uploaded files
-        $uploads = Database::fetchAll(
-            "SELECT field_name, file_path FROM order_uploads WHERE order_id = ?",
-            [$orderId]
-        );
-
-        // Build customization data with asset URLs
-        $customizationData = json_decode($order['customization_data'] ?? '{}', true) ?: [];
-
-        foreach ($uploads as $upload) {
-            $filePath = $upload['file_path'];
-            // Extract web path from full path
-            if (preg_match('#/uploads/(.+)$#', $filePath, $matches)) {
-                $webPath = '/uploads/' . $matches[1];
-            } elseif (strpos($filePath, 'orders/') !== false) {
-                $webPath = '/uploads/' . substr($filePath, strpos($filePath, 'orders/'));
-            } else {
-                $webPath = '/uploads/' . basename($filePath);
-            }
-            $customizationData[$upload['field_name']] = 'https://invitationvideos.com' . $webPath;
+        // Ensure order status is 'queued' for AWS Lambda orchestrator to pick up
+        if ($order['order_status'] !== 'queued') {
+            Database::query(
+                "UPDATE orders SET order_status = 'queued' WHERE id = ?",
+                [$orderId]
+            );
         }
 
-        // Add default music if needed
-        if (empty($customizationData['music_url']) && !empty($order['default_music_url'])) {
-            $customizationData['music_url'] = $order['default_music_url'];
+        error_log("dispatchRenderJob: Order #{$orderId} queued for AWS Lambda rendering");
+
+    } catch (Exception $e) {
+        error_log("dispatchRenderJob: Error queuing render for order #{$orderId}: " . $e->getMessage());
+    }
+}
+
+/**
+ * Sync order uploads to S3 for fast Lambda access
+ * 
+ * Called after payment is confirmed to copy user-uploaded files to S3.
+ * Files are stored in order-specific folders and cleaned up after expiry.
+ */
+function syncOrderUploadsToS3(int $orderId): void
+{
+    try {
+        // Check if S3 is configured
+        if (!\InvitationVideos\Services\S3UploadService::isConfigured()) {
+            error_log("syncOrderUploadsToS3: S3 not configured, skipping sync for order #{$orderId}");
+            return;
         }
 
-        // Build render payload
-        $payload = [
-            'order_id' => (int) $order['id'],
-            'order_number' => $order['order_number'],
-            'template_id' => $order['remotion_composition_id'],
-            'input_props' => $customizationData,
-            'template_settings' => [
-                'duration' => (int) ($order['duration_seconds'] ?? 30),
-                'fps' => (int) ($order['render_fps'] ?? 30),
-                'width' => (int) ($order['render_width'] ?? 1080),
-                'height' => (int) ($order['render_height'] ?? 1920),
-            ],
-            'callback_url' => 'https://invitationvideos.com/api/renders/receive-video.php',
-            'status_url' => 'https://invitationvideos.com/api/remotion/update-order.php',
-            'secret_key' => getenv('RENDERER_SECRET_KEY') ?: 'rmtn_render_secret_key'
-        ];
+        $result = \InvitationVideos\Services\S3UploadService::syncOrderUploadsToS3($orderId);
 
-        // Dispatch to Cloud Run
-        $ch = curl_init($cloudRunUrl . '/render');
-        curl_setopt_array($ch, [
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => json_encode($payload),
-            CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => 10,
-            CURLOPT_CONNECTTIMEOUT => 5
-        ]);
-
-        $result = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        if ($httpCode >= 200 && $httpCode < 300) {
-            error_log("dispatchRenderJob: Successfully dispatched render for order #{$orderId} (HTTP {$httpCode})");
+        if ($result['success']) {
+            error_log("syncOrderUploadsToS3: Order #{$orderId} - Synced {$result['uploaded']} files to S3");
         } else {
-            error_log("dispatchRenderJob: Failed to dispatch render for order #{$orderId} (HTTP {$httpCode}): {$result}");
+            error_log("syncOrderUploadsToS3: Order #{$orderId} - Failed: {$result['uploaded']} synced, {$result['failed']} failed");
         }
 
     } catch (Exception $e) {
-        error_log("dispatchRenderJob: Error dispatching render for order #{$orderId}: " . $e->getMessage());
+        error_log("syncOrderUploadsToS3: Error syncing order #{$orderId}: " . $e->getMessage());
     }
 }

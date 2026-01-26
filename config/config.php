@@ -144,6 +144,16 @@ define('SOCIAL_YOUTUBE', env('SOCIAL_YOUTUBE', '#'));
 define('SOCIAL_LINKEDIN', env('SOCIAL_LINKEDIN', '#'));
 
 // =============================================================================
+// AWS S3 Configuration (for user uploads after payment)
+// =============================================================================
+
+define('AWS_ACCESS_KEY_ID', env('AWS_ACCESS_KEY_ID', ''));
+define('AWS_SECRET_ACCESS_KEY', env('AWS_SECRET_ACCESS_KEY', ''));
+define('AWS_DEFAULT_REGION', env('AWS_DEFAULT_REGION', 'us-east-1'));
+define('S3_USER_UPLOADS_BUCKET', env('S3_USER_UPLOADS_BUCKET', 'invitation-video-user-uploads'));
+define('S3_UPLOADS_EXPIRY_DAYS', (int) env('S3_UPLOADS_EXPIRY_DAYS', 7));
+
+// =============================================================================
 // Error Handling
 // =============================================================================
 

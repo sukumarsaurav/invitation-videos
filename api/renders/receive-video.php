@@ -1,8 +1,8 @@
 <?php
 /**
- * Receive Video from Cloud Run - Boomerang Webhook
+ * Receive Video from AWS Lambda Remotion Renderer
  * 
- * Cloud Run POSTs the rendered video back to this endpoint.
+ * The AWS Lambda orchestrator POSTs the rendered video back to this endpoint.
  * This script:
  * 1. Verifies the secret key
  * 2. Saves the video to /downloads/

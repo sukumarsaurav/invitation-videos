@@ -112,5 +112,5 @@ try {
 } catch (Exception $e) {
     http_response_code(500);
     error_log("Failed to fetch pending orders: " . $e->getMessage());
-    echo json_encode(['success' => false, 'error' => 'Database error']);
+    echo json_encode(['success' => false, 'error' => 'Database error: ' . $e->getMessage()]);
 }

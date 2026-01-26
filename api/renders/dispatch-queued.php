@@ -74,14 +74,6 @@ if (empty($order['remotion_composition_id'])) {
     exit;
 }
 
-// Get Cloud Run URL
-$cloudRunUrl = getenv('CLOUD_RUN_URL');
-if (empty($cloudRunUrl)) {
-    http_response_code(500);
-    echo json_encode(['success' => false, 'error' => 'CLOUD_RUN_URL not configured']);
-    exit;
-}
-
 // Get uploaded files
 $uploads = Database::fetchAll(
     "SELECT field_name, file_path FROM order_uploads WHERE order_id = ?",
