@@ -27,6 +27,9 @@ unset($_SESSION['errors'], $_SESSION['old']);
 $redirectParam = !empty($_GET['redirect']) ? '?redirect=' . urlencode($_GET['redirect']) : '';
 
 $pageTitle = 'Create Account';
+
+// Disable bottom tabs on auth pages
+$showMobileBottomTabs = false;
 ?>
 
 <?php ob_start(); ?>
@@ -88,8 +91,7 @@ $pageTitle = 'Create Account';
                 </div>
 
                 <div>
-                    <label for="confirm_password"
-                        class="block text-sm font-medium text-slate-700 mb-2">
+                    <label for="confirm_password" class="block text-sm font-medium text-slate-700 mb-2">
                         Confirm Password
                     </label>
                     <input type="password" id="confirm_password" name="confirm_password" required

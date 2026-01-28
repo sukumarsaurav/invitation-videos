@@ -6,6 +6,9 @@ require_once __DIR__ . '/../../src/Core/ImageHelper.php';
 // Flag to hide footer on mobile (for sticky bottom bar)
 $hideFooterOnMobile = true;
 
+// Disable global bottom tabs (gallery has Sort/Filter bar)
+$showMobileBottomTabs = false;
+
 // Flag for gallery page - enables special mobile header
 $isGalleryPage = true;
 $currentCategory = $_GET['category'] ?? null;

@@ -30,6 +30,9 @@ $pageTitle = 'Login';
 // Mobile header configuration
 $showBackButton = true;
 $mobilePageTitle = 'Login';
+
+// Disable bottom tabs on auth pages
+$showMobileBottomTabs = false;
 ?>
 
 <?php ob_start(); ?>

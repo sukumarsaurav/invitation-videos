@@ -12,6 +12,9 @@ require_once __DIR__ . '/../../src/Services/DraftOrderService.php';
 
 use InvitationVideos\Services\DraftOrderService;
 
+// Disable bottom tabs on checkout - keep focus on payment
+$showMobileBottomTabs = false;
+
 // Determine if we're working with a draft token or legacy order_id
 $identifier = $_GET['order_id'] ?? '';
 $isDraft = false;
@@ -289,8 +292,7 @@ $pageTitle = 'Checkout - ' . $order['order_number'];
                 <?php if ($hasCustomizationFields): ?>
                     <!-- Step 1: Event Details -->
                     <?php if (!empty($fieldsByStep[1])): ?>
-                        <section data-step="1"
-                            class="checkout-step bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+                        <section data-step="1" class="checkout-step bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
                             <div class="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
                                 <span class="material-symbols-outlined text-primary text-2xl">event</span>
                                 <h2 class="text-xl font-bold tracking-tight">Event Details</h2>
@@ -414,8 +416,7 @@ $pageTitle = 'Checkout - ' . $order['order_number'];
                             </div>
                         <?php else: ?>
                             <!-- Stripe for Global -->
-                            <div id="card-element"
-                                class="p-4 rounded-lg border border-slate-200 bg-slate-50">
+                            <div id="card-element" class="p-4 rounded-lg border border-slate-200 bg-slate-50">
                                 <!-- Stripe Elements will mount here -->
                             </div>
                             <div id="card-errors" class="text-red-500 text-sm mt-2"></div>
@@ -438,8 +439,7 @@ $pageTitle = 'Checkout - ' . $order['order_number'];
         <!-- Order Summary -->
         <div class="lg:col-span-5">
             <div class="lg:sticky lg:top-24 flex flex-col gap-6">
-                <div
-                    class="bg-white rounded-xl border border-slate-200 p-6 shadow-lg">
+                <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-lg">
                     <h3 class="text-lg font-bold mb-4">Order Summary</h3>
 
                     <div class="flex gap-4 mb-6">
@@ -484,8 +484,7 @@ $pageTitle = 'Checkout - ' . $order['order_number'];
                             <span id="discount-amount">-<?= $order['currency'] === 'INR' ? '₹' : '$' ?>0.00</span>
                         </div>
                         <hr class="border-slate-100 border-dashed">
-                        <div
-                            class="flex justify-between items-center text-lg font-bold text-slate-900 pt-2">
+                        <div class="flex justify-between items-center text-lg font-bold text-slate-900 pt-2">
                             <span>Total</span>
                             <span
                                 id="total-amount"><?= $order['currency'] === 'INR' ? '₹' : '$' ?><?= number_format($order['amount'], 2) ?></span>

@@ -902,13 +902,14 @@ $footerHoverColor = '#fdf7f3';
     </div>
 
     <!-- Main Content -->
-    <main class="flex-1">
+    <main
+        class="flex-1 <?= ($showMobileBottomTabs ?? true) && !($hideFooterOnMobile ?? false) ? 'pb-16 sm:pb-0' : '' ?>">
         <?= $content ?? '' ?>
     </main>
     <!-- Floating Help Button - Only on landing page -->
     <?php if (($isHomePage ?? false)): ?>
         <a href="/support"
-            class="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 flex items-center justify-center w-12 h-12 sm:w-auto sm:h-auto sm:px-4 sm:py-3 font-bold rounded-full shadow-xl hover:scale-105 transition-all group"
+            class="fixed bottom-24 right-4 sm:bottom-6 sm:right-6 z-40 flex items-center justify-center w-12 h-12 sm:w-auto sm:h-auto sm:px-4 sm:py-3 font-bold rounded-full shadow-xl hover:scale-105 transition-all group"
             style="background-color: var(--footer-text-color, #1e293b); color: var(--footer-bg-color, #ffffff);"
             title="Need help?">
             <span class="material-symbols-outlined text-xl">support_agent</span>
@@ -1223,7 +1224,8 @@ $footerHoverColor = '#fdf7f3';
     <!-- Template Carousel Script -->
     <script src="/assets/js/section-carousel.js" defer></script>
 
-
+    <!-- Mobile Bottom Tab Navigation -->
+    <?php include __DIR__ . '/../components/mobile-bottom-tabs.php'; ?>
 
 </body>
 

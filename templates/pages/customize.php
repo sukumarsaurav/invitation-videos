@@ -16,6 +16,9 @@ require_once __DIR__ . '/../../src/Services/DressDesignService.php';
 
 use InvitationVideos\Services\DressDesignService;
 
+// Disable bottom tabs - customize page has its own contextual bottom bar
+$showMobileBottomTabs = false;
+
 // Support both slug and ID for template lookup
 $templateSlug = $_GET['template_slug'] ?? null;
 $templateId = intval($_GET['template_id'] ?? 0);
@@ -673,8 +676,8 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
             <div class="flex items-center justify-between gap-4 max-w-7xl mx-auto">
                 <div class="flex-1">
                     <p class="text-xs text-slate-500">Starting at</p>
-                    <p class="text-lg font-black text-slate-900 template-price"
-                        data-usd="<?= $template['price_usd'] ?>" data-inr="<?= $template['price_inr'] ?? 0 ?>">
+                    <p class="text-lg font-black text-slate-900 template-price" data-usd="<?= $template['price_usd'] ?>"
+                        data-inr="<?= $template['price_inr'] ?? 0 ?>">
                         ₹<?= number_format($template['price_inr'] ?? 0, 0) ?>
                     </p>
                 </div>
@@ -756,8 +759,7 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                                     </div>
                                     <!-- Connecting Line -->
                                     <?php if ($idx < count($availableSteps) - 1): ?>
-                                        <div
-                                            class="flex-1 h-0.5 mx-2 <?= $s < $step ? 'bg-green-500' : 'bg-slate-200' ?>">
+                                        <div class="flex-1 h-0.5 mx-2 <?= $s < $step ? 'bg-green-500' : 'bg-slate-200' ?>">
                                         </div>
                                     <?php endif; ?>
                                 </div>

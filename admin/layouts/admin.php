@@ -18,91 +18,8 @@ require_once __DIR__ . '/../auth.php';
     <!-- Material Symbols - Self-hosted -->
     <link rel="preload" href="/assets/fonts/material-symbols-outlined.woff2" as="font" type="font/woff2" crossorigin>
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#7f13ec",
-                        "background-light": "#f7f6f8",
-                        "background-dark": "#191022",
-                        "surface-light": "#ffffff",
-                        "surface-dark": "#251b30",
-                    },
-                    fontFamily: {
-                        "display": ["Plus Jakarta Sans", "sans-serif"],
-                    },
-                },
-            },
-        }
-    </script>
-
-    <style>
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-
-        /* Material Symbols Outlined - Self-hosted variable font */
-        @font-face {
-            font-family: 'Material Symbols Outlined';
-            font-style: normal;
-            font-weight: 400;
-            font-display: swap;
-            src: url('/assets/fonts/material-symbols-outlined.woff2') format('woff2');
-        }
-
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-
-        .icon-filled {
-            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background-color: #cbd5e1;
-            border-radius: 20px;
-        }
-
-        /* Mobile sidebar transitions */
-        #sidebar {
-            transition: transform 0.3s ease-in-out;
-        }
-
-        #sidebar.closed {
-            transform: translateX(-100%);
-        }
-
-        #overlay {
-            transition: opacity 0.3s ease-in-out;
-        }
-
-        #overlay.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        @media (min-width: 1024px) {
-            #sidebar {
-                transform: translateX(0) !important;
-            }
-
-            #overlay {
-                display: none !important;
-            }
-        }
-    </style>
+    <!-- Compiled Tailwind CSS -->
+    <link rel="stylesheet" href="/assets/css/app.css">
 </head>
 
 <body class="bg-background-light text-slate-900 overflow-hidden">
@@ -309,7 +226,7 @@ require_once __DIR__ . '/../auth.php';
                     toggleSidebar();
                 }
             });
-    });
+        });
     </script>
 
 </body>

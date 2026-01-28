@@ -5,8 +5,8 @@ module.exports = {
         "./admin/**/*.php",
         "./index.php"
     ],
-    // Dark mode disabled - site uses light mode only
-    darkMode: false,
+    // Dark mode enabled for admin panel (uses .dark class)
+    darkMode: "class",
     theme: {
         extend: {
             colors: {
@@ -17,6 +17,7 @@ module.exports = {
                 "text-secondary": "#404040",    // Body text and descriptions
                 // Background Colors
                 "background-light": "#fdf7f3",  // Light mode background
+                "background-dark": "#191022",   // Dark mode background (admin)
                 // Header Colors
                 "header-bg": "#2c0914",         // Header background
                 "header-text": "#b69b5b",       // Header links and text
@@ -27,6 +28,7 @@ module.exports = {
                 "footer-hover": "#fdf7f3",      // Footer link hover state
                 // Surface colors
                 "surface-light": "#ffffff",
+                "surface-dark": "#251b30",      // Dark mode surface (admin)
             },
             fontFamily: {
                 "display": ["Plus Jakarta Sans", "sans-serif"],
