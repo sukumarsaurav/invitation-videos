@@ -54,6 +54,11 @@ class RazorpayService
     public function verifyPayment(string $paymentId, string $orderId, string $signature): bool
     {
         try {
+            error_log("[RazorpayService] verifyPayment called with:");
+            error_log("[RazorpayService] - paymentId: " . $paymentId);
+            error_log("[RazorpayService] - orderId: " . $orderId);
+            error_log("[RazorpayService] - signature: " . substr($signature, 0, 20) . "...");
+
             $attributes = [
                 'razorpay_order_id' => $orderId,
                 'razorpay_payment_id' => $paymentId,
@@ -61,10 +66,12 @@ class RazorpayService
             ];
 
             $this->api->utility->verifyPaymentSignature($attributes);
+            error_log("[RazorpayService] Signature verification SUCCESS");
             return true;
 
         } catch (\Exception $e) {
-            error_log("Razorpay Verify Error: " . $e->getMessage());
+            error_log("[RazorpayService] Signature verification FAILED: " . $e->getMessage());
+            error_log("[RazorpayService] Exception class: " . get_class($e));
             return false;
         }
     }
