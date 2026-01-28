@@ -168,34 +168,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // IMPORTANT: Handle file uploads IMMEDIATELY at each step, not just final step
-        // Files are stored in organized draft directory and paths saved in session
+        // Files are uploaded directly to S3 and paths saved in session
         if (!isset($_SESSION['customize_uploads'])) {
             $_SESSION['customize_uploads'] = [];
-        }
-
-        // Create/get organized draft directory for this session
-        if (!isset($_SESSION['customize_draft_dir'])) {
-            $draftDirName = bin2hex(random_bytes(8)); // 16-char unique name
-            $_SESSION['customize_draft_dir'] = 'drafts/' . $draftDirName . '/';
-        }
-        $draftDir = UPLOAD_PATH . $_SESSION['customize_draft_dir'];
-
-        // Ensure directory exists (create if not)
-        if (!is_dir($draftDir)) {
-            if (!mkdir($draftDir, 0755, true)) {
-                error_log("customize.php: FAILED to create draft directory: " . $draftDir);
-                error_log("customize.php: UPLOAD_PATH is: " . UPLOAD_PATH);
-            } else {
-                error_log("customize.php: Created draft directory: " . $draftDir);
-            }
         }
 
         // DEBUG: Log all received files
         error_log("customize.php: POST received. Step={$step}, FILES count=" . count($_FILES));
         error_log("customize.php: FILES keys: " . implode(', ', array_keys($_FILES)));
-        error_log("customize.php: Using draft dir: " . $draftDir);
-        error_log("customize.php: Draft dir exists: " . (is_dir($draftDir) ? 'YES' : 'NO'));
-        error_log("customize.php: Draft dir writable: " . (is_writable($draftDir) ? 'YES' : 'NO'));
+
+        // Upload files directly to S3 (not local storage)
+        require_once __DIR__ . '/../../src/Services/S3UploadService.php';
 
         foreach ($_FILES as $fieldName => $file) {
             error_log("customize.php: Processing file '{$fieldName}': name={$file['name']}, type={$file['type']}, size={$file['size']}, error={$file['error']}, tmp_name={$file['tmp_name']}");
@@ -207,30 +190,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     continue;
                 }
 
+                // Generate a draft folder name if not existing
+                if (!isset($_SESSION['customize_draft_token'])) {
+                    $_SESSION['customize_draft_token'] = bin2hex(random_bytes(8));
+                }
+                $draftToken = $_SESSION['customize_draft_token'];
+
+                // Upload directly to S3 under drafts/{draft_token}/
                 $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-                $storedFilename = uniqid() . '_' . $fieldName . '.' . $extension;
+                $s3Key = "drafts/{$draftToken}/" . uniqid() . "_{$fieldName}.{$extension}";
 
-                // Full path for actual file storage
-                $fullPath = $draftDir . $storedFilename;
+                try {
+                    $s3Client = new \Aws\S3\S3Client([
+                        'version' => 'latest',
+                        'region' => AWS_DEFAULT_REGION,
+                        'credentials' => [
+                            'key' => AWS_ACCESS_KEY_ID,
+                            'secret' => AWS_SECRET_ACCESS_KEY,
+                        ],
+                    ]);
 
-                // Web-relative path for database storage (standardized format)
-                $webPath = '/uploads/' . $_SESSION['customize_draft_dir'] . $storedFilename;
+                    $result = $s3Client->putObject([
+                        'Bucket' => S3_USER_UPLOADS_BUCKET,
+                        'Key' => $s3Key,
+                        'SourceFile' => $file['tmp_name'],
+                        'ContentType' => $file['type'],
+                    ]);
 
-                error_log("customize.php: Attempting to move '{$file['tmp_name']}' to '{$fullPath}'");
+                    $s3Url = $result['ObjectURL'];
 
-                if (move_uploaded_file($file['tmp_name'], $fullPath)) {
-                    // Store file info with WEB-RELATIVE path (standardized)
+                    // Store file info with S3 URL
                     $_SESSION['customize_uploads'][$fieldName] = [
-                        'stored_filename' => $storedFilename,
-                        'file_path' => $webPath,  // Web-relative, not absolute
+                        's3_url' => $s3Url,
+                        's3_key' => $s3Key,
+                        's3_bucket' => S3_USER_UPLOADS_BUCKET,
+                        'file_path' => $s3Url, // Use S3 URL as file_path
                         'original_filename' => $file['name'],
                         'mime_type' => $file['type'],
                         'file_size' => $file['size']
                     ];
-                    error_log("customize.php: SUCCESS - Saved upload for field '{$fieldName}' with web path {$webPath}");
-                } else {
-                    error_log("customize.php: FAILED - Could not move uploaded file for field '{$fieldName}'");
-                    error_log("customize.php: Last PHP error: " . print_r(error_get_last(), true));
+                    error_log("customize.php: SUCCESS - Uploaded to S3: {$s3Url}");
+
+                } catch (\Exception $e) {
+                    error_log("customize.php: S3 upload FAILED for '{$fieldName}': " . $e->getMessage());
                 }
             } else {
                 if (empty($file['tmp_name'])) {
