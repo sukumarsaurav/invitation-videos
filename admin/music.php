@@ -62,7 +62,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['music_file']) && $_F
                     'Key' => $filename,
                     'SourceFile' => $file['tmp_name'],
                     'ContentType' => $file['type'],
-                    'ACL' => 'public-read',
                 ]);
 
                 $_POST['s3_url'] = $result['ObjectURL'];
@@ -333,7 +332,7 @@ $pageTitle = $action === 'new' ? 'Add Music' : ($action === 'edit' ? 'Edit Music
                 </div>
             <?php endif; ?>
             <input type="file" name="music_file" accept=".mp3,.wav,.ogg,audio/*" <?= $action === 'new' ? 'required' : '' ?>
-            class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-primary
+                class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-primary
         focus:border-primary transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary
         file:text-white file:font-medium file:cursor-pointer">
             <p class="mt-1 text-xs text-slate-500">Accepted formats: MP3, WAV, OGG. Max size: 20MB</p>
