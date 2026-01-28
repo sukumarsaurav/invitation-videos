@@ -41,10 +41,21 @@ try {
     if ($status === 'processing') {
         Database::query("UPDATE orders SET order_status = 'processing' WHERE id = ?", [$orderId]);
     } elseif ($status === 'completed') {
-        $videoUrl = $input['video_url'] ?? null;
-        if (!$videoUrl) {
+        $s3VideoUrl = $input['video_url'] ?? null;
+        if (!$s3VideoUrl) {
             throw new Exception("Video URL required for completed status");
         }
+
+        // Download from S3 and save to Hostinger
+        $orderNumber = $order['order_number'];
+        $localVideoPath = downloadAndSaveVideo($s3VideoUrl, $orderNumber);
+
+        if (!$localVideoPath) {
+            throw new Exception("Failed to download and save video from S3");
+        }
+
+        // Generate Hostinger URL
+        $hostingerUrl = APP_URL . '/uploads/orders/' . $orderNumber . '/video.mp4';
 
         // Calculate expiry (7 days)
         $expiresAt = date('Y-m-d H:i:s', strtotime('+7 days'));
@@ -57,10 +68,12 @@ try {
                 video_expires_at = ?,
                 completed_at = NOW()
             WHERE id = ?
-        ", [$videoUrl, $expiresAt, $orderId]);
+        ", [$hostingerUrl, $expiresAt, $orderId]);
 
-        // Send email
-        sendCompletionEmail($orderId, $videoUrl);
+        error_log("[Update Order] Video saved to Hostinger: $hostingerUrl (S3 source: $s3VideoUrl)");
+
+        // Send email with Hostinger URL
+        sendCompletionEmail($orderId, $hostingerUrl);
     } elseif ($status === 'failed') {
         $error = $input['error'] ?? 'Unknown error';
         error_log("Render failed for order #{$order['order_number']}: $error");
@@ -110,5 +123,76 @@ function sendCompletionEmail($orderId, $videoUrl)
         }
     } catch (Exception $e) {
         error_log("[sendCompletionEmail] Exception: " . $e->getMessage());
+    }
+}
+
+/**
+ * Download video from S3 and save to Hostinger
+ * 
+ * @param string $s3Url The S3 URL of the rendered video
+ * @param string $orderNumber The order number (e.g., ORD-ABC123)
+ * @return string|false Local path on success, false on failure
+ */
+function downloadAndSaveVideo($s3Url, $orderNumber)
+{
+    try {
+        // Create directory: uploads/orders/{order_number}/
+        $uploadDir = __DIR__ . '/../../uploads/orders/' . $orderNumber;
+
+        if (!is_dir($uploadDir)) {
+            if (!mkdir($uploadDir, 0755, true)) {
+                error_log("[downloadAndSaveVideo] Failed to create directory: $uploadDir");
+                return false;
+            }
+        }
+
+        $videoPath = $uploadDir . '/video.mp4';
+
+        error_log("[downloadAndSaveVideo] Downloading from S3: $s3Url");
+
+        // Download video from S3 using cURL for better error handling
+        $ch = curl_init($s3Url);
+        $fp = fopen($videoPath, 'wb');
+
+        if (!$fp) {
+            error_log("[downloadAndSaveVideo] Failed to open file for writing: $videoPath");
+            return false;
+        }
+
+        curl_setopt($ch, CURLOPT_FILE, $fp);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 300);  // 5 minute timeout for large videos
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+
+        $success = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+
+        curl_close($ch);
+        fclose($fp);
+
+        if (!$success || $httpCode !== 200) {
+            error_log("[downloadAndSaveVideo] Download failed. HTTP: $httpCode, Error: $error");
+            // Clean up failed download
+            if (file_exists($videoPath)) {
+                unlink($videoPath);
+            }
+            return false;
+        }
+
+        // Verify file was downloaded
+        $fileSize = filesize($videoPath);
+        if ($fileSize < 1000) {  // Video should be at least 1KB
+            error_log("[downloadAndSaveVideo] Downloaded file too small: $fileSize bytes");
+            unlink($videoPath);
+            return false;
+        }
+
+        error_log("[downloadAndSaveVideo] Success! Saved to: $videoPath ($fileSize bytes)");
+        return $videoPath;
+
+    } catch (Exception $e) {
+        error_log("[downloadAndSaveVideo] Exception: " . $e->getMessage());
+        return false;
     }
 }
