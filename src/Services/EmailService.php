@@ -150,12 +150,18 @@ class EmailService
      */
     public static function sendOrderCompletedEmail(array $order, array $user): bool
     {
+        // Handle both absolute S3 URLs and relative paths
+        $videoUrl = $order['output_video_url'];
+        if (!str_starts_with($videoUrl, 'http')) {
+            $videoUrl = APP_URL . $videoUrl;
+        }
+
         $data = [
             'name' => $user['name'],
             'email' => $user['email'],
             'orderNumber' => $order['order_number'],
             'templateTitle' => $order['template_title'] ?? 'Your Video',
-            'videoUrl' => APP_URL . $order['output_video_url'],
+            'videoUrl' => $videoUrl,
             'expiresAt' => $order['video_expires_at'] ?? date('Y-m-d H:i:s', strtotime('+7 days')),
             'appName' => APP_NAME,
             'appUrl' => APP_URL,
