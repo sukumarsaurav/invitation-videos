@@ -52,7 +52,7 @@ INSERT INTO `templates` (
     'Wedding',
     'Indian Traditional',
     'hindu',
-    'RoyalWeddingGold',
+    'FirstTemplate',
     'video',
     4.99,
     399.00,

@@ -65,6 +65,266 @@
                 "imageOverlays",
                 "musicUrl"
             ]
+        },
+        {
+            "id": "MangalSutraDreams",
+            "name": "Mangal Sutra Dreams",
+            "description": "Golden mandala patterns floating, lotus flowers blooming, diya lamps flickering.",
+            "category": "Wedding",
+            "duration": 10,
+            "fps": 30,
+            "width": 1080,
+            "height": 1920,
+            "aspectRatio": "9:16",
+            "requiredFields": [
+                "eventName",
+                "eventDate",
+                "groomName",
+                "brideName"
+            ],
+            "optionalFields": [
+                "title",
+                "subtitle",
+                "eventTime",
+                "eventVenue",
+                "primaryColor",
+                "secondaryColor",
+                "backgroundVideoUrl"
+            ]
+        },
+        {
+            "id": "SindoorCelebration",
+            "name": "Sindoor Celebration",
+            "description": "Red rose petals falling, sindoor powder sprinkling, marigold garlands swaying.",
+            "category": "Wedding",
+            "duration": 10,
+            "fps": 30,
+            "width": 1080,
+            "height": 1920,
+            "aspectRatio": "9:16",
+            "requiredFields": [
+                "eventName",
+                "eventDate",
+                "groomName",
+                "brideName"
+            ],
+            "optionalFields": [
+                "title",
+                "subtitle",
+                "eventTime",
+                "eventVenue",
+                "primaryColor",
+                "secondaryColor",
+                "backgroundVideoUrl"
+            ]
+        },
+        {
+            "id": "PeacockParadise",
+            "name": "Peacock Paradise",
+            "description": "Peacock feathers displaying iridescent colors, temple pillars, ornate carvings.",
+            "category": "Wedding",
+            "duration": 10,
+            "fps": 30,
+            "width": 1080,
+            "height": 1920,
+            "aspectRatio": "9:16",
+            "requiredFields": [
+                "eventName",
+                "eventDate",
+                "groomName",
+                "brideName"
+            ],
+            "optionalFields": [
+                "title",
+                "subtitle",
+                "eventTime",
+                "eventVenue",
+                "primaryColor",
+                "secondaryColor",
+                "backgroundVideoUrl"
+            ]
+        },
+        {
+            "id": "LotusBloom",
+            "name": "Lotus Bloom",
+            "description": "White and pink lotus flowers blooming in calm water, soft ripples.",
+            "category": "Wedding",
+            "duration": 10,
+            "fps": 30,
+            "width": 1080,
+            "height": 1920,
+            "aspectRatio": "9:16",
+            "requiredFields": [
+                "eventName",
+                "eventDate",
+                "groomName",
+                "brideName"
+            ],
+            "optionalFields": [
+                "title",
+                "subtitle",
+                "eventTime",
+                "eventVenue",
+                "primaryColor",
+                "secondaryColor",
+                "backgroundVideoUrl"
+            ]
+        },
+        {
+            "id": "DiyaDelight",
+            "name": "Diya Delight",
+            "description": "Multiple diya lamps flickering, golden flames, warm candlelight glow.",
+            "category": "Wedding",
+            "duration": 10,
+            "fps": 30,
+            "width": 1080,
+            "height": 1920,
+            "aspectRatio": "9:16",
+            "requiredFields": [
+                "eventName",
+                "eventDate",
+                "groomName",
+                "brideName"
+            ],
+            "optionalFields": [
+                "title",
+                "subtitle",
+                "eventTime",
+                "eventVenue",
+                "primaryColor",
+                "secondaryColor",
+                "backgroundVideoUrl"
+            ]
+        },
+        {
+            "id": "MehendiMagic",
+            "name": "Mehendi Magic",
+            "description": "Intricate henna patterns being drawn on hands, detailed traditional designs.",
+            "category": "Wedding",
+            "duration": 10,
+            "fps": 30,
+            "width": 1080,
+            "height": 1920,
+            "aspectRatio": "9:16",
+            "requiredFields": [
+                "eventName",
+                "eventDate",
+                "groomName",
+                "brideName"
+            ],
+            "optionalFields": [
+                "title",
+                "subtitle",
+                "eventTime",
+                "eventVenue",
+                "primaryColor",
+                "secondaryColor",
+                "backgroundVideoUrl"
+            ]
+        },
+        {
+            "id": "TempleBells",
+            "name": "Temple Bells",
+            "description": "Temple architecture with golden bells swaying, marble white and gold.",
+            "category": "Wedding",
+            "duration": 10,
+            "fps": 30,
+            "width": 1080,
+            "height": 1920,
+            "aspectRatio": "9:16",
+            "requiredFields": [
+                "eventName",
+                "eventDate",
+                "groomName",
+                "brideName"
+            ],
+            "optionalFields": [
+                "title",
+                "subtitle",
+                "eventTime",
+                "eventVenue",
+                "primaryColor",
+                "secondaryColor",
+                "backgroundVideoUrl"
+            ]
+        },
+        {
+            "id": "RosePetalRomance",
+            "name": "Rose Petal Romance",
+            "description": "Deep red and pink rose petals falling gracefully, rose garlands.",
+            "category": "Wedding",
+            "duration": 10,
+            "fps": 30,
+            "width": 1080,
+            "height": 1920,
+            "aspectRatio": "9:16",
+            "requiredFields": [
+                "eventName",
+                "eventDate",
+                "groomName",
+                "brideName"
+            ],
+            "optionalFields": [
+                "title",
+                "subtitle",
+                "eventTime",
+                "eventVenue",
+                "primaryColor",
+                "secondaryColor",
+                "backgroundVideoUrl"
+            ]
+        },
+        {
+            "id": "GoldenMandala",
+            "name": "Golden Mandala",
+            "description": "Intricate golden mandala patterns rotating slowly, sacred geometry.",
+            "category": "Wedding",
+            "duration": 10,
+            "fps": 30,
+            "width": 1080,
+            "height": 1920,
+            "aspectRatio": "9:16",
+            "requiredFields": [
+                "eventName",
+                "eventDate",
+                "groomName",
+                "brideName"
+            ],
+            "optionalFields": [
+                "title",
+                "subtitle",
+                "eventTime",
+                "eventVenue",
+                "primaryColor",
+                "secondaryColor",
+                "backgroundVideoUrl"
+            ]
+        },
+        {
+            "id": "SaffronSunrise",
+            "name": "Saffron Sunrise",
+            "description": "Saffron orange sunrise with golden rays, temple silhouettes in background.",
+            "category": "Wedding",
+            "duration": 10,
+            "fps": 30,
+            "width": 1080,
+            "height": 1920,
+            "aspectRatio": "9:16",
+            "requiredFields": [
+                "eventName",
+                "eventDate",
+                "groomName",
+                "brideName"
+            ],
+            "optionalFields": [
+                "title",
+                "subtitle",
+                "eventTime",
+                "eventVenue",
+                "primaryColor",
+                "secondaryColor",
+                "backgroundVideoUrl"
+            ]
         }
     ]
 }

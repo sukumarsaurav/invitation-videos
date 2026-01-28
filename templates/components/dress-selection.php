@@ -23,7 +23,7 @@ $selectedColorId = $_SESSION['customize_color_id'] ?? null;
 <div class="space-y-6" id="dress-selection">
     <!-- Header -->
     <div class="text-center">
-        <h2 class="text-xl font-bold text-slate-900 dark:text-white">Choose Your Outfit Style</h2>
+        <h2 class="text-xl font-bold text-slate-900">Choose Your Outfit Style</h2>
         <p class="text-slate-500 mt-1">Select a dress design for your AI-generated caricature</p>
     </div>
 
@@ -36,8 +36,8 @@ $selectedColorId = $_SESSION['customize_color_id'] ?? null;
             <?= $dress['id'] ?>" required>
                 <div class="relative overflow-hidden rounded-xl border-2 transition-all
                     peer-checked:border-primary peer-checked:ring-2 peer-checked:ring-primary/20
-                    border-slate-200 dark:border-slate-700 hover:border-primary/50
-                    bg-white dark:bg-slate-800">
+                    border-slate-200 hover:border-primary/50
+                    bg-white">
 
                     <!-- Dress Thumbnail -->
                     <?php if (!empty($dress['thumbnail_url'])): ?>
@@ -54,7 +54,7 @@ $selectedColorId = $_SESSION['customize_color_id'] ?? null;
 
                     <!-- Dress Name -->
                     <div class="p-3 text-center">
-                        <p class="font-medium text-slate-900 dark:text-white text-sm">
+                        <p class="font-medium text-slate-900 text-sm">
                             <?= Security::escape($dress['name']) ?>
                         </p>
                         <?php if (!empty($dress['description'])): ?>
@@ -76,7 +76,7 @@ $selectedColorId = $_SESSION['customize_color_id'] ?? null;
 
     <!-- Color Selection (dynamic based on dress) -->
     <div id="color-section" class="<?= $selectedDressId ? '' : 'hidden' ?>">
-        <h3 class="font-bold text-slate-900 dark:text-white mb-3">Select Color</h3>
+        <h3 class="font-bold text-slate-900 mb-3">Select Color</h3>
 
         <div id="color-loading" class="hidden animate-pulse">
             <div class="flex gap-3">
@@ -127,8 +127,8 @@ $selectedColorId = $_SESSION['customize_color_id'] ?? null;
                 <span class="material-symbols-outlined text-primary">auto_awesome</span>
             </div>
             <div>
-                <p class="font-bold text-slate-900 dark:text-white">AI-Generated Caricature</p>
-                <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                <p class="font-bold text-slate-900">AI-Generated Caricature</p>
+                <p class="text-sm text-slate-600 mt-1">
                     After payment, our AI will create a beautiful cartoon caricature of you and your partner
                     wearing the selected outfit. This personalized illustration will be featured in your video!
                 </p>

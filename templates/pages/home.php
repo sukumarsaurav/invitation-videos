@@ -68,7 +68,7 @@ $isHomePage = true;  // For floating help button display
 
 <!-- Hero Section -->
 <section
-    class="hero-section flex items-center justify-center relative overflow-hidden<?= empty($heroImageDesktop) ? ' bg-gradient-to-br from-primary/5 via-purple-500/5 to-rose-500/5 dark:from-primary/10 dark:via-purple-500/10 dark:to-rose-500/10' : '' ?>">
+    class="hero-section flex items-center justify-center relative overflow-hidden<?= empty($heroImageDesktop) ? ' bg-gradient-to-br from-primary/5 via-purple-500/5 to-rose-500/5' : '' ?>">
     <?php if (!empty($heroImageDesktop)): ?>
         <!-- Hero Background Image -->
         <div class="absolute inset-0 z-0">
@@ -93,14 +93,13 @@ $isHomePage = true;  // For floating help button display
         $hasSubtitleText = !empty(trim($heroSubtitle));
         ?>
         <?php if ($hasTitleText): ?>
-            <h1
-                class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold <?= !empty($heroImageDesktop) ? 'text-white' : 'text-slate-900 dark:text-white' ?> mb-3">
+            <h1 class="heading-hero <?= !empty($heroImageDesktop) ? 'text-white' : 'text-slate-900' ?> mb-3">
                 <?= $heroTitle ?>
             </h1>
         <?php endif; ?>
         <?php if ($hasSubtitleText): ?>
             <p
-                class="<?= !empty($heroImageDesktop) ? 'text-white/90' : 'text-slate-600 dark:text-slate-400' ?> text-sm sm:text-base md:text-lg max-w-2xl mx-auto mb-6">
+                class="<?= !empty($heroImageDesktop) ? 'text-white/90' : 'text-slate-600' ?> text-sm sm:text-base md:text-lg max-w-2xl mx-auto mb-6">
                 <?= htmlspecialchars($heroSubtitle) ?>
             </p>
         <?php endif; ?>
@@ -115,12 +114,12 @@ $isHomePage = true;  // For floating help button display
 </section>
 
 <!-- All Categories Section -->
-<section class="py-8 sm:py-12 bg-white dark:bg-slate-900">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+<section class="py-8 sm:py-12 bg-white">
+    <div class="container-section">
         <div class="flex items-start sm:items-center justify-between mb-6 flex-col sm:flex-row gap-4">
             <div>
-                <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-1">All Categories</h2>
-                <p class="text-slate-600 dark:text-slate-400 text-sm">Browse templates for any event</p>
+                <h2 class="text-xl sm:text-2xl font-bold text-slate-900 mb-1">All Categories</h2>
+                <p class="text-slate-600 text-sm">Browse templates for any event</p>
             </div>
             <a href="/templates"
                 class="hidden sm:flex items-center gap-2 text-primary font-bold hover:underline whitespace-nowrap">
@@ -148,12 +147,12 @@ $isHomePage = true;  // For floating help button display
                         <a href="/templates?category=<?= $cat['slug'] ?>"
                             class="flex flex-col items-center w-14 flex-shrink-0">
                             <div
-                                class="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-1 overflow-hidden">
+                                class="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center mb-1 overflow-hidden">
                                 <img src="<?= htmlspecialchars($cat['image']) ?>"
                                     alt="<?= htmlspecialchars($cat['name']) ?>" class="w-full h-full object-cover">
                             </div>
                             <span
-                                class="text-[10px] font-medium text-slate-700 dark:text-slate-300 text-center leading-tight"><?= $cat['name'] ?></span>
+                                class="text-[10px] font-medium text-slate-700 text-center leading-tight"><?= $cat['name'] ?></span>
                         </a>
                     <?php endforeach; ?>
                 </div>
@@ -163,12 +162,12 @@ $isHomePage = true;  // For floating help button display
                         <a href="/templates?category=<?= $cat['slug'] ?>"
                             class="flex flex-col items-center w-14 flex-shrink-0">
                             <div
-                                class="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-1 overflow-hidden">
+                                class="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center mb-1 overflow-hidden">
                                 <img src="<?= htmlspecialchars($cat['image']) ?>"
                                     alt="<?= htmlspecialchars($cat['name']) ?>" class="w-full h-full object-cover">
                             </div>
                             <span
-                                class="text-[10px] font-medium text-slate-700 dark:text-slate-300 text-center leading-tight"><?= $cat['name'] ?></span>
+                                class="text-[10px] font-medium text-slate-700 text-center leading-tight"><?= $cat['name'] ?></span>
                         </a>
                     <?php endforeach; ?>
                 </div>
@@ -181,13 +180,13 @@ $isHomePage = true;  // For floating help button display
                 <a href="/templates?category=<?= $cat['slug'] ?>" class="group flex flex-col items-center">
                     <!-- Image Container -->
                     <div
-                        class="w-40 h-40 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform overflow-hidden border border-slate-200 dark:border-slate-700">
+                        class="w-40 h-40 rounded-2xl bg-slate-100 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform overflow-hidden border border-slate-200">
                         <img src="<?= htmlspecialchars($cat['image']) ?>" alt="<?= htmlspecialchars($cat['name']) ?>"
                             class="w-full h-full object-cover">
                     </div>
                     <!-- Category Name -->
                     <span
-                        class="font-medium text-sm text-slate-700 dark:text-slate-300 text-center group-hover:text-primary transition-colors"><?= $cat['name'] ?></span>
+                        class="font-medium text-sm text-slate-700 text-center group-hover:text-primary transition-colors"><?= $cat['name'] ?></span>
                 </a>
             <?php endforeach; ?>
         </div>
@@ -200,12 +199,12 @@ $isHomePage = true;  // For floating help button display
 // =====================================================
 ?>
 <!-- Popular Templates -->
-<section class="py-12 bg-slate-50 dark:bg-slate-800/50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+<section class="py-12 bg-slate-50">
+    <div class="container-section">
         <div class="flex items-start sm:items-center justify-between mb-8 flex-col sm:flex-row gap-4">
             <div>
-                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2">Popular Templates</h2>
-                <p class="text-slate-600 dark:text-slate-400">Discover trending designs for your next event.</p>
+                <h2 class="heading-section text-slate-900 mb-2">Popular Templates</h2>
+                <p class="text-slate-600">Discover trending designs for your next event.</p>
             </div>
             <a href="/templates"
                 class="hidden sm:flex items-center gap-2 text-primary font-bold hover:underline whitespace-nowrap">
@@ -216,25 +215,25 @@ $isHomePage = true;  // For floating help button display
 
         <?php
         $categoryBadgeColors = [
-            'wedding' => 'bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300',
-            'birthday' => 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300',
-            'baby_shower' => 'bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-300',
-            'corporate' => 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300',
-            'anniversary' => 'bg-pink-100 text-pink-700 dark:bg-pink-900/50 dark:text-pink-300',
-            'parties' => 'bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300',
-            'graduation' => 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300',
-            'religious' => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300',
+            'wedding' => 'bg-rose-100 text-rose-700',
+            'birthday' => 'bg-amber-100 text-amber-700',
+            'baby_shower' => 'bg-teal-100 text-teal-700',
+            'corporate' => 'bg-slate-200 text-slate-700',
+            'anniversary' => 'bg-pink-100 text-pink-700',
+            'parties' => 'bg-orange-100 text-orange-700',
+            'graduation' => 'bg-indigo-100 text-indigo-700',
+            'religious' => 'bg-yellow-100 text-yellow-700',
         ];
         ?>
 
         <!-- Desktop: 5-column grid -->
         <div class="hidden sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
             <?php foreach ($trendingTemplates as $index => $template):
-                $badgeColor = $categoryBadgeColors[$template['category']] ?? 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300';
+                $badgeColor = $categoryBadgeColors[$template['category']] ?? 'bg-purple-100 text-purple-700';
                 $isAboveFold = $index < 2;
                 ?>
                 <a href="/template/<?= Security::escape($template['slug']) ?>"
-                    class="group block bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200 dark:border-slate-700 hover:border-primary/30">
+                    class="group block bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200 hover:border-primary/30">
                     <div class="relative aspect-[4/5] overflow-hidden bg-slate-100">
                         <?= ImageHelper::responsiveThumbnail(
                             $template['thumbnail_url'] ?? '/assets/images/placeholder.jpg',
@@ -250,8 +249,7 @@ $isHomePage = true;  // For floating help button display
                         </div>
                     </div>
                     <div class="p-4">
-                        <h3
-                            class="font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors truncate">
+                        <h3 class="font-bold text-slate-900 group-hover:text-primary transition-colors truncate">
                             <?= Security::escape($template['title']) ?>
                         </h3>
                         <p
@@ -267,11 +265,11 @@ $isHomePage = true;  // For floating help button display
         <div class="sm:hidden flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory -mx-4 px-4"
             style="-webkit-overflow-scrolling: touch; scrollbar-width: none;">
             <?php foreach ($trendingTemplates as $index => $template):
-                $badgeColor = $categoryBadgeColors[$template['category']] ?? 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300';
+                $badgeColor = $categoryBadgeColors[$template['category']] ?? 'bg-purple-100 text-purple-700';
                 $isAboveFold = $index < 2;
                 ?>
                 <a href="/template/<?= Security::escape($template['slug']) ?>"
-                    class="group flex-shrink-0 w-[45%] snap-start bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200 dark:border-slate-700">
+                    class="group flex-shrink-0 w-[45%] snap-start bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200">
                     <div class="relative aspect-[4/5] overflow-hidden bg-slate-100">
                         <?= ImageHelper::responsiveThumbnail(
                             $template['thumbnail_url'] ?? '/assets/images/placeholder.jpg',
@@ -287,7 +285,7 @@ $isHomePage = true;  // For floating help button display
                         </div>
                     </div>
                     <div class="p-3">
-                        <h3 class="font-bold text-sm text-slate-900 dark:text-white truncate">
+                        <h3 class="font-bold text-sm text-slate-900 truncate">
                             <?= Security::escape($template['title']) ?>
                         </h3>
                         <p
@@ -318,11 +316,11 @@ $isHomePage = true;  // For floating help button display
 // Category Template Sections (Wedding, Birthday, Party, etc.)
 // =====================================================
 $sectionColors = [
-    'wedding' => ['bg' => 'bg-rose-50 dark:bg-rose-950/20', 'badge' => 'bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300'],
-    'birthday' => ['bg' => 'bg-amber-50 dark:bg-amber-950/20', 'badge' => 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300'],
-    'party' => ['bg' => 'bg-orange-50 dark:bg-orange-950/20', 'badge' => 'bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300'],
-    'pooja-rituals' => ['bg' => 'bg-yellow-50 dark:bg-yellow-950/20', 'badge' => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300'],
-    'festivals' => ['bg' => 'bg-red-50 dark:bg-red-950/20', 'badge' => 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300'],
+    'wedding' => ['bg' => 'bg-rose-50', 'badge' => 'bg-rose-100 text-rose-700'],
+    'birthday' => ['bg' => 'bg-amber-50', 'badge' => 'bg-amber-100 text-amber-700'],
+    'party' => ['bg' => 'bg-orange-50', 'badge' => 'bg-orange-100 text-orange-700'],
+    'pooja-rituals' => ['bg' => 'bg-yellow-50', 'badge' => 'bg-yellow-100 text-yellow-700'],
+    'festivals' => ['bg' => 'bg-red-50', 'badge' => 'bg-red-100 text-red-700'],
 ];
 ?>
 
@@ -330,16 +328,16 @@ $sectionColors = [
     $templates = $categoryTemplates[$catSlug] ?? [];
     if (empty($templates))
         continue;
-    $colors = $sectionColors[$catSlug] ?? ['bg' => 'bg-slate-50 dark:bg-slate-800/50', 'badge' => 'bg-slate-100 text-slate-700'];
+    $colors = $sectionColors[$catSlug] ?? ['bg' => 'bg-slate-50', 'badge' => 'bg-slate-100 text-slate-700'];
     ?>
     <!-- <?= $catConfig['name'] ?> Templates Section -->
     <section class="py-12 <?= $colors['bg'] ?>">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <div class="container-section">
             <div class="flex items-start sm:items-center justify-between mb-8 flex-col sm:flex-row gap-4">
                 <div>
-                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2"><?= $catConfig['name'] ?>
+                    <h2 class="heading-section text-slate-900 mb-2"><?= $catConfig['name'] ?>
                         Templates</h2>
-                    <p class="text-slate-600 dark:text-slate-400">Beautiful <?= strtolower($catConfig['name']) ?> video
+                    <p class="text-slate-600">Beautiful <?= strtolower($catConfig['name']) ?> video
                         invitations</p>
                 </div>
                 <!-- Desktop View All link -->
@@ -357,7 +355,7 @@ $sectionColors = [
                     $isAboveFold = false;
                     ?>
                     <a href="/template/<?= Security::escape($template['slug']) ?>"
-                        class="group block bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200 dark:border-slate-700 hover:border-primary/30">
+                        class="group block bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200 hover:border-primary/30">
                         <div class="relative aspect-[4/5] overflow-hidden bg-slate-100">
                             <?= ImageHelper::responsiveThumbnail(
                                 $template['thumbnail_url'] ?? '/assets/images/placeholder.jpg',
@@ -373,8 +371,7 @@ $sectionColors = [
                             </div>
                         </div>
                         <div class="p-4">
-                            <h3
-                                class="font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors truncate">
+                            <h3 class="font-bold text-slate-900 group-hover:text-primary transition-colors truncate">
                                 <?= Security::escape($template['title']) ?>
                             </h3>
                             <p
@@ -393,7 +390,7 @@ $sectionColors = [
                     $badgeColor = $colors['badge'];
                     ?>
                     <a href="/template/<?= Security::escape($template['slug']) ?>"
-                        class="group flex-shrink-0 w-[45%] snap-start bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200 dark:border-slate-700">
+                        class="group flex-shrink-0 w-[45%] snap-start bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200">
                         <div class="relative aspect-[4/5] overflow-hidden bg-slate-100">
                             <?= ImageHelper::responsiveThumbnail(
                                 $template['thumbnail_url'] ?? '/assets/images/placeholder.jpg',
@@ -409,7 +406,7 @@ $sectionColors = [
                             </div>
                         </div>
                         <div class="p-3">
-                            <h3 class="font-bold text-sm text-slate-900 dark:text-white truncate">
+                            <h3 class="font-bold text-sm text-slate-900 truncate">
                                 <?= Security::escape($template['title']) ?>
                             </h3>
                             <p
@@ -438,41 +435,38 @@ $sectionColors = [
 
 <!-- How It Works -->
 
-<section id="how-it-works" class="py-12 bg-slate-50 dark:bg-slate-800">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+<section id="how-it-works" class="py-12 bg-slate-50">
+    <div class="container-section">
         <div class="text-center mb-10">
-            <h2 class="text-2xl sm:text-3xl font-bold mb-3 text-slate-900 dark:text-white">How It Works</h2>
-            <p class="text-slate-600 dark:text-slate-300">Create your invitation in 3 easy steps</p>
+            <h2 class="heading-section text-slate-900 mb-3">How It Works</h2>
+            <p class="text-slate-600">Create your invitation in 3 easy steps</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div
-                class="text-center p-6 rounded-2xl bg-white dark:bg-slate-900 shadow-sm border border-slate-200 dark:border-slate-700">
+            <div class="text-center p-6 rounded-2xl bg-white shadow-sm border border-slate-200">
                 <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                     <span class="material-symbols-outlined text-3xl text-primary">grid_view</span>
                 </div>
-                <h3 class="font-bold text-lg mb-2 text-slate-900 dark:text-white">1. Choose Template</h3>
-                <p class="text-sm text-slate-600 dark:text-slate-400">Browse our collection and select the perfect
+                <h3 class="font-bold text-lg mb-2 text-slate-900">1. Choose Template</h3>
+                <p class="text-sm text-slate-600">Browse our collection and select the perfect
                     design for your event.</p>
             </div>
 
-            <div
-                class="text-center p-6 rounded-2xl bg-white dark:bg-slate-900 shadow-sm border border-slate-200 dark:border-slate-700">
+            <div class="text-center p-6 rounded-2xl bg-white shadow-sm border border-slate-200">
                 <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                     <span class="material-symbols-outlined text-3xl text-primary">edit</span>
                 </div>
-                <h3 class="font-bold text-lg mb-2 text-slate-900 dark:text-white">2. Customize</h3>
-                <p class="text-sm text-slate-600 dark:text-slate-400">Add your details, photos, and music to personalize
+                <h3 class="font-bold text-lg mb-2 text-slate-900">2. Customize</h3>
+                <p class="text-sm text-slate-600">Add your details, photos, and music to personalize
                     your invitation.</p>
             </div>
 
-            <div
-                class="text-center p-6 rounded-2xl bg-white dark:bg-slate-900 shadow-sm border border-slate-200 dark:border-slate-700">
+            <div class="text-center p-6 rounded-2xl bg-white shadow-sm border border-slate-200">
                 <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                     <span class="material-symbols-outlined text-3xl text-primary">share</span>
                 </div>
-                <h3 class="font-bold text-lg mb-2 text-slate-900 dark:text-white">3. Share</h3>
-                <p class="text-sm text-slate-600 dark:text-slate-400">Download your HD video and share it with friends
+                <h3 class="font-bold text-lg mb-2 text-slate-900">3. Share</h3>
+                <p class="text-sm text-slate-600">Download your HD video and share it with friends
                     and family.</p>
             </div>
         </div>
@@ -480,108 +474,102 @@ $sectionColors = [
 </section>
 
 <!-- Why Choose Invitation Videos (SEO Content) -->
-<section class="py-12 bg-gradient-to-br from-primary/5 to-purple-500/5 dark:from-primary/10 dark:to-purple-500/10">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+<section class="py-12 bg-gradient-to-br from-primary/5 to-purple-500/5">
+    <div class="container-section">
         <div class="text-center mb-10">
-            <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-3">Why Choose Invitation Videos?
+            <h2 class="heading-section text-slate-900 mb-3">Why Choose Invitation Videos?
             </h2>
-            <p class="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">Discover why thousands of customers trust us
+            <p class="text-slate-600 max-w-2xl mx-auto">Discover why thousands of customers trust us
                 to create their perfect video invitations for weddings, birthdays, and special occasions.</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             <!-- Feature 1 -->
-            <div
-                class="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
                 <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
                     <span class="material-symbols-outlined text-2xl text-primary">high_quality</span>
                 </div>
-                <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-2">Full HD Quality Videos</h3>
-                <p class="text-sm text-slate-600 dark:text-slate-400">All our video invitations are rendered in stunning
+                <h3 class="font-bold text-lg text-slate-900 mb-2">Full HD Quality Videos</h3>
+                <p class="text-sm text-slate-600">All our video invitations are rendered in stunning
                     1080p Full HD quality. Your invitation will look crystal clear on any device - from smartphones to
                     large TV screens at your event venue.</p>
             </div>
 
             <!-- Feature 2 -->
-            <div
-                class="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
                 <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-4">
                     <span class="material-symbols-outlined text-2xl text-emerald-500">schedule</span>
                 </div>
-                <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-2">Quick Turnaround Time</h3>
-                <p class="text-sm text-slate-600 dark:text-slate-400">Receive your customized video invitation within
+                <h3 class="font-bold text-lg text-slate-900 mb-2">Quick Turnaround Time</h3>
+                <p class="text-sm text-slate-600">Receive your customized video invitation within
                     24-48 hours. Need it faster? Our rush delivery option ensures you get your video within hours for
                     those last-minute celebrations.</p>
             </div>
 
             <!-- Feature 3 -->
-            <div
-                class="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
                 <div class="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center mb-4">
                     <span class="material-symbols-outlined text-2xl text-amber-500">brush</span>
                 </div>
-                <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-2">Professional Design Templates</h3>
-                <p class="text-sm text-slate-600 dark:text-slate-400">Choose from our extensive library of
+                <h3 class="font-bold text-lg text-slate-900 mb-2">Professional Design Templates</h3>
+                <p class="text-sm text-slate-600">Choose from our extensive library of
                     professionally designed templates crafted by expert motion graphics designers. From elegant wedding
                     invitations to fun birthday animations.</p>
             </div>
 
             <!-- Feature 4 -->
-            <div
-                class="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
                 <div class="w-12 h-12 rounded-xl bg-rose-500/10 flex items-center justify-center mb-4">
                     <span class="material-symbols-outlined text-2xl text-rose-500">share</span>
                 </div>
-                <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-2">Easy Sharing on WhatsApp</h3>
-                <p class="text-sm text-slate-600 dark:text-slate-400">Our videos are optimized for WhatsApp, Instagram,
+                <h3 class="font-bold text-lg text-slate-900 mb-2">Easy Sharing on WhatsApp</h3>
+                <p class="text-sm text-slate-600">Our videos are optimized for WhatsApp, Instagram,
                     and Facebook sharing. The perfect file size ensures your invitation reaches all your guests without
                     compression or quality loss.</p>
             </div>
 
             <!-- Feature 5 -->
-            <div
-                class="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
                 <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mb-4">
                     <span class="material-symbols-outlined text-2xl text-blue-500">support_agent</span>
                 </div>
-                <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-2">Dedicated Customer Support</h3>
-                <p class="text-sm text-slate-600 dark:text-slate-400">Our friendly support team is available to help you
+                <h3 class="font-bold text-lg text-slate-900 mb-2">Dedicated Customer Support</h3>
+                <p class="text-sm text-slate-600">Our friendly support team is available to help you
                     with any questions or revisions. We offer one free revision per order to ensure your invitation is
                     exactly how you envisioned.</p>
             </div>
 
             <!-- Feature 6 -->
-            <div
-                class="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
                 <div class="w-12 h-12 rounded-xl bg-teal-500/10 flex items-center justify-center mb-4">
                     <span class="material-symbols-outlined text-2xl text-teal-500">verified</span>
                 </div>
-                <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-2">100% Satisfaction Guarantee</h3>
-                <p class="text-sm text-slate-600 dark:text-slate-400">We stand behind our work with a complete
+                <h3 class="font-bold text-lg text-slate-900 mb-2">100% Satisfaction Guarantee</h3>
+                <p class="text-sm text-slate-600">We stand behind our work with a complete
                     satisfaction guarantee. If you're not happy with your video after revisions, we'll provide a full
                     refund - no questions asked.</p>
             </div>
         </div>
 
         <!-- Additional SEO Content -->
-        <div class="bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-sm border border-slate-200 dark:border-slate-700">
-            <h3 class="font-bold text-xl text-slate-900 dark:text-white mb-4">The Perfect Video Invitation for Every
+        <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-200">
+            <h3 class="font-bold text-xl text-slate-900 mb-4">The Perfect Video Invitation for Every
                 Occasion</h3>
-            <div class="prose prose-slate dark:prose-invert max-w-none">
-                <p class="text-slate-600 dark:text-slate-400 mb-4">
+            <div class="prose prose-slate max-w-none">
+                <p class="text-slate-600 mb-4">
                     At Invitation Videos, we believe that every celebration deserves a memorable beginning. Our video
                     invitations transform the traditional way of inviting guests into an immersive, emotional
                     experience. Whether you're planning an intimate wedding ceremony, a grand birthday bash, a
                     heartwarming baby shower, or a corporate event, our professionally crafted video invitations set the
                     perfect tone for your special day.
                 </p>
-                <p class="text-slate-600 dark:text-slate-400 mb-4">
+                <p class="text-slate-600 mb-4">
                     Our collection includes templates for Indian weddings featuring traditional elements like mandaps,
                     mehendi designs, and festive colors. We also offer contemporary minimalist designs for modern
                     celebrations, elegant save-the-date videos, and vibrant party invitations that capture the
                     excitement of your upcoming event.
                 </p>
-                <p class="text-slate-600 dark:text-slate-400">
+                <p class="text-slate-600">
                     The process is simple: browse our template gallery, select the design that speaks to you, enter your
                     event details including names, dates, venue information, and photos, and we'll create a stunning
                     animated video that you can share with all your loved ones. Your video invitation becomes a keepsake
@@ -595,7 +583,7 @@ $sectionColors = [
 <!-- CTA Section -->
 <section class="py-16 bg-gradient-to-r from-primary to-purple-600">
     <div class="max-w-4xl mx-auto px-6 text-center">
-        <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">Ready to Create Your Invitation?</h2>
+        <h2 class="heading-hero text-white mb-4">Ready to Create Your Invitation?</h2>
         <p class="text-base sm:text-lg text-white/80 mb-6">Join thousands of happy customers who have created stunning
             video invitations.</p>
         <a href="/templates"
@@ -607,23 +595,23 @@ $sectionColors = [
 </section>
 
 <!-- Testimonials Section -->
-<section class="py-12 bg-white dark:bg-slate-900">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+<section class="py-12 bg-white">
+    <div class="container-section">
         <div class="text-center mb-10">
-            <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-3">What Our Customers Say</h2>
-            <p class="text-slate-600 dark:text-slate-400">Trusted by thousands of happy couples and families</p>
+            <h2 class="heading-section text-slate-900 mb-3">What Our Customers Say</h2>
+            <p class="text-slate-600">Trusted by thousands of happy couples and families</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <!-- Testimonial 1 -->
-            <div class="bg-slate-50 dark:bg-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all">
+            <div class="bg-slate-50 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all">
                 <div class="flex items-center gap-1 mb-4">
                     <?php for ($i = 0; $i < 5; $i++): ?>
                         <span class="material-symbols-outlined text-amber-400 text-lg"
                             style="font-variation-settings: 'FILL' 1;">star</span>
                     <?php endfor; ?>
                 </div>
-                <p class="text-slate-600 dark:text-slate-400 mb-4">
+                <p class="text-slate-600 mb-4">
                     "The video invitation for our wedding was absolutely stunning! Our guests were amazed and kept
                     asking where we got it made. Highly recommend!"
                 </p>
@@ -632,21 +620,21 @@ $sectionColors = [
                         <span class="text-primary font-bold">P</span>
                     </div>
                     <div>
-                        <p class="font-bold text-slate-900 dark:text-white text-sm">Priya & Rahul</p>
+                        <p class="font-bold text-slate-900 text-sm">Priya & Rahul</p>
                         <p class="text-xs text-slate-500">Wedding Invitation</p>
                     </div>
                 </div>
             </div>
 
             <!-- Testimonial 2 -->
-            <div class="bg-slate-50 dark:bg-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all">
+            <div class="bg-slate-50 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all">
                 <div class="flex items-center gap-1 mb-4">
                     <?php for ($i = 0; $i < 5; $i++): ?>
                         <span class="material-symbols-outlined text-amber-400 text-lg"
                             style="font-variation-settings: 'FILL' 1;">star</span>
                     <?php endfor; ?>
                 </div>
-                <p class="text-slate-600 dark:text-slate-400 mb-4">
+                <p class="text-slate-600 mb-4">
                     "Created a beautiful birthday invitation for my daughter's 5th birthday. The animation quality was
                     professional and delivery was super fast!"
                 </p>
@@ -655,21 +643,21 @@ $sectionColors = [
                         <span class="text-rose-500 font-bold">A</span>
                     </div>
                     <div>
-                        <p class="font-bold text-slate-900 dark:text-white text-sm">Anjali Sharma</p>
+                        <p class="font-bold text-slate-900 text-sm">Anjali Sharma</p>
                         <p class="text-xs text-slate-500">Birthday Invitation</p>
                     </div>
                 </div>
             </div>
 
             <!-- Testimonial 3 -->
-            <div class="bg-slate-50 dark:bg-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all">
+            <div class="bg-slate-50 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all">
                 <div class="flex items-center gap-1 mb-4">
                     <?php for ($i = 0; $i < 5; $i++): ?>
                         <span class="material-symbols-outlined text-amber-400 text-lg"
                             style="font-variation-settings: 'FILL' 1;">star</span>
                     <?php endfor; ?>
                 </div>
-                <p class="text-slate-600 dark:text-slate-400 mb-4">
+                <p class="text-slate-600 mb-4">
                     "Easy to customize and the WhatsApp sharing was seamless. Everyone loved the video quality. Will
                     definitely use again for our next event!"
                 </p>
@@ -678,7 +666,7 @@ $sectionColors = [
                         <span class="text-emerald-500 font-bold">R</span>
                     </div>
                     <div>
-                        <p class="font-bold text-slate-900 dark:text-white text-sm">Rajesh Kumar</p>
+                        <p class="font-bold text-slate-900 text-sm">Rajesh Kumar</p>
                         <p class="text-xs text-slate-500">Engagement Ceremony</p>
                     </div>
                 </div>
@@ -688,27 +676,27 @@ $sectionColors = [
 </section>
 
 <!-- FAQ Section -->
-<section class="py-12 bg-slate-50 dark:bg-slate-800/50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+<section class="py-12 bg-slate-50">
+    <div class="container-section">
         <div class="text-center mb-10">
-            <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-3">Frequently Asked Questions
+            <h2 class="heading-section text-slate-900 mb-3">Frequently Asked Questions
             </h2>
-            <p class="text-slate-600 dark:text-slate-400">Everything you need to know about our video invitations</p>
+            <p class="text-slate-600">Everything you need to know about our video invitations</p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4" x-data="{ openFaq: 1 }">
             <!-- Left Column -->
             <div class="space-y-4">
                 <!-- FAQ Item 1 -->
-                <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm overflow-hidden">
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden">
                     <button @click="openFaq = openFaq === 1 ? null : 1"
                         class="w-full px-6 py-4 flex items-center justify-between text-left">
-                        <h3 class="font-bold text-slate-900 dark:text-white">How do video invitations work?</h3>
+                        <h3 class="font-bold text-slate-900">How do video invitations work?</h3>
                         <span class="material-symbols-outlined text-primary transition-transform"
                             :class="{ 'rotate-180': openFaq === 1 }">expand_more</span>
                     </button>
                     <div x-show="openFaq === 1" x-collapse class="px-6 pb-4">
-                        <p class="text-slate-600 dark:text-slate-400">Simply choose a template, customize it with your
+                        <p class="text-slate-600">Simply choose a template, customize it with your
                             event
                             details (names, date, venue, photos), and we'll generate a stunning HD video invitation. You
                             can
@@ -717,17 +705,17 @@ $sectionColors = [
                 </div>
 
                 <!-- FAQ Item 2 -->
-                <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm overflow-hidden">
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden">
                     <button @click="openFaq = openFaq === 2 ? null : 2"
                         class="w-full px-6 py-4 flex items-center justify-between text-left">
-                        <h3 class="font-bold text-slate-900 dark:text-white">How long does it take to create an
+                        <h3 class="font-bold text-slate-900">How long does it take to create an
                             invitation?
                         </h3>
                         <span class="material-symbols-outlined text-primary transition-transform"
                             :class="{ 'rotate-180': openFaq === 2 }">expand_more</span>
                     </button>
                     <div x-show="openFaq === 2" x-collapse class="px-6 pb-4">
-                        <p class="text-slate-600 dark:text-slate-400">Most video invitations are ready within 24-48
+                        <p class="text-slate-600">Most video invitations are ready within 24-48
                             hours.
                             Premium rush delivery is available for urgent orders. You'll receive your video via email
                             and
@@ -736,15 +724,15 @@ $sectionColors = [
                 </div>
 
                 <!-- FAQ Item 3 -->
-                <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm overflow-hidden">
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden">
                     <button @click="openFaq = openFaq === 3 ? null : 3"
                         class="w-full px-6 py-4 flex items-center justify-between text-left">
-                        <h3 class="font-bold text-slate-900 dark:text-white">Can I make changes after ordering?</h3>
+                        <h3 class="font-bold text-slate-900">Can I make changes after ordering?</h3>
                         <span class="material-symbols-outlined text-primary transition-transform"
                             :class="{ 'rotate-180': openFaq === 3 }">expand_more</span>
                     </button>
                     <div x-show="openFaq === 3" x-collapse class="px-6 pb-4">
-                        <p class="text-slate-600 dark:text-slate-400">Yes! We offer one free revision per order. If you
+                        <p class="text-slate-600">Yes! We offer one free revision per order. If you
                             need
                             to change names, dates, or other details, just contact our support team and we'll update
                             your
@@ -756,15 +744,15 @@ $sectionColors = [
             <!-- Right Column -->
             <div class="space-y-4">
                 <!-- FAQ Item 4 -->
-                <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm overflow-hidden">
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden">
                     <button @click="openFaq = openFaq === 4 ? null : 4"
                         class="w-full px-6 py-4 flex items-center justify-between text-left">
-                        <h3 class="font-bold text-slate-900 dark:text-white">What video formats do you provide?</h3>
+                        <h3 class="font-bold text-slate-900">What video formats do you provide?</h3>
                         <span class="material-symbols-outlined text-primary transition-transform"
                             :class="{ 'rotate-180': openFaq === 4 }">expand_more</span>
                     </button>
                     <div x-show="openFaq === 4" x-collapse class="px-6 pb-4">
-                        <p class="text-slate-600 dark:text-slate-400">We provide videos in Full HD (1080p) MP4 format,
+                        <p class="text-slate-600">We provide videos in Full HD (1080p) MP4 format,
                             optimized for sharing on WhatsApp, Instagram, Facebook, and other platforms. The videos are
                             also
                             perfect for displaying on screens at your event.</p>
@@ -772,15 +760,15 @@ $sectionColors = [
                 </div>
 
                 <!-- FAQ Item 5 -->
-                <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm overflow-hidden">
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden">
                     <button @click="openFaq = openFaq === 5 ? null : 5"
                         class="w-full px-6 py-4 flex items-center justify-between text-left">
-                        <h3 class="font-bold text-slate-900 dark:text-white">Do you offer refunds?</h3>
+                        <h3 class="font-bold text-slate-900">Do you offer refunds?</h3>
                         <span class="material-symbols-outlined text-primary transition-transform"
                             :class="{ 'rotate-180': openFaq === 5 }">expand_more</span>
                     </button>
                     <div x-show="openFaq === 5" x-collapse class="px-6 pb-4">
-                        <p class="text-slate-600 dark:text-slate-400">We offer a 100% satisfaction guarantee. If you're
+                        <p class="text-slate-600">We offer a 100% satisfaction guarantee. If you're
                             not
                             happy with your video after revisions, we'll provide a full refund. Your satisfaction is our
                             priority.</p>
@@ -788,15 +776,15 @@ $sectionColors = [
                 </div>
 
                 <!-- FAQ Item 6 -->
-                <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm overflow-hidden">
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden">
                     <button @click="openFaq = openFaq === 6 ? null : 6"
                         class="w-full px-6 py-4 flex items-center justify-between text-left">
-                        <h3 class="font-bold text-slate-900 dark:text-white">How can I share my invitation?</h3>
+                        <h3 class="font-bold text-slate-900">How can I share my invitation?</h3>
                         <span class="material-symbols-outlined text-primary transition-transform"
                             :class="{ 'rotate-180': openFaq === 6 }">expand_more</span>
                     </button>
                     <div x-show="openFaq === 6" x-collapse class="px-6 pb-4">
-                        <p class="text-slate-600 dark:text-slate-400">Once your video is ready, you can download it and
+                        <p class="text-slate-600">Once your video is ready, you can download it and
                             share
                             directly via WhatsApp, email, Facebook, Instagram, or any messaging app. The file is
                             optimized
@@ -810,12 +798,12 @@ $sectionColors = [
 
 <!-- Blog/Tips Section for SEO -->
 <?php if (!empty($blogPosts)): ?>
-    <section class="py-12 bg-white dark:bg-slate-900">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <section class="py-12 bg-white">
+        <div class="container-section">
             <div class="flex items-center justify-between mb-8">
                 <div>
-                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2">Tips & Inspiration</h2>
-                    <p class="text-slate-600 dark:text-slate-400">Ideas to make your invitations unforgettable</p>
+                    <h2 class="heading-section text-slate-900 mb-2">Tips & Inspiration</h2>
+                    <p class="text-slate-600">Ideas to make your invitations unforgettable</p>
                 </div>
                 <a href="/blog" class="text-primary font-bold hover:underline flex items-center gap-1">
                     View All <span class="material-symbols-outlined text-base">arrow_forward</span>
@@ -832,8 +820,7 @@ $sectionColors = [
                 foreach ($blogPosts as $i => $post):
                     $color = $colors[$i % count($colors)];
                     ?>
-                    <article
-                        class="group bg-slate-50 dark:bg-slate-800 rounded-2xl overflow-hidden hover:shadow-xl transition-all">
+                    <article class="group bg-slate-50 rounded-2xl overflow-hidden hover:shadow-xl transition-all">
                         <a href="/blog/<?= Security::escape($post['slug']) ?>" class="block">
                             <div
                                 class="aspect-video <?= $post['featured_image'] ? 'bg-slate-100' : "bg-gradient-to-br {$color[0]} {$color[1]}" ?> flex items-center justify-center relative overflow-hidden">
@@ -852,11 +839,11 @@ $sectionColors = [
                                         class="text-xs font-bold text-primary uppercase tracking-wide"><?= Security::escape($post['category']) ?></span>
                                 <?php endif; ?>
                                 <h3
-                                    class="font-bold text-lg text-slate-900 dark:text-white mt-2 mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                                    class="font-bold text-lg text-slate-900 mt-2 mb-2 group-hover:text-primary transition-colors line-clamp-2">
                                     <?= Security::escape($post['title']) ?>
                                 </h3>
                                 <?php if ($post['excerpt']): ?>
-                                    <p class="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
+                                    <p class="text-sm text-slate-600 line-clamp-2">
                                         <?= Security::escape($post['excerpt']) ?>
                                     </p>
                                 <?php endif; ?>

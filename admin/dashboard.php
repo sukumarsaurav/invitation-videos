@@ -124,7 +124,7 @@ $pageTitle = 'Dashboard';
     </div>
     <div class="flex items-center gap-3">
         <select id="dateRange" onchange="window.location.href='/admin/dashboard.php?days=' + this.value"
-            class="h-10 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-surface-dark text-sm font-medium">
+            class="h-10 px-4 rounded-lg border border-slate-200 bg-white text-sm font-medium">
             <option value="7" <?= $days == 7 ? 'selected' : '' ?>>Last 7 days</option>
             <option value="30" <?= $days == 30 ? 'selected' : '' ?>>Last 30 days</option>
             <option value="90" <?= $days == 90 ? 'selected' : '' ?>>Last 90 days</option>
@@ -140,9 +140,9 @@ $pageTitle = 'Dashboard';
 <!-- Stats Grid -->
 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
     <!-- Revenue -->
-    <div class="bg-white dark:bg-surface-dark p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
         <div class="flex items-center justify-between mb-3">
-            <div class="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg text-green-600">
+            <div class="p-2 bg-green-100 rounded-lg text-green-600">
                 <span class="material-symbols-outlined">payments</span>
             </div>
         </div>
@@ -165,9 +165,9 @@ $pageTitle = 'Dashboard';
     </div>
 
     <!-- Orders -->
-    <div class="bg-white dark:bg-surface-dark p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
         <div class="flex items-center justify-between mb-3">
-            <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600">
+            <div class="p-2 bg-blue-100 rounded-lg text-blue-600">
                 <span class="material-symbols-outlined">shopping_cart</span>
             </div>
             <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
@@ -179,9 +179,9 @@ $pageTitle = 'Dashboard';
     </div>
 
     <!-- Customers -->
-    <div class="bg-white dark:bg-surface-dark p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
         <div class="flex items-center justify-between mb-3">
-            <div class="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg text-purple-600">
+            <div class="p-2 bg-purple-100 rounded-lg text-purple-600">
                 <span class="material-symbols-outlined">group</span>
             </div>
             <span class="text-xs font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded">
@@ -193,9 +193,9 @@ $pageTitle = 'Dashboard';
     </div>
 
     <!-- Conversion Rate -->
-    <div class="bg-white dark:bg-surface-dark p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
         <div class="flex items-center justify-between mb-3">
-            <div class="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg text-orange-600">
+            <div class="p-2 bg-orange-100 rounded-lg text-orange-600">
                 <span class="material-symbols-outlined">conversion_path</span>
             </div>
         </div>
@@ -209,7 +209,7 @@ $pageTitle = 'Dashboard';
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
     <!-- Revenue Chart -->
     <div
-        class="lg:col-span-2 bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        class="lg:col-span-2 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
         <div class="flex justify-between items-center mb-6">
             <div>
                 <h3 class="text-lg font-bold">Revenue & Orders</h3>
@@ -222,7 +222,7 @@ $pageTitle = 'Dashboard';
     </div>
 
     <!-- Sales by Category -->
-    <div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
         <h3 class="text-lg font-bold mb-2">Sales by Category</h3>
         <p class="text-sm text-slate-500 mb-6">All time distribution</p>
         <div class="h-56">
@@ -235,8 +235,8 @@ $pageTitle = 'Dashboard';
 <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
     <!-- Trending Templates -->
     <div
-        class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-        <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
+        class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-5 border-b border-slate-200 flex justify-between items-center">
             <div>
                 <h3 class="text-lg font-bold flex items-center gap-2">
                     <span class="material-symbols-outlined text-orange-500">local_fire_department</span>
@@ -245,10 +245,10 @@ $pageTitle = 'Dashboard';
                 <p class="text-xs text-slate-500 mt-1">Top performing this week</p>
             </div>
         </div>
-        <div class="divide-y divide-slate-100 dark:divide-slate-800">
+        <div class="divide-y divide-slate-100">
             <?php foreach ($trendingTemplates as $i => $tpl): ?>
                 <a href="/admin/templates.php?action=edit&id=<?= $tpl['id'] ?>"
-                    class="flex items-center gap-3 p-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                    class="flex items-center gap-3 p-4 hover:bg-slate-50:bg-white/5 transition-colors">
                     <div class="relative">
                         <div class="w-12 h-12 rounded-lg bg-slate-100 bg-cover bg-center"
                             style="background-image: url('<?= Security::escape($tpl['thumbnail_url'] ?? '') ?>');"></div>
@@ -280,14 +280,14 @@ $pageTitle = 'Dashboard';
 
     <!-- Recent Orders -->
     <div
-        class="xl:col-span-2 bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-        <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
+        class="xl:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-5 border-b border-slate-200 flex justify-between items-center">
             <h3 class="text-lg font-bold">Recent Orders</h3>
             <a href="/admin/orders.php" class="text-sm font-semibold text-primary hover:underline">View All →</a>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm">
-                <thead class="bg-slate-50 dark:bg-white/5 text-slate-500 font-medium text-xs uppercase">
+                <thead class="bg-slate-50 text-slate-500 font-medium text-xs uppercase">
                     <tr>
                         <th class="px-5 py-3">Order</th>
                         <th class="px-5 py-3">Customer</th>
@@ -296,7 +296,7 @@ $pageTitle = 'Dashboard';
                         <th class="px-5 py-3">Date</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                <tbody class="divide-y divide-slate-100">
                     <?php foreach ($recentOrders as $order):
                         $statusColors = [
                             'awaiting_payment' => 'bg-yellow-100 text-yellow-700',
@@ -307,7 +307,7 @@ $pageTitle = 'Dashboard';
                         ];
                         $statusColor = $statusColors[$order['order_status'] ?? 'awaiting_payment'] ?? 'bg-slate-100 text-slate-700';
                         ?>
-                        <tr class="hover:bg-slate-50 dark:hover:bg-white/5">
+                        <tr class="hover:bg-slate-50:bg-white/5">
                             <td class="px-5 py-3">
                                 <a href="/admin/orders.php?action=view&id=<?= $order['id'] ?>"
                                     class="font-bold text-primary hover:underline">
@@ -353,7 +353,7 @@ $pageTitle = 'Dashboard';
 <!-- Bottom Row -->
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
     <!-- Geographic Overview -->
-    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
         <h3 class="text-lg font-bold mb-1">Top Countries</h3>
         <p class="text-sm text-slate-500 mb-4">Customer distribution</p>
         <div class="space-y-3">
@@ -385,7 +385,7 @@ $pageTitle = 'Dashboard';
     </div>
 
     <!-- Order Status Funnel -->
-    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
         <h3 class="text-lg font-bold mb-1">Order Pipeline</h3>
         <p class="text-sm text-slate-500 mb-4">Current order status</p>
         <div class="space-y-3">
@@ -401,7 +401,7 @@ $pageTitle = 'Dashboard';
             foreach ($statusLabels as $key => $info):
                 $count = $statusData[$key] ?? 0;
                 ?>
-                <div class="flex items-center gap-3 p-3 rounded-lg bg-slate-50 dark:bg-white/5">
+                <div class="flex items-center gap-3 p-3 rounded-lg bg-slate-50">
                     <div class="w-8 h-8 rounded-lg <?= $info['color'] ?> text-white flex items-center justify-center">
                         <span class="material-symbols-outlined text-lg"><?= $info['icon'] ?></span>
                     </div>
@@ -415,26 +415,26 @@ $pageTitle = 'Dashboard';
     </div>
 
     <!-- Quick Actions -->
-    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
         <h3 class="text-lg font-bold mb-4">Quick Actions</h3>
         <div class="grid grid-cols-2 gap-3">
             <a href="/admin/templates.php?action=new"
-                class="flex flex-col items-center justify-center p-4 rounded-lg bg-slate-50 dark:bg-white/5 hover:bg-primary/10 hover:text-primary transition-all gap-2 group border border-transparent hover:border-primary/20">
+                class="flex flex-col items-center justify-center p-4 rounded-lg bg-slate-50 hover:bg-primary/10 hover:text-primary transition-all gap-2 group border border-transparent hover:border-primary/20">
                 <span class="material-symbols-outlined text-slate-600 group-hover:text-primary">add_circle</span>
                 <span class="text-xs font-bold">New Template</span>
             </a>
             <a href="/admin/orders.php"
-                class="flex flex-col items-center justify-center p-4 rounded-lg bg-slate-50 dark:bg-white/5 hover:bg-primary/10 hover:text-primary transition-all gap-2 group border border-transparent hover:border-primary/20">
+                class="flex flex-col items-center justify-center p-4 rounded-lg bg-slate-50 hover:bg-primary/10 hover:text-primary transition-all gap-2 group border border-transparent hover:border-primary/20">
                 <span class="material-symbols-outlined text-slate-600 group-hover:text-primary">receipt_long</span>
                 <span class="text-xs font-bold">View Orders</span>
             </a>
             <a href="/admin/promo-codes.php"
-                class="flex flex-col items-center justify-center p-4 rounded-lg bg-slate-50 dark:bg-white/5 hover:bg-primary/10 hover:text-primary transition-all gap-2 group border border-transparent hover:border-primary/20">
+                class="flex flex-col items-center justify-center p-4 rounded-lg bg-slate-50 hover:bg-primary/10 hover:text-primary transition-all gap-2 group border border-transparent hover:border-primary/20">
                 <span class="material-symbols-outlined text-slate-600 group-hover:text-primary">sell</span>
                 <span class="text-xs font-bold">Promo Codes</span>
             </a>
             <a href="/admin/support.php"
-                class="flex flex-col items-center justify-center p-4 rounded-lg bg-slate-50 dark:bg-white/5 hover:bg-primary/10 hover:text-primary transition-all gap-2 group border border-transparent hover:border-primary/20 relative">
+                class="flex flex-col items-center justify-center p-4 rounded-lg bg-slate-50 hover:bg-primary/10 hover:text-primary transition-all gap-2 group border border-transparent hover:border-primary/20 relative">
                 <span class="material-symbols-outlined text-slate-600 group-hover:text-primary">support_agent</span>
                 <span class="text-xs font-bold">Support</span>
                 <?php if ($stats['support'] > 0): ?>

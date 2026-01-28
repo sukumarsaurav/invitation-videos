@@ -565,9 +565,9 @@ class ImageHelper
         $class = htmlspecialchars($class, ENT_QUOTES, 'UTF-8');
         $srcsetAttr = implode(', ', $srcset);
 
-        // sizes: matches new breakpoints - 2 cols below 769px, 3 cols 769-1023, 4 cols 1024-1279, 5 cols 1280+
+        // sizes: matches new breakpoints - 2 cols below 768px, 3 cols 768-1023, 4 cols 1024-1279, 5 cols 1280+
         // Max container is ~1280px, so largest image is ~256px (1280/5)
-        $sizes = '(max-width: 768px) 50vw, (max-width: 1023px) 33vw, (max-width: 1279px) 25vw, 20vw';
+        $sizes = '(max-width: 767px) 50vw, (max-width: 1023px) 33vw, (max-width: 1279px) 25vw, 20vw';
 
         return sprintf(
             '<img src="%s" srcset="%s" sizes="%s" alt="%s" class="%s" width="300" height="375" loading="%s" decoding="%s"%s>',

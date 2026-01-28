@@ -173,7 +173,7 @@ if ($category && isset($categoryTitles[$category])) {
 
         <!-- Desktop Sidebar Filters (hidden on mobile) -->
         <aside
-            class="hidden lg:block w-72 xl:w-80 lg:shrink-0 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-y-auto lg:h-[calc(100vh-65px)] lg:sticky lg:top-[65px]">
+            class="hidden lg:block w-72 xl:w-80 lg:shrink-0 border-r border-slate-200 bg-white overflow-y-auto lg:h-[calc(100vh-65px)] lg:sticky lg:top-[65px]">
             <div class="flex flex-col h-full p-6">
                 <!-- Categories -->
                 <div class="py-4">
@@ -195,7 +195,7 @@ if ($category && isset($categoryTitles[$category])) {
                     </div>
                 </div>
 
-                <div class="h-px bg-slate-200 dark:bg-slate-800 my-2"></div>
+                <div class="h-px bg-slate-200 my-2"></div>
 
                 <!-- Cultural Traditions -->
                 <div class="py-4">
@@ -205,7 +205,7 @@ if ($category && isset($categoryTitles[$category])) {
                         <?php foreach ($traditions as $t): ?>
                             <a href="/templates?tradition=<?= strtolower($t) ?><?= $category ? '&category=' . $category : '' ?>"
                                 class="inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-bold transition-all 
-                               <?= $tradition === strtolower($t) ? 'border-primary bg-primary text-white' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 hover:border-primary hover:text-primary' ?>">
+                               <?= $tradition === strtolower($t) ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-white text-slate-600 hover:border-primary hover:text-primary' ?>">
                                 <?= $t ?>
                             </a>
                         <?php endforeach; ?>
@@ -213,7 +213,7 @@ if ($category && isset($categoryTitles[$category])) {
                 </div>
 
                 <?php if (!empty($subcategoryFilters)): ?>
-                    <div class="h-px bg-slate-200 dark:bg-slate-800 my-2"></div>
+                    <div class="h-px bg-slate-200 my-2"></div>
 
                     <!-- Event Types (Subcategories) -->
                     <div class="py-4">
@@ -222,7 +222,7 @@ if ($category && isset($categoryTitles[$category])) {
                             <?php foreach ($subcategoryFilters as $subcat): ?>
                                 <a href="/templates?category=<?= $subcat['slug'] ?><?= $tradition ? '&tradition=' . $tradition : '' ?>"
                                     class="inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-bold transition-all 
-                               <?= ($category === $subcat['slug']) ? 'border-primary bg-primary text-white' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 hover:border-primary hover:text-primary' ?>">
+                               <?= ($category === $subcat['slug']) ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-white text-slate-600 hover:border-primary hover:text-primary' ?>">
                                     <?= htmlspecialchars($subcat['name']) ?>
                                 </a>
                             <?php endforeach; ?>
@@ -230,7 +230,7 @@ if ($category && isset($categoryTitles[$category])) {
                     </div>
                 <?php endif; ?>
 
-                <div class="h-px bg-slate-200 dark:bg-slate-800 my-2"></div>
+                <div class="h-px bg-slate-200 my-2"></div>
 
                 <!-- Sort (Desktop) -->
                 <div class="py-4">
@@ -255,18 +255,17 @@ if ($category && isset($categoryTitles[$category])) {
                 <nav class="hidden sm:flex items-center gap-2 text-sm mb-4">
                     <a class="text-slate-500 hover:text-primary transition-colors" href="/">Home</a>
                     <span class="text-slate-400">/</span>
-                    <span class="font-medium text-slate-900 dark:text-white">Templates</span>
+                    <span class="font-medium text-slate-900">Templates</span>
                 </nav>
 
                 <!-- Header - hidden on mobile, visible on desktop -->
                 <div class="hidden sm:flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                     <div>
-                        <h1
-                            class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                        <h1 class="heading-hero text-slate-900 tracking-tight">
                             <?= $category && isset($allCategories[$category]) ? $allCategories[$category]['name'] : 'All' ?>
                             Templates
                         </h1>
-                        <p class="text-slate-500 dark:text-slate-400 mt-1">
+                        <p class="text-slate-500 mt-1">
                             <span id="template-count"><?= $totalTemplates ?></span> templates found
                         </p>
                     </div>
@@ -275,7 +274,7 @@ if ($category && isset($categoryTitles[$category])) {
                     <div class="hidden sm:flex items-center gap-2">
                         <span class="text-sm text-slate-500">Sort:</span>
                         <select onchange="window.location.href=this.value"
-                            class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2 text-sm font-medium">
+                            class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium">
                             <?php foreach ($sortOptions as $key => $label): ?>
                                 <option value="?<?= http_build_query(array_merge($_GET, ['sort' => $key])) ?>"
                                     <?= $sort === $key ? 'selected' : '' ?>>
@@ -296,7 +295,7 @@ if ($category && isset($categoryTitles[$category])) {
                     <a href="/template/<?= Security::escape($template['slug']) ?>" class="group block">
                         <!-- Image Card -->
                         <div
-                            class="relative aspect-[4/5] overflow-hidden bg-slate-100 rounded-2xl shadow-sm hover:shadow-xl transition-all border border-slate-100 dark:border-slate-800 group-hover:border-primary/30">
+                            class="relative aspect-[4/5] overflow-hidden bg-slate-100 rounded-2xl shadow-sm hover:shadow-xl transition-all border border-slate-100 group-hover:border-primary/30">
                             <?= ImageHelper::responsiveThumbnail(
                                 $template['thumbnail_url'] ?? '/assets/images/placeholder.jpg',
                                 $template['title'],
@@ -327,10 +326,10 @@ if ($category && isset($categoryTitles[$category])) {
                         <!-- Title & Price (Outside Card) -->
                         <div class="pt-3 px-1">
                             <h3
-                                class="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-primary transition-colors">
+                                class="font-bold text-sm text-slate-900 truncate group-hover:text-primary transition-colors">
                                 <?= Security::escape($template['title']) ?>
                             </h3>
-                            <p class="template-price text-sm font-semibold mt-0.5 <?= $template['price_usd'] == 0 ? 'text-green-600' : 'text-slate-700 dark:text-slate-300' ?>"
+                            <p class="template-price text-sm font-semibold mt-0.5 <?= $template['price_usd'] == 0 ? 'text-green-600' : 'text-slate-700' ?>"
                                 data-usd="<?= $template['price_usd'] ?>" data-inr="<?= $template['price_inr'] ?? 0 ?>">
                                 <?= $template['price_usd'] == 0 ? 'Free' : '₹' . number_format($template['price_inr'] ?? 0, 0) ?>
                             </p>
@@ -347,10 +346,10 @@ if ($category && isset($categoryTitles[$category])) {
                         <!-- Skeleton Cards -->
                         <?php for ($i = 0; $i < 4; $i++): ?>
                             <div class="animate-pulse">
-                                <div class="aspect-[4/5] bg-slate-200 dark:bg-slate-700 rounded-2xl"></div>
+                                <div class="aspect-[4/5] bg-slate-200 rounded-2xl"></div>
                                 <div class="pt-3 px-1">
-                                    <div class="h-4 bg-slate-200 dark:bg-slate-700 rounded w-3/4 mb-2"></div>
-                                    <div class="h-3 bg-slate-200 dark:bg-slate-700 rounded w-1/4"></div>
+                                    <div class="h-4 bg-slate-200 rounded w-3/4 mb-2"></div>
+                                    <div class="h-3 bg-slate-200 rounded w-1/4"></div>
                                 </div>
                             </div>
                         <?php endfor; ?>
@@ -402,16 +401,16 @@ if ($category && isset($categoryTitles[$category])) {
 
 <!-- Filter Bottom Sheet -->
 <div id="filter-sheet"
-    class="fixed bottom-0 left-0 right-0 z-[110] bg-white dark:bg-slate-900 rounded-t-3xl transform translate-y-full transition-transform duration-300 ease-out max-h-[85vh] overflow-hidden flex flex-col">
+    class="fixed bottom-0 left-0 right-0 z-[110] bg-white rounded-t-3xl transform translate-y-full transition-transform duration-300 ease-out max-h-[85vh] overflow-hidden flex flex-col">
     <!-- Handle -->
     <div class="flex justify-center pt-3 pb-2">
-        <div class="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></div>
+        <div class="w-10 h-1 rounded-full bg-slate-300"></div>
     </div>
 
     <!-- Header -->
-    <div class="flex items-center justify-between px-5 pb-4 border-b border-slate-200 dark:border-slate-700">
+    <div class="flex items-center justify-between px-5 pb-4 border-b border-slate-200">
         <h3 class="text-lg font-bold">Filter Templates</h3>
-        <button onclick="closeSheet()" class="p-2 -mr-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+        <button onclick="closeSheet()" class="p-2 -mr-2 rounded-lg hover:bg-slate-100:bg-slate-800">
             <span class="material-symbols-outlined">close</span>
         </button>
     </div>
@@ -423,12 +422,12 @@ if ($category && isset($categoryTitles[$category])) {
             <h4 class="text-sm font-bold text-slate-500 uppercase tracking-wide mb-3">Category</h4>
             <div class="flex flex-wrap gap-2" id="filter-categories">
                 <button type="button" data-category=""
-                    class="filter-cat-btn px-4 py-2 rounded-full text-sm font-medium border transition-all <?= !$category ? 'border-primary bg-primary text-white' : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300' ?>">
+                    class="filter-cat-btn px-4 py-2 rounded-full text-sm font-medium border transition-all <?= !$category ? 'border-primary bg-primary text-white' : 'border-slate-200 text-slate-600' ?>">
                     All
                 </button>
                 <?php foreach ($allCategories as $key => $cat): ?>
                     <button type="button" data-category="<?= $key ?>"
-                        class="filter-cat-btn px-4 py-2 rounded-full text-sm font-medium border transition-all <?= $category === $key ? 'border-primary bg-primary text-white' : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300' ?>">
+                        class="filter-cat-btn px-4 py-2 rounded-full text-sm font-medium border transition-all <?= $category === $key ? 'border-primary bg-primary text-white' : 'border-slate-200 text-slate-600' ?>">
                         <?= $cat['name'] ?>
                     </button>
                 <?php endforeach; ?>
@@ -445,7 +444,7 @@ if ($category && isset($categoryTitles[$category])) {
                     foreach ($subcategoryFilters as $subcat):
                         ?>
                         <button type="button" data-subcategory="<?= $subcat['slug'] ?>"
-                            class="filter-subcat-btn px-4 py-2 rounded-full text-sm font-medium border transition-all <?= $currentSubcat === $subcat['slug'] ? 'border-primary bg-primary text-white' : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300' ?>">
+                            class="filter-subcat-btn px-4 py-2 rounded-full text-sm font-medium border transition-all <?= $currentSubcat === $subcat['slug'] ? 'border-primary bg-primary text-white' : 'border-slate-200 text-slate-600' ?>">
                             <?= htmlspecialchars($subcat['name']) ?>
                         </button>
                     <?php endforeach; ?>
@@ -458,12 +457,12 @@ if ($category && isset($categoryTitles[$category])) {
             <h4 class="text-sm font-bold text-slate-500 uppercase tracking-wide mb-3">Cultural Tradition</h4>
             <div class="flex flex-wrap gap-2" id="filter-traditions">
                 <button type="button" data-tradition=""
-                    class="filter-trad-btn px-4 py-2 rounded-full text-sm font-medium border transition-all <?= !$tradition ? 'border-primary bg-primary text-white' : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300' ?>">
+                    class="filter-trad-btn px-4 py-2 rounded-full text-sm font-medium border transition-all <?= !$tradition ? 'border-primary bg-primary text-white' : 'border-slate-200 text-slate-600' ?>">
                     All
                 </button>
                 <?php foreach ($traditions as $t): ?>
                     <button type="button" data-tradition="<?= strtolower($t) ?>"
-                        class="filter-trad-btn px-4 py-2 rounded-full text-sm font-medium border transition-all <?= $tradition === strtolower($t) ? 'border-primary bg-primary text-white' : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300' ?>">
+                        class="filter-trad-btn px-4 py-2 rounded-full text-sm font-medium border transition-all <?= $tradition === strtolower($t) ? 'border-primary bg-primary text-white' : 'border-slate-200 text-slate-600' ?>">
                         <?= $t ?>
                     </button>
                 <?php endforeach; ?>
@@ -472,7 +471,7 @@ if ($category && isset($categoryTitles[$category])) {
     </div>
 
     <!-- Apply Button -->
-    <div class="p-5 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+    <div class="p-5 border-t border-slate-200 bg-white">
         <button onclick="applyFilters()"
             class="w-full py-4 rounded-xl bg-primary text-white font-bold text-lg shadow-lg shadow-primary/30 active:scale-[0.98] transition-transform">
             Apply Filters
@@ -482,33 +481,33 @@ if ($category && isset($categoryTitles[$category])) {
 
 <!-- Sort Bottom Sheet (Clean Design) -->
 <div id="sort-sheet"
-    class="fixed bottom-0 left-0 right-0 z-[110] bg-white dark:bg-slate-900 rounded-t-3xl transform translate-y-full transition-transform duration-300 ease-out">
+    class="fixed bottom-0 left-0 right-0 z-[110] bg-white rounded-t-3xl transform translate-y-full transition-transform duration-300 ease-out">
     <!-- Header -->
-    <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-700">
-        <h3 class="text-sm font-bold uppercase tracking-wide text-slate-900 dark:text-white">Sort By</h3>
+    <div class="px-5 py-4 border-b border-slate-200">
+        <h3 class="text-sm font-bold uppercase tracking-wide text-slate-900">Sort By</h3>
     </div>
 
     <!-- Sort Options (Clean List) -->
     <div class="py-2">
         <button onclick="applySort('popular')"
-            class="w-full flex items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800">
+            class="w-full flex items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-slate-50:bg-slate-800">
             <span class="material-symbols-outlined text-xl text-slate-500">local_fire_department</span>
-            <span class="font-medium text-slate-700 dark:text-slate-200">Popularity</span>
+            <span class="font-medium text-slate-700">Popularity</span>
         </button>
         <button onclick="applySort('newest')"
-            class="w-full flex items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800">
+            class="w-full flex items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-slate-50:bg-slate-800">
             <span class="material-symbols-outlined text-xl text-slate-500">schedule</span>
-            <span class="font-medium text-slate-700 dark:text-slate-200">Latest</span>
+            <span class="font-medium text-slate-700">Latest</span>
         </button>
         <button onclick="applySort('price_high')"
-            class="w-full flex items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800">
+            class="w-full flex items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-slate-50:bg-slate-800">
             <span class="material-symbols-outlined text-xl text-slate-500">trending_down</span>
-            <span class="font-medium text-slate-700 dark:text-slate-200">Price: High to Low</span>
+            <span class="font-medium text-slate-700">Price: High to Low</span>
         </button>
         <button onclick="applySort('price_low')"
-            class="w-full flex items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800">
+            class="w-full flex items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-slate-50:bg-slate-800">
             <span class="material-symbols-outlined text-xl text-slate-500">trending_up</span>
-            <span class="font-medium text-slate-700 dark:text-slate-200">Price: Low to High</span>
+            <span class="font-medium text-slate-700">Price: Low to High</span>
         </button>
     </div>
 </div>
@@ -570,9 +569,9 @@ if ($category && isset($categoryTitles[$category])) {
         btn.addEventListener('click', function () {
             document.querySelectorAll('.filter-cat-btn').forEach(b => {
                 b.classList.remove('border-primary', 'bg-primary', 'text-white');
-                b.classList.add('border-slate-200', 'dark:border-slate-700', 'text-slate-600', 'dark:text-slate-300');
+                b.classList.add('border-slate-200', 'text-slate-600');
             });
-            this.classList.remove('border-slate-200', 'dark:border-slate-700', 'text-slate-600', 'dark:text-slate-300');
+            this.classList.remove('border-slate-200', 'text-slate-600');
             this.classList.add('border-primary', 'bg-primary', 'text-white');
             selectedCategory = this.dataset.category;
         });
@@ -582,9 +581,9 @@ if ($category && isset($categoryTitles[$category])) {
         btn.addEventListener('click', function () {
             document.querySelectorAll('.filter-trad-btn').forEach(b => {
                 b.classList.remove('border-primary', 'bg-primary', 'text-white');
-                b.classList.add('border-slate-200', 'dark:border-slate-700', 'text-slate-600', 'dark:text-slate-300');
+                b.classList.add('border-slate-200', 'text-slate-600');
             });
-            this.classList.remove('border-slate-200', 'dark:border-slate-700', 'text-slate-600', 'dark:text-slate-300');
+            this.classList.remove('border-slate-200', 'text-slate-600');
             this.classList.add('border-primary', 'bg-primary', 'text-white');
             selectedTradition = this.dataset.tradition;
         });
@@ -596,14 +595,14 @@ if ($category && isset($categoryTitles[$category])) {
             // Toggle: click again to deselect
             if (this.classList.contains('bg-primary')) {
                 this.classList.remove('border-primary', 'bg-primary', 'text-white');
-                this.classList.add('border-slate-200', 'dark:border-slate-700', 'text-slate-600', 'dark:text-slate-300');
+                this.classList.add('border-slate-200', 'text-slate-600');
                 selectedSubcategory = '';
             } else {
                 document.querySelectorAll('.filter-subcat-btn').forEach(b => {
                     b.classList.remove('border-primary', 'bg-primary', 'text-white');
-                    b.classList.add('border-slate-200', 'dark:border-slate-700', 'text-slate-600', 'dark:text-slate-300');
+                    b.classList.add('border-slate-200', 'text-slate-600');
                 });
-                this.classList.remove('border-slate-200', 'dark:border-slate-700', 'text-slate-600', 'dark:text-slate-300');
+                this.classList.remove('border-slate-200', 'text-slate-600');
                 this.classList.add('border-primary', 'bg-primary', 'text-white');
                 selectedSubcategory = this.dataset.subcategory;
             }
@@ -684,7 +683,7 @@ if ($category && isset($categoryTitles[$category])) {
 
     function createTemplateCard(template) {
         const isFree = template.price_usd === 0;
-        const priceClass = isFree ? 'text-green-600' : 'text-slate-700 dark:text-slate-300';
+        const priceClass = isFree ? 'text-green-600' : 'text-slate-700';
         const priceInr = Math.round(template.price_inr || 0);
         const priceUsd = Math.round(template.price_usd || 0);
         const priceText = isFree ? 'Free' : (userCurrency === 'USD' ? '$' + priceUsd : '₹' + priceInr.toLocaleString('en-IN'));
@@ -713,14 +712,14 @@ if ($category && isset($categoryTitles[$category])) {
 
         return `
         <a href="/template/${template.slug}" class="group block">
-            <div class="relative aspect-[4/5] overflow-hidden bg-slate-100 rounded-2xl shadow-sm hover:shadow-xl transition-all border border-slate-100 dark:border-slate-800 group-hover:border-primary/30">
+            <div class="relative aspect-[4/5] overflow-hidden bg-slate-100 rounded-2xl shadow-sm hover:shadow-xl transition-all border border-slate-100 group-hover:border-primary/30">
                 <img src="${imgSrc}" alt="${template.title}" loading="lazy" decoding="async" 
                      class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                 ${badge}
                 ${wishlistBtn}
             </div>
             <div class="pt-3 px-1">
-                <h3 class="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-primary transition-colors">${template.title}</h3>
+                <h3 class="font-bold text-sm text-slate-900 truncate group-hover:text-primary transition-colors">${template.title}</h3>
                 <p class="template-price text-sm font-semibold mt-0.5 ${priceClass}" data-usd="${template.price_usd}" data-inr="${template.price_inr || 0}">${priceText}</p>
             </div>
         </a>

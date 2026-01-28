@@ -410,7 +410,7 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
             <span class="text-slate-400">/</span>
             <a class="text-slate-500 hover:text-primary transition-colors" href="/templates">Templates</a>
             <span class="text-slate-400">/</span>
-            <span class="font-medium text-slate-900 dark:text-white"><?= Security::escape($template['title']) ?></span>
+            <span class="font-medium text-slate-900"><?= Security::escape($template['title']) ?></span>
         </nav>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -516,7 +516,7 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                             class="inline-flex items-center gap-1 text-xs font-bold text-primary uppercase tracking-wider mb-2">
                             <?= ucfirst(str_replace('_', ' ', $template['category'] ?? 'General')) ?>
                         </span>
-                        <h1 class="text-3xl md:text-4xl font-black text-slate-900 dark:text-white leading-tight">
+                        <h1 class="heading-hero text-slate-900 leading-tight">
                             <?= Security::escape($template['title']) ?>
                         </h1>
                     </div>
@@ -554,32 +554,32 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                 </div>
 
                 <!-- Description -->
-                <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+                <p class="text-slate-600 leading-relaxed">
                     <?= Security::escape($template['description'] ?? 'Beautiful video invitation template perfect for your special occasion.') ?>
                 </p>
 
                 <!-- Features -->
                 <ul class="space-y-3">
-                    <li class="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+                    <li class="flex items-center gap-3 text-slate-700">
                         <span class="material-symbols-outlined text-green-500">check_circle</span>
                         <span>Full HD 1080p Video Download</span>
                     </li>
-                    <li class="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+                    <li class="flex items-center gap-3 text-slate-700">
                         <span class="material-symbols-outlined text-green-500">check_circle</span>
                         <span>Optimized for WhatsApp & Social Media</span>
                     </li>
-                    <li class="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+                    <li class="flex items-center gap-3 text-slate-700">
                         <span class="material-symbols-outlined text-green-500">check_circle</span>
                         <span>Delivered in 24-48 Hours</span>
                     </li>
-                    <li class="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+                    <li class="flex items-center gap-3 text-slate-700">
                         <span class="material-symbols-outlined text-green-500">check_circle</span>
                         <span>Free Revisions Included</span>
                     </li>
                 </ul>
 
                 <!-- Language Selector -->
-                <div class="pt-4 border-t border-slate-200 dark:border-slate-700">
+                <div class="pt-4 border-t border-slate-200">
                     <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wide mb-3">
                         Select Language
                     </h3>
@@ -600,11 +600,11 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                         foreach ($languages as $lang):
                             ?>
                             <button type="button"
-                                class="lang-btn px-3 py-2 rounded-lg border-2 text-center transition-all <?= $selectedLang === $lang['code'] ? 'border-primary bg-primary/5 ring-2 ring-primary/20' : 'border-slate-200 dark:border-slate-700 hover:border-primary/50' ?>"
+                                class="lang-btn px-3 py-2 rounded-lg border-2 text-center transition-all <?= $selectedLang === $lang['code'] ? 'border-primary bg-primary/5 ring-2 ring-primary/20' : 'border-slate-200 hover:border-primary/50' ?>"
                                 data-lang="<?= $lang['code'] ?>" data-name="<?= $lang['name'] ?>"
                                 data-native="<?= $lang['native'] ?>">
                                 <span
-                                    class="block text-sm font-bold <?= $selectedLang === $lang['code'] ? 'text-primary' : 'text-slate-700 dark:text-slate-300' ?>"><?= $lang['native'] ?></span>
+                                    class="block text-sm font-bold <?= $selectedLang === $lang['code'] ? 'text-primary' : 'text-slate-700' ?>"><?= $lang['native'] ?></span>
                                 <span class="block text-xs text-slate-500"><?= $lang['name'] ?></span>
                             </button>
                         <?php endforeach; ?>
@@ -621,7 +621,7 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                     </div>
                 </div>
                 <!-- Trust badges -->
-                <div class="flex items-center gap-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                <div class="flex items-center gap-4 pt-4 border-t border-slate-200">
                     <div class="flex items-center gap-2 text-sm text-slate-500">
                         <span class="material-symbols-outlined text-lg">verified_user</span>
                         <span>Secure Payment</span>
@@ -636,8 +636,8 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
 
         <!-- Related Templates Section -->
         <?php if (!empty($relatedTemplates)): ?>
-            <div class="mt-16 pt-8 border-t border-slate-200 dark:border-slate-700">
-                <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">Related Templates</h2>
+            <div class="mt-16 pt-8 border-t border-slate-200">
+                <h2 class="text-2xl font-bold text-slate-900 mb-6">Related Templates</h2>
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                     <?php foreach ($relatedTemplates as $related): ?>
                         <a href="/template/<?= Security::escape($related['slug']) ?>" class="group block">
@@ -669,11 +669,11 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
 
         <!-- Fixed Bottom Bar for Mobile (up to lg breakpoint) -->
         <div
-            class="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
+            class="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-white border-t border-slate-200 p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
             <div class="flex items-center justify-between gap-4 max-w-7xl mx-auto">
                 <div class="flex-1">
                     <p class="text-xs text-slate-500">Starting at</p>
-                    <p class="text-lg font-black text-slate-900 dark:text-white template-price"
+                    <p class="text-lg font-black text-slate-900 template-price"
                         data-usd="<?= $template['price_usd'] ?>" data-inr="<?= $template['price_inr'] ?? 0 ?>">
                         ₹<?= number_format($template['price_inr'] ?? 0, 0) ?>
                     </p>
@@ -709,9 +709,9 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                     <?php include __DIR__ . '/../components/dress-selection.php'; ?>
 
                     <!-- Navigation -->
-                    <div class="flex items-center justify-between gap-4 pt-6 border-t border-slate-200 dark:border-slate-700">
+                    <div class="flex items-center justify-between gap-4 pt-6 border-t border-slate-200">
                         <a href="/template/<?= Security::escape($templateSlug) ?>"
-                            class="flex items-center gap-2 px-6 py-3 rounded-lg border border-slate-200 dark:border-slate-700 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                            class="flex items-center gap-2 px-6 py-3 rounded-lg border border-slate-200 font-bold hover:bg-slate-50:bg-slate-800 transition-colors">
                             <span class="material-symbols-outlined">arrow_back</span>
                             Back
                         </a>
@@ -725,7 +725,7 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
 
                 <!-- Fixed Bottom Bar for Mobile (dress step) -->
                 <div
-                    class="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
+                    class="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white border-t border-slate-200 p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
                     <button type="submit" form="customize-form"
                         class="w-full flex items-center justify-center gap-2 px-8 py-3 rounded-lg bg-primary text-white font-bold hover:bg-primary/90 shadow-lg shadow-primary/25 transition-colors">
                         <span>Next Step</span>
@@ -747,7 +747,7 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                                     <!-- Step Circle -->
                                     <div
                                         class="size-10 rounded-full flex items-center justify-center text-sm font-bold transition-all shrink-0
-                                    <?= $s < $step ? 'bg-green-500 text-white' : ($s === $step ? 'bg-primary text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400') ?>">
+                                    <?= $s < $step ? 'bg-green-500 text-white' : ($s === $step ? 'bg-primary text-white' : 'bg-slate-200 text-slate-500') ?>">
                                         <?php if ($s < $step): ?>
                                             <span class="material-symbols-outlined text-lg">check</span>
                                         <?php else: ?>
@@ -757,7 +757,7 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                                     <!-- Connecting Line -->
                                     <?php if ($idx < count($availableSteps) - 1): ?>
                                         <div
-                                            class="flex-1 h-0.5 mx-2 <?= $s < $step ? 'bg-green-500' : 'bg-slate-200 dark:bg-slate-700' ?>">
+                                            class="flex-1 h-0.5 mx-2 <?= $s < $step ? 'bg-green-500' : 'bg-slate-200' ?>">
                                         </div>
                                     <?php endif; ?>
                                 </div>
@@ -765,7 +765,7 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                         </div>
                         <!-- Current Step Title -->
                         <div class="text-center">
-                            <h2 class="font-bold text-slate-900 dark:text-white text-lg">
+                            <h2 class="font-bold text-slate-900 text-lg">
                                 <?= $stepTitles[$step] ?? 'Details' ?>
                             </h2>
                         </div>
@@ -787,16 +787,16 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                     <?= $formRenderer->renderByGroups($templateId, $stepGroups[$step] ?? [], $storedValues) ?>
 
                     <!-- Navigation Buttons -->
-                    <div class="flex items-center justify-between gap-4 pt-6 border-t border-slate-200 dark:border-slate-700">
+                    <div class="flex items-center justify-between gap-4 pt-6 border-t border-slate-200">
                         <?php if ($currentStepIndex > 0): ?>
                             <a href="/template/<?= Security::escape($templateSlug) ?>?step=<?= $availableSteps[$currentStepIndex - 1] ?>"
-                                class="hidden md:flex items-center gap-2 px-6 py-3 rounded-lg border border-slate-200 dark:border-slate-700 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                                class="hidden md:flex items-center gap-2 px-6 py-3 rounded-lg border border-slate-200 font-bold hover:bg-slate-50:bg-slate-800 transition-colors">
                                 <span class="material-symbols-outlined">arrow_back</span>
                                 Back
                             </a>
                         <?php else: ?>
                             <a href="/template/<?= Security::escape($templateSlug) ?>"
-                                class="hidden md:flex items-center gap-2 px-6 py-3 rounded-lg border border-slate-200 dark:border-slate-700 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                                class="hidden md:flex items-center gap-2 px-6 py-3 rounded-lg border border-slate-200 font-bold hover:bg-slate-50:bg-slate-800 transition-colors">
                                 <span class="material-symbols-outlined">arrow_back</span>
                                 Back
                             </a>
@@ -818,7 +818,7 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
 
             <!-- Fixed Bottom Bar for Mobile (customize steps) -->
             <div
-                class="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
+                class="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white border-t border-slate-200 p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
                 <button type="submit" form="customize-form"
                     class="w-full flex items-center justify-center gap-2 px-8 py-3 rounded-lg bg-primary text-white font-bold hover:bg-primary/90 shadow-lg shadow-primary/25 transition-colors">
                     <?php if ($currentStepIndex < $totalSteps - 1): ?>
@@ -1033,7 +1033,7 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                 btn.classList.toggle('ring-2', isSelected);
                 btn.classList.toggle('ring-primary/20', isSelected);
                 btn.classList.toggle('border-slate-200', !isSelected);
-                btn.classList.toggle('dark:border-slate-700', !isSelected);
+                btn.classList.toggle(!isSelected);
                 btn.querySelector('span:first-child').classList.toggle('text-primary', isSelected);
                 btn.querySelector('span:first-child').classList.toggle('text-slate-700', !isSelected);
             });
@@ -1124,26 +1124,26 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
             modal.id = 'translation-modal';
             modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm';
             modal.innerHTML = `
-                <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full p-6">
-                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">
+                <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">
                         You selected: ${langNative} (${langName})
                     </h3>
                     <p class="text-sm text-slate-500 mb-6">How would you like to enter your text?</p>
                     
                     <div class="space-y-3">
-                        <label class="flex items-start gap-3 p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 cursor-pointer hover:border-primary/50 transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+                        <label class="flex items-start gap-3 p-4 rounded-xl border-2 border-slate-200 cursor-pointer hover:border-primary/50 transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5">
                             <input type="radio" name="translation_mode" value="self" class="mt-1 text-primary" checked>
                             <div class="flex-1">
-                                <span class="block font-bold text-slate-900 dark:text-white">I will type in ${langName}</span>
+                                <span class="block font-bold text-slate-900">I will type in ${langName}</span>
                                 <span class="block text-sm text-slate-500">Enter your text directly in ${langName}</span>
                             </div>
                             <span class="text-green-600 font-bold">FREE</span>
                         </label>
                         
-                        <label class="flex items-start gap-3 p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 cursor-pointer hover:border-primary/50 transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+                        <label class="flex items-start gap-3 p-4 rounded-xl border-2 border-slate-200 cursor-pointer hover:border-primary/50 transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5">
                             <input type="radio" name="translation_mode" value="translate" class="mt-1 text-primary">
                             <div class="flex-1">
-                                <span class="block font-bold text-slate-900 dark:text-white">Translate my English to ${langName}</span>
+                                <span class="block font-bold text-slate-900">Translate my English to ${langName}</span>
                                 <span class="block text-sm text-slate-500">Type in English, we'll translate for you</span>
                             </div>
                             <span class="text-amber-600 font-bold">+₹99</span>
@@ -1151,7 +1151,7 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                     </div>
                     
                     <div class="flex gap-3 mt-6">
-                        <button type="button" onclick="closeTranslationModal()" class="flex-1 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 font-bold hover:bg-slate-50 transition-colors">
+                        <button type="button" onclick="closeTranslationModal()" class="flex-1 px-4 py-3 rounded-xl border border-slate-200 font-bold hover:bg-slate-50 transition-colors">
                             Cancel
                         </button>
                         <button type="button" onclick="confirmTranslationChoice('${langCode}', '${langName}', '${langNative}')" class="flex-1 px-4 py-3 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 transition-colors">

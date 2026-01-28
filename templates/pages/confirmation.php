@@ -62,29 +62,29 @@ $pageTitle = 'Order Confirmed - ' . $order['order_number'];
         <!-- Success Animation -->
         <div class="mb-8">
             <div
-                class="w-24 h-24 mx-auto bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center animate-bounce-in">
-                <span class="material-symbols-outlined text-5xl text-green-600 dark:text-green-400">check_circle</span>
+                class="w-24 h-24 mx-auto bg-green-100 rounded-full flex items-center justify-center animate-bounce-in">
+                <span class="material-symbols-outlined text-5xl text-green-600">check_circle</span>
             </div>
         </div>
 
         <!-- Success Message -->
-        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white mb-3">
+        <h1 class="text-3xl font-extrabold text-slate-900 mb-3">
             Payment Successful!
         </h1>
-        <p class="text-slate-600 dark:text-slate-400 mb-8">
+        <p class="text-slate-600 mb-8">
             Thank you for your order. Your video invitation is being prepared.
         </p>
 
         <!-- Order Details Card -->
         <div
-            class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 mb-8 text-left shadow-lg">
+            class="bg-white rounded-2xl border border-slate-200 p-6 mb-8 text-left shadow-lg">
 
-            <div class="flex gap-4 mb-6 pb-6 border-b border-slate-100 dark:border-slate-800">
+            <div class="flex gap-4 mb-6 pb-6 border-b border-slate-100">
                 <div class="w-20 h-14 shrink-0 rounded-lg bg-cover bg-center shadow-sm"
                     style="background-image: url('<?= Security::escape($order['thumbnail_url'] ?? '') ?>');">
                 </div>
                 <div class="flex flex-col justify-center flex-1">
-                    <h3 class="font-bold text-slate-900 dark:text-white">
+                    <h3 class="font-bold text-slate-900">
                         <?= Security::escape($order['template_title']) ?>
                     </h3>
                     <p class="text-sm text-slate-500">Order #<?= Security::escape($order['order_number']) ?></p>
@@ -96,11 +96,11 @@ $pageTitle = 'Order Confirmed - ' . $order['order_number'];
                     <span class="text-slate-500">Status</span>
                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold 
                         <?php if ($order['status'] === 'paid'): ?>
-                            bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400
+                            bg-green-100 text-green-700
                         <?php elseif ($order['status'] === 'processing'): ?>
-                            bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400
+                            bg-blue-100 text-blue-700
                         <?php else: ?>
-                            bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400
+                            bg-yellow-100 text-yellow-700
                         <?php endif; ?>">
                         <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
                         <?= ucfirst($order['status']) ?>
@@ -108,19 +108,19 @@ $pageTitle = 'Order Confirmed - ' . $order['order_number'];
                 </div>
                 <div class="flex justify-between">
                     <span class="text-slate-500">Amount Paid</span>
-                    <span class="font-bold text-slate-900 dark:text-white">
+                    <span class="font-bold text-slate-900">
                         <?= $order['currency'] === 'INR' ? '₹' : '$' ?><?= number_format($order['amount'], 2) ?>
                     </span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-slate-500">Payment Method</span>
-                    <span class="text-slate-700 dark:text-slate-300">
+                    <span class="text-slate-700">
                         <?= ucfirst($order['payment_gateway'] ?? 'Card') ?>
                     </span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-slate-500">Date</span>
-                    <span class="text-slate-700 dark:text-slate-300">
+                    <span class="text-slate-700">
                         <?= date('M j, Y g:i A', strtotime($order['created_at'])) ?>
                     </span>
                 </div>
@@ -129,11 +129,11 @@ $pageTitle = 'Order Confirmed - ' . $order['order_number'];
 
         <!-- What's Next -->
         <div class="bg-primary/5 rounded-xl border border-primary/10 p-5 mb-8 text-left">
-            <h4 class="font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+            <h4 class="font-bold text-slate-900 mb-3 flex items-center gap-2">
                 <span class="material-symbols-outlined text-primary">info</span>
                 What happens next?
             </h4>
-            <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+            <ul class="space-y-2 text-sm text-slate-600">
                 <li class="flex items-start gap-2">
                     <span class="material-symbols-outlined text-green-500 text-base mt-0.5">check</span>
                     Your payment has been confirmed
@@ -157,7 +157,7 @@ $pageTitle = 'Order Confirmed - ' . $order['order_number'];
                 View My Orders
             </a>
             <a href="/templates"
-                class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-xl transition-all">
+                class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-slate-100 hover:bg-slate-200:bg-slate-700 text-slate-700 font-bold rounded-xl transition-all">
                 <span class="material-symbols-outlined">explore</span>
                 Browse More Templates
             </a>

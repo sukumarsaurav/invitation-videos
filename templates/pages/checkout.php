@@ -127,10 +127,10 @@ function renderCheckoutField($field, $existingData = [])
     $label = Security::escape($field['name']);
     $icon = Security::escape($field['icon'] ?? 'text_fields');
 
-    $inputClass = "h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 focus:border-primary w-full";
+    $inputClass = "h-11 px-4 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20 focus:border-primary w-full";
 
     $html = '<label class="flex flex-col gap-2">';
-    $html .= '<span class="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1.5">';
+    $html .= '<span class="text-sm font-medium text-slate-700 flex items-center gap-1.5">';
     $html .= '<span class="material-symbols-outlined text-lg text-primary">' . $icon . '</span>';
     $html .= $label;
     if ($field['is_required']) {
@@ -239,7 +239,7 @@ $pageTitle = 'Checkout - ' . $order['order_number'];
             </nav>
 
             <div class="flex flex-col gap-1">
-                <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Secure Checkout</h1>
+                <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Secure Checkout</h1>
                 <p class="text-slate-500">Complete your details to create your personalized video invitation.</p>
             </div>
 
@@ -290,8 +290,8 @@ $pageTitle = 'Checkout - ' . $order['order_number'];
                     <!-- Step 1: Event Details -->
                     <?php if (!empty($fieldsByStep[1])): ?>
                         <section data-step="1"
-                            class="checkout-step bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
-                            <div class="flex items-center gap-3 mb-6 border-b border-slate-100 dark:border-slate-800 pb-4">
+                            class="checkout-step bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+                            <div class="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
                                 <span class="material-symbols-outlined text-primary text-2xl">event</span>
                                 <h2 class="text-xl font-bold tracking-tight">Event Details</h2>
                             </div>
@@ -312,8 +312,8 @@ $pageTitle = 'Checkout - ' . $order['order_number'];
                     <!-- Step 2: Personal Info -->
                     <?php if (!empty($fieldsByStep[2])): ?>
                         <section data-step="2"
-                            class="checkout-step hidden bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
-                            <div class="flex items-center gap-3 mb-6 border-b border-slate-100 dark:border-slate-800 pb-4">
+                            class="checkout-step hidden bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+                            <div class="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
                                 <span class="material-symbols-outlined text-primary text-2xl">person</span>
                                 <h2 class="text-xl font-bold tracking-tight">Personal Information</h2>
                             </div>
@@ -338,8 +338,8 @@ $pageTitle = 'Checkout - ' . $order['order_number'];
                     <!-- Step 3: Media & Extras -->
                     <?php if (!empty($fieldsByStep[3])): ?>
                         <section data-step="3"
-                            class="checkout-step hidden bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
-                            <div class="flex items-center gap-3 mb-6 border-b border-slate-100 dark:border-slate-800 pb-4">
+                            class="checkout-step hidden bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+                            <div class="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
                                 <span class="material-symbols-outlined text-primary text-2xl">photo_library</span>
                                 <h2 class="text-xl font-bold tracking-tight">Media & Extras</h2>
                             </div>
@@ -364,43 +364,43 @@ $pageTitle = 'Checkout - ' . $order['order_number'];
 
                 <!-- Final Step: Billing & Payment -->
                 <section data-step="4"
-                    class="checkout-step <?= $hasCustomizationFields && (!empty($fieldsByStep[1]) || !empty($fieldsByStep[2]) || !empty($fieldsByStep[3])) ? 'hidden' : '' ?> bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
-                    <div class="flex items-center gap-3 mb-6 border-b border-slate-100 dark:border-slate-800 pb-4">
+                    class="checkout-step <?= $hasCustomizationFields && (!empty($fieldsByStep[1]) || !empty($fieldsByStep[2]) || !empty($fieldsByStep[3])) ? 'hidden' : '' ?> bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+                    <div class="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
                         <span class="material-symbols-outlined text-primary text-2xl">credit_card</span>
                         <h2 class="text-xl font-bold tracking-tight">Billing & Payment</h2>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
                         <label class="flex flex-col gap-2">
-                            <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Full Name</span>
+                            <span class="text-sm font-medium text-slate-700">Full Name</span>
                             <input type="text" name="billing_name" required
-                                class="h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                                class="h-11 px-4 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20 focus:border-primary"
                                 placeholder="John Doe" value="<?= Security::escape($user['name'] ?? '') ?>">
                         </label>
 
                         <label class="flex flex-col gap-2">
-                            <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Email Address</span>
+                            <span class="text-sm font-medium text-slate-700">Email Address</span>
                             <input type="email" name="billing_email" required
-                                class="h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                                class="h-11 px-4 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20 focus:border-primary"
                                 placeholder="john@example.com" value="<?= Security::escape($user['email'] ?? '') ?>">
                         </label>
 
                         <?php if (!$isIndian): ?>
                             <label class="flex flex-col gap-2 md:col-span-2">
-                                <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Billing Address</span>
+                                <span class="text-sm font-medium text-slate-700">Billing Address</span>
                                 <input type="text" name="billing_address"
-                                    class="h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                                    class="h-11 px-4 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20 focus:border-primary"
                                     placeholder="123 Main St, City, State, ZIP">
                             </label>
                         <?php endif; ?>
                     </div>
 
-                    <div class="border-t border-slate-100 dark:border-slate-800 pt-6 mb-6">
+                    <div class="border-t border-slate-100 pt-6 mb-6">
                         <h3 class="text-lg font-bold mb-4">Payment Method</h3>
                         <?php if ($isIndian): ?>
                             <!-- Razorpay for India -->
                             <div class="text-center py-4">
-                                <p class="text-slate-600 dark:text-slate-400 mb-4">You will be redirected to Razorpay's
+                                <p class="text-slate-600 mb-4">You will be redirected to Razorpay's
                                     secure payment page</p>
                                 <div class="flex justify-center gap-4 items-center flex-wrap">
                                     <img src="/assets/images/razorpay.png" alt="Razorpay" class="h-8" width="100"
@@ -415,7 +415,7 @@ $pageTitle = 'Checkout - ' . $order['order_number'];
                         <?php else: ?>
                             <!-- Stripe for Global -->
                             <div id="card-element"
-                                class="p-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+                                class="p-4 rounded-lg border border-slate-200 bg-slate-50">
                                 <!-- Stripe Elements will mount here -->
                             </div>
                             <div id="card-errors" class="text-red-500 text-sm mt-2"></div>
@@ -439,7 +439,7 @@ $pageTitle = 'Checkout - ' . $order['order_number'];
         <div class="lg:col-span-5">
             <div class="lg:sticky lg:top-24 flex flex-col gap-6">
                 <div
-                    class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-lg">
+                    class="bg-white rounded-xl border border-slate-200 p-6 shadow-lg">
                     <h3 class="text-lg font-bold mb-4">Order Summary</h3>
 
                     <div class="flex gap-4 mb-6">
@@ -449,14 +449,14 @@ $pageTitle = 'Checkout - ' . $order['order_number'];
                                 class="w-full h-full object-cover" width="96" height="64" loading="eager">
                         </div>
                         <div class="flex flex-col justify-center">
-                            <h4 class="text-sm font-bold text-slate-900 dark:text-white leading-tight">
+                            <h4 class="text-sm font-bold text-slate-900 leading-tight">
                                 <?= Security::escape($order['template_title']) ?>
                             </h4>
                             <p class="text-xs text-slate-500 mt-1">Order
                                 #<?= Security::escape($order['order_number']) ?></p>
                         </div>
                         <div class="ml-auto flex items-center">
-                            <span class="font-bold text-slate-900 dark:text-white">
+                            <span class="font-bold text-slate-900">
                                 <?= $order['currency'] === 'INR' ? '₹' : '$' ?><?= number_format($order['amount'], 2) ?>
                             </span>
                         </div>
@@ -465,17 +465,17 @@ $pageTitle = 'Checkout - ' . $order['order_number'];
                     <!-- Promo Code -->
                     <div class="flex gap-2 mb-6">
                         <input type="text" id="promo-code" placeholder="Promo code"
-                            class="flex-1 h-10 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-primary/20">
+                            class="flex-1 h-10 px-4 rounded-lg border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-primary/20">
                         <button type="button" onclick="applyPromo()"
-                            class="px-4 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-bold transition-colors">
+                            class="px-4 h-10 rounded-lg bg-slate-100 hover:bg-slate-200:bg-slate-700 text-slate-700 text-sm font-bold transition-colors">
                             Apply
                         </button>
                     </div>
 
-                    <hr class="border-slate-100 dark:border-slate-800 mb-4">
+                    <hr class="border-slate-100 mb-4">
 
                     <div class="space-y-3 mb-6">
-                        <div class="flex justify-between text-sm text-slate-600 dark:text-slate-400">
+                        <div class="flex justify-between text-sm text-slate-600">
                             <span>Subtotal</span>
                             <span><?= $order['currency'] === 'INR' ? '₹' : '$' ?><?= number_format($order['amount'], 2) ?></span>
                         </div>
@@ -483,9 +483,9 @@ $pageTitle = 'Checkout - ' . $order['order_number'];
                             <span>Discount</span>
                             <span id="discount-amount">-<?= $order['currency'] === 'INR' ? '₹' : '$' ?>0.00</span>
                         </div>
-                        <hr class="border-slate-100 dark:border-slate-800 border-dashed">
+                        <hr class="border-slate-100 border-dashed">
                         <div
-                            class="flex justify-between items-center text-lg font-bold text-slate-900 dark:text-white pt-2">
+                            class="flex justify-between items-center text-lg font-bold text-slate-900 pt-2">
                             <span>Total</span>
                             <span
                                 id="total-amount"><?= $order['currency'] === 'INR' ? '₹' : '$' ?><?= number_format($order['amount'], 2) ?></span>
@@ -512,7 +512,7 @@ $pageTitle = 'Checkout - ' . $order['order_number'];
                         <span class="material-symbols-outlined text-lg">support_agent</span>
                     </div>
                     <div>
-                        <h5 class="text-sm font-bold text-slate-900 dark:text-white">Need help with your order?</h5>
+                        <h5 class="text-sm font-bold text-slate-900">Need help with your order?</h5>
                         <p class="text-xs text-slate-500 mt-1 leading-relaxed">Our support team is available 24/7 to
                             assist you.</p>
                         <a class="text-xs font-bold text-primary mt-2 inline-block hover:underline"

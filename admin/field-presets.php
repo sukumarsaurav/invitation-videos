@@ -123,7 +123,7 @@ $fieldTypes = ['text', 'textarea', 'date', 'time', 'datetime', 'image', 'music',
 
     <?php if ($action === 'new' || $action === 'edit'): ?>
         <!-- Add/Edit Form -->
-        <div class="bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
             <h2 class="text-lg font-bold mb-4"><?= $editPreset ? 'Edit Preset' : 'Add New Preset' ?></h2>
             
             <form method="POST" class="space-y-4">
@@ -210,13 +210,13 @@ $fieldTypes = ['text', 'textarea', 'date', 'time', 'datetime', 'image', 'music',
     <?php else: ?>
         <!-- Presets List by Category -->
         <?php foreach ($presetsByCategory as $category => $categoryPresets): ?>
-            <div class="bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
-                <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200">
+                <div class="px-6 py-4 border-b border-slate-200">
                     <h2 class="font-bold text-lg capitalize"><?= str_replace('_', ' ', $category) ?></h2>
                 </div>
-                <div class="divide-y divide-slate-200 dark:divide-slate-700">
+                <div class="divide-y divide-slate-200">
                     <?php foreach ($categoryPresets as $preset): ?>
-                        <div class="flex items-center justify-between px-6 py-4 hover:bg-slate-50 dark:hover:bg-white/5">
+                        <div class="flex items-center justify-between px-6 py-4 hover:bg-slate-50:bg-white/5">
                             <div class="flex items-center gap-4">
                                 <span class="material-symbols-outlined text-primary"><?= Security::escape($preset['icon']) ?></span>
                                 <div>

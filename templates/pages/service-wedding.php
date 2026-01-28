@@ -5,6 +5,7 @@
 
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../src/Core/Security.php';
+require_once __DIR__ . '/../components/template-card.php';
 
 // Fetch relevant templates
 $weddingTemplates = Database::fetchAll(
@@ -19,7 +20,7 @@ ob_start();
 
 <!-- Hero Section -->
 <section class="relative pt-20 pb-24 lg:pt-32 lg:pb-40 overflow-hidden">
-    <div class="absolute inset-0 bg-slate-50 dark:bg-slate-900">
+    <div class="absolute inset-0 bg-slate-50">
         <div class="absolute inset-0 bg-[url('/assets/images/pattern.svg')] opacity-[0.03]"></div>
     </div>
 
@@ -27,17 +28,16 @@ ob_start();
         <div class="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div class="text-center lg:text-left">
                 <div
-                    class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-300 text-sm font-bold mb-6">
+                    class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-600 text-sm font-bold mb-6">
                     <span class="material-symbols-outlined text-base">favorite</span>
                     #1 Wedding Invitation Maker
                 </div>
-                <h1
-                    class="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-white leading-tight mb-6">
+                <h1 class="heading-hero text-slate-900 leading-tight mb-6">
                     Create Beautiful <span
                         class="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-purple-600">Wedding Video
                         Invites</span>
                 </h1>
-                <p class="text-lg text-slate-600 dark:text-slate-400 mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+                <p class="text-lg text-slate-600 mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0">
                     Skip the expensive designers. Create professional, movie-quality wedding invitation videos in
                     minutes. Perfect for WhatsApp, Instagram, and email.
                 </p>
@@ -47,7 +47,7 @@ ob_start();
                         Create Wedding Video
                     </a>
                     <a href="#how-it-works"
-                        class="w-full sm:w-auto px-8 py-4 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all text-center flex items-center justify-center gap-2">
+                        class="w-full sm:w-auto px-8 py-4 bg-white text-slate-700 font-bold rounded-xl border border-slate-200 hover:bg-slate-50:bg-slate-700 transition-all text-center flex items-center justify-center gap-2">
                         <span class="material-symbols-outlined">play_circle</span>
                         See How It Works
                     </a>
@@ -56,7 +56,7 @@ ob_start();
 
             <div class="relative mx-auto w-full max-w-md lg:max-w-full">
                 <div
-                    class="relative aspect-[9/16] rounded-2xl overflow-hidden shadow-2xl border-4 border-white dark:border-slate-800 bg-slate-900">
+                    class="relative aspect-[9/16] rounded-2xl overflow-hidden shadow-2xl border-4 border-white bg-slate-900">
                     <!-- Placeholder for hero video/image -->
                     <div class="absolute inset-0 flex items-center justify-center bg-slate-800 text-slate-500">
                         <span class="material-symbols-outlined text-6xl">movie</span>
@@ -71,36 +71,22 @@ ob_start();
 </section>
 
 <!-- Templates Section -->
-<section id="templates" class="py-20 bg-white dark:bg-slate-900">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+<section id="templates" class="py-20 bg-white">
+    <div class="container-section">
         <div class="text-center mb-12">
-            <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-4">Trending Wedding Templates
+            <h2 class="heading-section text-slate-900 mb-4">Trending Wedding Templates
             </h2>
-            <p class="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">Choose from our collection of premium,
+            <p class="text-slate-600 max-w-2xl mx-auto">Choose from our collection of premium,
                 handcrafted designs. 100% customizable with your photos, music, and text.</p>
         </div>
 
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
             <?php foreach ($weddingTemplates as $template): ?>
-                <a href="/template/<?= Security::escape($template['slug']) ?>"
-                    class="group block bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200 dark:border-slate-700 hover:border-primary/30">
-                    <div class="relative aspect-[4/5] overflow-hidden bg-slate-100">
-                        <img src="<?= Security::escape($template['thumbnail_url']) ?>"
-                            alt="<?= Security::escape($template['title']) ?>"
-                            class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                            loading="lazy">
-                    </div>
-                    <div class="p-4">
-                        <h3
-                            class="font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors truncate">
-                            <?= Security::escape($template['title']) ?>
-                        </h3>
-                        <p
-                            class="text-sm <?= $template['price_usd'] > 0 ? 'text-primary font-bold' : 'text-green-600 font-bold' ?>">
-                            <?= $template['price_usd'] > 0 ? '$' . number_format($template['price_usd'], 2) : 'Free' ?>
-                        </p>
-                    </div>
-                </a>
+                <?= renderTemplateCard($template, [
+                    'variant' => 'service',
+                    'badgeColor' => 'bg-rose-100 text-rose-700',
+                    'showBadge' => false
+                ]) ?>
             <?php endforeach; ?>
         </div>
 
@@ -114,34 +100,31 @@ ob_start();
 </section>
 
 <!-- Features / SEO Content -->
-<section class="py-20 bg-slate-50 dark:bg-slate-800/50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+<section class="py-20 bg-slate-50">
+    <div class="container-section">
         <div class="grid md:grid-cols-3 gap-8">
-            <div class="p-6 bg-white dark:bg-slate-900 rounded-2xl shadow-sm">
-                <div
-                    class="w-12 h-12 rounded-xl bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-300 flex items-center justify-center mb-4">
+            <div class="p-6 bg-white rounded-2xl shadow-sm">
+                <div class="w-12 h-12 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center mb-4">
                     <span class="material-symbols-outlined text-2xl">speed</span>
                 </div>
-                <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Instant Download</h3>
-                <p class="text-slate-600 dark:text-slate-400">No waiting for designers. Edit your template and download
+                <h3 class="text-xl font-bold text-slate-900 mb-2">Instant Download</h3>
+                <p class="text-slate-600">No waiting for designers. Edit your template and download
                     the HD video instantly.</p>
             </div>
-            <div class="p-6 bg-white dark:bg-slate-900 rounded-2xl shadow-sm">
-                <div
-                    class="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300 flex items-center justify-center mb-4">
+            <div class="p-6 bg-white rounded-2xl shadow-sm">
+                <div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center mb-4">
                     <span class="material-symbols-outlined text-2xl">music_note</span>
                 </div>
-                <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Your Choice of Music</h3>
-                <p class="text-slate-600 dark:text-slate-400">Upload your favorite romantic song or choose from our
+                <h3 class="text-xl font-bold text-slate-900 mb-2">Your Choice of Music</h3>
+                <p class="text-slate-600">Upload your favorite romantic song or choose from our
                     royalty-free library.</p>
             </div>
-            <div class="p-6 bg-white dark:bg-slate-900 rounded-2xl shadow-sm">
-                <div
-                    class="w-12 h-12 rounded-xl bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-300 flex items-center justify-center mb-4">
+            <div class="p-6 bg-white rounded-2xl shadow-sm">
+                <div class="w-12 h-12 rounded-xl bg-teal-100 text-teal-600 flex items-center justify-center mb-4">
                     <span class="material-symbols-outlined text-2xl">share</span>
                 </div>
-                <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">WhatsApp Friendly</h3>
-                <p class="text-slate-600 dark:text-slate-400">Optimized for sharing on WhatsApp, Instagram Stories, and
+                <h3 class="text-xl font-bold text-slate-900 mb-2">WhatsApp Friendly</h3>
+                <p class="text-slate-600">Optimized for sharing on WhatsApp, Instagram Stories, and
                     Facebook.</p>
             </div>
         </div>
@@ -149,8 +132,8 @@ ob_start();
 </section>
 
 <!-- Detailed SEO Content Support -->
-<section class="py-20 bg-white dark:bg-slate-900">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 prose prose-lg dark:prose-invert">
+<section class="py-20 bg-white">
+    <div class="container-narrow prose prose-lg">
         <h2>Why Choose a Video Invitation for Your Wedding?</h2>
         <p>In the digital age, paper cards are becoming a thing of the past. A <strong>wedding invitation video</strong>
             is modern, eco-friendly, and creates a lasting impression. It allows you to tell your love story through

@@ -83,7 +83,7 @@ $shareUrl = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HT
             </a>
         <?php endif; ?>
 
-        <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 leading-tight mb-6">
+        <h1 class="heading-hero text-slate-900 leading-tight mb-6">
             <?= Security::escape($post['title']) ?>
         </h1>
 

@@ -90,7 +90,7 @@ $pageTitle = 'Users';
 
     <div class="flex items-center gap-3">
         <button
-            class="flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors text-sm font-medium">
+            class="flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 hover:bg-slate-50:bg-white/5 transition-colors text-sm font-medium">
             <span class="material-symbols-outlined text-lg">download</span>
             Export
         </button>
@@ -111,35 +111,35 @@ $pageTitle = 'Users';
 
 <!-- Stats -->
 <div class="grid grid-cols-3 gap-4 mb-6">
-    <div class="bg-white dark:bg-surface-dark p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
         <p class="text-slate-500 text-xs font-medium uppercase">Total Users</p>
         <p class="text-2xl font-bold mt-1"><?= number_format($stats['total']) ?></p>
     </div>
-    <div class="bg-white dark:bg-surface-dark p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
         <p class="text-slate-500 text-xs font-medium uppercase">Active Users</p>
         <p class="text-2xl font-bold mt-1 text-green-600"><?= number_format($stats['active']) ?></p>
     </div>
-    <div class="bg-white dark:bg-surface-dark p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
         <p class="text-slate-500 text-xs font-medium uppercase">Admins</p>
         <p class="text-2xl font-bold mt-1 text-primary"><?= number_format($stats['admins']) ?></p>
     </div>
 </div>
 
 <!-- Filters -->
-<div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-4 mb-6">
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-6">
     <form method="GET" class="flex flex-wrap items-center gap-4">
         <div class="flex-1 min-w-[200px]">
             <div class="relative">
                 <span
                     class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 material-symbols-outlined text-lg">search</span>
                 <input type="text" name="search" value="<?= Security::escape($search) ?>"
-                    class="w-full h-10 pl-10 pr-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+                    class="w-full h-10 pl-10 pr-4 rounded-lg border border-slate-200 bg-slate-50 text-sm"
                     placeholder="Search by name or email...">
             </div>
         </div>
 
         <select name="role"
-            class="h-10 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
+            class="h-10 px-4 rounded-lg border border-slate-200 bg-slate-50 text-sm">
             <option value="">All Roles</option>
             <option value="customer" <?= $role === 'customer' ? 'selected' : '' ?>>Customer</option>
             <option value="admin" <?= $role === 'admin' ? 'selected' : '' ?>>Admin</option>
@@ -147,7 +147,7 @@ $pageTitle = 'Users';
         </select>
 
         <select name="status"
-            class="h-10 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
+            class="h-10 px-4 rounded-lg border border-slate-200 bg-slate-50 text-sm">
             <option value="">All Status</option>
             <option value="active" <?= $status === 'active' ? 'selected' : '' ?>>Active</option>
             <option value="inactive" <?= $status === 'inactive' ? 'selected' : '' ?>>Inactive</option>
@@ -167,10 +167,10 @@ $pageTitle = 'Users';
 
 <!-- Users Table -->
 <div
-    class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+    class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
     <div class="overflow-x-auto">
         <table class="w-full text-left text-sm">
-            <thead class="bg-slate-50 dark:bg-white/5 text-slate-500 font-semibold uppercase text-xs">
+            <thead class="bg-slate-50 text-slate-500 font-semibold uppercase text-xs">
                 <tr>
                     <th class="px-6 py-4 w-10">
                         <input type="checkbox" class="rounded border-slate-300 text-primary focus:ring-primary">
@@ -182,7 +182,7 @@ $pageTitle = 'Users';
                     <th class="px-6 py-4 text-right">Actions</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody class="divide-y divide-slate-100">
                 <?php foreach ($users as $user):
                     $roleColors = [
                         'admin' => 'bg-purple-100 text-purple-700',
@@ -191,7 +191,7 @@ $pageTitle = 'Users';
                     ];
                     $roleColor = $roleColors[$user['role']] ?? 'bg-slate-100 text-slate-700';
                     ?>
-                    <tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                    <tr class="hover:bg-slate-50:bg-white/5 transition-colors">
                         <td class="px-6 py-4">
                             <input type="checkbox" class="rounded border-slate-300 text-primary focus:ring-primary">
                         </td>
@@ -202,7 +202,7 @@ $pageTitle = 'Users';
                                     <?= strtoupper(substr($user['name'] ?? $user['email'], 0, 1)) ?>
                                 </div>
                                 <div>
-                                    <p class="font-semibold text-slate-900 dark:text-white">
+                                    <p class="font-semibold text-slate-900">
                                         <?= Security::escape($user['name'] ?? 'No Name') ?></p>
                                     <p class="text-xs text-slate-500"><?= Security::escape($user['email']) ?></p>
                                 </div>
@@ -235,16 +235,16 @@ $pageTitle = 'Users';
                             <div class="flex items-center justify-end gap-1">
                                 <div class="relative group">
                                     <button
-                                        class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-500 transition-colors">
+                                        class="p-2 rounded-lg hover:bg-slate-100:bg-white/10 text-slate-500 transition-colors">
                                         <span class="material-symbols-outlined text-lg">more_vert</span>
                                     </button>
                                     <div
-                                        class="absolute right-0 top-full mt-1 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-1 w-44 hidden group-hover:block z-10">
+                                        class="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-slate-200 py-1 w-44 hidden group-hover:block z-10">
                                         <form method="POST" class="contents">
                                             <input type="hidden" name="user_id" value="<?= $user['id'] ?>">
 
                                             <button type="submit" name="action" value="toggle_status"
-                                                class="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 dark:hover:bg-white/5 flex items-center gap-2">
+                                                class="w-full text-left px-4 py-2 text-sm hover:bg-slate-50:bg-white/5 flex items-center gap-2">
                                                 <span
                                                     class="material-symbols-outlined text-lg"><?= $user['status'] === 'active' ? 'block' : 'check_circle' ?></span>
                                                 <?= $user['status'] === 'active' ? 'Suspend' : 'Activate' ?>
@@ -253,14 +253,14 @@ $pageTitle = 'Users';
                                             <?php if ($user['role'] !== 'admin'): ?>
                                                 <button type="submit" name="action" value="change_role"
                                                     onclick="this.form.elements.new_role.value='admin'"
-                                                    class="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 dark:hover:bg-white/5 flex items-center gap-2">
+                                                    class="w-full text-left px-4 py-2 text-sm hover:bg-slate-50:bg-white/5 flex items-center gap-2">
                                                     <span class="material-symbols-outlined text-lg">admin_panel_settings</span>
                                                     Make Admin
                                                 </button>
                                             <?php else: ?>
                                                 <button type="submit" name="action" value="change_role"
                                                     onclick="this.form.elements.new_role.value='customer'"
-                                                    class="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 dark:hover:bg-white/5 flex items-center gap-2">
+                                                    class="w-full text-left px-4 py-2 text-sm hover:bg-slate-50:bg-white/5 flex items-center gap-2">
                                                     <span class="material-symbols-outlined text-lg">person</span>
                                                     Make Customer
                                                 </button>
@@ -289,7 +289,7 @@ $pageTitle = 'Users';
 
     <!-- Pagination -->
     <?php if ($totalPages > 1): ?>
-        <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <div class="px-6 py-4 border-t border-slate-200 flex items-center justify-between">
             <p class="text-sm text-slate-500">
                 Showing <?= $offset + 1 ?> to <?= min($offset + $perPage, $totalUsers) ?> of <?= $totalUsers ?> users
             </p>
@@ -297,7 +297,7 @@ $pageTitle = 'Users';
             <div class="flex items-center gap-1">
                 <?php if ($page > 1): ?>
                     <a href="?page=<?= $page - 1 ?>&role=<?= $role ?>&status=<?= $status ?>&search=<?= urlencode($search) ?>"
-                        class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-500">
+                        class="p-2 rounded-lg hover:bg-slate-100:bg-white/10 text-slate-500">
                         <span class="material-symbols-outlined">chevron_left</span>
                     </a>
                 <?php endif; ?>
@@ -311,7 +311,7 @@ $pageTitle = 'Users';
 
                 <?php if ($page < $totalPages): ?>
                     <a href="?page=<?= $page + 1 ?>&role=<?= $role ?>&status=<?= $status ?>&search=<?= urlencode($search) ?>"
-                        class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-500">
+                        class="p-2 rounded-lg hover:bg-slate-100:bg-white/10 text-slate-500">
                         <span class="material-symbols-outlined">chevron_right</span>
                     </a>
                 <?php endif; ?>

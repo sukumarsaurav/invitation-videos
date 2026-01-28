@@ -108,10 +108,10 @@ $pageTitle = $action === 'new' ? 'New Promo Code' : ($action === 'edit' ? 'Edit 
     <?php endif; ?>
 
     <div
-        class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm">
-                <thead class="bg-slate-50 dark:bg-white/5 text-slate-500 font-semibold uppercase text-xs">
+                <thead class="bg-slate-50 text-slate-500 font-semibold uppercase text-xs">
                     <tr>
                         <th class="px-6 py-4">Code</th>
                         <th class="px-6 py-4">Discount</th>
@@ -122,12 +122,12 @@ $pageTitle = $action === 'new' ? 'New Promo Code' : ($action === 'edit' ? 'Edit 
                         <th class="px-6 py-4 text-right">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                <tbody class="divide-y divide-slate-100">
                     <?php foreach ($promoCodes as $code):
                         $isExpired = !empty($code['valid_until']) && strtotime($code['valid_until']) < time();
                         $usageLimit = $code['max_uses'] ? ($code['used_count'] >= $code['max_uses']) : false;
                         ?>
-                        <tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                        <tr class="hover:bg-slate-50:bg-white/5 transition-colors">
                             <td class="px-6 py-4">
                                 <span class="font-mono font-bold text-primary bg-primary/10 px-2 py-1 rounded">
                                     <?= Security::escape($code['code']) ?>
@@ -225,7 +225,7 @@ $pageTitle = $action === 'new' ? 'New Promo Code' : ($action === 'edit' ? 'Edit 
     <!-- Create/Edit Form -->
     <div class="flex items-center gap-4 mb-6">
         <a href="/admin/promo-codes.php"
-            class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-500 transition-colors">
+            class="p-2 rounded-lg hover:bg-slate-100:bg-white/10 text-slate-500 transition-colors">
             <span class="material-symbols-outlined">arrow_back</span>
         </a>
         <div>
@@ -248,7 +248,7 @@ $pageTitle = $action === 'new' ? 'New Promo Code' : ($action === 'edit' ? 'Edit 
         <input type="hidden" name="form_action" value="<?= $action === 'new' ? 'create' : 'update' ?>">
 
         <div
-            class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 space-y-6">
+            class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-6">
 
             <!-- Code -->
             <div>

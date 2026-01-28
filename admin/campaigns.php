@@ -148,7 +148,7 @@ $pageTitle = 'Campaigns';
 
         <div class="flex items-center gap-3">
             <!-- Date Range Filter -->
-            <div class="flex rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div class="flex rounded-lg border border-slate-200 overflow-hidden">
                 <a href="?range=7d"
                     class="px-3 py-2 text-sm font-medium <?= $range === '7d' ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-50' ?>">7d</a>
                 <a href="?range=30d"
@@ -183,7 +183,7 @@ $pageTitle = 'Campaigns';
         $totalVisitors = array_sum($sourceData);
         ?>
         <?php foreach ($sourceIcons as $source => $config): ?>
-            <div class="bg-white dark:bg-surface-dark p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+            <div class="bg-white p-4 rounded-xl border border-slate-200">
                 <div class="flex items-center gap-2 mb-2">
                     <div class="size-8 <?= $config['bg'] ?> rounded-full flex items-center justify-center">
                         <span class="material-symbols-outlined text-lg <?= $config['color'] ?>">
@@ -207,10 +207,10 @@ $pageTitle = 'Campaigns';
     </div>
 
     <!-- Campaigns Table -->
-    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full">
-                <thead class="bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-slate-700">
+                <thead class="bg-slate-50 border-b border-slate-200">
                     <tr>
                         <th class="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Campaign
                         </th>
@@ -228,7 +228,7 @@ $pageTitle = 'Campaigns';
                         </th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                <tbody class="divide-y divide-slate-100">
                     <?php if (empty($campaigns)): ?>
                         <tr>
                             <td colspan="7" class="px-6 py-12 text-center text-slate-500">
@@ -244,14 +244,14 @@ $pageTitle = 'Campaigns';
                         </tr>
                     <?php else: ?>
                         <?php foreach ($campaigns as $c): ?>
-                            <tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                            <tr class="hover:bg-slate-50:bg-white/5 transition-colors">
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-3">
                                         <div class="size-10 bg-primary/10 rounded-lg flex items-center justify-center">
                                             <span class="material-symbols-outlined text-primary">campaign</span>
                                         </div>
                                         <div>
-                                            <p class="font-semibold text-slate-900 dark:text-white">
+                                            <p class="font-semibold text-slate-900">
                                                 <?= htmlspecialchars($c['name']) ?>
                                             </p>
                                             <p class="text-xs text-slate-400 font-mono">
@@ -403,7 +403,7 @@ $pageTitle = 'Campaigns';
         <!-- Main Form -->
         <div class="lg:col-span-2 space-y-6">
             <!-- Basic Info -->
-            <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-700 p-6">
+            <div class="bg-white rounded-xl border border-slate-200 p-6">
                 <h3 class="font-bold text-lg mb-4">Campaign Details</h3>
 
                 <div class="space-y-4">
@@ -483,7 +483,7 @@ $pageTitle = 'Campaigns';
             </div>
 
             <!-- Schedule & Budget -->
-            <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-700 p-6">
+            <div class="bg-white rounded-xl border border-slate-200 p-6">
                 <h3 class="font-bold text-lg mb-4">Schedule & Budget</h3>
 
                 <div class="grid grid-cols-3 gap-4">
@@ -519,7 +519,7 @@ $pageTitle = 'Campaigns';
         <!-- Sidebar -->
         <div class="space-y-6">
             <!-- Status -->
-            <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-700 p-6">
+            <div class="bg-white rounded-xl border border-slate-200 p-6">
                 <h3 class="font-bold text-lg mb-4">Status</h3>
 
                 <select name="status"
@@ -549,7 +549,7 @@ $pageTitle = 'Campaigns';
             </div>
 
             <!-- URL Preview -->
-            <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-700 p-6">
+            <div class="bg-white rounded-xl border border-slate-200 p-6">
                 <h3 class="font-bold text-lg mb-4">Generated URL</h3>
 
                 <div class="bg-slate-50 rounded-lg p-4 break-all font-mono text-xs text-slate-600" id="url-preview">
@@ -572,7 +572,7 @@ $pageTitle = 'Campaigns';
 
             <?php if ($campaign): ?>
                 <!-- Campaign Stats -->
-                <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-700 p-6">
+                <div class="bg-white rounded-xl border border-slate-200 p-6">
                     <h3 class="font-bold text-lg mb-4">Performance</h3>
 
                     <?php $stats = CampaignService::getStats($campaign['id'], $dateFrom, $dateTo); ?>

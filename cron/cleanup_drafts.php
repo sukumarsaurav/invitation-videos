@@ -1,4 +1,3 @@
-#!/usr/bin/env php
 <?php
 /**
  * Clean up expired draft orders

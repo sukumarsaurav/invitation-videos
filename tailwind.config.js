@@ -5,7 +5,8 @@ module.exports = {
         "./admin/**/*.php",
         "./index.php"
     ],
-    darkMode: "class",
+    // Dark mode disabled - site uses light mode only
+    darkMode: false,
     theme: {
         extend: {
             colors: {
@@ -16,7 +17,6 @@ module.exports = {
                 "text-secondary": "#404040",    // Body text and descriptions
                 // Background Colors
                 "background-light": "#fdf7f3",  // Light mode background
-                "background-dark": "#2c0914",   // Dark mode background
                 // Header Colors
                 "header-bg": "#2c0914",         // Header background
                 "header-text": "#b69b5b",       // Header links and text
@@ -25,19 +25,18 @@ module.exports = {
                 "footer-bg": "#2c0914",         // Footer background
                 "footer-text": "#b69b5b",       // Footer links and text
                 "footer-hover": "#fdf7f3",      // Footer link hover state
-                // Legacy aliases for compatibility
+                // Surface colors
                 "surface-light": "#ffffff",
-                "surface-dark": "#2c0914",
             },
             fontFamily: {
                 "display": ["Plus Jakarta Sans", "sans-serif"],
             },
             screens: {
-                'xs': '481px',    // 481-768: small mobile to tablet
-                'sm': '769px',   // 769-1023: tablet
-                'md': '1024px',  // 1024-1279: small desktop
-                'lg': '1280px',  // 1280-1535: desktop
-                'xl': '1536px',  // 1536+: large screens
+                'xs': '480px',    // 480-767: small mobile to large mobile
+                'sm': '768px',    // 768-1023: tablet (industry standard)
+                'md': '1024px',   // 1024-1279: small desktop
+                'lg': '1280px',   // 1280-1535: desktop
+                'xl': '1536px',   // 1536+: large screens
             },
         },
     },

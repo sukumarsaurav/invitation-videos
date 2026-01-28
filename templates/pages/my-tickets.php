@@ -94,8 +94,8 @@ $pageTitle = 'My Support Tickets';
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-            <h1 class="text-3xl font-bold text-slate-900 dark:text-white">My Support Tickets</h1>
-            <p class="text-slate-600 dark:text-slate-400 mt-2">Track your support requests and communicate with our team
+            <h1 class="text-3xl font-bold text-slate-900">My Support Tickets</h1>
+            <p class="text-slate-600 mt-2">Track your support requests and communicate with our team
             </p>
         </div>
         <a href="/support"
@@ -114,9 +114,9 @@ $pageTitle = 'My Support Tickets';
 
     <?php if (empty($tickets)): ?>
         <!-- Empty State -->
-        <div class="text-center py-16 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+        <div class="text-center py-16 bg-white rounded-2xl border border-slate-200">
             <span class="material-symbols-outlined text-6xl text-slate-300">support_agent</span>
-            <h3 class="mt-4 text-xl font-bold text-slate-900 dark:text-white">No support tickets</h3>
+            <h3 class="mt-4 text-xl font-bold text-slate-900">No support tickets</h3>
             <p class="mt-2 text-slate-500">Need help? Create a new support ticket</p>
             <a href="/support"
                 class="inline-flex items-center gap-2 mt-6 px-6 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 transition-colors">
@@ -130,11 +130,11 @@ $pageTitle = 'My Support Tickets';
             <!-- Tickets List -->
             <div class="w-full lg:w-96 shrink-0">
                 <div
-                    class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
-                    <div class="p-4 border-b border-slate-200 dark:border-slate-800">
+                    class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                    <div class="p-4 border-b border-slate-200">
                         <span class="text-sm font-semibold text-slate-500 uppercase tracking-wide">Your Tickets</span>
                     </div>
-                    <div class="divide-y divide-slate-100 dark:divide-slate-800 max-h-[600px] overflow-y-auto">
+                    <div class="divide-y divide-slate-100 max-h-[600px] overflow-y-auto">
                         <?php foreach ($tickets as $ticket):
                             $isActive = $ticketId === intval($ticket['id']);
                             $statusColors = [
@@ -155,13 +155,13 @@ $pageTitle = 'My Support Tickets';
                             ?>
                             <a href="/my-tickets?id=<?= $ticket['id'] ?>" class="block p-4 transition-colors <?= $isActive
                                   ? 'bg-primary/5 border-l-4 border-l-primary'
-                                  : 'hover:bg-slate-50 dark:hover:bg-slate-800 border-l-4 border-l-transparent' ?>">
+                                  : 'hover:bg-slate-50:bg-slate-800 border-l-4 border-l-transparent' ?>">
                                 <div class="flex items-center justify-between mb-2">
                                     <span
                                         class="text-xs font-medium text-slate-500">#<?= Security::escape($ticket['ticket_number']) ?></span>
                                     <span class="text-xs text-slate-400"><?= $timeStr ?></span>
                                 </div>
-                                <h3 class="text-sm font-semibold text-slate-900 dark:text-white line-clamp-1">
+                                <h3 class="text-sm font-semibold text-slate-900 line-clamp-1">
                                     <?= Security::escape($ticket['subject']) ?>
                                 </h3>
                                 <div class="flex items-center justify-between mt-2">
@@ -185,12 +185,12 @@ $pageTitle = 'My Support Tickets';
             <div class="flex-1">
                 <?php if ($currentTicket): ?>
                     <div
-                        class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+                        class="bg-white rounded-xl border border-slate-200 overflow-hidden">
                         <!-- Ticket Header -->
-                        <div class="p-5 border-b border-slate-200 dark:border-slate-800">
+                        <div class="p-5 border-b border-slate-200">
                             <div class="flex items-start justify-between gap-4">
                                 <div>
-                                    <h2 class="text-lg font-bold text-slate-900 dark:text-white">
+                                    <h2 class="text-lg font-bold text-slate-900">
                                         <?= Security::escape($currentTicket['subject']) ?>
                                     </h2>
                                     <p class="text-sm text-slate-500 mt-1">
@@ -218,13 +218,13 @@ $pageTitle = 'My Support Tickets';
                         <!-- Messages -->
                         <div class="p-5 space-y-4 max-h-[400px] overflow-y-auto">
                             <!-- Original Message -->
-                            <div class="bg-slate-50 dark:bg-slate-800 rounded-xl p-4">
+                            <div class="bg-slate-50 rounded-xl p-4">
                                 <div class="flex items-center gap-2 mb-2 text-sm text-slate-500">
                                     <span class="material-symbols-outlined text-lg">mail</span>
                                     Original Message •
                                     <?= date('M j, Y g:i A', strtotime($currentTicket['created_at'])) ?>
                                 </div>
-                                <div class="text-slate-700 dark:text-slate-300 whitespace-pre-wrap">
+                                <div class="text-slate-700 whitespace-pre-wrap">
                                     <?= nl2br(Security::escape($currentTicket['message'])) ?>
                                 </div>
                             </div>
@@ -242,7 +242,7 @@ $pageTitle = 'My Support Tickets';
                                             class="inline-block text-left rounded-xl p-4
                                             <?= $msg['sender_type'] === 'user'
                                                 ? 'bg-primary text-white'
-                                                : 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' ?>">
+                                                : 'bg-green-50 border border-green-200' ?>">
                                             <p class="text-sm whitespace-pre-wrap"><?= nl2br(Security::escape($msg['message'])) ?>
                                             </p>
                                         </div>
@@ -256,12 +256,12 @@ $pageTitle = 'My Support Tickets';
 
                         <!-- Reply Form -->
                         <?php if ($currentTicket['status'] !== 'closed'): ?>
-                            <div class="p-5 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
+                            <div class="p-5 border-t border-slate-200 bg-slate-50">
                                 <form method="POST">
                                     <?= Security::csrfField() ?>
                                     <div class="flex gap-3">
                                         <textarea name="message" required rows="2"
-                                            class="flex-1 px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm resize-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                                            class="flex-1 px-4 py-3 rounded-lg border border-slate-200 bg-white text-sm resize-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                                             placeholder="Type your reply..."></textarea>
                                         <button type="submit"
                                             class="px-6 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 transition-colors shadow-sm flex items-center gap-2 self-end">
@@ -272,7 +272,7 @@ $pageTitle = 'My Support Tickets';
                                 </form>
                             </div>
                         <?php else: ?>
-                            <div class="p-5 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
+                            <div class="p-5 border-t border-slate-200 bg-slate-50">
                                 <p class="text-sm text-slate-500 text-center">
                                     This ticket has been closed. <a href="/support" class="text-primary hover:underline">Create a
                                         new ticket</a> if you need more help.
@@ -283,9 +283,9 @@ $pageTitle = 'My Support Tickets';
                 <?php else: ?>
                     <!-- No Ticket Selected -->
                     <div
-                        class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-12 text-center">
+                        class="bg-white rounded-xl border border-slate-200 p-12 text-center">
                         <span class="material-symbols-outlined text-5xl text-slate-300">inbox</span>
-                        <h3 class="mt-4 text-lg font-bold text-slate-700 dark:text-slate-300">Select a ticket</h3>
+                        <h3 class="mt-4 text-lg font-bold text-slate-700">Select a ticket</h3>
                         <p class="mt-2 text-sm text-slate-500">Choose a ticket from the list to view details and reply</p>
                     </div>
                 <?php endif; ?>

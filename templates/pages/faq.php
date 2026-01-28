@@ -76,30 +76,30 @@ $faqs = [
 
 <?php ob_start(); ?>
 
-<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+<div class="container-narrow section-padding">
     <!-- Breadcrumb -->
     <nav class="flex items-center gap-2 text-sm mb-8">
         <a class="text-slate-500 hover:text-primary transition-colors" href="/">Home</a>
         <span class="text-slate-400">/</span>
-        <span class="font-medium text-slate-900 dark:text-white">FAQ</span>
+        <span class="font-medium text-slate-900">FAQ</span>
     </nav>
 
     <!-- Header -->
     <div class="text-center mb-12">
-        <h1 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">
+        <h1 class="heading-section text-slate-900 mb-4">
             Frequently Asked Questions
         </h1>
-        <p class="text-lg text-slate-600 dark:text-slate-400">
+        <p class="text-lg text-slate-600">
             Find answers to common questions about our video invitation service
         </p>
     </div>
 
     <!-- Quick Contact -->
     <div
-        class="bg-gradient-to-r from-primary/10 to-purple-100 dark:from-primary/20 dark:to-purple-900/20 rounded-2xl p-6 mb-10 flex flex-col sm:flex-row items-center justify-between gap-4">
+        class="bg-gradient-to-r from-primary/10 to-purple-100 rounded-2xl p-6 mb-10 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>
-            <h3 class="font-bold text-slate-900 dark:text-white">Can't find what you're looking for?</h3>
-            <p class="text-slate-600 dark:text-slate-400">Our support team is here to help</p>
+            <h3 class="font-bold text-slate-900">Can't find what you're looking for?</h3>
+            <p class="text-slate-600">Our support team is here to help</p>
         </div>
         <a href="/support"
             class="flex items-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-colors">
@@ -112,17 +112,17 @@ $faqs = [
     <div class="space-y-8">
         <?php foreach ($faqs as $category => $questions): ?>
             <div
-                class="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 overflow-hidden">
+                class="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
                 <h2
-                    class="text-lg font-bold px-6 py-4 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+                    class="text-lg font-bold px-6 py-4 bg-slate-50 border-b border-slate-200">
                     <?= Security::escape($category) ?>
                 </h2>
-                <div class="divide-y divide-slate-200 dark:divide-slate-700">
+                <div class="divide-y divide-slate-200">
                     <?php foreach ($questions as $index => $faq): ?>
                         <details class="group" <?= $index === 0 ? 'open' : '' ?>>
                             <summary
-                                class="flex items-center justify-between gap-4 p-6 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                                <span class="font-medium text-slate-900 dark:text-white">
+                                class="flex items-center justify-between gap-4 p-6 cursor-pointer hover:bg-slate-50:bg-slate-800 transition-colors">
+                                <span class="font-medium text-slate-900">
                                     <?= Security::escape($faq['question']) ?>
                                 </span>
                                 <span
@@ -130,7 +130,7 @@ $faqs = [
                                     expand_more
                                 </span>
                             </summary>
-                            <div class="px-6 pb-6 text-slate-600 dark:text-slate-400">
+                            <div class="px-6 pb-6 text-slate-600">
                                 <?= $faq['answer'] ?>
                             </div>
                         </details>

@@ -37,22 +37,22 @@ $showBackButton = true;
 
 <?php ob_start(); ?>
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+<div class="container-section py-6 sm:py-10">
 
     <!-- Breadcrumb -->
     <nav class="hidden sm:flex items-center gap-2 text-sm mb-6">
         <a class="text-slate-500 hover:text-primary transition-colors" href="/">Home</a>
         <span class="text-slate-400">/</span>
-        <span class="font-medium text-slate-900 dark:text-white">Wishlist</span>
+        <span class="font-medium text-slate-900">Wishlist</span>
     </nav>
 
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
         <div>
-            <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            <h1 class="heading-hero text-slate-900 tracking-tight">
                 My Wishlist
             </h1>
-            <p class="text-slate-500 dark:text-slate-400 mt-1">
+            <p class="text-slate-500 mt-1">
                 <span id="wishlist-count">
                     <?= count($wishlistItems) ?>
                 </span>
@@ -71,7 +71,7 @@ $showBackButton = true;
                     <a href="/template/<?= Security::escape($template['slug']) ?>" class="block">
                         <!-- Image Card -->
                         <div
-                            class="relative aspect-[4/5] overflow-hidden bg-slate-100 rounded-2xl shadow-sm hover:shadow-xl transition-all border border-slate-100 dark:border-slate-800 group-hover:border-primary/30">
+                            class="relative aspect-[4/5] overflow-hidden bg-slate-100 rounded-2xl shadow-sm hover:shadow-xl transition-all border border-slate-100 group-hover:border-primary/30">
                             <?= ImageHelper::responsiveThumbnail(
                                 $template['thumbnail_url'] ?? '/assets/images/placeholder.jpg',
                                 $template['title'],
@@ -105,11 +105,11 @@ $showBackButton = true;
                     <div class="pt-3 px-1">
                         <a href="/template/<?= Security::escape($template['slug']) ?>" class="block">
                             <h3
-                                class="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-primary transition-colors">
+                                class="font-bold text-sm text-slate-900 truncate group-hover:text-primary transition-colors">
                                 <?= Security::escape($template['title']) ?>
                             </h3>
                         </a>
-                        <p class="template-price text-sm font-semibold mt-0.5 <?= $template['price_usd'] == 0 ? 'text-green-600' : 'text-slate-700 dark:text-slate-300' ?>"
+                        <p class="template-price text-sm font-semibold mt-0.5 <?= $template['price_usd'] == 0 ? 'text-green-600' : 'text-slate-700' ?>"
                             data-usd="<?= $template['price_usd'] ?>" data-inr="<?= $template['price_inr'] ?? 0 ?>">
                             <?= $template['price_usd'] == 0 ? 'Free' : '₹' . number_format($template['price_inr'] ?? 0, 0) ?>
                         </p>
@@ -120,11 +120,11 @@ $showBackButton = true;
     <?php else: ?>
         <!-- Empty State -->
         <div class="text-center py-16">
-            <div class="size-24 mx-auto mb-6 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                <span class="material-symbols-outlined text-5xl text-slate-300 dark:text-slate-600">favorite</span>
+            <div class="size-24 mx-auto mb-6 rounded-full bg-slate-100 flex items-center justify-center">
+                <span class="material-symbols-outlined text-5xl text-slate-300">favorite</span>
             </div>
-            <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Your wishlist is empty</h3>
-            <p class="text-slate-500 dark:text-slate-400 mb-6 max-w-md mx-auto">
+            <h3 class="text-xl font-bold text-slate-900 mb-2">Your wishlist is empty</h3>
+            <p class="text-slate-500 mb-6 max-w-md mx-auto">
                 Save templates you love by clicking the heart icon. They'll appear here for easy access.
             </p>
             <a href="/templates"
@@ -140,7 +140,7 @@ $showBackButton = true;
 <div id="toast"
     class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 opacity-0 pointer-events-none transition-all duration-300 translate-y-4">
     <div
-        class="flex items-center gap-3 px-4 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl shadow-xl">
+        class="flex items-center gap-3 px-4 py-3 bg-slate-900 text-white rounded-xl shadow-xl">
         <span class="material-symbols-outlined text-lg" id="toast-icon">check_circle</span>
         <span id="toast-message" class="font-medium text-sm"></span>
     </div>

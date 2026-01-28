@@ -112,7 +112,7 @@ $provider = $aiService->getProvider();
 
     <!-- Status Cards -->
     <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <div class="bg-white dark:bg-surface-dark rounded-xl shadow-sm border p-4">
+        <div class="bg-white rounded-xl shadow-sm border p-4">
             <div class="flex items-center gap-3">
                 <div class="size-10 rounded-full bg-blue-100 flex items-center justify-center">
                     <span class="material-symbols-outlined text-blue-600">hourglass_top</span>
@@ -125,7 +125,7 @@ $provider = $aiService->getProvider();
                 </div>
             </div>
         </div>
-        <div class="bg-white dark:bg-surface-dark rounded-xl shadow-sm border p-4">
+        <div class="bg-white rounded-xl shadow-sm border p-4">
             <div class="flex items-center gap-3">
                 <div class="size-10 rounded-full bg-amber-100 flex items-center justify-center">
                     <span class="material-symbols-outlined text-amber-600">sync</span>
@@ -138,7 +138,7 @@ $provider = $aiService->getProvider();
                 </div>
             </div>
         </div>
-        <div class="bg-white dark:bg-surface-dark rounded-xl shadow-sm border p-4">
+        <div class="bg-white rounded-xl shadow-sm border p-4">
             <div class="flex items-center gap-3">
                 <div class="size-10 rounded-full bg-green-100 flex items-center justify-center">
                     <span class="material-symbols-outlined text-green-600">check_circle</span>
@@ -151,7 +151,7 @@ $provider = $aiService->getProvider();
                 </div>
             </div>
         </div>
-        <div class="bg-white dark:bg-surface-dark rounded-xl shadow-sm border p-4">
+        <div class="bg-white rounded-xl shadow-sm border p-4">
             <div class="flex items-center gap-3">
                 <div class="size-10 rounded-full bg-red-100 flex items-center justify-center">
                     <span class="material-symbols-outlined text-red-600">error</span>
@@ -164,7 +164,7 @@ $provider = $aiService->getProvider();
                 </div>
             </div>
         </div>
-        <div class="bg-white dark:bg-surface-dark rounded-xl shadow-sm border p-4">
+        <div class="bg-white rounded-xl shadow-sm border p-4">
             <div class="flex items-center gap-3">
                 <div
                     class="size-10 rounded-full <?= $isEnabled ? 'bg-green-100' : 'bg-red-100' ?> flex items-center justify-center">
@@ -185,7 +185,7 @@ $provider = $aiService->getProvider();
     </div>
 
     <!-- Filter Tabs -->
-    <div class="border-b border-slate-200 dark:border-slate-700">
+    <div class="border-b border-slate-200">
         <nav class="flex gap-4">
             <a href="/admin/ai-queue.php"
                 class="py-3 px-1 border-b-2 <?= !$statusFilter ? 'border-primary text-primary font-medium' : 'border-transparent text-slate-500 hover:text-slate-700' ?>">
@@ -211,11 +211,11 @@ $provider = $aiService->getProvider();
     </div>
 
     <!-- Queue Table -->
-    <div class="bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200">
         <div class="overflow-x-auto">
             <table class="w-full">
                 <thead>
-                    <tr class="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-white/5">
+                    <tr class="border-b border-slate-200 bg-slate-50">
                         <th class="text-left px-6 py-3 text-sm font-medium text-slate-500">Order</th>
                         <th class="text-left px-6 py-3 text-sm font-medium text-slate-500">Dress / Color</th>
                         <th class="text-center px-6 py-3 text-sm font-medium text-slate-500">Status</th>
@@ -225,7 +225,7 @@ $provider = $aiService->getProvider();
                         <th class="text-right px-6 py-3 text-sm font-medium text-slate-500">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                <tbody class="divide-y divide-slate-200">
                     <?php if (empty($queueItems)): ?>
                         <tr>
                             <td colspan="7" class="px-6 py-12 text-center text-slate-500">
@@ -235,7 +235,7 @@ $provider = $aiService->getProvider();
                         </tr>
                     <?php else: ?>
                         <?php foreach ($queueItems as $item): ?>
-                            <tr class="hover:bg-slate-50 dark:hover:bg-white/5">
+                            <tr class="hover:bg-slate-50:bg-white/5">
                                 <td class="px-6 py-4">
                                     <a href="/admin/orders.php?search=<?= urlencode($item['order_number']) ?>"
                                         class="font-medium text-primary hover:underline">
@@ -320,7 +320,7 @@ $provider = $aiService->getProvider();
 
     <!-- Prompt Modal -->
     <div id="prompt-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-surface-dark rounded-xl shadow-xl max-w-2xl w-full max-h-[80vh] overflow-auto">
+        <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[80vh] overflow-auto">
             <div class="flex items-center justify-between px-6 py-4 border-b">
                 <h3 class="font-bold">Generation Prompt</h3>
                 <button onclick="closePromptModal()" class="p-2 hover:bg-slate-100 rounded-lg">
@@ -334,7 +334,7 @@ $provider = $aiService->getProvider();
     </div>
 
     <!-- Cron Setup Info -->
-    <div class="bg-slate-50 dark:bg-white/5 rounded-xl p-6">
+    <div class="bg-slate-50 rounded-xl p-6">
         <h3 class="font-bold mb-2">⏰ Cron Setup</h3>
         <p class="text-sm text-slate-600 mb-3">
             To process the queue automatically, add this cron job (runs every minute):

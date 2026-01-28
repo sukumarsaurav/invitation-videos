@@ -294,7 +294,7 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
         <div class="lg:col-span-2 space-y-6">
             <!-- Order Header -->
             <div
-                class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
                 <div class="flex items-start justify-between mb-4">
                     <div>
                         <h2 class="text-2xl font-bold">Order #<?= Security::escape($viewOrder['order_number']) ?></h2>
@@ -318,7 +318,7 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-slate-100">
                     <div>
                         <span class="text-xs text-slate-500 uppercase">Amount</span>
                         <p class="font-bold text-lg">
@@ -343,8 +343,8 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
 
             <!-- Customization Data -->
             <div
-                class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-                <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-white/5">
+                class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-100 bg-slate-50">
                     <h3 class="font-bold flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary">edit_note</span>
                         Customization Details
@@ -359,10 +359,10 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
                             <?php foreach ($customData as $key => $value): ?>
                                 <?php if (!empty($value) && !is_array($value)): ?>
                                     <div
-                                        class="flex flex-col sm:flex-row sm:items-center gap-2 pb-3 border-b border-slate-100 dark:border-slate-800 last:border-0">
+                                        class="flex flex-col sm:flex-row sm:items-center gap-2 pb-3 border-b border-slate-100 last:border-0">
                                         <span
                                             class="text-sm text-slate-500 min-w-[140px] capitalize"><?= str_replace('_', ' ', $key) ?></span>
-                                        <span class="font-medium text-slate-900 dark:text-white"><?= Security::escape($value) ?></span>
+                                        <span class="font-medium text-slate-900"><?= Security::escape($value) ?></span>
                                     </div>
                                 <?php endif; ?>
                             <?php endforeach; ?>
@@ -376,8 +376,8 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
             <!-- Uploaded Images -->
             <?php if (!empty($orderUploads)): ?>
                 <div
-                    class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-                    <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-white/5">
+                    class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-100 bg-slate-50">
                         <h3 class="font-bold flex items-center gap-2">
                             <span class="material-symbols-outlined text-primary">image</span>
                             Uploaded Files (<?= count($orderUploads) ?>)
@@ -492,8 +492,8 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
 
             <!-- Video Upload / Status -->
             <div
-                class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-                <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-white/5">
+                class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-100 bg-slate-50">
                     <h3 class="font-bold flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary">video_library</span>
                         Video Delivery
@@ -820,7 +820,7 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
         <div class="space-y-6">
             <!-- Customer Info -->
             <div
-                class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
                 <h3 class="font-bold mb-4 flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary">person</span>
                     Customer
@@ -845,7 +845,7 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
 
             <!-- Template Info -->
             <div
-                class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
                 <h3 class="font-bold mb-4 flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary">movie</span>
                     Template
@@ -861,7 +861,7 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
 
             <!-- Update Status -->
             <div
-                class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
                 <h3 class="font-bold mb-4 flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary">sync</span>
                     Update Status
@@ -873,7 +873,7 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Payment Status</label>
                         <select name="payment_status"
-                            class="w-full h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
+                            class="w-full h-10 px-3 rounded-lg border border-slate-200 bg-slate-50 text-sm">
                             <option value="pending" <?= ($viewOrder['payment_status'] ?? 'pending') === 'pending' ? 'selected' : '' ?>>Pending</option>
                             <option value="paid" <?= ($viewOrder['payment_status'] ?? '') === 'paid' ? 'selected' : '' ?>>Paid
                             </option>
@@ -886,7 +886,7 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Order Status</label>
                         <select name="order_status"
-                            class="w-full h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
+                            class="w-full h-10 px-3 rounded-lg border border-slate-200 bg-slate-50 text-sm">
                             <option value="awaiting_payment" <?= ($viewOrder['order_status'] ?? 'awaiting_payment') === 'awaiting_payment' ? 'selected' : '' ?>>Awaiting Payment</option>
                             <option value="queued" <?= ($viewOrder['order_status'] ?? '') === 'queued' ? 'selected' : '' ?>>
                                 Queued</option>
@@ -917,7 +917,7 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
 
         <div class="flex items-center gap-3">
             <button
-                class="flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors text-sm font-medium">
+                class="flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 hover:bg-slate-50:bg-white/5 transition-colors text-sm font-medium">
                 <span class="material-symbols-outlined text-lg">download</span>
                 Export
             </button>
@@ -933,43 +933,43 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
 
     <!-- Stats -->
     <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-        <div class="bg-white dark:bg-surface-dark p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
             <p class="text-slate-500 text-xs font-medium uppercase">New (24h)</p>
             <p class="text-2xl font-bold mt-1"><?= $stats['new'] ?></p>
         </div>
-        <div class="bg-white dark:bg-surface-dark p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
             <p class="text-slate-500 text-xs font-medium uppercase">Queued</p>
             <p class="text-2xl font-bold mt-1 text-blue-600"><?= $stats['queued'] ?></p>
         </div>
-        <div class="bg-white dark:bg-surface-dark p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
             <p class="text-slate-500 text-xs font-medium uppercase">Processing</p>
             <p class="text-2xl font-bold mt-1 text-purple-600"><?= $stats['processing'] ?></p>
         </div>
-        <div class="bg-white dark:bg-surface-dark p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
             <p class="text-slate-500 text-xs font-medium uppercase">Completed</p>
             <p class="text-2xl font-bold mt-1 text-green-600"><?= $stats['completed'] ?></p>
         </div>
-        <div class="bg-white dark:bg-surface-dark p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
             <p class="text-slate-500 text-xs font-medium uppercase">Revenue Today</p>
             <p class="text-2xl font-bold mt-1 text-green-600">$<?= number_format($stats['revenue_today'], 2) ?></p>
         </div>
     </div>
 
     <!-- Filters -->
-    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-4 mb-6">
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-6">
         <form method="GET" class="flex flex-wrap items-center gap-4">
             <div class="flex-1 min-w-[200px]">
                 <div class="relative">
                     <span
                         class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 material-symbols-outlined text-lg">search</span>
                     <input type="text" name="search" value="<?= Security::escape($search) ?>"
-                        class="w-full h-10 pl-10 pr-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+                        class="w-full h-10 pl-10 pr-4 rounded-lg border border-slate-200 bg-slate-50 text-sm"
                         placeholder="Search by order ID, customer name or email...">
                 </div>
             </div>
 
             <select name="status"
-                class="h-10 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
+                class="h-10 px-4 rounded-lg border border-slate-200 bg-slate-50 text-sm">
                 <option value="">All Status</option>
                 <optgroup label="Payment">
                     <option value="pending" <?= $status === 'pending' ? 'selected' : '' ?>>💳 Pending</option>
@@ -996,10 +996,10 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
 
     <!-- Orders Table -->
     <div
-        class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm">
-                <thead class="bg-slate-50 dark:bg-white/5 text-slate-500 font-semibold uppercase text-xs">
+                <thead class="bg-slate-50 text-slate-500 font-semibold uppercase text-xs">
                     <tr>
                         <th class="px-6 py-4">Order ID</th>
                         <th class="px-6 py-4">Customer</th>
@@ -1011,17 +1011,17 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
                         <th class="px-6 py-4 text-right">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                <tbody class="divide-y divide-slate-100">
                     <?php foreach ($orders as $order):
                         $paymentColors = ['pending' => 'bg-yellow-100 text-yellow-800', 'paid' => 'bg-green-100 text-green-800', 'failed' => 'bg-red-100 text-red-800', 'refunded' => 'bg-slate-100 text-slate-800'];
                         $orderColors = ['awaiting_payment' => 'bg-yellow-100 text-yellow-800', 'queued' => 'bg-blue-100 text-blue-800', 'processing' => 'bg-purple-100 text-purple-800', 'completed' => 'bg-green-100 text-green-800', 'cancelled' => 'bg-red-100 text-red-800'];
                         $paymentColor = $paymentColors[$order['payment_status'] ?? 'pending'] ?? 'bg-slate-100 text-slate-800';
                         $orderColor = $orderColors[$order['order_status'] ?? 'awaiting_payment'] ?? 'bg-slate-100 text-slate-800';
                         ?>
-                        <tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                        <tr class="hover:bg-slate-50:bg-white/5 transition-colors">
                             <td class="px-6 py-4">
                                 <span
-                                    class="font-bold text-slate-900 dark:text-white">#<?= Security::escape($order['order_number']) ?></span>
+                                    class="font-bold text-slate-900">#<?= Security::escape($order['order_number']) ?></span>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
@@ -1030,7 +1030,7 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
                                         <?= strtoupper(substr($order['customer_name'] ?? 'U', 0, 1)) ?>
                                     </div>
                                     <div>
-                                        <p class="font-medium text-slate-900 dark:text-white">
+                                        <p class="font-medium text-slate-900">
                                             <?= Security::escape($order['customer_name'] ?? 'Unknown') ?>
                                         </p>
                                         <p class="text-xs text-slate-500">
@@ -1054,7 +1054,7 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
                                 <?= date('M j, Y', strtotime($order['created_at'])) ?>
                             </td>
                             <td class="px-6 py-4">
-                                <span class="font-bold text-slate-900 dark:text-white">
+                                <span class="font-bold text-slate-900">
                                     <?= $order['currency'] === 'INR' ? '₹' : '$' ?>         <?= number_format($order['amount'], 2) ?>
                                 </span>
                             </td>
@@ -1073,7 +1073,7 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
                             <td class="px-6 py-4">
                                 <div class="flex items-center justify-end gap-1">
                                     <a href="/admin/orders.php?action=view&id=<?= $order['id'] ?>"
-                                        class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-500 hover:text-primary transition-colors"
+                                        class="p-2 rounded-lg hover:bg-slate-100:bg-white/10 text-slate-500 hover:text-primary transition-colors"
                                         title="View Details">
                                         <span class="material-symbols-outlined text-lg">visibility</span>
                                     </a>
@@ -1097,7 +1097,7 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
 
         <!-- Pagination -->
         <?php if ($totalPages > 1): ?>
-            <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+            <div class="px-6 py-4 border-t border-slate-200 flex items-center justify-between">
                 <p class="text-sm text-slate-500">
                     Showing <?= $offset + 1 ?> to <?= min($offset + $perPage, $totalOrders) ?> of <?= $totalOrders ?> orders
                 </p>
@@ -1105,21 +1105,21 @@ $pageTitle = $viewOrder ? 'Order #' . $viewOrder['order_number'] : 'Orders';
                 <div class="flex items-center gap-1">
                     <?php if ($page > 1): ?>
                         <a href="?page=<?= $page - 1 ?>&status=<?= $status ?>&search=<?= urlencode($search) ?>"
-                            class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-500">
+                            class="p-2 rounded-lg hover:bg-slate-100:bg-white/10 text-slate-500">
                             <span class="material-symbols-outlined">chevron_left</span>
                         </a>
                     <?php endif; ?>
 
                     <?php for ($i = max(1, $page - 2); $i <= min($totalPages, $page + 2); $i++): ?>
                         <a href="?page=<?= $i ?>&status=<?= $status ?>&search=<?= urlencode($search) ?>"
-                            class="w-10 h-10 flex items-center justify-center rounded-lg <?= $i === $page ? 'bg-primary text-white' : 'hover:bg-slate-100 dark:hover:bg-white/10 text-slate-600' ?> font-medium text-sm">
+                            class="w-10 h-10 flex items-center justify-center rounded-lg <?= $i === $page ? 'bg-primary text-white' : 'hover:bg-slate-100:bg-white/10 text-slate-600' ?> font-medium text-sm">
                             <?= $i ?>
                         </a>
                     <?php endfor; ?>
 
                     <?php if ($page < $totalPages): ?>
                         <a href="?page=<?= $page + 1 ?>&status=<?= $status ?>&search=<?= urlencode($search) ?>"
-                            class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-500">
+                            class="p-2 rounded-lg hover:bg-slate-100:bg-white/10 text-slate-500">
                             <span class="material-symbols-outlined">chevron_right</span>
                         </a>
                     <?php endif; ?>

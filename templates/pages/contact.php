@@ -72,29 +72,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <?php ob_start(); ?>
 
-<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+<div class="container-section section-padding">
     <!-- Breadcrumb -->
     <nav class="flex items-center gap-2 text-sm mb-8">
         <a class="text-slate-500 hover:text-primary transition-colors" href="/">Home</a>
         <span class="text-slate-400">/</span>
-        <span class="font-medium text-slate-900 dark:text-white">Contact Us</span>
+        <span class="font-medium text-slate-900">Contact Us</span>
     </nav>
 
     <!-- Header -->
     <div class="text-center mb-12">
-        <h1 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">
+        <h1 class="heading-section text-slate-900 mb-4">
             Get in Touch
         </h1>
-        <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+        <p class="text-lg text-slate-600 max-w-2xl mx-auto">
             Have a question or need help? We'd love to hear from you. Our team typically responds within 24 hours.
         </p>
     </div>
 
     <!-- Service Description -->
     <div
-        class="mb-10 p-6 bg-gradient-to-r from-primary/5 to-purple-500/5 dark:from-primary/10 dark:to-purple-500/10 rounded-2xl max-w-4xl mx-auto">
-        <h2 class="font-bold text-lg text-slate-900 dark:text-white mb-3 text-center">How Can We Help?</h2>
-        <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed text-center">
+        class="mb-10 p-6 bg-gradient-to-r from-primary/5 to-purple-500/5 rounded-2xl max-w-4xl mx-auto">
+        <h2 class="font-bold text-lg text-slate-900 mb-3 text-center">How Can We Help?</h2>
+        <p class="text-slate-600 text-sm leading-relaxed text-center">
             At Invitation Videos, we're committed to helping you create the perfect video invitation for your
             special occasion. Whether you need assistance choosing the right template, have questions about
             customization options, or need support with your order, our dedicated team is here to help. We
@@ -110,13 +110,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="space-y-6">
             <!-- Email -->
             <div
-                class="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 p-6">
+                class="bg-white rounded-2xl shadow-lg border border-slate-200 p-6">
                 <div class="flex items-center gap-4">
                     <div class="size-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
                         <span class="material-symbols-outlined text-2xl">mail</span>
                     </div>
                     <div>
-                        <h3 class="font-bold text-slate-900 dark:text-white">Email Us</h3>
+                        <h3 class="font-bold text-slate-900">Email Us</h3>
                         <a href="mailto:support@invitationvideos.com" class="text-primary hover:underline">
                             support@invitationvideos.com
                         </a>
@@ -126,55 +126,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <!-- Response Time -->
             <div
-                class="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 p-6">
+                class="bg-white rounded-2xl shadow-lg border border-slate-200 p-6">
                 <div class="flex items-center gap-4">
                     <div
-                        class="size-12 rounded-xl bg-green-100 dark:bg-green-900/30 text-green-600 flex items-center justify-center">
+                        class="size-12 rounded-xl bg-green-100 text-green-600 flex items-center justify-center">
                         <span class="material-symbols-outlined text-2xl">schedule</span>
                     </div>
                     <div>
-                        <h3 class="font-bold text-slate-900 dark:text-white">Response Time</h3>
-                        <p class="text-slate-600 dark:text-slate-400">Within 24 hours</p>
+                        <h3 class="font-bold text-slate-900">Response Time</h3>
+                        <p class="text-slate-600">Within 24 hours</p>
                     </div>
                 </div>
             </div>
 
             <!-- Support Hours -->
             <div
-                class="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 p-6">
+                class="bg-white rounded-2xl shadow-lg border border-slate-200 p-6">
                 <div class="flex items-center gap-4">
                     <div
-                        class="size-12 rounded-xl bg-amber-100 dark:bg-amber-900/30 text-amber-600 flex items-center justify-center">
+                        class="size-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center">
                         <span class="material-symbols-outlined text-2xl">support_agent</span>
                     </div>
                     <div>
-                        <h3 class="font-bold text-slate-900 dark:text-white">Support Hours</h3>
-                        <p class="text-slate-600 dark:text-slate-400">Mon-Sat, 9AM-9PM IST</p>
+                        <h3 class="font-bold text-slate-900">Support Hours</h3>
+                        <p class="text-slate-600">Mon-Sat, 9AM-9PM IST</p>
                     </div>
                 </div>
             </div>
 
             <!-- Quick Links -->
-            <div class="bg-slate-50 dark:bg-slate-800 rounded-2xl p-6">
-                <h3 class="font-bold text-slate-900 dark:text-white mb-4">Quick Links</h3>
+            <div class="bg-slate-50 rounded-2xl p-6">
+                <h3 class="font-bold text-slate-900 mb-4">Quick Links</h3>
                 <ul class="space-y-3">
                     <li>
                         <a href="/faq"
-                            class="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-primary">
+                            class="flex items-center gap-2 text-slate-600 hover:text-primary">
                             <span class="material-symbols-outlined text-lg">help</span>
                             FAQ
                         </a>
                     </li>
                     <li>
                         <a href="/support"
-                            class="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-primary">
+                            class="flex items-center gap-2 text-slate-600 hover:text-primary">
                             <span class="material-symbols-outlined text-lg">confirmation_number</span>
                             Submit Support Ticket
                         </a>
                     </li>
                     <li>
                         <a href="/refund"
-                            class="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-primary">
+                            class="flex items-center gap-2 text-slate-600 hover:text-primary">
                             <span class="material-symbols-outlined text-lg">payments</span>
                             Refund Policy
                         </a>
@@ -186,7 +186,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <!-- Contact Form -->
         <div class="lg:col-span-2">
             <div
-                class="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 p-8">
+                class="bg-white rounded-2xl shadow-lg border border-slate-200 p-8">
                 <?php if ($success): ?>
                     <div
                         class="mb-6 p-4 rounded-lg bg-green-50 border border-green-200 text-green-700 flex items-center gap-3">
@@ -207,30 +207,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div>
-                            <label for="name" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                            <label for="name" class="block text-sm font-medium text-slate-700 mb-2">
                                 Your Name *
                             </label>
                             <input type="text" id="name" name="name" required
-                                class="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                class="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                 placeholder="John Doe">
                         </div>
                         <div>
                             <label for="email"
-                                class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                class="block text-sm font-medium text-slate-700 mb-2">
                                 Email Address *
                             </label>
                             <input type="email" id="email" name="email" required
-                                class="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                class="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                 placeholder="you@example.com">
                         </div>
                     </div>
 
                     <div>
-                        <label for="subject" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        <label for="subject" class="block text-sm font-medium text-slate-700 mb-2">
                             Subject *
                         </label>
                         <select id="subject" name="subject" required
-                            class="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary focus:border-transparent transition-all">
+                            class="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all">
                             <option value="">Select a topic</option>
                             <option value="General Inquiry">General Inquiry</option>
                             <option value="Order Question">Order Question</option>
@@ -242,11 +242,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
 
                     <div>
-                        <label for="message" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        <label for="message" class="block text-sm font-medium text-slate-700 mb-2">
                             Message *
                         </label>
                         <textarea id="message" name="message" rows="5" required
-                            class="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none"
+                            class="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none"
                             placeholder="How can we help you?"></textarea>
                     </div>
 

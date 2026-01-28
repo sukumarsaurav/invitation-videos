@@ -10,7 +10,7 @@ class PositionEditor {
         this.breakpointLabels = {
             'xs': '≤480px (Mobile)',
             'sm': '481-768px (Tablet)',
-            'md': '769-1023px (Small Desktop)',
+            'md': '768-1023px (Tablet)',
             'lg': '1024-1279px (Desktop)',
             'xl': '1280px+ (Large)'
         };

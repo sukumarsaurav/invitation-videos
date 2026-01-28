@@ -35,7 +35,7 @@
             if (w >= 1536) return 'xl';
             if (w >= 1280) return 'lg';
             if (w >= 1024) return 'md';
-            if (w >= 769) return 'sm';
+            if (w >= 768) return 'sm';
             return 'xs';
         }
 

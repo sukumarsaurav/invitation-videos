@@ -104,18 +104,18 @@ $metaDescription = 'Browse all template categories for video invitations includi
 <!-- Categories Page - Two Column Layout (Mobile) -->
 <div class="min-h-screen flex sm:hidden" style="padding-top: 64px; padding-bottom: 60px;">
     <!-- Left Column: Main Categories - Fixed position with independent scroll -->
-    <div class="w-20 flex-shrink-0 border-r border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 overflow-y-auto overscroll-contain"
+    <div class="w-20 flex-shrink-0 border-r border-slate-200 bg-slate-50 overflow-y-auto overscroll-contain"
         style="position: fixed; top: 64px; bottom: 60px; left: 0; width: 80px; -webkit-overflow-scrolling: touch;">
         <?php foreach ($mainCategoriesWithSubs as $slug => $cat):
             $isActive = $activeCategory === $slug;
             ?>
             <a href="/categories?active=<?= $slug ?>"
-                class="flex flex-col items-center gap-1 px-1 py-3 text-center transition-colors <?= $isActive ? 'bg-white dark:bg-slate-900 border-l-2 border-primary' : 'hover:bg-white dark:hover:bg-slate-800' ?>">
+                class="flex flex-col items-center gap-1 px-1 py-3 text-center transition-colors <?= $isActive ? 'bg-white border-l-2 border-primary' : 'hover:bg-white:bg-slate-800' ?>">
                 <img src="<?= htmlspecialchars($cat['image']) ?>" alt="<?= htmlspecialchars($cat['name']) ?>"
                     class="w-12 h-12 rounded-lg object-cover <?= $isActive ? 'ring-2 ring-primary' : '' ?>"
                     onerror="this.src='/assets/images/placeholder-category.png'">
                 <span
-                    class="text-[10px] font-medium leading-tight <?= $isActive ? 'text-primary' : 'text-slate-600 dark:text-slate-300' ?>">
+                    class="text-[10px] font-medium leading-tight <?= $isActive ? 'text-primary' : 'text-slate-600' ?>">
                     <?= $cat['name'] ?>
                 </span>
             </a>
@@ -123,9 +123,9 @@ $metaDescription = 'Browse all template categories for video invitations includi
     </div>
 
     <!-- Right Section: Subcategories Grid - Scrolls with page, offset by sidebar width -->
-    <div class="flex-1 p-3 bg-white dark:bg-slate-900" style="margin-left: 80px;">
+    <div class="flex-1 p-3 bg-white" style="margin-left: 80px;">
 
-        <h2 class="text-base font-bold text-slate-900 dark:text-white mb-3">
+        <h2 class="text-base font-bold text-slate-900 mb-3">
             <?= $displayCategoryName ?>
         </h2>
 
@@ -145,12 +145,12 @@ $metaDescription = 'Browse all template categories for video invitations includi
             <div class="grid grid-cols-3 gap-2">
                 <?php foreach ($subcategories as $subcat): ?>
                     <a href="/templates?category=<?= $subcat['slug'] ?>"
-                        class="flex flex-col items-center p-2 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                        class="flex flex-col items-center p-2 rounded-xl bg-slate-50 hover:bg-slate-100:bg-slate-700 transition-colors">
                         <img src="<?= htmlspecialchars($subcat['image']) ?>" alt="<?= htmlspecialchars($subcat['name']) ?>"
                             class="w-14 h-14 rounded-lg object-cover mb-1"
                             onerror="this.src='/assets/images/placeholder-subcategory.png'">
                         <span
-                            class="text-[10px] font-medium text-slate-700 dark:text-slate-300 text-center leading-tight line-clamp-2">
+                            class="text-[10px] font-medium text-slate-700 text-center leading-tight line-clamp-2">
                             <?= htmlspecialchars($subcat['name']) ?>
                         </span>
                     </a>

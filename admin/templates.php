@@ -625,13 +625,13 @@ function getYouTubeEmbedUrl($url)
 
     <!-- Filter Bar -->
     <form method="GET"
-        class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-4 mb-6">
+        class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-6">
         <div class="flex flex-wrap items-end gap-4">
             <!-- Category Filter -->
             <label class="flex flex-col gap-1.5">
                 <span class="text-xs font-medium text-slate-500">Category</span>
                 <select name="category" onchange="this.form.submit()"
-                    class="h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm min-w-[140px]">
+                    class="h-10 px-3 rounded-lg border border-slate-200 bg-slate-50 text-sm min-w-[140px]">
                     <option value="">All Categories</option>
                     <?php foreach ($categories as $cat): ?>
                         <option value="<?= $cat['slug'] ?>" <?= $filterCategory === $cat['slug'] ? 'selected' : '' ?>>
@@ -645,7 +645,7 @@ function getYouTubeEmbedUrl($url)
             <label class="flex flex-col gap-1.5">
                 <span class="text-xs font-medium text-slate-500">Status</span>
                 <select name="status" onchange="this.form.submit()"
-                    class="h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm min-w-[130px]">
+                    class="h-10 px-3 rounded-lg border border-slate-200 bg-slate-50 text-sm min-w-[130px]">
                     <option value="">All Status</option>
                     <option value="active" <?= $filterStatus === 'active' ? 'selected' : '' ?>>Active</option>
                     <option value="draft" <?= $filterStatus === 'draft' ? 'selected' : '' ?>>Draft</option>
@@ -658,7 +658,7 @@ function getYouTubeEmbedUrl($url)
             <label class="flex flex-col gap-1.5">
                 <span class="text-xs font-medium text-slate-500">Sort By</span>
                 <select name="sort" onchange="this.form.submit()"
-                    class="h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm min-w-[130px]">
+                    class="h-10 px-3 rounded-lg border border-slate-200 bg-slate-50 text-sm min-w-[130px]">
                     <option value="created_at" <?= $sortBy === 'created_at' ? 'selected' : '' ?>>Date Created</option>
                     <option value="title" <?= $sortBy === 'title' ? 'selected' : '' ?>>Title</option>
                     <option value="price_usd" <?= $sortBy === 'price_usd' ? 'selected' : '' ?>>Price</option>
@@ -671,7 +671,7 @@ function getYouTubeEmbedUrl($url)
             <label class="flex flex-col gap-1.5">
                 <span class="text-xs font-medium text-slate-500">Order</span>
                 <select name="order" onchange="this.form.submit()"
-                    class="h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm min-w-[100px]">
+                    class="h-10 px-3 rounded-lg border border-slate-200 bg-slate-50 text-sm min-w-[100px]">
                     <option value="DESC" <?= $sortOrder === 'DESC' ? 'selected' : '' ?>>Descending</option>
                     <option value="ASC" <?= $sortOrder === 'ASC' ? 'selected' : '' ?>>Ascending</option>
                 </select>
@@ -681,7 +681,7 @@ function getYouTubeEmbedUrl($url)
             <label class="flex flex-col gap-1.5">
                 <span class="text-xs font-medium text-slate-500">Per Page</span>
                 <select name="per_page" onchange="this.form.submit()"
-                    class="h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm min-w-[80px]">
+                    class="h-10 px-3 rounded-lg border border-slate-200 bg-slate-50 text-sm min-w-[80px]">
                     <option value="10" <?= $perPage === 10 ? 'selected' : '' ?>>10</option>
                     <option value="25" <?= $perPage === 25 ? 'selected' : '' ?>>25</option>
                     <option value="50" <?= $perPage === 50 ? 'selected' : '' ?>>50</option>
@@ -707,10 +707,10 @@ function getYouTubeEmbedUrl($url)
     </form>
 
     <div
-        class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm">
-                <thead class="bg-slate-50 dark:bg-white/5 text-slate-500 font-semibold uppercase text-xs">
+                <thead class="bg-slate-50 text-slate-500 font-semibold uppercase text-xs">
                     <tr>
                         <th class="px-6 py-4">Template</th>
                         <th class="px-6 py-4">Category</th>
@@ -721,16 +721,16 @@ function getYouTubeEmbedUrl($url)
                         <th class="px-6 py-4 text-right">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                <tbody class="divide-y divide-slate-100">
                     <?php foreach ($templates as $tpl): ?>
-                        <tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                        <tr class="hover:bg-slate-50:bg-white/5 transition-colors">
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
                                     <div class="size-12 rounded-lg bg-slate-100 bg-cover bg-center shrink-0"
                                         style="background-image: url('<?= Security::escape($tpl['thumbnail_url'] ?? '') ?>');">
                                     </div>
                                     <div>
-                                        <p class="font-semibold text-slate-900 dark:text-white">
+                                        <p class="font-semibold text-slate-900">
                                             <?= Security::escape($tpl['title']) ?>
                                         </p>
                                         <p class="text-xs text-slate-500"><?= $tpl['duration_seconds'] ?>s •
@@ -779,7 +779,7 @@ function getYouTubeEmbedUrl($url)
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-2">
                                     <a href="/admin/templates.php?action=edit&id=<?= $tpl['id'] ?>"
-                                        class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-500 hover:text-primary transition-colors">
+                                        class="p-2 rounded-lg hover:bg-slate-100:bg-white/10 text-slate-500 hover:text-primary transition-colors">
                                         <span class="material-symbols-outlined text-lg">edit</span>
                                     </a>
                                     <a href="/admin/templates.php?action=delete&id=<?= $tpl['id'] ?>"
@@ -807,7 +807,7 @@ function getYouTubeEmbedUrl($url)
 
         <!-- Pagination -->
         <?php if ($totalPages > 1): ?>
-            <div class="flex items-center justify-between px-6 py-4 border-t border-slate-100 dark:border-slate-800">
+            <div class="flex items-center justify-between px-6 py-4 border-t border-slate-100">
                 <div class="text-sm text-slate-500">
                     Page <?= $currentPage ?> of <?= $totalPages ?>
                 </div>
@@ -868,7 +868,7 @@ function getYouTubeEmbedUrl($url)
     <!-- Create/Edit Form -->
     <div class="flex items-center gap-4 mb-6">
         <a href="/admin/templates.php"
-            class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-500 transition-colors">
+            class="p-2 rounded-lg hover:bg-slate-100:bg-white/10 text-slate-500 transition-colors">
             <span class="material-symbols-outlined">arrow_back</span>
         </a>
         <div>
@@ -896,14 +896,14 @@ function getYouTubeEmbedUrl($url)
 
             <!-- Basic Info -->
             <div
-                class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
                 <h3 class="text-lg font-bold mb-4">Basic Information</h3>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <label class="flex flex-col gap-2 md:col-span-2">
                         <span class="text-sm font-medium">Template Title</span>
                         <input type="text" name="title" required
-                            class="h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                            class="h-11 px-4 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20 focus:border-primary"
                             value="<?= Security::escape($template['title'] ?? '') ?>"
                             placeholder="e.g., Floral Elegance Wedding" oninput="generateSlug(this.value)">
                     </label>
@@ -914,7 +914,7 @@ function getYouTubeEmbedUrl($url)
                         <div class="flex items-center gap-2">
                             <span class="text-slate-400 text-sm">/templates/</span>
                             <input type="text" name="slug" id="slug-input"
-                                class="flex-1 h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                                class="flex-1 h-11 px-4 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20 focus:border-primary"
                                 value="<?= Security::escape($template['slug'] ?? '') ?>"
                                 placeholder="floral-elegance-wedding">
                         </div>
@@ -923,14 +923,14 @@ function getYouTubeEmbedUrl($url)
                     <label class="flex flex-col gap-2 md:col-span-2">
                         <span class="text-sm font-medium">Description</span>
                         <textarea name="description" rows="3"
-                            class="px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 focus:border-primary resize-y"
+                            class="px-4 py-3 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20 focus:border-primary resize-y"
                             placeholder="Describe this template..."><?= Security::escape($template['description'] ?? '') ?></textarea>
                     </label>
 
                     <label class="flex flex-col gap-2">
                         <span class="text-sm font-medium">Category</span>
                         <select name="category"
-                            class="h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20">
+                            class="h-11 px-4 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20">
                             <?php foreach ($categories as $cat): ?>
                                 <option value="<?= $cat['slug'] ?>" <?= ($template['category'] ?? '') === $cat['slug'] ? 'selected' : '' ?>><?= Security::escape($cat['name']) ?></option>
                             <?php endforeach; ?>
@@ -940,7 +940,7 @@ function getYouTubeEmbedUrl($url)
                     <label class="flex flex-col gap-2">
                         <span class="text-sm font-medium">Subcategory</span>
                         <input type="text" name="subcategory"
-                            class="h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20"
+                            class="h-11 px-4 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20"
                             value="<?= Security::escape($template['subcategory'] ?? '') ?>"
                             placeholder="e.g., haldi, sangeet">
                     </label>
@@ -948,7 +948,7 @@ function getYouTubeEmbedUrl($url)
                     <label class="flex flex-col gap-2">
                         <span class="text-sm font-medium">Cultural Tradition</span>
                         <input type="text" name="cultural_tradition"
-                            class="h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20"
+                            class="h-11 px-4 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20"
                             value="<?= Security::escape($template['cultural_tradition'] ?? '') ?>"
                             placeholder="e.g., hindu, muslim, christian">
                     </label>
@@ -956,7 +956,7 @@ function getYouTubeEmbedUrl($url)
                     <label class="flex flex-col gap-2">
                         <span class="text-sm font-medium">Duration (seconds)</span>
                         <input type="number" name="duration_seconds" min="10" max="300"
-                            class="h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20"
+                            class="h-11 px-4 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20"
                             value="<?= $template['duration_seconds'] ?? 30 ?>">
                     </label>
                 </div>
@@ -964,7 +964,7 @@ function getYouTubeEmbedUrl($url)
 
             <!-- Remotion Integration -->
             <div
-                class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
                 <h3 class="text-lg font-bold mb-2">🎬 Remotion Integration</h3>
                 <p class="text-sm text-slate-500 mb-4">Connect this template to a Remotion video composition for automated
                     rendering.</p>
@@ -977,7 +977,7 @@ function getYouTubeEmbedUrl($url)
                                 class="text-xs px-2 py-0.5 rounded bg-purple-100 text-purple-700 font-mono">Important</span>
                         </span>
                         <select name="remotion_composition_id"
-                                class="h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 font-mono">
+                                class="h-11 px-4 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20 font-mono">
                                 <option value="">-- Select Composition --</option>
                                 <?php foreach ($remotionCompositions as $comp): ?>
                                         <option value="<?= Security::escape($comp['id']) ?>"
@@ -996,7 +996,7 @@ function getYouTubeEmbedUrl($url)
                             <span class="text-sm font-medium">Default Music URL <span
                                     class="text-slate-400 font-normal">Optional</span></span>
                             <input type="text" name="default_music_url"
-                                class="h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20"
+                                class="h-11 px-4 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20"
                                 value="<?= Security::escape($template['default_music_url'] ?? '') ?>"
                                 placeholder="/uploads/audio/wedding-default.mp3">
                             <p class="text-xs text-slate-500">Fallback music if customer doesn't upload their own</p>
@@ -1040,7 +1040,7 @@ function getYouTubeEmbedUrl($url)
 
                 <!-- Categories & Tags -->
                 <div
-                    class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                    class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
                     <h3 class="text-lg font-bold mb-2">Categories & Tags</h3>
                     <p class="text-sm text-slate-500 mb-4">Select all applicable categories for this template. These help users
                         find templates through the mega menu filters.</p>
@@ -1052,7 +1052,7 @@ function getYouTubeEmbedUrl($url)
                                 <span class="material-symbols-outlined text-base text-purple-500">style</span> Style
                             </span>
                             <select name="styles[]" multiple
-                                class="h-28 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 text-sm">
+                                class="h-28 px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20 text-sm">
                                 <?php foreach ($allStyles as $style): ?>
                                         <option value="<?= $style['id'] ?>" <?= in_array($style['id'], $templateStyles) ? 'selected' : '' ?>><?= Security::escape($style['name']) ?></option>
                                 <?php endforeach; ?>
@@ -1065,7 +1065,7 @@ function getYouTubeEmbedUrl($url)
                                 <span class="material-symbols-outlined text-base text-blue-500">video_file</span> Format
                             </span>
                             <select name="formats[]" multiple
-                                class="h-28 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 text-sm">
+                                class="h-28 px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20 text-sm">
                                 <?php foreach ($allFormats as $format): ?>
                                         <option value="<?= $format['id'] ?>" <?= in_array($format['id'], $templateFormats) ? 'selected' : '' ?>><?= Security::escape($format['name']) ?></option>
                                 <?php endforeach; ?>
@@ -1078,7 +1078,7 @@ function getYouTubeEmbedUrl($url)
                                 <span class="material-symbols-outlined text-base text-amber-500">temple_hindu</span> Religion
                             </span>
                             <select name="religions[]" multiple
-                                class="h-28 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 text-sm">
+                                class="h-28 px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20 text-sm">
                                 <?php foreach ($allReligions as $religion): ?>
                                         <option value="<?= $religion['id'] ?>" <?= in_array($religion['id'], $templateReligions) ? 'selected' : '' ?>><?= Security::escape($religion['name']) ?></option>
                                 <?php endforeach; ?>
@@ -1091,7 +1091,7 @@ function getYouTubeEmbedUrl($url)
                                 <span class="material-symbols-outlined text-base text-rose-500">event</span> Function
                             </span>
                             <select name="functions[]" multiple
-                                class="h-28 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 text-sm">
+                                class="h-28 px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20 text-sm">
                                 <?php foreach ($allFunctions as $function): ?>
                                         <option value="<?= $function['id'] ?>" <?= in_array($function['id'], $templateFunctions) ? 'selected' : '' ?>><?= Security::escape($function['name']) ?></option>
                                 <?php endforeach; ?>
@@ -1104,7 +1104,7 @@ function getYouTubeEmbedUrl($url)
                                 <span class="material-symbols-outlined text-base text-teal-500">celebration</span> Party Type
                             </span>
                             <select name="party_types[]" multiple
-                                class="h-28 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 text-sm">
+                                class="h-28 px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20 text-sm">
                                 <?php foreach ($allPartyTypes as $party): ?>
                                         <option value="<?= $party['id'] ?>" <?= in_array($party['id'], $templatePartyTypes) ? 'selected' : '' ?>><?= Security::escape($party['name']) ?></option>
                                 <?php endforeach; ?>
@@ -1118,7 +1118,7 @@ function getYouTubeEmbedUrl($url)
                                 Rituals
                             </span>
                             <select name="pujas[]" multiple
-                                class="h-28 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 text-sm">
+                                class="h-28 px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20 text-sm">
                                 <?php foreach ($allPujas as $puja): ?>
                                         <option value="<?= $puja['id'] ?>" <?= in_array($puja['id'], $templatePujas) ? 'selected' : '' ?>><?= Security::escape($puja['name']) ?></option>
                                 <?php endforeach; ?>
@@ -1131,7 +1131,7 @@ function getYouTubeEmbedUrl($url)
                                 <span class="material-symbols-outlined text-base text-pink-500">festival</span> Festivals
                             </span>
                             <select name="festivals[]" multiple
-                                class="h-28 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 text-sm">
+                                class="h-28 px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20 text-sm">
                                 <?php foreach ($allFestivals as $festival): ?>
                                         <option value="<?= $festival['id'] ?>" <?= in_array($festival['id'], $templateFestivals) ? 'selected' : '' ?>><?= Security::escape($festival['name']) ?></option>
                                 <?php endforeach; ?>
@@ -1144,7 +1144,7 @@ function getYouTubeEmbedUrl($url)
                                 <span class="material-symbols-outlined text-base text-indigo-500">translate</span> Language
                             </span>
                             <select name="languages[]" multiple
-                                class="h-28 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 text-sm">
+                                class="h-28 px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20 text-sm">
                                 <?php foreach ($allLanguages as $lang): ?>
                                         <option value="<?= $lang['id'] ?>" <?= in_array($lang['id'], $templateLanguages) ? 'selected' : '' ?>><?= Security::escape($lang['name']) ?>
                                             <?= $lang['native_name'] && $lang['native_name'] !== $lang['name'] ? '(' . Security::escape($lang['native_name']) . ')' : '' ?>
@@ -1158,7 +1158,7 @@ function getYouTubeEmbedUrl($url)
 
                 <!-- Pricing -->
                 <div
-                    class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                    class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
                     <h3 class="text-lg font-bold mb-4">Pricing</h3>
                     <p class="text-sm text-slate-500 mb-4">Set prices for both payment gateways: Stripe (USD) for international,
                         Razorpay (INR) for India</p>
@@ -1171,7 +1171,7 @@ function getYouTubeEmbedUrl($url)
                                 <div class="relative">
                                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">$</span>
                                     <input type="number" name="price_usd" step="0.01" min="0"
-                                        class="h-11 pl-8 pr-4 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20"
+                                        class="h-11 pl-8 pr-4 w-full rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20"
                                         value="<?= $template['price_usd'] ?? 0 ?>">
                                 </div>
                             </label>
@@ -1182,7 +1182,7 @@ function getYouTubeEmbedUrl($url)
                                 <div class="relative">
                                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">$</span>
                                     <input type="number" name="discounted_price_usd" step="0.01" min="0"
-                                        class="h-11 pl-8 pr-4 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20"
+                                        class="h-11 pl-8 pr-4 w-full rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20"
                                         value="<?= $template['discounted_price_usd'] ?? '' ?>"
                                         placeholder="Leave empty for no discount">
                                 </div>
@@ -1196,7 +1196,7 @@ function getYouTubeEmbedUrl($url)
                                 <div class="relative">
                                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">₹</span>
                                     <input type="number" name="price_inr" step="1" min="0"
-                                        class="h-11 pl-8 pr-4 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20"
+                                        class="h-11 pl-8 pr-4 w-full rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20"
                                         value="<?= $template['price_inr'] ?? 0 ?>">
                                 </div>
                             </label>
@@ -1207,7 +1207,7 @@ function getYouTubeEmbedUrl($url)
                                 <div class="relative">
                                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">₹</span>
                                     <input type="number" name="discounted_price_inr" step="1" min="0"
-                                        class="h-11 pl-8 pr-4 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20"
+                                        class="h-11 pl-8 pr-4 w-full rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20"
                                         value="<?= $template['discounted_price_inr'] ?? '' ?>"
                                         placeholder="Leave empty for no discount">
                                 </div>
@@ -1219,7 +1219,7 @@ function getYouTubeEmbedUrl($url)
                 <!-- Required Fields for Checkout -->
                 <?php if ($action === 'edit' && $templateId): ?>
                         <div
-                            class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                            class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
                             <div class="flex items-center justify-between mb-4">
                                 <div>
                                     <h3 class="text-lg font-bold">Required Fields</h3>
@@ -1233,7 +1233,7 @@ function getYouTubeEmbedUrl($url)
                             </div>
 
                             <!-- Steps Tabs -->
-                            <div class="border-b border-slate-200 dark:border-slate-700 mb-4">
+                            <div class="border-b border-slate-200 mb-4">
                                 <div class="flex gap-1 -mb-px" id="step-tabs">
                                     <button type="button" data-step="1" onclick="switchStep(1)"
                                         class="step-tab px-4 py-2.5 text-sm font-medium border-b-2 border-primary text-primary transition-colors">
@@ -1267,7 +1267,7 @@ function getYouTubeEmbedUrl($url)
                                                 <?php else:
                                                     foreach ($stepFields as $field):
                                                         ?>
-                                                                <div class="field-item flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 cursor-move"
+                                                                <div class="field-item flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200 cursor-move"
                                                                     data-preset-id="<?= $field['preset_id'] ?>" data-step="<?= $step ?>"
                                                                     data-required="<?= $field['is_required'] ?>">
                                                                     <span class="material-symbols-outlined text-slate-400 drag-handle">drag_indicator</span>
@@ -1305,7 +1305,7 @@ function getYouTubeEmbedUrl($url)
                             </div>
 
                             <!-- Save Fields Button -->
-                            <div class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                            <div class="mt-4 pt-4 border-t border-slate-200">
                                 <button type="button" onclick="saveTemplateFields()"
                                     class="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-5 rounded-lg transition-colors">
                                     <span class="material-symbols-outlined text-lg">save</span>
@@ -1322,7 +1322,7 @@ function getYouTubeEmbedUrl($url)
 
                 <!-- Status -->
                 <div
-                    class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                    class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
                     <h3 class="text-lg font-bold mb-4">Status</h3>
 
                     <div class="space-y-3">
@@ -1346,7 +1346,7 @@ function getYouTubeEmbedUrl($url)
                         </label>
                     </div>
 
-                    <div class="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
+                    <div class="mt-6 pt-6 border-t border-slate-200">
                         <button type="submit"
                             class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-4 rounded-lg shadow-sm shadow-primary/30 transition-all flex items-center justify-center gap-2">
                             <span class="material-symbols-outlined text-lg">save</span>
@@ -1357,7 +1357,7 @@ function getYouTubeEmbedUrl($url)
 
                 <!-- Media -->
                 <div
-                    class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                    class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
                     <h3 class="text-lg font-bold mb-4">Media</h3>
 
                     <div class="space-y-4">
@@ -1381,7 +1381,7 @@ function getYouTubeEmbedUrl($url)
                         <div>
                             <label class="text-sm font-medium block mb-2">YouTube Preview Video URL</label>
                             <input type="text" name="preview_video_url" id="youtube-url"
-                                class="w-full h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+                                class="w-full h-10 px-3 rounded-lg border border-slate-200 bg-slate-50 text-sm"
                                 value="<?= Security::escape($template['preview_video_url'] ?? '') ?>"
                                 placeholder="https://youtube.com/watch?v=..." onchange="updateYouTubePreview()">
 
@@ -1400,7 +1400,7 @@ function getYouTubeEmbedUrl($url)
                 <?php if ($action === 'edit' && $templateId): ?>
                         <!-- Gallery Images -->
                         <div
-                            class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                            class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
                             <div class="flex items-center justify-between mb-4">
                                 <h3 class="text-lg font-bold">Gallery Images</h3>
                                 <button type="button" onclick="document.getElementById('gallery-input').click()"
@@ -1437,7 +1437,7 @@ function getYouTubeEmbedUrl($url)
 
                         <!-- Language-Specific Thumbnails -->
                         <div
-                            class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                            class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
                             <div class="flex items-center justify-between mb-4">
                                 <div>
                                     <h3 class="text-lg font-bold">Language Thumbnails</h3>
@@ -1447,7 +1447,7 @@ function getYouTubeEmbedUrl($url)
                             </div>
 
                             <!-- Language Tabs -->
-                            <div class="border-b border-slate-200 dark:border-slate-700 mb-4">
+                            <div class="border-b border-slate-200 mb-4">
                                 <div class="flex gap-1 -mb-px overflow-x-auto" id="lang-tabs">
                                     <?php
                                     $languages = Database::fetchAll("SELECT code, name, native_name FROM languages ORDER BY display_order");
@@ -1808,8 +1808,8 @@ function getYouTubeEmbedUrl($url)
         <div id="field-selector-modal" class="fixed inset-0 z-50 hidden">
             <div class="absolute inset-0 bg-black/50" onclick="closeFieldSelector()"></div>
             <div
-                class="absolute inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[700px] md:max-h-[85vh] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl flex flex-col overflow-hidden">
-                <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700">
+                class="absolute inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[700px] md:max-h-[85vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+                <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
                     <div>
                         <h3 class="text-lg font-bold">Add Field Preset</h3>
                         <p class="text-sm text-slate-500">Select a field to add to this template</p>
@@ -1829,7 +1829,7 @@ function getYouTubeEmbedUrl($url)
                                     <?php foreach ($presets as $preset): ?>
                                             <button type="button"
                                                 onclick="addFieldPreset(<?= htmlspecialchars(json_encode($preset), ENT_QUOTES, 'UTF-8') ?>)"
-                                                class="preset-option flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800 hover:bg-primary/10 hover:border-primary rounded-lg border border-slate-200 dark:border-slate-700 text-left transition-all"
+                                                class="preset-option flex items-center gap-3 p-3 bg-slate-50 hover:bg-primary/10 hover:border-primary rounded-lg border border-slate-200 text-left transition-all"
                                                 data-preset-id="<?= $preset['id'] ?>">
                                                 <span
                                                     class="material-symbols-outlined text-primary"><?= Security::escape($preset['icon'] ?? 'text_fields') ?></span>
@@ -1853,7 +1853,7 @@ function getYouTubeEmbedUrl($url)
                     <?php endif; ?>
                 </div>
 
-                <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+                <div class="px-6 py-4 border-t border-slate-200 bg-slate-50">
                     <p class="text-xs text-slate-500">
                         <span class="material-symbols-outlined text-sm align-middle">info</span>
                         Click to add fields. Manage presets in <a href="/admin/field-presets.php"
@@ -1932,7 +1932,7 @@ function getYouTubeEmbedUrl($url)
 
                 // Create field item HTML
                 const fieldHtml = `
-                    <div class="field-item flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 cursor-move"
+                    <div class="field-item flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200 cursor-move"
                         data-preset-id="${preset.id}"
                         data-step="${currentStep}"
                         data-required="1">

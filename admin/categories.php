@@ -108,28 +108,28 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($category ? 'Edit Cate
 
     <div class="max-w-xl">
         <form method="POST"
-            class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 space-y-6">
+            class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-6">
             <input type="hidden" name="action" value="save_category">
             <input type="hidden" name="id" value="<?= $category['id'] ?? 0 ?>">
 
             <div>
                 <label class="block text-sm font-bold text-slate-700 mb-2">Category Name *</label>
                 <input type="text" name="name" value="<?= Security::escape($category['name'] ?? '') ?>" required
-                    class="w-full h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-primary"
+                    class="w-full h-11 px-4 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-primary"
                     placeholder="e.g., Engagement">
             </div>
 
             <div>
                 <label class="block text-sm font-bold text-slate-700 mb-2">Slug (URL-safe)</label>
                 <input type="text" name="slug" value="<?= Security::escape($category['slug'] ?? '') ?>"
-                    class="w-full h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-primary"
+                    class="w-full h-11 px-4 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-primary"
                     placeholder="engagement (auto-generated if empty)">
             </div>
 
             <div>
                 <label class="block text-sm font-bold text-slate-700 mb-2">Parent Category</label>
                 <select name="parent_id"
-                    class="w-full h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-primary bg-white">
+                    class="w-full h-11 px-4 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-primary bg-white">
                     <option value="">— Main Category (No Parent) —</option>
                     <?php foreach ($mainCategories as $main): ?>
                         <?php if (($category['id'] ?? 0) !== $main['id']): ?>
@@ -146,7 +146,7 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($category ? 'Edit Cate
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-2">Icon (Material Symbol)</label>
                     <input type="text" name="icon" value="<?= Security::escape($category['icon'] ?? 'category') ?>"
-                        class="w-full h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-primary"
+                        class="w-full h-11 px-4 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-primary"
                         placeholder="favorite">
                     <p class="text-xs text-slate-500 mt-1">
                         <a href="https://fonts.google.com/icons" target="_blank" class="text-primary hover:underline">Browse
@@ -167,7 +167,7 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($category ? 'Edit Cate
             <div>
                 <label class="block text-sm font-bold text-slate-700 mb-2">Display Order</label>
                 <input type="number" name="display_order" value="<?= intval($category['display_order'] ?? 0) ?>"
-                    class="w-full h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-primary"
+                    class="w-full h-11 px-4 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-primary"
                     placeholder="0">
             </div>
 
@@ -219,10 +219,10 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($category ? 'Edit Cate
     <?php endif; ?>
 
     <div
-        class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm">
-                <thead class="bg-slate-50 dark:bg-white/5 text-slate-500 font-semibold uppercase text-xs">
+                <thead class="bg-slate-50 text-slate-500 font-semibold uppercase text-xs">
                     <tr>
                         <th class="px-6 py-4">Order</th>
                         <th class="px-6 py-4">Category</th>
@@ -232,14 +232,14 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($category ? 'Edit Cate
                         <th class="px-6 py-4 text-right">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                <tbody class="divide-y divide-slate-100">
                     <?php foreach ($categories as $cat): ?>
-                        <tr class="hover:bg-slate-50 dark:hover:bg-white/5 <?= $cat['parent_id'] ? 'bg-slate-25' : '' ?>">
+                        <tr class="hover:bg-slate-50:bg-white/5 <?= $cat['parent_id'] ? 'bg-slate-25' : '' ?>">
                             <td class="px-6 py-4 text-slate-500 font-mono"><?= $cat['display_order'] ?></td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
                                     <?php if ($cat['parent_id']): ?>
-                                        <span class="text-slate-300 dark:text-slate-600 mr-2">↳</span>
+                                        <span class="text-slate-300 mr-2">↳</span>
                                     <?php endif; ?>
                                     <div class="w-10 h-10 rounded-lg flex items-center justify-center text-white flex-shrink-0"
                                         style="background-color: <?= Security::escape($cat['color']) ?>">

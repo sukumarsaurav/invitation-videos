@@ -5,6 +5,7 @@
 
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../src/Core/Security.php';
+require_once __DIR__ . '/../components/template-card.php';
 
 // Fetch relevant templates
 $birthdayTemplates = Database::fetchAll(
@@ -19,7 +20,7 @@ ob_start();
 
 <!-- Hero Section -->
 <section class="relative pt-20 pb-24 lg:pt-32 lg:pb-40 overflow-hidden">
-    <div class="absolute inset-0 bg-slate-50 dark:bg-slate-900">
+    <div class="absolute inset-0 bg-slate-50">
         <div class="absolute inset-0 bg-[url('/assets/images/pattern.svg')] opacity-[0.03]"></div>
     </div>
 
@@ -27,17 +28,16 @@ ob_start();
         <div class="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div class="text-center lg:text-left">
                 <div
-                    class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-300 text-sm font-bold mb-6">
+                    class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-600 text-sm font-bold mb-6">
                     <span class="material-symbols-outlined text-base">cake</span>
                     For All Ages
                 </div>
-                <h1
-                    class="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-white leading-tight mb-6">
+                <h1 class="heading-hero text-slate-900 leading-tight mb-6">
                     Fun & Exciting <span
                         class="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-600">Birthday
                         Video Invites</span>
                 </h1>
-                <p class="text-lg text-slate-600 dark:text-slate-400 mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+                <p class="text-lg text-slate-600 mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0">
                     Make your party unforgettable from the start! Create amazing birthday invitation videos for kids and
                     adults in minutes.
                 </p>
@@ -47,7 +47,7 @@ ob_start();
                         Create Birthday Video
                     </a>
                     <a href="#how-it-works"
-                        class="w-full sm:w-auto px-8 py-4 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all text-center flex items-center justify-center gap-2">
+                        class="w-full sm:w-auto px-8 py-4 bg-white text-slate-700 font-bold rounded-xl border border-slate-200 hover:bg-slate-50:bg-slate-700 transition-all text-center flex items-center justify-center gap-2">
                         <span class="material-symbols-outlined">play_circle</span>
                         See How It Works
                     </a>
@@ -56,7 +56,7 @@ ob_start();
 
             <div class="relative mx-auto w-full max-w-md lg:max-w-full">
                 <div
-                    class="relative aspect-[9/16] rounded-2xl overflow-hidden shadow-2xl border-4 border-white dark:border-slate-800 bg-slate-900">
+                    class="relative aspect-[9/16] rounded-2xl overflow-hidden shadow-2xl border-4 border-white bg-slate-900">
                     <!-- Placeholder for hero video/image -->
                     <div class="absolute inset-0 flex items-center justify-center bg-slate-800 text-slate-500">
                         <span class="material-symbols-outlined text-6xl">cake</span>
@@ -71,35 +71,21 @@ ob_start();
 </section>
 
 <!-- Templates Section -->
-<section id="templates" class="py-20 bg-white dark:bg-slate-900">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+<section id="templates" class="py-20 bg-white">
+    <div class="container-section">
         <div class="text-center mb-12">
-            <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-4">Popular Birthday Themes</h2>
-            <p class="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">From 1st birthday milestones to sweet 16s
+            <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">Popular Birthday Themes</h2>
+            <p class="text-slate-600 max-w-2xl mx-auto">From 1st birthday milestones to sweet 16s
                 and adult parties, we have it all.</p>
         </div>
 
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
             <?php foreach ($birthdayTemplates as $template): ?>
-                <a href="/template/<?= Security::escape($template['slug']) ?>"
-                    class="group block bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-200 dark:border-slate-700 hover:border-primary/30">
-                    <div class="relative aspect-[4/5] overflow-hidden bg-slate-100">
-                        <img src="<?= Security::escape($template['thumbnail_url']) ?>"
-                            alt="<?= Security::escape($template['title']) ?>"
-                            class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                            loading="lazy">
-                    </div>
-                    <div class="p-4">
-                        <h3
-                            class="font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors truncate">
-                            <?= Security::escape($template['title']) ?>
-                        </h3>
-                        <p
-                            class="text-sm <?= $template['price_usd'] > 0 ? 'text-primary font-bold' : 'text-green-600 font-bold' ?>">
-                            <?= $template['price_usd'] > 0 ? '$' . number_format($template['price_usd'], 2) : 'Free' ?>
-                        </p>
-                    </div>
-                </a>
+                <?= renderTemplateCard($template, [
+                    'variant' => 'service',
+                    'badgeColor' => 'bg-amber-100 text-amber-700',
+                    'showBadge' => false
+                ]) ?>
             <?php endforeach; ?>
         </div>
 
@@ -113,8 +99,8 @@ ob_start();
 </section>
 
 <!-- Detailed SEO Content Support -->
-<section class="py-20 bg-white dark:bg-slate-900">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 prose prose-lg dark:prose-invert">
+<section class="py-20 bg-white">
+    <div class="container-narrow prose prose-lg">
         <h2>Make Your Birthday Party Special with Video Invites</h2>
         <p>A birthday comes only once a year, so make the invitation special! Whether you are planning a <strong>1st
                 birthday party</strong> for your baby, a surprise party for a friend, or a milestone 50th birthday

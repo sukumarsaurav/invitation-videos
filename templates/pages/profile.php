@@ -62,13 +62,13 @@ unset($_SESSION['success'], $_SESSION['errors']);
 <div class="max-w-2xl mx-auto px-4 py-8 sm:py-12">
     <!-- Header -->
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-slate-900 dark:text-white">My Profile</h1>
-        <p class="text-slate-600 dark:text-slate-400 mt-2">Manage your account details</p>
+        <h1 class="text-3xl font-bold text-slate-900">My Profile</h1>
+        <p class="text-slate-600 mt-2">Manage your account details</p>
     </div>
 
     <!-- Profile Card -->
     <div
-        class="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+        class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
         <!-- Profile Header -->
         <div
             class="bg-gradient-to-r from-primary/10 to-purple-500/10 p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-4">
@@ -82,10 +82,10 @@ unset($_SESSION['success'], $_SESSION['errors']);
                 </div>
             <?php endif; ?>
             <div class="text-center sm:text-left">
-                <h2 class="text-xl font-bold text-slate-900 dark:text-white">
+                <h2 class="text-xl font-bold text-slate-900">
                     <?= Security::escape($user['name'] ?? 'User') ?>
                 </h2>
-                <p class="text-slate-600 dark:text-slate-400"><?= Security::escape($user['email']) ?></p>
+                <p class="text-slate-600"><?= Security::escape($user['email']) ?></p>
                 <?php if ($user['google_id']): ?>
                     <span
                         class="inline-flex items-center gap-1 mt-2 px-2 py-0.5 bg-white/80 rounded-full text-xs text-slate-600">
@@ -130,43 +130,43 @@ unset($_SESSION['success'], $_SESSION['errors']);
 
             <div class="grid gap-6 sm:grid-cols-2">
                 <div>
-                    <label for="name" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    <label for="name" class="block text-sm font-medium text-slate-700 mb-2">
                         Full Name
                     </label>
                     <input type="text" id="name" name="name" required
                         value="<?= Security::escape($user['name'] ?? '') ?>"
-                        class="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary focus:border-transparent transition-all">
+                        class="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all">
                 </div>
 
                 <div>
-                    <label for="email" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    <label for="email" class="block text-sm font-medium text-slate-700 mb-2">
                         Email Address
                     </label>
                     <input type="email" id="email" disabled value="<?= Security::escape($user['email']) ?>"
-                        class="w-full px-4 py-3 rounded-lg border border-slate-200 bg-slate-50 dark:bg-slate-800 text-slate-500 cursor-not-allowed">
+                        class="w-full px-4 py-3 rounded-lg border border-slate-200 bg-slate-50 text-slate-500 cursor-not-allowed">
                     <p class="text-xs text-slate-500 mt-1">Email cannot be changed</p>
                 </div>
 
                 <div>
-                    <label for="phone" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    <label for="phone" class="block text-sm font-medium text-slate-700 mb-2">
                         Phone Number
                     </label>
                     <input type="tel" id="phone" name="phone" value="<?= Security::escape($user['phone'] ?? '') ?>"
-                        class="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                        class="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                         placeholder="+1 234 567 890">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    <label class="block text-sm font-medium text-slate-700 mb-2">
                         Member Since
                     </label>
                     <input type="text" disabled value="<?= date('F j, Y', strtotime($user['created_at'])) ?>"
-                        class="w-full px-4 py-3 rounded-lg border border-slate-200 bg-slate-50 dark:bg-slate-800 text-slate-500 cursor-not-allowed">
+                        class="w-full px-4 py-3 rounded-lg border border-slate-200 bg-slate-50 text-slate-500 cursor-not-allowed">
                 </div>
             </div>
 
             <!-- Actions -->
-            <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
+            <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-200">
                 <button type="submit"
                     class="flex-1 py-3 px-6 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg shadow-lg shadow-primary/30 transition-all flex items-center justify-center gap-2">
                     <span class="material-symbols-outlined">save</span>
@@ -187,26 +187,26 @@ unset($_SESSION['success'], $_SESSION['errors']);
     <!-- Quick Links -->
     <div class="mt-6 grid gap-4 sm:grid-cols-2">
         <a href="/my-orders"
-            class="block p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 hover:shadow-lg transition-all">
+            class="block p-4 bg-white rounded-xl border border-slate-200 hover:shadow-lg transition-all">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
                     <span class="material-symbols-outlined">shopping_bag</span>
                 </div>
                 <div>
-                    <h3 class="font-medium text-slate-900 dark:text-white">My Orders</h3>
+                    <h3 class="font-medium text-slate-900">My Orders</h3>
                     <p class="text-sm text-slate-500">View order history</p>
                 </div>
             </div>
         </a>
 
         <a href="/templates"
-            class="block p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 hover:shadow-lg transition-all">
+            class="block p-4 bg-white rounded-xl border border-slate-200 hover:shadow-lg transition-all">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center">
                     <span class="material-symbols-outlined">video_library</span>
                 </div>
                 <div>
-                    <h3 class="font-medium text-slate-900 dark:text-white">Browse Templates</h3>
+                    <h3 class="font-medium text-slate-900">Browse Templates</h3>
                     <p class="text-sm text-slate-500">Create new invitation</p>
                 </div>
             </div>

@@ -236,7 +236,8 @@ $footerHoverColor = '#fdf7f3';
             ;
         }
 
-        /* Critical CSS for above-the-fold content */
+        /* Critical CSS - Minimal essentials only */
+        /* Tailwind utilities are in app.css (preloaded async) */
         *,
         ::after,
         ::before {
@@ -273,258 +274,22 @@ $footerHoverColor = '#fdf7f3';
             display: block
         }
 
-        .font-display {
-            font-family: Plus Jakarta Sans, ui-sans-serif, system-ui, sans-serif
-        }
-
-        .bg-background-light {
-            background-color: #f8fafc
-        }
-
-        .text-slate-900 {
-            color: #0f172a
-        }
-
-        .min-h-screen {
-            min-height: 100vh
-        }
-
-        .flex {
-            display: flex
-        }
-
-        .flex-col {
-            flex-direction: column
-        }
-
-        .items-center {
-            align-items: center
-        }
-
-        .justify-between {
-            justify-content: space-between
-        }
-
-        .gap-2 {
-            gap: .5rem
-        }
-
-        .gap-4 {
-            gap: 1rem
-        }
-
-        .px-4 {
-            padding-left: 1rem;
-            padding-right: 1rem
-        }
-
-        .py-4 {
-            padding-top: 1rem;
-            padding-bottom: 1rem
-        }
-
-        .h-16 {
-            height: 4rem
-        }
-
-        .max-w-7xl {
-            max-width: 80rem
-        }
-
-        .mx-auto {
-            margin-left: auto;
-            margin-right: auto
-        }
-
-        .sticky {
-            position: sticky
-        }
-
-        .top-0 {
-            top: 0
-        }
-
-        .z-50 {
-            z-index: 50
-        }
-
-        .bg-white {
-            background-color: #fff
-        }
-
-        .border-b {
-            border-bottom-width: 1px
-        }
-
-        .border-slate-200 {
-            border-color: #e2e8f0
-        }
-
-        .shadow-sm {
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, .05)
-        }
-
-        .rounded-lg {
-            border-radius: .5rem
-        }
-
-        .rounded-xl {
-            border-radius: .75rem
-        }
-
-        .rounded-2xl {
-            border-radius: 1rem
-        }
-
-        .font-bold {
-            font-weight: 700
-        }
-
-        .text-lg {
-            font-size: 1.125rem;
-            line-height: 1.75rem
-        }
-
-        .text-xl {
-            font-size: 1.25rem;
-            line-height: 1.75rem
-        }
-
-        .text-sm {
-            font-size: .875rem;
-            line-height: 1.25rem
-        }
-
-        .hidden {
-            display: none
-        }
-
-        .block {
-            display: block
-        }
-
-        .w-full {
-            width: 100%
-        }
-
-        .h-full {
-            height: 100%
-        }
-
-        .object-cover {
-            object-fit: cover
-        }
-
-        .overflow-hidden {
-            overflow: hidden
-        }
-
-        .absolute {
-            position: absolute
-        }
-
-        .relative {
-            position: relative
-        }
-
-        .inset-0 {
-            top: 0;
-            right: 0;
-            bottom: 0;
-            left: 0
-        }
-
-        .aspect-\[4\/5\] {
-            aspect-ratio: 4/5
-        }
-
-        .grid {
-            display: grid
-        }
-
-        .grid-cols-2 {
-            grid-template-columns: repeat(2, minmax(0, 1fr))
-        }
-
-        .gap-6 {
-            gap: 1.5rem
-        }
-
-        .p-4 {
-            padding: 1rem
-        }
-
-        .mb-4 {
-            margin-bottom: 1rem
-        }
-
-        .mb-6 {
-            margin-bottom: 1.5rem
-        }
-
+        /* Primary color - must override Tailwind for dynamic theming */
         .text-primary {
-            color: var(--color-primary, #970747)
+            color: var(--color-primary, #970747) !important
         }
 
         .bg-primary {
-            background-color: var(--color-primary, #970747)
+            background-color: var(--color-primary, #970747) !important
         }
 
-        .text-white {
-            color: #fff
-        }
-
-        @media(min-width:640px) {
-            .sm\:px-6 {
-                padding-left: 1.5rem;
-                padding-right: 1.5rem
-            }
-        }
-
-        @media(min-width:769px) {
-            .sm\:block {
-                display: block !important
-            }
-
-            .sm\:hidden {
-                display: none
-            }
-
-            .sm\:grid {
-                display: grid
-            }
-
-            .md\:grid-cols-3 {
-                grid-template-columns: repeat(3, minmax(0, 1fr))
-            }
-        }
-
-        @media(min-width:1024px) {
-            .lg\:flex {
-                display: flex
-            }
-
-            .lg\:hidden {
-                display: none
-            }
-
-            .lg\:px-8 {
-                padding-left: 2rem;
-                padding-right: 2rem
-            }
-
-            .lg\:block {
-                display: block !important
-            }
-        }
-
-        /* Alpine.js cloak - hide elements until Alpine is initialized */
+        /* Alpine.js cloak - hide until initialized */
         [x-cloak] {
             display: none !important
         }
 
-        /* Footer content - always visible on desktop (>= 769px) */
-        @media(min-width:769px) {
+        /* Footer visibility - always visible on tablet+ */
+        @media(min-width:768px) {
 
             .footer-content,
             .footer-content[x-cloak] {
@@ -532,7 +297,7 @@ $footerHoverColor = '#fdf7f3';
             }
         }
 
-        /* Loading state for fonts - stable dimensions to prevent CLS */
+        /* Material Symbols - stable dimensions for CLS prevention */
         .material-symbols-outlined {
             font-family: 'Material Symbols Outlined', sans-serif;
             font-size: 24px;
@@ -544,21 +309,6 @@ $footerHoverColor = '#fdf7f3';
             line-height: 1;
             vertical-align: middle;
             overflow: hidden
-        }
-
-        /* Footer toggle animation utilities */
-        .rotate-180 {
-            transform: rotate(180deg)
-        }
-
-        .transition-transform {
-            transition-property: transform;
-            transition-timing-function: cubic-bezier(.4, 0, .2, 1);
-            transition-duration: .3s
-        }
-
-        .duration-300 {
-            transition-duration: .3s
         }
 
         /* Hide scrollbar for mobile category scroll */
@@ -725,19 +475,8 @@ $footerHoverColor = '#fdf7f3';
         }
     </style>
 
-    <!-- Material Symbols - preload for fast icon rendering (CLS fix) -->
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&display=swap"
-        as="style" crossorigin>
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&display=swap"
-        media="print" onload="this.media='all'" crossorigin>
-    <noscript>
-        <link rel="stylesheet"
-            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&display=swap"
-            crossorigin>
-    </noscript>
+    <!-- Material Symbols - Self-hosted for better performance (CLS fix) -->
+    <link rel="preload" href="/assets/fonts/material-symbols-outlined.woff2" as="font" type="font/woff2" crossorigin>
 
     <!-- Alpine.js Collapse Plugin + Core - self-hosted for better cache control -->
     <script defer src="/assets/js/vendor/alpine-collapse.min.js"></script>
@@ -745,12 +484,11 @@ $footerHoverColor = '#fdf7f3';
 
 </head>
 
-<body
-    class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display min-h-screen flex flex-col">
+<body class="bg-background-light text-slate-900 font-display min-h-screen flex flex-col">
 
 
     <!-- Header -->
-    <header class="sticky top-0 z-50 border-b border-slate-200 dark:border-slate-800 backdrop-blur-sm shadow-sm"
+    <header class="sticky top-0 z-50 border-b border-slate-200 backdrop-blur-sm shadow-sm"
         style="background-color: var(--header-bg-color, #ffffff); color: var(--header-text-color, #1e293b);">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
@@ -758,29 +496,27 @@ $footerHoverColor = '#fdf7f3';
                 <div class="flex items-center gap-2 lg:gap-8 flex-1">
                     <?php if (($isGalleryPage ?? false) && !empty($galleryCategories)): ?>
                         <!-- Mobile: Back Arrow (Gallery pages only) -->
-                        <a href="/"
-                            class="sm:hidden p-2 -ml-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
+                        <a href="/" class="sm:hidden p-2 -ml-2 rounded-lg hover:bg-slate-100:bg-slate-800 text-slate-600"
                             aria-label="Back to home">
                             <span class="material-symbols-outlined text-2xl">arrow_back</span>
                         </a>
                     <?php elseif ($isTemplateDetailPage ?? false): ?>
                         <!-- Mobile: Back Arrow (Template detail pages) -->
                         <a href="<?= $templateBackUrl ?? '/templates' ?>"
-                            class="lg:hidden p-2 -ml-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
+                            class="lg:hidden p-2 -ml-2 rounded-lg hover:bg-slate-100:bg-slate-800 text-slate-600"
                             aria-label="Go back">
                             <span class="material-symbols-outlined text-2xl">arrow_back</span>
                         </a>
                     <?php elseif ($showBackButton ?? false): ?>
                         <!-- Mobile: Back Arrow (Auth pages) -->
-                        <a href="/"
-                            class="lg:hidden p-2 -ml-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
+                        <a href="/" class="lg:hidden p-2 -ml-2 rounded-lg hover:bg-slate-100:bg-slate-800 text-slate-600"
                             aria-label="Go back">
                             <span class="material-symbols-outlined text-2xl">arrow_back</span>
                         </a>
                     <?php else: ?>
                         <!-- Mobile Menu Button (Left) -->
                         <button onclick="openMobileDrawer()"
-                            class="lg:hidden p-2 -ml-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
+                            class="lg:hidden p-2 -ml-2 rounded-lg hover:bg-slate-100:bg-slate-800 text-slate-600"
                             aria-label="Open menu">
                             <span class="material-symbols-outlined text-2xl">menu</span>
                         </button>
@@ -798,7 +534,7 @@ $footerHoverColor = '#fdf7f3';
                     <?php if (($isGalleryPage ?? false) && !empty($galleryCategories)): ?>
                         <!-- Mobile: Title + Count after logo -->
                         <div class="sm:hidden flex flex-col">
-                            <span class="text-sm font-bold text-slate-900 dark:text-white truncate">
+                            <span class="text-sm font-bold text-slate-900 truncate">
                                 <?= ($currentCategory ?? null) && isset($galleryCategories[$currentCategory])
                                     ? $galleryCategories[$currentCategory]['name']
                                     : 'All Templates' ?>
@@ -808,12 +544,12 @@ $footerHoverColor = '#fdf7f3';
                     <?php elseif ($isTemplateDetailPage ?? false): ?>
                         <!-- Mobile: Template name after logo -->
                         <span
-                            class="lg:hidden text-sm font-semibold text-slate-900 dark:text-white truncate max-w-[150px] sm:max-w-[200px]">
+                            class="lg:hidden text-sm font-semibold text-slate-900 truncate max-w-[150px] sm:max-w-[200px]">
                             <?= Security::escape($templateTitle ?? '') ?>
                         </span>
                     <?php elseif ($mobilePageTitle ?? false): ?>
                         <!-- Mobile: Page title (auth pages) -->
-                        <span class="lg:hidden text-sm font-bold text-slate-900 dark:text-white">
+                        <span class="lg:hidden text-sm font-bold text-slate-900">
                             <?= Security::escape($mobilePageTitle) ?>
                         </span>
                     <?php elseif (isset($_GET['active']) && !empty($mainCategories)): ?>
@@ -822,7 +558,7 @@ $footerHoverColor = '#fdf7f3';
                         $activeCatSlug = $_GET['active'];
                         $activeCatName = isset($mainCategories[$activeCatSlug]) ? $mainCategories[$activeCatSlug]['name'] : ucfirst($activeCatSlug);
                         ?>
-                        <span class="sm:hidden text-sm font-bold text-slate-900 dark:text-white truncate max-w-[150px]">
+                        <span class="sm:hidden text-sm font-bold text-slate-900 truncate max-w-[150px]">
                             <?= Security::escape($activeCatName) ?>
                         </span>
                     <?php endif; ?>
@@ -847,7 +583,7 @@ $footerHoverColor = '#fdf7f3';
                                 <div class="absolute left-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50"
                                     style="width: 280px;">
                                     <div
-                                        class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 p-4 max-h-[400px] overflow-y-auto">
+                                        class="bg-white rounded-xl shadow-2xl border border-slate-200 p-4 max-h-[400px] overflow-y-auto">
                                         <?php if (!empty($subcats)): ?>
                                             <ul class="space-y-1">
                                                 <?php foreach (array_slice($subcats, 0, 20) as $subcat): ?>
@@ -860,7 +596,7 @@ $footerHoverColor = '#fdf7f3';
                                                 <?php endforeach; ?>
                                             </ul>
                                         <?php endif; ?>
-                                        <div class="border-t border-slate-100 dark:border-slate-800 mt-3 pt-3">
+                                        <div class="border-t border-slate-100 mt-3 pt-3">
                                             <a href="/templates?category=<?= $catSlug ?>"
                                                 class="block py-2 px-3 text-sm text-primary font-medium hover:bg-primary/5 rounded-lg transition-colors">
                                                 View All <?= Security::escape($category['name']) ?> Templates →
@@ -882,8 +618,7 @@ $footerHoverColor = '#fdf7f3';
                                 </button>
                                 <div class="absolute right-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50"
                                     style="width: 280px;">
-                                    <div
-                                        class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 p-4">
+                                    <div class="bg-white rounded-xl shadow-2xl border border-slate-200 p-4">
                                         <ul class="space-y-1">
                                             <?php foreach ($categorySubcategories['miscellaneous'] ?? [] as $subcat): ?>
                                                 <li>
@@ -920,7 +655,7 @@ $footerHoverColor = '#fdf7f3';
                             <!-- Profile Dropdown -->
                             <div class="relative group">
                                 <button
-                                    class="flex items-center gap-2 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                    class="flex items-center gap-2 p-1 rounded-full hover:bg-slate-100:bg-slate-800 transition-colors">
                                     <?php if ($userAvatar): ?>
                                         <img src="<?= Security::escape($userAvatar) ?>" alt="Profile"
                                             class="w-9 h-9 rounded-full object-cover border-2 border-primary/20" width="36"
@@ -937,11 +672,10 @@ $footerHoverColor = '#fdf7f3';
                                 <!-- Dropdown Menu -->
                                 <div
                                     class="absolute right-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                                    <div
-                                        class="bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 py-2 min-w-[200px]">
+                                    <div class="bg-white rounded-xl shadow-xl border border-slate-200 py-2 min-w-[200px]">
                                         <!-- User Info -->
-                                        <div class="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
-                                            <p class="font-medium text-slate-900 dark:text-white">
+                                        <div class="px-4 py-3 border-b border-slate-100">
+                                            <p class="font-medium text-slate-900">
                                                 <?= Security::escape($userName) ?>
                                             </p>
                                             <p class="text-xs text-slate-500 truncate">
@@ -950,30 +684,30 @@ $footerHoverColor = '#fdf7f3';
                                         </div>
 
                                         <a href="/profile"
-                                            class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                                            class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50:bg-slate-800 transition-colors">
                                             <span class="material-symbols-outlined text-lg">person</span>
                                             Profile
                                         </a>
                                         <a href="/my-orders"
-                                            class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                                            class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50:bg-slate-800 transition-colors">
                                             <span class="material-symbols-outlined text-lg">shopping_bag</span>
                                             My Orders
                                         </a>
                                         <a href="/wishlist"
-                                            class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                                            class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50:bg-slate-800 transition-colors">
                                             <span class="material-symbols-outlined text-lg">favorite</span>
                                             My Wishlist
                                         </a>
                                         <a href="/my-tickets"
-                                            class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                                            class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50:bg-slate-800 transition-colors">
                                             <span class="material-symbols-outlined text-lg">support_agent</span>
                                             My Tickets
                                         </a>
 
-                                        <div class="border-t border-slate-100 dark:border-slate-800 my-1"></div>
+                                        <div class="border-t border-slate-100 my-1"></div>
 
                                         <a href="/logout"
-                                            class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                                            class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50:bg-red-900/20 transition-colors">
                                             <span class="material-symbols-outlined text-lg">logout</span>
                                             Sign Out
                                         </a>
@@ -1008,8 +742,7 @@ $footerHoverColor = '#fdf7f3';
                                 <?php endif; ?>
                             </a>
                         <?php else: ?>
-                            <a href="/login"
-                                class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
+                            <a href="/login" class="p-2 rounded-full hover:bg-slate-100:bg-slate-800 text-slate-600"
                                 aria-label="Login">
                                 <span class="material-symbols-outlined text-2xl">person</span>
                             </a>
@@ -1022,7 +755,7 @@ $footerHoverColor = '#fdf7f3';
 
     <?php if (($isGalleryPage ?? false) && !empty($galleryCategories)): ?>
         <!-- Mobile Category Scroll Bar (only on gallery pages, < 768px) -->
-        <div class="sm:hidden sticky top-16 z-40 bg-white dark:bg-slate-900">
+        <div class="sm:hidden sticky top-16 z-40 bg-white">
             <div class="category-scroll-container overflow-x-auto px-4 py-3"
                 style="-webkit-overflow-scrolling: touch; scrollbar-width: none;">
                 <div class="flex gap-3" style="min-width: max-content;">
@@ -1030,23 +763,22 @@ $footerHoverColor = '#fdf7f3';
                     <a href="/templates"
                         class="flex flex-col items-center flex-shrink-0 <?= !($currentCategory ?? null) ? 'category-selected' : '' ?>">
                         <div
-                            class="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-1 <?= !($currentCategory ?? null) ? 'border-2 border-primary' : 'border-2 border-transparent' ?>">
-                            <span
-                                class="material-symbols-outlined text-2xl text-slate-600 dark:text-slate-300">grid_view</span>
+                            class="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center mb-1 <?= !($currentCategory ?? null) ? 'border-2 border-primary' : 'border-2 border-transparent' ?>">
+                            <span class="material-symbols-outlined text-2xl text-slate-600">grid_view</span>
                         </div>
                         <span
-                            class="text-[10px] font-medium <?= !($currentCategory ?? null) ? 'text-primary' : 'text-slate-700 dark:text-slate-300' ?> text-center leading-tight">All</span>
+                            class="text-[10px] font-medium <?= !($currentCategory ?? null) ? 'text-primary' : 'text-slate-700' ?> text-center leading-tight">All</span>
                     </a>
                     <!-- Category Images from Config -->
                     <?php foreach ($galleryCategories as $slug => $cat): ?>
                         <a href="/templates?category=<?= $slug ?>" class="flex flex-col items-center flex-shrink-0">
                             <div
-                                class="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-1 overflow-hidden <?= ($currentCategory ?? null) === $slug ? 'border-2 border-primary' : 'border-2 border-transparent' ?>">
+                                class="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center mb-1 overflow-hidden <?= ($currentCategory ?? null) === $slug ? 'border-2 border-primary' : 'border-2 border-transparent' ?>">
                                 <img src="<?= htmlspecialchars($cat['image']) ?>" alt="<?= htmlspecialchars($cat['name']) ?>"
                                     class="w-full h-full object-cover">
                             </div>
                             <span
-                                class="text-[10px] font-medium <?= ($currentCategory ?? null) === $slug ? 'text-primary' : 'text-slate-700 dark:text-slate-300' ?> text-center leading-tight"><?= $cat['name'] ?></span>
+                                class="text-[10px] font-medium <?= ($currentCategory ?? null) === $slug ? 'text-primary' : 'text-slate-700' ?> text-center leading-tight"><?= $cat['name'] ?></span>
                         </a>
                     <?php endforeach; ?>
                 </div>
@@ -1060,16 +792,15 @@ $footerHoverColor = '#fdf7f3';
 
     <!-- Mobile Side Drawer -->
     <div id="mobileDrawer"
-        class="fixed top-0 left-0 h-full w-72 max-w-[80vw] bg-white dark:bg-slate-900 z-[110] transform -translate-x-full transition-transform duration-300 ease-out shadow-2xl lg:hidden">
+        class="fixed top-0 left-0 h-full w-72 max-w-[80vw] bg-white z-[110] transform -translate-x-full transition-transform duration-300 ease-out shadow-2xl lg:hidden">
         <!-- Drawer Header -->
-        <div class="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800">
+        <div class="flex items-center justify-between p-4 border-b border-slate-200">
             <a href="/" class="flex items-center gap-2">
                 <img src="/assets/images/logo-64.webp" alt="<?= APP_NAME ?? 'InvitationVideos' ?>" class="h-8 w-auto"
                     width="32" height="32">
                 <span class="font-bold text-lg"><?= APP_NAME ?? 'Invitation Videos' ?></span>
             </a>
-            <button onclick="closeMobileDrawer()"
-                class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
+            <button onclick="closeMobileDrawer()" class="p-2 rounded-lg hover:bg-slate-100:bg-slate-800 text-slate-600"
                 aria-label="Close menu">
                 <span class="material-symbols-outlined">close</span>
             </button>
@@ -1086,7 +817,7 @@ $footerHoverColor = '#fdf7f3';
                 ?>
                 <div x-data="{ open: false }">
                     <button @click="open = !open"
-                        class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                        class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100:bg-slate-800 font-medium transition-colors">
                         <span><?= Security::escape($category['name']) ?></span>
                         <span class="material-symbols-outlined text-base transition-transform"
                             :class="open ? 'rotate-180' : ''">expand_more</span>
@@ -1094,7 +825,7 @@ $footerHoverColor = '#fdf7f3';
                     <div x-show="open" x-collapse class="ml-4 space-y-1 mt-1">
                         <?php foreach (array_slice($subcats, 0, 12) as $subcat): ?>
                             <a href="/templates?category=<?= $subcat['slug'] ?>"
-                                class="block px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm transition-colors">
+                                class="block px-4 py-2 rounded-lg text-slate-600 hover:bg-slate-100:bg-slate-800 text-sm transition-colors">
                                 <?= Security::escape($subcat['name']) ?>
                             </a>
                         <?php endforeach; ?>
@@ -1108,53 +839,53 @@ $footerHoverColor = '#fdf7f3';
 
             <!-- Miscellaneous Section -->
             <?php if (isset($mainCategories['miscellaneous']) && !empty($categorySubcategories['miscellaneous'])): ?>
-                <div class="border-t border-slate-200 dark:border-slate-700 my-3"></div>
+                <div class="border-t border-slate-200 my-3"></div>
                 <p class="px-4 py-1 text-xs font-bold text-slate-400 uppercase tracking-wide">Miscellaneous</p>
                 <?php foreach ($categorySubcategories['miscellaneous'] as $subcat): ?>
                     <a href="/templates?category=<?= $subcat['slug'] ?>"
-                        class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                        class="block px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100:bg-slate-800 font-medium transition-colors">
                         <?= Security::escape($subcat['name']) ?>
                     </a>
                 <?php endforeach; ?>
             <?php endif; ?>
 
 
-            <div class="border-t border-slate-200 dark:border-slate-700 my-3"></div>
+            <div class="border-t border-slate-200 my-3"></div>
 
             <a href="/blog"
-                class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                class="block px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100:bg-slate-800 font-medium transition-colors">
                 Blog
             </a>
 
-            <div class="border-t border-slate-200 dark:border-slate-700 my-3"></div>
+            <div class="border-t border-slate-200 my-3"></div>
 
             <?php if (isset($_SESSION['user_id'])): ?>
                 <a href="/my-orders"
-                    class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                    class="block px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100:bg-slate-800 font-medium transition-colors">
                     My Orders
                 </a>
                 <a href="/wishlist"
-                    class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                    class="block px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100:bg-slate-800 font-medium transition-colors">
                     My Wishlist
                 </a>
                 <a href="/my-tickets"
-                    class="block px-4 py-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors">
+                    class="block px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100:bg-slate-800 font-medium transition-colors">
                     My Tickets
                 </a>
                 <a href="/logout"
-                    class="block px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 font-medium transition-colors">
+                    class="block px-4 py-3 rounded-lg text-red-600 hover:bg-red-50:bg-red-900/20 font-medium transition-colors">
                     Logout
                 </a>
             <?php endif; ?>
 
             <!-- Support Links (smaller, lighter) -->
-            <div class="border-t border-slate-200 dark:border-slate-700 my-3"></div>
+            <div class="border-t border-slate-200 my-3"></div>
             <a href="/support"
-                class="block px-4 py-2 rounded-lg text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm font-normal transition-colors">
+                class="block px-4 py-2 rounded-lg text-slate-400 hover:bg-slate-100:bg-slate-800 text-sm font-normal transition-colors">
                 Help Center
             </a>
             <a href="/contact"
-                class="block px-4 py-2 rounded-lg text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm font-normal transition-colors">
+                class="block px-4 py-2 rounded-lg text-slate-400 hover:bg-slate-100:bg-slate-800 text-sm font-normal transition-colors">
                 Contact Us
             </a>
 
@@ -1188,15 +919,14 @@ $footerHoverColor = '#fdf7f3';
 
 
     <!-- Footer - Can be hidden on mobile for specific pages like gallery -->
-    <footer
-        class="border-t border-slate-200 dark:border-slate-800 mt-auto <?= ($hideFooterOnMobile ?? false) ? 'hidden sm:block' : '' ?>"
+    <footer class="border-t border-slate-200 mt-auto <?= ($hideFooterOnMobile ?? false) ? 'hidden sm:block' : '' ?>"
         style="background-color: var(--footer-bg-color, #ffffff); color: var(--footer-text-color, #1e293b);"
-        x-data="{ footerOpen: window.innerWidth >= 769 }"
-        x-init="window.addEventListener('resize', () => { if (window.innerWidth >= 769) footerOpen = true })">
-        <!-- Mobile Footer Toggle Bar (visible only on small screens < 769px) -->
+        x-data="{ footerOpen: window.innerWidth >= 768 }"
+        x-init="window.addEventListener('resize', () => { if (window.innerWidth >= 768) footerOpen = true })">
+        <!-- Mobile Footer Toggle Bar (visible only on small screens < 768px) -->
         <div class="sm:hidden">
             <button @click="footerOpen = !footerOpen"
-                class="w-full flex items-center justify-between px-4 py-4 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                class="w-full flex items-center justify-between px-4 py-4 text-slate-600 hover:bg-slate-50:bg-slate-800 transition-colors"
                 :aria-expanded="footerOpen" aria-controls="footerContent">
                 <div class="flex items-center gap-2">
                     <img src="/assets/images/logo-64.webp" alt="<?= APP_NAME ?? 'InvitationVideos' ?>"
@@ -1220,7 +950,7 @@ $footerHoverColor = '#fdf7f3';
              LIMIT 10"
         );
         ?>
-        <!-- Footer Content (collapsible on mobile < 769px, always visible on sm and above) -->
+        <!-- Footer Content (collapsible on mobile < 768px, always visible on sm and above) -->
         <div id="footerContent" class="footer-content" x-show="footerOpen" x-cloak x-collapse.duration.300ms>
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8">
@@ -1359,7 +1089,7 @@ $footerHoverColor = '#fdf7f3';
             </div>
 
             <!-- Full-width divider -->
-            <div class="border-t border-slate-200 dark:border-slate-800 mt-8"></div>
+            <div class="border-t border-slate-200 mt-8"></div>
 
             <!-- Bottom Section: Copyright & Payment -->
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

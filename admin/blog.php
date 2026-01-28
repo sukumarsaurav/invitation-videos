@@ -144,7 +144,7 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
         <div class="lg:col-span-2 space-y-6">
             <!-- Title -->
             <div
-                class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
                 <input type="text" name="title" id="post-title" value="<?= Security::escape($post['title'] ?? '') ?>"
                     required
                     class="w-full text-2xl font-bold border-none focus:ring-0 p-0 bg-transparent placeholder:text-slate-400"
@@ -153,7 +153,7 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
 
             <!-- Slug -->
             <div
-                class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-4">
+                class="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
                 <label class="text-xs text-slate-500 uppercase font-bold mb-1 block">URL Slug</label>
                 <div class="flex items-center gap-2">
                     <span class="text-slate-400 text-sm">/blog/</span>
@@ -165,7 +165,7 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
 
             <!-- Excerpt -->
             <div
-                class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
                 <label class="text-xs text-slate-500 uppercase font-bold mb-2 block">Excerpt</label>
                 <textarea name="excerpt" rows="2"
                     class="w-full border-none focus:ring-0 p-0 bg-transparent text-sm resize-none placeholder:text-slate-400"
@@ -174,9 +174,9 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
 
             <!-- Content Editor -->
             <div
-                class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                 <div
-                    class="px-4 py-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-white/5 flex flex-wrap items-center gap-1">
+                    class="px-4 py-2 border-b border-slate-100 bg-slate-50 flex flex-wrap items-center gap-1">
                     <span class="text-xs text-slate-500 uppercase font-bold mr-2">Content</span>
 
                     <!-- Formatting Toolbar -->
@@ -311,7 +311,7 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
         <div class="space-y-6">
             <!-- Publish Box -->
             <div
-                class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
                 <h3 class="font-bold mb-4 flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary">publish</span>
                     Publish
@@ -321,7 +321,7 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Status</label>
                         <select name="status"
-                            class="w-full h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
+                            class="w-full h-10 px-3 rounded-lg border border-slate-200 bg-slate-50 text-sm">
                             <option value="draft" <?= ($post['status'] ?? 'draft') === 'draft' ? 'selected' : '' ?>>Draft
                             </option>
                             <option value="published" <?= ($post['status'] ?? '') === 'published' ? 'selected' : '' ?>>
@@ -352,13 +352,13 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
 
             <!-- Category -->
             <div
-                class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
                 <h3 class="font-bold mb-4 flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary">category</span>
                     Category
                 </h3>
                 <input type="text" name="category" value="<?= Security::escape($post['category'] ?? '') ?>"
-                    class="w-full h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 text-sm"
+                    class="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm"
                     placeholder="e.g., Wedding Tips, Birthday Ideas" list="category-suggestions">
                 <datalist id="category-suggestions">
                     <?php foreach ($categories as $cat): ?>
@@ -369,7 +369,7 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
 
             <!-- Featured Image -->
             <div
-                class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
                 <h3 class="font-bold mb-4 flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary">image</span>
                     Featured Image
@@ -412,7 +412,7 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
 
                 <input type="url" name="featured_image" id="featured-image-url"
                     value="<?= Security::escape($post['featured_image'] ?? '') ?>"
-                    class="w-full h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 text-sm"
+                    class="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm"
                     placeholder="https://..." onchange="updateFeaturedPreview()">
 
                 <!-- Preview -->
@@ -433,7 +433,7 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
 
             <!-- SEO -->
             <div
-                class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
                 <h3 class="font-bold mb-4 flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary">search</span>
                     SEO Settings
@@ -442,13 +442,13 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
                     <div>
                         <label class="block text-xs text-slate-500 uppercase font-bold mb-1">Meta Title</label>
                         <input type="text" name="meta_title" value="<?= Security::escape($post['meta_title'] ?? '') ?>"
-                            class="w-full h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 text-sm"
+                            class="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm"
                             placeholder="SEO title (60 chars max)">
                     </div>
                     <div>
                         <label class="block text-xs text-slate-500 uppercase font-bold mb-1">Meta Description</label>
                         <textarea name="meta_description" rows="3"
-                            class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-sm resize-none"
+                            class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm resize-none"
                             placeholder="SEO description (160 chars max)"><?= Security::escape($post['meta_description'] ?? '') ?></textarea>
                     </div>
                 </div>
@@ -1012,19 +1012,19 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
     <?php endif; ?>
 
     <!-- Filters -->
-    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-4 mb-6">
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-6">
         <form method="GET" class="flex flex-wrap items-center gap-4">
             <div class="flex-1 min-w-[200px]">
                 <div class="relative">
                     <span
                         class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 material-symbols-outlined text-lg">search</span>
                     <input type="text" name="search" value="<?= Security::escape($search) ?>"
-                        class="w-full h-10 pl-10 pr-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+                        class="w-full h-10 pl-10 pr-4 rounded-lg border border-slate-200 bg-slate-50 text-sm"
                         placeholder="Search posts...">
                 </div>
             </div>
             <select name="status"
-                class="h-10 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
+                class="h-10 px-4 rounded-lg border border-slate-200 bg-slate-50 text-sm">
                 <option value="">All Status</option>
                 <option value="draft" <?= $status === 'draft' ? 'selected' : '' ?>>Draft</option>
                 <option value="published" <?= $status === 'published' ? 'selected' : '' ?>>Published</option>
@@ -1038,10 +1038,10 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
 
     <!-- Posts Table -->
     <div
-        class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm">
-                <thead class="bg-slate-50 dark:bg-white/5 text-slate-500 font-semibold uppercase text-xs">
+                <thead class="bg-slate-50 text-slate-500 font-semibold uppercase text-xs">
                     <tr>
                         <th class="px-6 py-4">Title</th>
                         <th class="px-6 py-4">Category</th>
@@ -1052,7 +1052,7 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
                         <th class="px-6 py-4 text-right">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                <tbody class="divide-y divide-slate-100">
                     <?php foreach ($posts as $p):
                         $statusColors = [
                             'draft' => 'bg-yellow-100 text-yellow-700',
@@ -1060,7 +1060,7 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
                             'archived' => 'bg-slate-100 text-slate-700',
                         ];
                         ?>
-                        <tr class="hover:bg-slate-50 dark:hover:bg-white/5">
+                        <tr class="hover:bg-slate-50:bg-white/5">
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
                                     <?php if ($p['featured_image']): ?>
@@ -1068,7 +1068,7 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
                                             style="background-image: url('<?= Security::escape($p['featured_image']) ?>');"></div>
                                     <?php endif; ?>
                                     <div>
-                                        <p class="font-bold text-slate-900 dark:text-white"><?= Security::escape($p['title']) ?>
+                                        <p class="font-bold text-slate-900"><?= Security::escape($p['title']) ?>
                                         </p>
                                         <p class="text-xs text-slate-500 truncate max-w-xs">
                                             /blog/<?= Security::escape($p['slug']) ?></p>
@@ -1133,7 +1133,7 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
 
         <!-- Pagination -->
         <?php if ($totalPages > 1): ?>
-            <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+            <div class="px-6 py-4 border-t border-slate-200 flex items-center justify-between">
                 <p class="text-sm text-slate-500">
                     Showing <?= $offset + 1 ?> to <?= min($offset + $perPage, $totalPosts) ?> of <?= $totalPosts ?> posts
                 </p>

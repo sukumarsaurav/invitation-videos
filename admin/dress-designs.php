@@ -190,7 +190,7 @@ $genderOptions = ['couple' => 'Couple', 'male' => 'Male Only', 'female' => 'Fema
     <?php if ($action === 'new' || ($action === 'edit' && $design)): ?>
         <!-- Tabs for Edit Mode -->
         <?php if ($action === 'edit'): ?>
-            <div class="border-b border-slate-200 dark:border-slate-700">
+            <div class="border-b border-slate-200">
                 <nav class="flex gap-4">
                     <a href="/admin/dress-designs.php?action=edit&id=<?= $dressId ?>" 
                        class="py-3 px-1 border-b-2 <?= !isset($_GET['tab']) || $_GET['tab'] === 'details' ? 'border-primary text-primary font-medium' : 'border-transparent text-slate-500 hover:text-slate-700' ?>">
@@ -212,7 +212,7 @@ $genderOptions = ['couple' => 'Couple', 'male' => 'Male Only', 'female' => 'Fema
 
         <?php if ($currentTab === 'details' || $action === 'new'): ?>
             <!-- Design Details Form -->
-            <div class="bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
                 <form method="POST" class="space-y-4">
                     <input type="hidden" name="csrf_token" value="<?= Security::generateCSRFToken() ?>">
                     <input type="hidden" name="action" value="<?= $design ? 'update_design' : 'create_design' ?>">
@@ -288,11 +288,11 @@ $genderOptions = ['couple' => 'Couple', 'male' => 'Male Only', 'female' => 'Fema
             <!-- Colors Management -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Color List -->
-                <div class="bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
-                    <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200">
+                    <div class="px-6 py-4 border-b border-slate-200">
                         <h2 class="font-bold">Colors for <?= Security::escape($design['name']) ?></h2>
                     </div>
-                    <div class="divide-y divide-slate-200 dark:divide-slate-700">
+                    <div class="divide-y divide-slate-200">
                         <?php if (empty($colors)): ?>
                             <div class="p-6 text-center text-slate-500">
                                 <span class="material-symbols-outlined text-3xl mb-2">palette</span>
@@ -333,7 +333,7 @@ $genderOptions = ['couple' => 'Couple', 'male' => 'Male Only', 'female' => 'Fema
                 </div>
 
                 <!-- Add/Edit Color Form -->
-                <div class="bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
                     <h2 class="font-bold mb-4" id="color-form-title">Add New Color</h2>
                     <form method="POST" class="space-y-4" id="color-form">
                         <input type="hidden" name="csrf_token" value="<?= Security::generateCSRFToken() ?>">
@@ -409,12 +409,12 @@ $genderOptions = ['couple' => 'Couple', 'male' => 'Male Only', 'female' => 'Fema
             <!-- AI Prompts Management -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Prompt List -->
-                <div class="bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
-                    <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200">
+                    <div class="px-6 py-4 border-b border-slate-200">
                         <h2 class="font-bold">AI Prompts</h2>
                         <p class="text-sm text-slate-500">Prompts sent to AI for image generation</p>
                     </div>
-                    <div class="divide-y divide-slate-200 dark:divide-slate-700">
+                    <div class="divide-y divide-slate-200">
                         <?php if (empty($prompts)): ?>
                             <div class="p-6 text-center text-slate-500">
                                 <span class="material-symbols-outlined text-3xl mb-2">auto_awesome</span>
@@ -459,7 +459,7 @@ $genderOptions = ['couple' => 'Couple', 'male' => 'Male Only', 'female' => 'Fema
                 </div>
 
                 <!-- Add/Edit Prompt Form -->
-                <div class="bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
                     <h2 class="font-bold mb-4" id="prompt-form-title">Add AI Prompt</h2>
                     <form method="POST" class="space-y-4" id="prompt-form">
                         <input type="hidden" name="csrf_token" value="<?= Security::generateCSRFToken() ?>">
@@ -524,11 +524,11 @@ $genderOptions = ['couple' => 'Couple', 'male' => 'Male Only', 'female' => 'Fema
 
     <?php else: ?>
         <!-- Designs List -->
-        <div class="bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200">
             <div class="overflow-x-auto">
                 <table class="w-full">
                     <thead>
-                        <tr class="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-white/5">
+                        <tr class="border-b border-slate-200 bg-slate-50">
                             <th class="text-left px-6 py-3 text-sm font-medium text-slate-500">Design</th>
                             <th class="text-left px-6 py-3 text-sm font-medium text-slate-500">Category</th>
                             <th class="text-center px-6 py-3 text-sm font-medium text-slate-500">Colors</th>
@@ -537,7 +537,7 @@ $genderOptions = ['couple' => 'Couple', 'male' => 'Male Only', 'female' => 'Fema
                             <th class="text-right px-6 py-3 text-sm font-medium text-slate-500">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                    <tbody class="divide-y divide-slate-200">
                         <?php if (empty($designs)): ?>
                             <tr>
                                 <td colspan="6" class="px-6 py-12 text-center text-slate-500">
@@ -547,7 +547,7 @@ $genderOptions = ['couple' => 'Couple', 'male' => 'Male Only', 'female' => 'Fema
                             </tr>
                         <?php else: ?>
                             <?php foreach ($designs as $d): ?>
-                                <tr class="hover:bg-slate-50 dark:hover:bg-white/5">
+                                <tr class="hover:bg-slate-50:bg-white/5">
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-3">
                                             <?php if ($d['thumbnail_url']): ?>

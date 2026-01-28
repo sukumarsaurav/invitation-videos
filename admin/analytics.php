@@ -85,21 +85,21 @@ $pageTitle = 'Analytics';
 
     <!-- Date Range Filter -->
     <div class="flex items-center gap-2">
-        <div class="flex rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div class="flex rounded-lg border border-slate-200 overflow-hidden">
             <a href="?range=24h"
-                class="px-3 py-2 text-sm font-medium <?= $range === '24h' ? 'bg-primary text-white' : 'bg-white dark:bg-slate-800 text-slate-600 hover:bg-slate-50' ?>">
+                class="px-3 py-2 text-sm font-medium <?= $range === '24h' ? 'bg-primary text-white' : 'bg-white text-slate-600 hover:bg-slate-50' ?>">
                 24h
             </a>
             <a href="?range=7d"
-                class="px-3 py-2 text-sm font-medium border-l border-slate-200 dark:border-slate-700 <?= $range === '7d' ? 'bg-primary text-white' : 'bg-white dark:bg-slate-800 text-slate-600 hover:bg-slate-50' ?>">
+                class="px-3 py-2 text-sm font-medium border-l border-slate-200 <?= $range === '7d' ? 'bg-primary text-white' : 'bg-white text-slate-600 hover:bg-slate-50' ?>">
                 7d
             </a>
             <a href="?range=30d"
-                class="px-3 py-2 text-sm font-medium border-l border-slate-200 dark:border-slate-700 <?= $range === '30d' ? 'bg-primary text-white' : 'bg-white dark:bg-slate-800 text-slate-600 hover:bg-slate-50' ?>">
+                class="px-3 py-2 text-sm font-medium border-l border-slate-200 <?= $range === '30d' ? 'bg-primary text-white' : 'bg-white text-slate-600 hover:bg-slate-50' ?>">
                 30d
             </a>
             <a href="?range=90d"
-                class="px-3 py-2 text-sm font-medium border-l border-slate-200 dark:border-slate-700 <?= $range === '90d' ? 'bg-primary text-white' : 'bg-white dark:bg-slate-800 text-slate-600 hover:bg-slate-50' ?>">
+                class="px-3 py-2 text-sm font-medium border-l border-slate-200 <?= $range === '90d' ? 'bg-primary text-white' : 'bg-white text-slate-600 hover:bg-slate-50' ?>">
                 90d
             </a>
         </div>
@@ -130,7 +130,7 @@ $pageTitle = 'Analytics';
 <!-- Stats Grid -->
 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
     <!-- Total Visitors -->
-    <div class="bg-white dark:bg-surface-dark p-5 rounded-xl border border-slate-200 dark:border-slate-700">
+    <div class="bg-white p-5 rounded-xl border border-slate-200">
         <div class="flex items-center justify-between mb-3">
             <span class="material-symbols-outlined text-2xl text-blue-500">group</span>
         </div>
@@ -144,7 +144,7 @@ $pageTitle = 'Analytics';
     </div>
 
     <!-- Page Views -->
-    <div class="bg-white dark:bg-surface-dark p-5 rounded-xl border border-slate-200 dark:border-slate-700">
+    <div class="bg-white p-5 rounded-xl border border-slate-200">
         <div class="flex items-center justify-between mb-3">
             <span class="material-symbols-outlined text-2xl text-green-500">visibility</span>
         </div>
@@ -159,7 +159,7 @@ $pageTitle = 'Analytics';
     </div>
 
     <!-- Returning Visitors -->
-    <div class="bg-white dark:bg-surface-dark p-5 rounded-xl border border-slate-200 dark:border-slate-700">
+    <div class="bg-white p-5 rounded-xl border border-slate-200">
         <div class="flex items-center justify-between mb-3">
             <span class="material-symbols-outlined text-2xl text-amber-500">autorenew</span>
         </div>
@@ -174,7 +174,7 @@ $pageTitle = 'Analytics';
     </div>
 
     <!-- Conversion Rate -->
-    <div class="bg-white dark:bg-surface-dark p-5 rounded-xl border border-slate-200 dark:border-slate-700">
+    <div class="bg-white p-5 rounded-xl border border-slate-200">
         <div class="flex items-center justify-between mb-3">
             <span class="material-symbols-outlined text-2xl text-purple-500">trending_up</span>
         </div>
@@ -192,7 +192,7 @@ $pageTitle = 'Analytics';
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
     <!-- Visitors Chart -->
     <div
-        class="lg:col-span-2 bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-slate-700">
+        class="lg:col-span-2 bg-white p-6 rounded-xl border border-slate-200">
         <h3 class="font-bold text-lg mb-1">Visitors Over Time</h3>
         <p class="text-sm text-slate-500 mb-4">
             <?= $rangeLabel ?>
@@ -203,7 +203,7 @@ $pageTitle = 'Analytics';
     </div>
 
     <!-- Conversion Funnel -->
-    <div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-slate-700">
+    <div class="bg-white p-6 rounded-xl border border-slate-200">
         <h3 class="font-bold text-lg mb-1">Conversion Funnel</h3>
         <p class="text-sm text-slate-500 mb-4">
             <?= $rangeLabel ?>
@@ -217,7 +217,7 @@ $pageTitle = 'Analytics';
                         <?= number_format($funnel['visitors']) ?>
                     </span>
                 </div>
-                <div class="h-3 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                <div class="h-3 bg-slate-100 rounded-full overflow-hidden">
                     <div class="h-full bg-blue-500 rounded-full" style="width: 100%"></div>
                 </div>
             </div>
@@ -230,7 +230,7 @@ $pageTitle = 'Analytics';
                         <?= $funnelPercentages['template_views'] ?>%)
                     </span>
                 </div>
-                <div class="h-3 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                <div class="h-3 bg-slate-100 rounded-full overflow-hidden">
                     <div class="h-full bg-green-500 rounded-full"
                         style="width: <?= min($funnelPercentages['template_views'], 100) ?>%"></div>
                 </div>
@@ -244,7 +244,7 @@ $pageTitle = 'Analytics';
                         <?= $funnelPercentages['registrations'] ?>%)
                     </span>
                 </div>
-                <div class="h-3 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                <div class="h-3 bg-slate-100 rounded-full overflow-hidden">
                     <div class="h-full bg-amber-500 rounded-full"
                         style="width: <?= min($funnelPercentages['registrations'], 100) ?>%"></div>
                 </div>
@@ -258,7 +258,7 @@ $pageTitle = 'Analytics';
                         <?= $funnelPercentages['purchases'] ?>%)
                     </span>
                 </div>
-                <div class="h-3 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                <div class="h-3 bg-slate-100 rounded-full overflow-hidden">
                     <div class="h-full bg-purple-500 rounded-full"
                         style="width: <?= min($funnelPercentages['purchases'], 100) ?>%"></div>
                 </div>
@@ -270,14 +270,14 @@ $pageTitle = 'Analytics';
 <!-- Geo & Pages Row -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
     <!-- Top Countries -->
-    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-        <div class="p-5 border-b border-slate-200 dark:border-slate-700">
+    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div class="p-5 border-b border-slate-200">
             <h3 class="font-bold text-lg flex items-center gap-2">
                 <span class="material-symbols-outlined text-blue-500">public</span>
                 Top Countries
             </h3>
         </div>
-        <div class="divide-y divide-slate-100 dark:divide-slate-700">
+        <div class="divide-y divide-slate-100">
             <?php if (empty($visitorsByCountry)): ?>
                 <div class="p-8 text-center text-slate-500">
                     <span class="material-symbols-outlined text-4xl text-slate-300 mb-2">analytics</span>
@@ -285,7 +285,7 @@ $pageTitle = 'Analytics';
                 </div>
             <?php else: ?>
                 <?php foreach ($visitorsByCountry as $i => $country): ?>
-                    <div class="flex items-center justify-between px-5 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                    <div class="flex items-center justify-between px-5 py-3 hover:bg-slate-50:bg-slate-800/50">
                         <div class="flex items-center gap-3">
                             <span class="text-lg">
                                 <?= getCountryFlag($country['country_code']) ?>
@@ -295,7 +295,7 @@ $pageTitle = 'Analytics';
                             </span>
                         </div>
                         <div class="flex items-center gap-4">
-                            <div class="w-24 h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                            <div class="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
                                 <?php $maxCount = $visitorsByCountry[0]['visitor_count'] ?? 1; ?>
                                 <div class="h-full bg-blue-500 rounded-full"
                                     style="width: <?= ($country['visitor_count'] / $maxCount) * 100 ?>%"></div>
@@ -311,14 +311,14 @@ $pageTitle = 'Analytics';
     </div>
 
     <!-- Top Cities -->
-    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-        <div class="p-5 border-b border-slate-200 dark:border-slate-700">
+    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div class="p-5 border-b border-slate-200">
             <h3 class="font-bold text-lg flex items-center gap-2">
                 <span class="material-symbols-outlined text-green-500">location_city</span>
                 Top Cities
             </h3>
         </div>
-        <div class="divide-y divide-slate-100 dark:divide-slate-700">
+        <div class="divide-y divide-slate-100">
             <?php if (empty($visitorsByCity)): ?>
                 <div class="p-8 text-center text-slate-500">
                     <span class="material-symbols-outlined text-4xl text-slate-300 mb-2">analytics</span>
@@ -326,7 +326,7 @@ $pageTitle = 'Analytics';
                 </div>
             <?php else: ?>
                 <?php foreach ($visitorsByCity as $city): ?>
-                    <div class="flex items-center justify-between px-5 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                    <div class="flex items-center justify-between px-5 py-3 hover:bg-slate-50:bg-slate-800/50">
                         <div class="flex items-center gap-3">
                             <span class="text-lg">
                                 <?= getCountryFlag($city['country_code']) ?>
@@ -353,7 +353,7 @@ $pageTitle = 'Analytics';
 <!-- Device & Browser Row -->
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
     <!-- Device Breakdown -->
-    <div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-slate-700">
+    <div class="bg-white p-6 rounded-xl border border-slate-200">
         <h3 class="font-bold text-lg mb-4">Devices</h3>
         <div class="space-y-3">
             <?php
@@ -375,7 +375,7 @@ $pageTitle = 'Analytics';
                                 <?= $percent ?>%
                             </span>
                         </div>
-                        <div class="h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                        <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
                             <div class="h-full bg-primary rounded-full" style="width: <?= $percent ?>%"></div>
                         </div>
                     </div>
@@ -385,7 +385,7 @@ $pageTitle = 'Analytics';
     </div>
 
     <!-- Browser Breakdown -->
-    <div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-slate-700">
+    <div class="bg-white p-6 rounded-xl border border-slate-200">
         <h3 class="font-bold text-lg mb-4">Browsers</h3>
         <div class="space-y-3">
             <?php
@@ -406,7 +406,7 @@ $pageTitle = 'Analytics';
     </div>
 
     <!-- Top Pages -->
-    <div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-slate-700">
+    <div class="bg-white p-6 rounded-xl border border-slate-200">
         <h3 class="font-bold text-lg mb-4">Top Pages</h3>
         <div class="space-y-2">
             <?php foreach (array_slice($topPages, 0, 5) as $page): ?>
@@ -426,7 +426,7 @@ $pageTitle = 'Analytics';
 <!-- Traffic Sources & Campaigns -->
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
     <!-- Traffic Source Breakdown -->
-    <div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-slate-700">
+    <div class="bg-white p-6 rounded-xl border border-slate-200">
         <div class="flex items-center justify-between mb-4">
             <h3 class="font-bold text-lg">Traffic Sources</h3>
             <a href="/admin/campaigns.php" class="text-sm text-primary hover:underline">Manage</a>
@@ -461,7 +461,7 @@ $pageTitle = 'Analytics';
                         <span class="capitalize font-medium"><?= $source ?></span>
                         <span class="text-slate-500"><?= number_format($count) ?> (<?= $percent ?>%)</span>
                     </div>
-                    <div class="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                    <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
                         <div class="h-full <?= $config['color'] ?> rounded-full" style="width: <?= $percent ?>%"></div>
                     </div>
                 </div>
@@ -471,7 +471,7 @@ $pageTitle = 'Analytics';
     </div>
 
     <!-- Top Campaigns -->
-    <div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-slate-700">
+    <div class="bg-white p-6 rounded-xl border border-slate-200">
         <div class="flex items-center justify-between mb-4">
             <h3 class="font-bold text-lg">Top Campaigns</h3>
             <a href="/admin/campaigns.php?action=new" class="text-sm text-primary hover:underline flex items-center gap-1">
@@ -488,7 +488,7 @@ $pageTitle = 'Analytics';
         <?php else: ?>
         <div class="space-y-3">
             <?php foreach ($topCampaigns as $campaign): ?>
-            <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-white/5 rounded-lg">
+            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                 <div>
                     <p class="font-medium text-sm truncate max-w-[150px]"><?= htmlspecialchars($campaign['name']) ?></p>
                     <p class="text-xs text-slate-400"><?= ucfirst($campaign['utm_source']) ?></p>
@@ -504,7 +504,7 @@ $pageTitle = 'Analytics';
     </div>
 
     <!-- UTM Source Breakdown -->
-    <div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-slate-700">
+    <div class="bg-white p-6 rounded-xl border border-slate-200">
         <h3 class="font-bold text-lg mb-4">By Source</h3>
         <?php if (empty($utmSourceBreakdown)): ?>
         <div class="text-center py-8 text-slate-400">
@@ -523,7 +523,7 @@ $pageTitle = 'Analytics';
                         <span class="font-medium capitalize"><?= htmlspecialchars($src['utm_source']) ?></span>
                         <span class="text-slate-500"><?= number_format($src['count']) ?></span>
                     </div>
-                    <div class="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                    <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
                         <div class="h-full bg-primary rounded-full" style="width: <?= ($src['count'] / $maxSourceCount) * 100 ?>%"></div>
                     </div>
                 </div>

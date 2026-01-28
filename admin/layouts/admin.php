@@ -15,8 +15,8 @@ require_once __DIR__ . '/../auth.php';
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-        rel="stylesheet">
+    <!-- Material Symbols - Self-hosted -->
+    <link rel="preload" href="/assets/fonts/material-symbols-outlined.woff2" as="font" type="font/woff2" crossorigin>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -96,7 +96,7 @@ require_once __DIR__ . '/../auth.php';
     </style>
 </head>
 
-<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white overflow-hidden">
+<body class="bg-background-light text-slate-900 overflow-hidden">
 
     <!-- Mobile Overlay -->
     <div id="overlay" class="fixed inset-0 bg-black/50 z-40 lg:hidden hidden" onclick="toggleSidebar()"></div>
@@ -105,7 +105,7 @@ require_once __DIR__ . '/../auth.php';
 
         <!-- Side Navigation -->
         <aside id="sidebar"
-            class="fixed lg:relative z-50 flex w-64 flex-col justify-between border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-surface-dark flex-shrink-0 h-full closed lg:transform-none">
+            class="fixed lg:relative z-50 flex w-64 flex-col justify-between border-r border-slate-200 bg-white flex-shrink-0 h-full closed lg:transform-none">
             <div>
                 <!-- Logo -->
                 <div class="flex items-center justify-between gap-3 px-6 py-6">
@@ -162,19 +162,19 @@ require_once __DIR__ . '/../auth.php';
             </div>
 
             <!-- Bottom Section -->
-            <div class="p-4 border-t border-slate-200 dark:border-slate-800 relative">
+            <div class="p-4 border-t border-slate-200 relative">
                 <!-- Admin Profile with Dropdown -->
                 <div class="relative">
                     <!-- Dropdown Menu (hidden by default) -->
                     <div id="user-dropdown"
-                        class="absolute bottom-full left-0 right-0 mb-2 bg-white dark:bg-surface-dark rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden hidden">
+                        class="absolute bottom-full left-0 right-0 mb-2 bg-white rounded-lg shadow-lg border border-slate-200 overflow-hidden hidden">
                         <a href="/admin/settings.php"
-                            class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                            class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50:bg-white/5 transition-colors">
                             <span class="material-symbols-outlined text-lg">settings</span>
                             <span class="text-sm font-medium">Settings</span>
                         </a>
                         <a href="/logout"
-                            class="flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors border-t border-slate-100 dark:border-slate-700">
+                            class="flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50:bg-red-900/20 transition-colors border-t border-slate-100">
                             <span class="material-symbols-outlined text-lg">logout</span>
                             <span class="text-sm font-medium">Logout</span>
                         </a>
@@ -182,7 +182,7 @@ require_once __DIR__ . '/../auth.php';
 
                     <!-- Profile Button -->
                     <button type="button" onclick="toggleUserDropdown()"
-                        class="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-50 dark:bg-white/5 cursor-pointer hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
+                        class="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-50 cursor-pointer hover:bg-slate-100:bg-white/10 transition-colors">
                         <div
                             class="size-9 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
                             <?= substr($_SESSION['user_name'] ?? 'A', 0, 1) ?>
@@ -204,7 +204,7 @@ require_once __DIR__ . '/../auth.php';
 
             <!-- Top Header -->
             <header
-                class="h-14 sm:h-16 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-surface-dark px-4 sm:px-6 lg:px-8 py-3 flex-shrink-0">
+                class="h-14 sm:h-16 flex items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6 lg:px-8 py-3 flex-shrink-0">
 
                 <!-- Mobile Menu Button -->
                 <button onclick="toggleSidebar()"
@@ -220,7 +220,7 @@ require_once __DIR__ . '/../auth.php';
                             <span class="material-symbols-outlined text-[20px]">search</span>
                         </div>
                         <input type="text"
-                            class="block w-full p-2.5 pl-10 text-sm border-none rounded-lg bg-slate-100 dark:bg-white/5 focus:ring-2 focus:ring-primary transition-all placeholder:text-slate-400"
+                            class="block w-full p-2.5 pl-10 text-sm border-none rounded-lg bg-slate-100 focus:ring-2 focus:ring-primary transition-all placeholder:text-slate-400"
                             placeholder="Search orders, users, or templates...">
                     </div>
                 </div>
@@ -236,10 +236,10 @@ require_once __DIR__ . '/../auth.php';
                     </button>
 
                     <button
-                        class="relative p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-colors">
+                        class="relative p-2 text-slate-500 hover:bg-slate-100:bg-white/10 rounded-full transition-colors">
                         <span class="material-symbols-outlined">notifications</span>
                         <span
-                            class="absolute top-2 right-2 size-2 bg-red-500 rounded-full border-2 border-white dark:border-surface-dark"></span>
+                            class="absolute top-2 right-2 size-2 bg-red-500 rounded-full border-2 border-white"></span>
                     </button>
 
                     <a href="/admin/templates.php?action=new"

@@ -33,15 +33,15 @@ $pageTitle = 'My Orders';
 <div class="max-w-6xl mx-auto px-4 py-8 sm:py-12">
     <!-- Header -->
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-slate-900 dark:text-white">My Orders</h1>
-        <p class="text-slate-600 dark:text-slate-400 mt-2">Track and manage your video invitation orders</p>
+        <h1 class="text-3xl font-bold text-slate-900">My Orders</h1>
+        <p class="text-slate-600 mt-2">Track and manage your video invitation orders</p>
     </div>
 
     <?php if (empty($orders)): ?>
         <!-- Empty State -->
-        <div class="text-center py-16 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+        <div class="text-center py-16 bg-white rounded-2xl border border-slate-200">
             <span class="material-symbols-outlined text-6xl text-slate-300">shopping_bag</span>
-            <h3 class="mt-4 text-xl font-bold text-slate-900 dark:text-white">No orders yet</h3>
+            <h3 class="mt-4 text-xl font-bold text-slate-900">No orders yet</h3>
             <p class="mt-2 text-slate-500">Start by browsing our beautiful templates</p>
             <a href="/templates"
                 class="inline-flex items-center gap-2 mt-6 px-6 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 transition-colors">
@@ -78,7 +78,7 @@ $pageTitle = 'My Orders';
                 }
                 ?>
                 <div
-                    class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden hover:shadow-lg transition-shadow">
+                    class="bg-white rounded-xl border border-slate-200 overflow-hidden hover:shadow-lg transition-shadow">
                     <div class="p-4 sm:p-6">
                         <div class="flex flex-col sm:flex-row gap-4">
                             <!-- Thumbnail -->
@@ -92,7 +92,7 @@ $pageTitle = 'My Orders';
                             <div class="flex-1">
                                 <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                                     <div>
-                                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">
+                                        <h3 class="text-lg font-bold text-slate-900">
                                             <?= Security::escape($order['template_title'] ?? 'Video Invitation') ?>
                                         </h3>
                                         <p class="text-sm text-slate-500 mt-1">Order
@@ -114,26 +114,26 @@ $pageTitle = 'My Orders';
                                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4 text-sm">
                                     <div>
                                         <span class="text-slate-500">Amount</span>
-                                        <p class="font-bold text-slate-900 dark:text-white">
+                                        <p class="font-bold text-slate-900">
                                             <?= $order['currency'] === 'INR' ? '₹' : '$' ?>
                                             <?= number_format($order['amount'], 2) ?>
                                         </p>
                                     </div>
                                     <div>
                                         <span class="text-slate-500">Payment</span>
-                                        <p class="font-medium text-slate-900 dark:text-white capitalize">
+                                        <p class="font-medium text-slate-900 capitalize">
                                             <?= $order['payment_gateway'] ?? 'Pending' ?>
                                         </p>
                                     </div>
                                     <div>
                                         <span class="text-slate-500">Date</span>
-                                        <p class="font-medium text-slate-900 dark:text-white">
+                                        <p class="font-medium text-slate-900">
                                             <?= date('M d, Y', strtotime($order['created_at'])) ?>
                                         </p>
                                     </div>
                                     <div>
                                         <span class="text-slate-500">Delivery</span>
-                                        <p class="font-medium text-slate-900 dark:text-white">
+                                        <p class="font-medium text-slate-900">
                                             <?php if (($order['order_status'] ?? '') === 'completed'): ?>
                                                 <span class="text-green-600">Ready</span>
                                             <?php elseif (($order['order_status'] ?? '') === 'processing'): ?>
@@ -188,7 +188,7 @@ $pageTitle = 'My Orders';
                                 <?php endif; ?>
 
                                 <!-- Actions -->
-                                <div class="flex flex-wrap gap-3 mt-5 pt-4 border-t border-slate-100 dark:border-slate-800">
+                                <div class="flex flex-wrap gap-3 mt-5 pt-4 border-t border-slate-100">
                                     <?php if (($order['payment_status'] ?? 'pending') === 'pending'): ?>
                                         <a href="/checkout/<?= $order['id'] ?>"
                                             class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white font-bold text-sm rounded-lg hover:bg-primary/90 transition-colors">

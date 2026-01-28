@@ -143,7 +143,7 @@ class DynamicFormRenderer
 
         $label = $groupLabels[$groupName] ?? ucfirst(str_replace('_', ' ', $groupName));
 
-        $html = '<section class="form-section bg-white dark:bg-slate-900 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 mb-6">';
+        $html = '<section class="form-section bg-white rounded-xl p-6 shadow-sm border border-slate-200 mb-6">';
         $html .= '<h3 class="text-lg font-bold mb-4 flex items-center gap-2">' . Security::escape($label) . '</h3>';
         $html .= '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
 
@@ -178,7 +178,7 @@ class DynamicFormRenderer
 
         $html .= '">';
         $html .= '<label class="flex items-center justify-between mb-2">';
-        $html .= '<span class="text-sm font-medium text-slate-700 dark:text-slate-300">' . $label . '</span>';
+        $html .= '<span class="text-sm font-medium text-slate-700">' . $label . '</span>';
         $html .= $requiredBadge;
         $html .= '</label>';
 
@@ -187,44 +187,44 @@ class DynamicFormRenderer
             case 'number':
                 $type = $field['field_type'] === 'number' ? 'number' : 'text';
                 $html .= '<input type="' . $type . '" name="' . $name . '" 
-                    class="w-full h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                    class="w-full h-11 px-4 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                     placeholder="' . $placeholder . '" 
                     value="' . Security::escape($value ?? '') . '" ' . $required . '>';
                 break;
 
             case 'textarea':
                 $html .= '<textarea name="' . $name . '" 
-                    class="w-full min-h-[100px] p-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-y"
+                    class="w-full min-h-[100px] p-4 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-y"
                     placeholder="' . $placeholder . '" ' . $required . '>' . Security::escape($value ?? '') . '</textarea>';
                 break;
 
             case 'date':
                 $html .= '<input type="date" name="' . $name . '" 
-                    class="w-full h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                    class="w-full h-11 px-4 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                     value="' . Security::escape($value ?? '') . '" ' . $required . '>';
                 break;
 
             case 'time':
                 $html .= '<input type="time" name="' . $name . '" 
-                    class="w-full h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                    class="w-full h-11 px-4 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                     value="' . Security::escape($value ?? '') . '" ' . $required . '>';
                 break;
 
             case 'datetime':
                 $html .= '<input type="datetime-local" name="' . $name . '" 
-                    class="w-full h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                    class="w-full h-11 px-4 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                     value="' . Security::escape($value ?? '') . '" ' . $required . '>';
                 break;
 
             case 'color':
                 $html .= '<input type="color" name="' . $name . '" 
-                    class="w-full h-11 rounded-lg border border-slate-200 dark:border-slate-700 cursor-pointer"
+                    class="w-full h-11 rounded-lg border border-slate-200 cursor-pointer"
                     value="' . Security::escape($value ?? '#7f13ec') . '">';
                 break;
 
             case 'select':
                 $html .= '<select name="' . $name . '" 
-                    class="w-full h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" ' . $required . '>';
+                    class="w-full h-11 px-4 rounded-lg border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" ' . $required . '>';
                 $html .= '<option value="">Select...</option>';
 
                 $options = $this->getFieldOptions($field['id']);
@@ -261,7 +261,7 @@ class DynamicFormRenderer
     private function renderImageUpload(string $name, array $field, $value): string
     {
         $html = '<div class="image-upload-wrapper">';
-        $html .= '<div class="border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-primary rounded-xl p-6 text-center cursor-pointer transition-all" 
+        $html .= '<div class="border-2 border-dashed border-slate-200 hover:border-primary rounded-xl p-6 text-center cursor-pointer transition-all" 
             onclick="document.getElementById(\'' . $name . '_input\').click()">';
         $html .= '<div class="flex flex-col items-center gap-2">';
         $html .= '<span class="material-symbols-outlined text-4xl text-slate-400">cloud_upload</span>';
@@ -297,13 +297,13 @@ class DynamicFormRenderer
         } else {
             foreach ($presets as $preset) {
                 $checked = ($value === $preset['id']) ? 'checked' : '';
-                $html .= '<label class="flex items-center p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-primary cursor-pointer transition-all ' . ($checked ? 'border-primary bg-primary/5' : '') . '">';
+                $html .= '<label class="flex items-center p-4 rounded-xl border border-slate-200 hover:border-primary cursor-pointer transition-all ' . ($checked ? 'border-primary bg-primary/5' : '') . '">';
                 $html .= '<input type="radio" name="' . $name . '" value="' . $preset['id'] . '" class="hidden peer" ' . $checked . '>';
                 $html .= '<div class="flex-1">';
                 $html .= '<div class="font-medium">' . Security::escape($preset['name']) . '</div>';
                 $html .= '<div class="text-xs text-slate-500">' . Security::escape($preset['description'] ?? '') . '</div>';
                 $html .= '</div>';
-                $html .= '<button type="button" class="p-2 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-primary hover:text-white transition-colors" onclick="playPreview(\'' . Security::escape($preset['file_url']) . '\')">';
+                $html .= '<button type="button" class="p-2 rounded-full bg-slate-100 hover:bg-primary hover:text-white transition-colors" onclick="playPreview(\'' . Security::escape($preset['file_url']) . '\')">';
                 $html .= '<span class="material-symbols-outlined text-xl">play_arrow</span>';
                 $html .= '</button>';
                 $html .= '</label>';
@@ -312,11 +312,11 @@ class DynamicFormRenderer
 
         // Custom upload option with progress indicator
         $uploadId = $name . '_custom';
-        $html .= '<div class="mt-4 border-t border-slate-200 dark:border-slate-700 pt-4">';
-        $html .= '<p class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Or upload your own track:</p>';
+        $html .= '<div class="mt-4 border-t border-slate-200 pt-4">';
+        $html .= '<p class="text-sm font-medium text-slate-600 mb-2">Or upload your own track:</p>';
 
         // Dropzone
-        $html .= '<div class="border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-primary rounded-xl p-4 text-center cursor-pointer transition-all" 
+        $html .= '<div class="border-2 border-dashed border-slate-200 hover:border-primary rounded-xl p-4 text-center cursor-pointer transition-all" 
             id="' . $uploadId . '_dropzone" 
             onclick="document.getElementById(\'' . $uploadId . '\').click()">';
 
@@ -333,7 +333,7 @@ class DynamicFormRenderer
         $html .= '<div class="flex items-center gap-3">';
         $html .= '<span class="material-symbols-outlined text-2xl text-primary">audio_file</span>';
         $html .= '<div class="text-left">';
-        $html .= '<p id="' . $uploadId . '_filename" class="text-sm font-medium text-slate-800 dark:text-slate-200 truncate max-w-[200px]"></p>';
+        $html .= '<p id="' . $uploadId . '_filename" class="text-sm font-medium text-slate-800 truncate max-w-[200px]"></p>';
         $html .= '<p id="' . $uploadId . '_size" class="text-xs text-slate-500"></p>';
         $html .= '</div>';
         $html .= '</div>';

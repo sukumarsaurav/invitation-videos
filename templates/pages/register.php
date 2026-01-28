@@ -39,12 +39,12 @@ $pageTitle = 'Create Account';
                 <span class="material-symbols-outlined text-primary text-4xl">movie_filter</span>
                 <span class="text-2xl font-bold"><?= APP_NAME ?></span>
             </a>
-            <h1 class="mt-6 text-3xl font-bold text-slate-900 dark:text-white">Create your account</h1>
-            <p class="mt-2 text-slate-600 dark:text-slate-400">Start creating beautiful video invitations</p>
+            <h1 class="mt-6 text-3xl font-bold text-slate-900">Create your account</h1>
+            <p class="mt-2 text-slate-600">Start creating beautiful video invitations</p>
         </div>
 
         <!-- Register Form -->
-        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-xl p-8 border border-slate-200 dark:border-slate-800">
+        <div class="bg-white rounded-2xl shadow-xl p-8 border border-slate-200">
             <?php if (!empty($errors)): ?>
                 <div class="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
                     <ul class="list-disc list-inside space-y-1">
@@ -59,48 +59,48 @@ $pageTitle = 'Create Account';
                 <?= Security::csrfField() ?>
 
                 <div>
-                    <label for="name" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    <label for="name" class="block text-sm font-medium text-slate-700 mb-2">
                         Full Name
                     </label>
                     <input type="text" id="name" name="name" required
                         value="<?= Security::escape($old['name'] ?? '') ?>"
-                        class="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                        class="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                         placeholder="John Doe">
                 </div>
 
                 <div>
-                    <label for="email" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    <label for="email" class="block text-sm font-medium text-slate-700 mb-2">
                         Email Address
                     </label>
                     <input type="email" id="email" name="email" required
                         value="<?= Security::escape($old['email'] ?? '') ?>"
-                        class="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                        class="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                         placeholder="you@example.com">
                 </div>
 
                 <div>
-                    <label for="password" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    <label for="password" class="block text-sm font-medium text-slate-700 mb-2">
                         Password
                     </label>
                     <input type="password" id="password" name="password" required minlength="8"
-                        class="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                        class="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                         placeholder="Minimum 8 characters">
                 </div>
 
                 <div>
                     <label for="confirm_password"
-                        class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        class="block text-sm font-medium text-slate-700 mb-2">
                         Confirm Password
                     </label>
                     <input type="password" id="confirm_password" name="confirm_password" required
-                        class="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                        class="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                         placeholder="Repeat your password">
                 </div>
 
                 <div class="flex items-start gap-2">
                     <input type="checkbox" id="terms" name="terms" required
                         class="mt-1 rounded border-slate-300 text-primary focus:ring-primary">
-                    <label for="terms" class="text-sm text-slate-600 dark:text-slate-400">
+                    <label for="terms" class="text-sm text-slate-600">
                         I agree to the <a href="/terms" class="text-primary hover:underline">Terms of Service</a>
                         and <a href="/privacy" class="text-primary hover:underline">Privacy Policy</a>
                     </label>
@@ -115,16 +115,16 @@ $pageTitle = 'Create Account';
             <!-- Divider -->
             <div class="relative my-6">
                 <div class="absolute inset-0 flex items-center">
-                    <div class="w-full border-t border-slate-200 dark:border-slate-700"></div>
+                    <div class="w-full border-t border-slate-200"></div>
                 </div>
                 <div class="relative flex justify-center text-sm">
-                    <span class="px-4 bg-white dark:bg-slate-900 text-slate-500">or continue with</span>
+                    <span class="px-4 bg-white text-slate-500">or continue with</span>
                 </div>
             </div>
 
             <!-- Google Sign Up -->
             <a href="/auth/google<?= $redirectParam ?>"
-                class="flex items-center justify-center gap-3 w-full py-3 px-4 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+                class="flex items-center justify-center gap-3 w-full py-3 px-4 border border-slate-300 rounded-lg hover:bg-slate-50:bg-slate-800 transition-all">
                 <svg class="w-5 h-5" viewBox="0 0 24 24">
                     <path fill="#4285F4"
                         d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -135,11 +135,11 @@ $pageTitle = 'Create Account';
                     <path fill="#EA4335"
                         d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                 </svg>
-                <span class="font-medium text-slate-700 dark:text-slate-300">Sign up with Google</span>
+                <span class="font-medium text-slate-700">Sign up with Google</span>
             </a>
 
             <div class="mt-6 text-center">
-                <p class="text-slate-600 dark:text-slate-400">
+                <p class="text-slate-600">
                     Already have an account?
                     <a href="/login<?= $redirectParam ?>" class="text-primary font-semibold hover:underline">Sign in</a>
                 </p>

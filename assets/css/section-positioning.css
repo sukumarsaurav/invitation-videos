@@ -11,10 +11,10 @@
     /* Mobile: shorter hero */
 }
 
-@media (min-width: 769px) {
+@media (min-width: 768px) {
     .hero-section {
         min-height: 80vh;
-        /* Desktop: taller hero */
+        /* Tablet+: taller hero */
     }
 }
 
@@ -39,13 +39,13 @@
     height: var(--height-xs);
 }
 
-@media (min-width: 481px) {
+@media (min-width: 480px) {
     .section-banner {
         height: var(--height-xs);
     }
 }
 
-@media (min-width: 769px) {
+@media (min-width: 768px) {
     .section-banner {
         height: var(--height-sm);
     }
@@ -204,8 +204,8 @@
     transition: transform 0.4s ease-out;
 }
 
-/* Mobile: Horizontal scroll with snap */
-@media (max-width: 768px) {
+/* Mobile: Horizontal scroll with snap (< 768px) */
+@media (max-width: 767px) {
     .carousel-track {
         overflow-x: auto;
         scroll-snap-type: x mandatory;
@@ -223,8 +223,8 @@
     }
 }
 
-/* Desktop: Hidden overflow for slide animation */
-@media (min-width: 769px) {
+/* Tablet+: Hidden overflow for slide animation */
+@media (min-width: 768px) {
     .carousel-track {
         overflow: hidden;
     }
@@ -271,8 +271,8 @@
     right: -22px;
 }
 
-/* Hide arrows on mobile */
-@media (max-width: 768px) {
+/* Hide arrows on mobile (< 768px) */
+@media (max-width: 767px) {
 
     .carousel-prev,
     .carousel-next {
@@ -288,8 +288,8 @@
     margin-top: 16px;
 }
 
-/* Hide dots on mobile - using horizontal scroll instead */
-@media (max-width: 768px) {
+/* Hide dots on mobile - using horizontal scroll instead (< 768px) */
+@media (max-width: 767px) {
     .carousel-dots {
         display: none;
     }

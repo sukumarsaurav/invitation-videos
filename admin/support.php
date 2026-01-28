@@ -127,10 +127,10 @@ $pageTitle = 'Support';
 
     <!-- Tickets List Panel -->
     <div
-        class="w-full lg:w-[380px] bg-white dark:bg-surface-dark border-r border-slate-200 dark:border-slate-800 flex flex-col shrink-0">
+        class="w-full lg:w-[380px] bg-white border-r border-slate-200 flex flex-col shrink-0">
 
         <!-- Filters Header -->
-        <div class="p-4 border-b border-slate-200 dark:border-slate-800 space-y-3">
+        <div class="p-4 border-b border-slate-200 space-y-3">
             <div class="flex justify-between items-center">
                 <span class="text-sm font-semibold text-slate-500 uppercase tracking-wide">Support Inbox</span>
                 <span class="bg-primary/10 text-primary text-xs font-bold px-2 py-0.5 rounded-full">
@@ -164,8 +164,8 @@ $pageTitle = 'Support';
             <?php foreach ($tickets as $ticket):
                 $isActive = $ticketId === intval($ticket['id']);
                 $priorityColors = [
-                    'high' => 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-                    'medium' => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+                    'high' => 'bg-red-100 text-red-700',
+                    'medium' => 'bg-yellow-100 text-yellow-700',
                     'low' => 'bg-slate-100 text-slate-600',
                 ];
                 $statusColors = [
@@ -177,10 +177,10 @@ $pageTitle = 'Support';
                 $timeAgo = (new DateTime($ticket['created_at']))->diff(new DateTime())->days;
                 $timeStr = $timeAgo > 0 ? $timeAgo . 'd ago' : 'Today';
                 ?>
-                <a href="/admin/support.php?id=<?= $ticket['id'] ?>" class="flex flex-col gap-1 p-4 border-l-4 border-b border-b-slate-100 dark:border-b-slate-800 cursor-pointer transition-colors
+                <a href="/admin/support.php?id=<?= $ticket['id'] ?>" class="flex flex-col gap-1 p-4 border-l-4 border-b border-b-slate-100 cursor-pointer transition-colors
                <?= $isActive
-                   ? 'border-l-primary bg-primary/5 dark:bg-primary/10'
-                   : 'border-l-transparent hover:bg-slate-50 dark:hover:bg-slate-800' ?>">
+                   ? 'border-l-primary bg-primary/5'
+                   : 'border-l-transparent hover:bg-slate-50:bg-slate-800' ?>">
                     <div class="flex justify-between items-start mb-1">
                         <div class="flex items-center gap-2">
                             <?php if ($ticket['priority'] === 'high'): ?>
@@ -192,7 +192,7 @@ $pageTitle = 'Support';
                         </div>
                         <span class="text-xs text-slate-400 font-medium"><?= $timeStr ?></span>
                     </div>
-                    <h3 class="text-sm font-semibold text-slate-900 dark:text-white leading-tight line-clamp-1">
+                    <h3 class="text-sm font-semibold text-slate-900 leading-tight line-clamp-1">
                         <?= Security::escape($ticket['subject']) ?>
                     </h3>
                     <p class="text-xs text-slate-500 line-clamp-1 mt-1">
@@ -203,7 +203,7 @@ $pageTitle = 'Support';
                             class="size-5 rounded-full bg-primary/20 flex items-center justify-center text-primary text-[10px] font-bold">
                             <?= strtoupper(substr($ticket['customer_name'] ?? 'U', 0, 1)) ?>
                         </div>
-                        <span class="text-xs font-medium text-slate-600 dark:text-slate-400">
+                        <span class="text-xs font-medium text-slate-600">
                             <?= Security::escape($ticket['customer_name'] ?? 'Unknown') ?>
                         </span>
                         <span
@@ -224,15 +224,15 @@ $pageTitle = 'Support';
     </div>
 
     <!-- Ticket Detail Panel -->
-    <div class="flex-1 flex flex-col min-w-0 bg-slate-50 dark:bg-background-dark">
+    <div class="flex-1 flex flex-col min-w-0 bg-slate-50">
 
         <?php if ($currentTicket): ?>
 
             <!-- Ticket Header -->
             <div
-                class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-surface-dark shrink-0">
+                class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-white shrink-0">
                 <div class="flex items-center gap-3 overflow-hidden">
-                    <h2 class="text-lg font-bold text-slate-900 dark:text-white truncate">
+                    <h2 class="text-lg font-bold text-slate-900 truncate">
                         <?= Security::escape($currentTicket['subject']) ?>
                     </h2>
                     <?php if ($currentTicket['priority'] === 'high'): ?>
@@ -269,14 +269,14 @@ $pageTitle = 'Support';
                 <div class="max-w-3xl mx-auto space-y-6">
 
                     <!-- Customer Info Card -->
-                    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 p-4">
+                    <div class="bg-white rounded-xl border border-slate-200 p-4">
                         <div class="flex items-center gap-4">
                             <div
                                 class="size-12 rounded-full bg-primary/20 flex items-center justify-center text-primary text-lg font-bold">
                                 <?= strtoupper(substr($currentTicket['customer_name'] ?? 'U', 0, 1)) ?>
                             </div>
                             <div class="flex-1">
-                                <p class="font-bold text-slate-900 dark:text-white">
+                                <p class="font-bold text-slate-900">
                                     <?= Security::escape($currentTicket['customer_name'] ?? 'Unknown') ?>
                                 </p>
                                 <p class="text-sm text-slate-500">
@@ -290,7 +290,7 @@ $pageTitle = 'Support';
                             </div>
                         </div>
                         <?php if ($currentTicket['order_number']): ?>
-                            <div class="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
+                            <div class="mt-3 pt-3 border-t border-slate-200">
                                 <p class="text-sm text-slate-500">
                                     Related Order:
                                     <a href="/admin/orders.php?search=<?= $currentTicket['order_number'] ?>"
@@ -303,12 +303,12 @@ $pageTitle = 'Support';
                     </div>
 
                     <!-- Original Message -->
-                    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 p-5">
+                    <div class="bg-white rounded-xl border border-slate-200 p-5">
                         <div class="flex items-center gap-2 mb-3 text-sm text-slate-500">
                             <span class="material-symbols-outlined text-lg">mail</span>
                             Original Message
                         </div>
-                        <div class="text-slate-700 dark:text-slate-300 whitespace-pre-wrap">
+                        <div class="text-slate-700 whitespace-pre-wrap">
                             <?= nl2br(Security::escape($currentTicket['message'])) ?>
                         </div>
                     </div>
@@ -324,7 +324,7 @@ $pageTitle = 'Support';
                             <div class="flex-1 max-w-[80%] <?= $msg['sender_type'] === 'admin' ? 'text-right' : '' ?>">
                                 <div class="inline-block text-left rounded-xl p-4 <?= $msg['sender_type'] === 'admin'
                                     ? 'bg-primary text-white'
-                                    : 'bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-800' ?>">
+                                    : 'bg-white border border-slate-200' ?>">
                                     <p class="text-sm whitespace-pre-wrap"><?= nl2br(Security::escape($msg['message'])) ?></p>
                                 </div>
                                 <p class="text-xs text-slate-400 mt-1">
@@ -339,14 +339,14 @@ $pageTitle = 'Support';
 
             <!-- Reply Form -->
             <?php if ($currentTicket['status'] !== 'closed'): ?>
-                <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-surface-dark shrink-0">
+                <div class="px-6 py-4 border-t border-slate-200 bg-white shrink-0">
                     <form method="POST" class="max-w-3xl mx-auto">
                         <input type="hidden" name="ticket_id" value="<?= $ticketId ?>">
                         <input type="hidden" name="action" value="reply">
 
                         <div class="flex gap-3">
                             <textarea name="message" required rows="2"
-                                class="flex-1 px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm resize-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                                class="flex-1 px-4 py-3 rounded-lg border border-slate-200 bg-slate-50 text-sm resize-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                                 placeholder="Type your reply..."></textarea>
                             <button type="submit"
                                 class="px-6 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 transition-colors shadow-sm flex items-center gap-2 self-end">
@@ -374,23 +374,23 @@ $pageTitle = 'Support';
             <!-- Empty State -->
             <div class="flex-1 flex flex-col items-center justify-center text-slate-500">
                 <span class="material-symbols-outlined text-7xl text-slate-300 mb-4">support_agent</span>
-                <h3 class="text-xl font-bold text-slate-700 dark:text-slate-300 mb-2">Select a Ticket</h3>
+                <h3 class="text-xl font-bold text-slate-700 mb-2">Select a Ticket</h3>
                 <p class="text-sm">Choose a support ticket from the list to view details and respond.</p>
 
                 <!-- Stats Cards -->
                 <div class="grid grid-cols-3 gap-4 mt-8 max-w-lg">
                     <div
-                        class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 p-4 text-center">
+                        class="bg-white rounded-xl border border-slate-200 p-4 text-center">
                         <p class="text-2xl font-bold text-primary"><?= $stats['total_open'] ?></p>
                         <p class="text-xs text-slate-500 mt-1">Open Tickets</p>
                     </div>
                     <div
-                        class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 p-4 text-center">
+                        class="bg-white rounded-xl border border-slate-200 p-4 text-center">
                         <p class="text-2xl font-bold text-red-600"><?= $stats['high_priority'] ?></p>
                         <p class="text-xs text-slate-500 mt-1">High Priority</p>
                     </div>
                     <div
-                        class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 p-4 text-center">
+                        class="bg-white rounded-xl border border-slate-200 p-4 text-center">
                         <p class="text-2xl font-bold text-green-600"><?= $stats['resolved_today'] ?></p>
                         <p class="text-xs text-slate-500 mt-1">Resolved Today</p>
                     </div>
