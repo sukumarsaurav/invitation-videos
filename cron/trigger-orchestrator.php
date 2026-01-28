@@ -2,39 +2,27 @@
 /**
  * Trigger AWS Lambda Orchestrator
  * 
- * Cron job to process pending video render orders.
- * Calls the Node.js orchestrator which handles AWS Lambda rendering.
+ * Cron job to trigger video rendering via AWS Lambda.
+ * Invokes the Lambda orchestrator function which fetches pending orders 
+ * from the PHP backend and renders them.
  * 
  * Usage: Run every 2 minutes via cron
- * Cron: 0,2,4,... * * * * php trigger-orchestrator.php >> /var/log/video-render.log 2>&1
- * 
- * For testing: php cron/trigger-orchestrator.php
  */
 
-// Ensure CLI only
+// Ensure CLI only  
 if (php_sapi_name() !== 'cli') {
     die('This script can only be run from the command line.');
 }
 
-// Configuration
-$awsRendererPath = '/path/to/aws-renderer';  // Update this on server
+// Load configuration
+require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../config/config.php';
+
+// Lock file to prevent overlapping executions
 $lockFile = sys_get_temp_dir() . '/video_orchestrator.lock';
-$lockTimeout = 600;  // 10 minutes max lock time (videos can take a while)
+$lockTimeout = 600;  // 10 minutes max lock time
 
 echo "[" . date('Y-m-d H:i:s') . "] Video Render Orchestrator starting...\n";
-
-// Check if aws-renderer path exists (for local dev, auto-detect)
-if (!is_dir($awsRendererPath)) {
-    // Try relative path for local development
-    $localPath = dirname(__DIR__) . '/../aws-renderer';
-    if (is_dir($localPath)) {
-        $awsRendererPath = realpath($localPath);
-        echo "Using local aws-renderer path: $awsRendererPath\n";
-    } else {
-        echo "ERROR: aws-renderer directory not found. Update \$awsRendererPath in this script.\n";
-        exit(1);
-    }
-}
 
 // Prevent multiple instances running simultaneously
 if (file_exists($lockFile)) {
@@ -52,29 +40,63 @@ if (file_exists($lockFile)) {
 file_put_contents($lockFile, time());
 
 try {
-    // Check if .env exists
-    if (!file_exists("$awsRendererPath/.env")) {
-        throw new Exception(".env file not found in aws-renderer. Copy .env.example to .env and configure.");
+    // Check for pending orders first (avoid invoking Lambda unnecessarily)
+    require_once __DIR__ . '/../config/database.php';
+
+    $pendingCount = Database::fetchOne(
+        "SELECT COUNT(*) as count FROM orders WHERE order_status = 'queued'"
+    );
+
+    if (!$pendingCount || (int) $pendingCount['count'] === 0) {
+        echo "No pending orders. Skipping Lambda invocation.\n";
+        if (file_exists($lockFile))
+            unlink($lockFile);
+        exit(0);
     }
 
-    // Run the orchestrator
-    $command = "cd " . escapeshellarg($awsRendererPath) . " && /bin/bash scripts/trigger.sh 2>&1";
+    echo "Found {$pendingCount['count']} pending order(s). Invoking Lambda orchestrator...\n";
 
-    echo "Running: $command\n";
-    echo "---\n";
+    // Invoke the Lambda orchestrator function
+    $lambdaClient = new Aws\Lambda\LambdaClient([
+        'version' => 'latest',
+        'region' => AWS_DEFAULT_REGION,
+        'credentials' => [
+            'key' => AWS_ACCESS_KEY_ID,
+            'secret' => AWS_SECRET_ACCESS_KEY,
+        ],
+    ]);
 
-    $output = [];
-    $returnCode = 0;
-    exec($command, $output, $returnCode);
+    // The orchestrator function name - should match what's deployed
+    // Format: remotion-render-{version}-mem{memory}mb-disk{disk}mb-{timeout}sec
+    $orchestratorFunctionName = defined('LAMBDA_ORCHESTRATOR_FUNCTION')
+        ? LAMBDA_ORCHESTRATOR_FUNCTION
+        : 'video-orchestrator';  // Fallback name if not defined
 
-    echo implode("\n", $output) . "\n";
-    echo "---\n";
+    echo "Invoking Lambda function: {$orchestratorFunctionName}\n";
 
-    if ($returnCode !== 0) {
-        throw new Exception("Orchestrator exited with code $returnCode");
+    $result = $lambdaClient->invoke([
+        'FunctionName' => $orchestratorFunctionName,
+        'InvocationType' => 'Event',  // Async invocation
+        'Payload' => json_encode([
+            'source' => 'cron',
+            'timestamp' => time()
+        ]),
+    ]);
+
+    $statusCode = $result['StatusCode'];
+
+    if ($statusCode === 202) {
+        echo "Lambda invoked successfully (async). Status: 202 Accepted\n";
+    } else {
+        echo "Lambda invocation returned status: {$statusCode}\n";
+        // For synchronous invocation, we could read the response
+        if (isset($result['Payload'])) {
+            $payload = json_decode($result['Payload']->getContents(), true);
+            echo "Response: " . json_encode($payload, JSON_PRETTY_PRINT) . "\n";
+        }
     }
 
-    echo "Orchestrator completed successfully.\n";
+    echo "Orchestrator trigger completed successfully.\n";
 
 } catch (Exception $e) {
     echo "ERROR: " . $e->getMessage() . "\n";

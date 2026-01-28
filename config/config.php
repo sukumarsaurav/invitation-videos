@@ -154,6 +154,16 @@ define('S3_USER_UPLOADS_BUCKET', env('S3_USER_UPLOADS_BUCKET', 'invitation-video
 define('S3_UPLOADS_EXPIRY_DAYS', (int) env('S3_UPLOADS_EXPIRY_DAYS', 7));
 
 // =============================================================================
+// Remotion Lambda Configuration (Video Rendering)
+// =============================================================================
+
+define('REMOTION_FUNCTION_NAME', env('REMOTION_FUNCTION_NAME', ''));
+define('REMOTION_SERVE_URL', env('REMOTION_SERVE_URL', ''));
+define('REMOTION_REGION', env('REMOTION_REGION', AWS_DEFAULT_REGION));
+// Backend auth token for orchestrator API calls
+define('BACKEND_AUTH_TOKEN', env('BACKEND_AUTH_TOKEN', ''));
+
+// =============================================================================
 // Error Handling
 // =============================================================================
 
