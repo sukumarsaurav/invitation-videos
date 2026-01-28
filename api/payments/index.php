@@ -327,10 +327,24 @@ function verifyRazorpayPayment(array $input): void
             $realOrderId = $draftService->convertToOrder($draft, $razorpayPaymentId, 'razorpay');
             error_log("Razorpay Verify: Converted draft #{$draft['id']} to order #{$realOrderId}");
         } else {
-            error_log("verifyRazorpayPayment: Draft NOT found by token OR razorpay_order_id. Token: {$draftToken}, RazorpayOrderId: {$razorpayOrderId}");
-            http_response_code(404);
-            echo json_encode(['error' => 'Draft order not found']);
-            return;
+            // Draft not found - it may have been already converted by webhook
+            // Check if an order already exists with this payment
+            error_log("verifyRazorpayPayment: Draft NOT found, checking if order already exists...");
+
+            $existingOrder = Database::fetchOne(
+                "SELECT id FROM orders WHERE payment_id = ? OR razorpay_order_id = ?",
+                [$razorpayPaymentId, $razorpayOrderId]
+            );
+
+            if ($existingOrder) {
+                error_log("verifyRazorpayPayment: Order already exists! ID: {$existingOrder['id']} (webhook already processed)");
+                $realOrderId = $existingOrder['id'];
+            } else {
+                error_log("verifyRazorpayPayment: No order found either. Token: {$draftToken}, RazorpayOrderId: {$razorpayOrderId}");
+                http_response_code(404);
+                echo json_encode(['error' => 'Order not found']);
+                return;
+            }
         }
     } else {
         // Legacy: Update existing order in orders table
