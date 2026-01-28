@@ -177,17 +177,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!isset($_SESSION['customize_draft_dir'])) {
             $draftDirName = bin2hex(random_bytes(8)); // 16-char unique name
             $_SESSION['customize_draft_dir'] = 'drafts/' . $draftDirName . '/';
-            $fullDraftDir = UPLOAD_PATH . $_SESSION['customize_draft_dir'];
-            if (!is_dir($fullDraftDir)) {
-                mkdir($fullDraftDir, 0755, true);
-            }
         }
         $draftDir = UPLOAD_PATH . $_SESSION['customize_draft_dir'];
+
+        // ALWAYS ensure directory exists (create if not) - runs on every step
+        if (!is_dir($draftDir)) {
+            $created = @mkdir($draftDir, 0755, true);
+            error_log("customize.php: Creating draft dir: {$draftDir} - " . ($created ? 'SUCCESS' : 'FAILED'));
+            if (!$created) {
+                error_log("customize.php: mkdir error: " . print_r(error_get_last(), true));
+            }
+        }
 
         // DEBUG: Log all received files
         error_log("customize.php: POST received. Step={$step}, FILES count=" . count($_FILES));
         error_log("customize.php: FILES keys: " . implode(', ', array_keys($_FILES)));
-        error_log("customize.php: Using draft dir: " . $draftDir);
+        error_log("customize.php: Using draft dir: " . $draftDir . " (exists: " . (is_dir($draftDir) ? 'YES' : 'NO') . ")");
 
         foreach ($_FILES as $fieldName => $file) {
             error_log("customize.php: Processing file '{$fieldName}': name={$file['name']}, type={$file['type']}, size={$file['size']}, error={$file['error']}, tmp_name={$file['tmp_name']}");
