@@ -28,7 +28,6 @@ try {
             o.order_number,
             o.template_id,
             o.customization_data,
-            o.default_music_url as order_music,
             t.remotion_composition_id,
             t.title as template_title,
             t.template_slug,
@@ -78,9 +77,9 @@ try {
             $customization[$upload['field_name']] = $webPath;
         }
 
-        // Add music URL preference
+        // Add music URL preference (from template)
         if (empty($customization['music_url'])) {
-            $customization['music_url'] = $order['order_music'] ?: $order['template_music'];
+            $customization['music_url'] = $order['template_music'];
         }
 
         // Add background asset if implicit
