@@ -67,8 +67,7 @@ unset($_SESSION['success'], $_SESSION['errors']);
     </div>
 
     <!-- Profile Card -->
-    <div
-        class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
         <!-- Profile Header -->
         <div
             class="bg-gradient-to-r from-primary/10 to-purple-500/10 p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-4">
@@ -189,7 +188,7 @@ unset($_SESSION['success'], $_SESSION['errors']);
         <a href="/my-orders"
             class="block p-4 bg-white rounded-xl border border-slate-200 hover:shadow-lg transition-all">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+                <div class="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
                     <span class="material-symbols-outlined">shopping_bag</span>
                 </div>
                 <div>
@@ -202,7 +201,7 @@ unset($_SESSION['success'], $_SESSION['errors']);
         <a href="/templates"
             class="block p-4 bg-white rounded-xl border border-slate-200 hover:shadow-lg transition-all">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center">
+                <div class="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
                     <span class="material-symbols-outlined">video_library</span>
                 </div>
                 <div>

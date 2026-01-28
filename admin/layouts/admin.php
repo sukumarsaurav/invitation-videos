@@ -45,6 +45,15 @@ require_once __DIR__ . '/../auth.php';
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
+        /* Material Symbols Outlined - Self-hosted variable font */
+        @font-face {
+            font-family: 'Material Symbols Outlined';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url('/assets/fonts/material-symbols-outlined.woff2') format('woff2');
+        }
+
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
@@ -300,7 +309,7 @@ require_once __DIR__ . '/../auth.php';
                     toggleSidebar();
                 }
             });
-        });
+    });
     </script>
 
 </body>

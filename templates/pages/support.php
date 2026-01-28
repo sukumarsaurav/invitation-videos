@@ -66,7 +66,7 @@ $faqs = [
         <a href="mailto:support@invitationvideos.com"
             class="p-6 bg-white rounded-xl border border-slate-200 hover:shadow-lg hover:border-primary/30 transition-all text-center group">
             <div
-                class="w-12 h-12 mx-auto rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                class="w-12 h-12 mx-auto rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                 <span class="material-symbols-outlined text-2xl">mail</span>
             </div>
             <h3 class="font-bold text-slate-900">Email Us</h3>
@@ -86,10 +86,8 @@ $faqs = [
             <p class="text-sm text-slate-500 mt-1">Chat with us instantly</p>
         </a>
 
-        <div
-            class="p-6 bg-white rounded-xl border border-slate-200 text-center">
-            <div
-                class="w-12 h-12 mx-auto rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center mb-3">
+        <div class="p-6 bg-white rounded-xl border border-slate-200 text-center">
+            <div class="w-12 h-12 mx-auto rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-3">
                 <span class="material-symbols-outlined text-2xl">schedule</span>
             </div>
             <h3 class="font-bold text-slate-900">Response Time</h3>
@@ -106,12 +104,10 @@ $faqs = [
 
         <div class="space-y-4">
             <?php foreach ($faqs as $index => $faq): ?>
-                <div
-                    class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
                     <button onclick="toggleFaq(<?= $index ?>)"
                         class="w-full p-5 text-left flex items-center justify-between gap-4 hover:bg-slate-50:bg-slate-800/50 transition-colors">
-                        <span
-                            class="font-medium text-slate-900"><?= Security::escape($faq['question']) ?></span>
+                        <span class="font-medium text-slate-900"><?= Security::escape($faq['question']) ?></span>
                         <span id="faqIcon<?= $index ?>"
                             class="material-symbols-outlined text-slate-400 transition-transform">expand_more</span>
                     </button>

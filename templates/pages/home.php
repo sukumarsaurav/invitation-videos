@@ -530,8 +530,8 @@ $sectionColors = [
 
             <!-- Feature 5 -->
             <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
-                <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mb-4">
-                    <span class="material-symbols-outlined text-2xl text-blue-500">support_agent</span>
+                <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                    <span class="material-symbols-outlined text-2xl text-primary">support_agent</span>
                 </div>
                 <h3 class="font-bold text-lg text-slate-900 mb-2">Dedicated Customer Support</h3>
                 <p class="text-sm text-slate-600">Our friendly support team is available to help you
@@ -541,8 +541,8 @@ $sectionColors = [
 
             <!-- Feature 6 -->
             <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
-                <div class="w-12 h-12 rounded-xl bg-teal-500/10 flex items-center justify-center mb-4">
-                    <span class="material-symbols-outlined text-2xl text-teal-500">verified</span>
+                <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                    <span class="material-symbols-outlined text-2xl text-primary">verified</span>
                 </div>
                 <h3 class="font-bold text-lg text-slate-900 mb-2">100% Satisfaction Guarantee</h3>
                 <p class="text-sm text-slate-600">We stand behind our work with a complete
