@@ -85,6 +85,8 @@ try {
 function sendCompletionEmail($orderId, $videoUrl)
 {
     try {
+        error_log("[sendCompletionEmail] Starting for order ID: $orderId, video URL: $videoUrl");
+
         require_once __DIR__ . '/../../src/Services/EmailService.php';
 
         $orderDetails = Database::fetchOne("
@@ -96,12 +98,17 @@ function sendCompletionEmail($orderId, $videoUrl)
         ", [$orderId]);
 
         if ($orderDetails) {
+            error_log("[sendCompletionEmail] Found order details, user email: " . $orderDetails['email']);
+
             $user = ['email' => $orderDetails['email'], 'name' => $orderDetails['name']];
             $order = array_merge($orderDetails, ['output_video_url' => $videoUrl]);
 
-            \InvitationVideos\Services\EmailService::sendOrderCompletedEmail($order, $user);
+            $result = \InvitationVideos\Services\EmailService::sendOrderCompletedEmail($order, $user);
+            error_log("[sendCompletionEmail] Email send result: " . ($result ? 'SUCCESS' : 'FAILED'));
+        } else {
+            error_log("[sendCompletionEmail] Order not found for ID: $orderId");
         }
     } catch (Exception $e) {
-        error_log("Failed to send email: " . $e->getMessage());
+        error_log("[sendCompletionEmail] Exception: " . $e->getMessage());
     }
 }

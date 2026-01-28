@@ -49,6 +49,8 @@ class EmailService
     public static function send(string $to, string $subject, string $htmlBody, ?string $toName = null): bool
     {
         try {
+            error_log("[EmailService] Attempting to send email to: $to, subject: $subject");
+
             $mailer = self::getMailer();
 
             // Clear previous recipients
@@ -65,9 +67,12 @@ class EmailService
 
             $mailer->send();
 
+            error_log("[EmailService] Email sent successfully to: $to");
+
             return true;
         } catch (Exception $e) {
-            error_log("Email sending failed: " . $e->getMessage());
+            error_log("[EmailService] Email sending failed to $to: " . $e->getMessage());
+            error_log("[EmailService] SMTP Debug: Host=" . MAIL_HOST . ", Port=" . MAIL_PORT . ", User=" . MAIL_USERNAME);
             return false;
         }
     }
