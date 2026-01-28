@@ -30,7 +30,7 @@ try {
             o.customization_data,
             t.remotion_composition_id,
             t.title as template_title,
-            t.template_slug,
+            t.slug as template_slug,
             t.asset_base_url,
             t.default_music_url as template_music,
             t.duration_seconds,
