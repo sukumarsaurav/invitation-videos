@@ -2,11 +2,10 @@
 /**
  * Trigger AWS Lambda Orchestrator
  * 
- * Cron job to trigger video rendering via AWS Lambda.
- * Invokes the Lambda orchestrator function which fetches pending orders 
- * from the PHP backend and renders them.
+ * Cron job that invokes the video-orchestrator Lambda function.
+ * The orchestrator handles fetching pending orders and triggering renders.
  * 
- * Usage: Run every 2 minutes via cron
+ * Usage: Run every 2 minutes via Hostinger cron
  */
 
 // Ensure CLI only  
@@ -17,66 +16,62 @@ if (php_sapi_name() !== 'cli') {
 // Load configuration
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../config/database.php';
+
+use Aws\Lambda\LambdaClient;
 
 // Lock file to prevent overlapping executions
 $lockFile = sys_get_temp_dir() . '/video_orchestrator.lock';
 $lockTimeout = 600;  // 10 minutes max lock time
 
-echo "[" . date('Y-m-d H:i:s') . "] Video Render Orchestrator starting...\n";
+echo "[" . date('Y-m-d H:i:s') . "] Video Render Trigger starting...\n";
 
-// Prevent multiple instances running simultaneously
+// Prevent multiple instances
 if (file_exists($lockFile)) {
     $lockTime = (int) file_get_contents($lockFile);
-
     if (time() - $lockTime < $lockTimeout) {
-        echo "Another instance is already running (locked for " . (time() - $lockTime) . "s). Exiting.\n";
+        echo "Another instance is already running. Exiting.\n";
         exit(0);
     }
-
     echo "Stale lock file found, removing...\n";
 }
 
-// Create lock file
 file_put_contents($lockFile, time());
 
 try {
-    // Check for pending orders first (avoid invoking Lambda unnecessarily)
-    require_once __DIR__ . '/../config/database.php';
-
+    // Quick check for pending orders (avoid invoking Lambda unnecessarily)
     $pendingCount = Database::fetchOne(
         "SELECT COUNT(*) as count FROM orders WHERE order_status = 'queued'"
     );
 
     if (!$pendingCount || (int) $pendingCount['count'] === 0) {
         echo "No pending orders. Skipping Lambda invocation.\n";
-        if (file_exists($lockFile))
-            unlink($lockFile);
+        cleanup($lockFile);
         exit(0);
     }
 
-    echo "Found {$pendingCount['count']} pending order(s). Invoking Lambda orchestrator...\n";
+    echo "Found {$pendingCount['count']} pending order(s). Invoking orchestrator...\n";
 
-    // Invoke the Lambda orchestrator function
-    $lambdaClient = new Aws\Lambda\LambdaClient([
+    // Get orchestrator function name
+    $orchestratorFunction = defined('LAMBDA_ORCHESTRATOR_FUNCTION')
+        ? LAMBDA_ORCHESTRATOR_FUNCTION
+        : 'video-orchestrator';
+
+    // Invoke the orchestrator Lambda
+    $lambdaClient = new LambdaClient([
         'version' => 'latest',
-        'region' => AWS_DEFAULT_REGION,
+        'region' => defined('AWS_DEFAULT_REGION') ? AWS_DEFAULT_REGION : 'us-east-1',
         'credentials' => [
             'key' => AWS_ACCESS_KEY_ID,
             'secret' => AWS_SECRET_ACCESS_KEY,
         ],
     ]);
 
-    // The orchestrator function name - should match what's deployed
-    // Format: remotion-render-{version}-mem{memory}mb-disk{disk}mb-{timeout}sec
-    $orchestratorFunctionName = defined('LAMBDA_ORCHESTRATOR_FUNCTION')
-        ? LAMBDA_ORCHESTRATOR_FUNCTION
-        : 'video-orchestrator';  // Fallback name if not defined
-
-    echo "Invoking Lambda function: {$orchestratorFunctionName}\n";
+    echo "Invoking Lambda: {$orchestratorFunction}\n";
 
     $result = $lambdaClient->invoke([
-        'FunctionName' => $orchestratorFunctionName,
-        'InvocationType' => 'Event',  // Async invocation
+        'FunctionName' => $orchestratorFunction,
+        'InvocationType' => 'Event',  // Async - don't wait for completion
         'Payload' => json_encode([
             'source' => 'cron',
             'timestamp' => time()
@@ -86,27 +81,23 @@ try {
     $statusCode = $result['StatusCode'];
 
     if ($statusCode === 202) {
-        echo "Lambda invoked successfully (async). Status: 202 Accepted\n";
+        echo "✅ Orchestrator invoked successfully (async).\n";
     } else {
-        echo "Lambda invocation returned status: {$statusCode}\n";
-        // For synchronous invocation, we could read the response
-        if (isset($result['Payload'])) {
-            $payload = json_decode($result['Payload']->getContents(), true);
-            echo "Response: " . json_encode($payload, JSON_PRETTY_PRINT) . "\n";
-        }
+        echo "Unexpected status code: {$statusCode}\n";
     }
-
-    echo "Orchestrator trigger completed successfully.\n";
 
 } catch (Exception $e) {
     echo "ERROR: " . $e->getMessage() . "\n";
-    error_log("Video Render Orchestrator error: " . $e->getMessage());
-
+    error_log("Video Render Trigger error: " . $e->getMessage());
 } finally {
-    // Remove lock file
+    cleanup($lockFile);
+}
+
+echo "[" . date('Y-m-d H:i:s') . "] Video Render Trigger finished.\n";
+
+function cleanup($lockFile)
+{
     if (file_exists($lockFile)) {
         unlink($lockFile);
     }
 }
-
-echo "[" . date('Y-m-d H:i:s') . "] Video Render Orchestrator finished.\n";

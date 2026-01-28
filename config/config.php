@@ -162,6 +162,8 @@ define('REMOTION_SERVE_URL', env('REMOTION_SERVE_URL', ''));
 define('REMOTION_REGION', env('REMOTION_REGION', AWS_DEFAULT_REGION));
 // Backend auth token for orchestrator API calls
 define('BACKEND_AUTH_TOKEN', env('BACKEND_AUTH_TOKEN', ''));
+// Lambda function name for orchestrator (polls orders and triggers renders)
+define('LAMBDA_ORCHESTRATOR_FUNCTION', env('LAMBDA_ORCHESTRATOR_FUNCTION', 'video-orchestrator'));
 
 // =============================================================================
 // Error Handling
