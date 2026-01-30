@@ -29,6 +29,7 @@ try {
             o.template_id,
             o.customization_data,
             t.remotion_composition_id,
+            t.template_definition,
             t.title as template_title,
             t.slug as template_slug,
             t.asset_base_url,
@@ -89,11 +90,19 @@ try {
         }
 
         // Format for Orchestrator
+        // If template_definition exists, use GenericTemplate
+        // Otherwise, fall back to legacy composition (remotion_composition_id)
+        $templateDefinition = null;
+        if (!empty($order['template_definition'])) {
+            $templateDefinition = json_decode($order['template_definition'], true);
+        }
+
         $pendingOrders[] = [
             'id' => (int) $order['id'],
             'order_number' => $order['order_number'],
             'template_id' => (int) $order['template_id'],
             'remotion_composition_id' => $order['remotion_composition_id'],
+            'template_definition' => $templateDefinition,
             'template_slug' => $order['template_slug'],
             'default_music_url' => $order['template_music'],
             'customization_data' => $customization,

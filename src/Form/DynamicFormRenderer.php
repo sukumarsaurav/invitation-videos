@@ -66,16 +66,19 @@ class DynamicFormRenderer
     }
 
     /**
-     * Get music presets for music fields
+     * Get music tracks from music_library table
      */
-    public function getMusicPresets(): array
+    public function getMusicLibrary(): array
     {
         try {
-            $sql = "SELECT * FROM music_presets WHERE is_active = 1 ORDER BY display_order";
+            $sql = "SELECT id, name, slug, category, s3_url, duration_seconds, file_size_kb 
+                    FROM music_library 
+                    WHERE is_active = 1 
+                    ORDER BY category, name";
             return Database::fetchAll($sql);
         } catch (\PDOException $e) {
             // Table might not exist yet
-            error_log("Music presets query failed: " . $e->getMessage());
+            error_log("Music library query failed: " . $e->getMessage());
             return [];
         }
     }
@@ -281,39 +284,100 @@ class DynamicFormRenderer
     }
 
     /**
-     * Render music selector field
+     * Render music selector field with tracks from music_library
      */
     private function renderMusicSelector(string $name, array $field, $value): string
     {
-        $presets = $this->getMusicPresets();
+        $tracks = $this->getMusicLibrary();
 
-        $html = '<div class="music-selector space-y-3">';
+        // Category labels for display
+        $categoryLabels = [
+            'wedding' => '💒 Wedding',
+            'traditional' => '🎭 Traditional',
+            'romantic' => '💕 Romantic',
+            'modern' => '🎧 Modern',
+            'upbeat' => '🎉 Upbeat',
+            'party' => '🎊 Party',
+            'festival' => '🪔 Festival',
+            'puja' => '🙏 Puja'
+        ];
 
-        if (empty($presets)) {
-            // No presets - show simple upload message
-            $html .= '<div class="text-center py-4 text-slate-500">';
-            $html .= '<p class="text-sm">Upload your own music track below</p>';
+        $html = '<div class="music-selector">';
+
+        if (empty($tracks)) {
+            // No tracks in library - show upload option only
+            $html .= '<div class="text-center py-6 text-slate-500">';
+            $html .= '<span class="material-symbols-outlined text-4xl text-slate-300 mb-2">music_off</span>';
+            $html .= '<p class="text-sm">No music tracks available. Upload your own track below.</p>';
             $html .= '</div>';
         } else {
-            foreach ($presets as $preset) {
-                $checked = ($value === $preset['id']) ? 'checked' : '';
-                $html .= '<label class="flex items-center p-4 rounded-xl border border-slate-200 hover:border-primary cursor-pointer transition-all ' . ($checked ? 'border-primary bg-primary/5' : '') . '">';
-                $html .= '<input type="radio" name="' . $name . '" value="' . $preset['id'] . '" class="hidden peer" ' . $checked . '>';
-                $html .= '<div class="flex-1">';
-                $html .= '<div class="font-medium">' . Security::escape($preset['name']) . '</div>';
-                $html .= '<div class="text-xs text-slate-500">' . Security::escape($preset['description'] ?? '') . '</div>';
+            // Group tracks by category
+            $groupedTracks = [];
+            foreach ($tracks as $track) {
+                $category = $track['category'] ?? 'other';
+                $groupedTracks[$category][] = $track;
+            }
+
+            // Option to use no music / default
+            $noMusicChecked = (empty($value) || $value === 'none') ? 'checked' : '';
+            $html .= '<label class="music-option flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all mb-3 ' . ($noMusicChecked ? 'border-primary bg-primary/5' : 'border-slate-200 hover:border-primary/50') . '">';
+            $html .= '<input type="radio" name="' . $name . '" value="none" class="hidden music-radio" ' . $noMusicChecked . '>';
+            $html .= '<div class="size-12 rounded-full bg-slate-100 flex items-center justify-center shrink-0">';
+            $html .= '<span class="material-symbols-outlined text-slate-400">music_off</span>';
+            $html .= '</div>';
+            $html .= '<div class="flex-1">';
+            $html .= '<p class="font-semibold text-slate-800">Use Template Default</p>';
+            $html .= '<p class="text-xs text-slate-500">Use the default music for this template</p>';
+            $html .= '</div>';
+            $html .= '<span class="material-symbols-outlined text-primary opacity-0 check-icon">check_circle</span>';
+            $html .= '</label>';
+
+            // Render each category
+            foreach ($groupedTracks as $category => $categoryTracks) {
+                $categoryLabel = $categoryLabels[$category] ?? ucfirst($category);
+
+                $html .= '<div class="mb-4">';
+                $html .= '<h4 class="text-sm font-bold text-slate-600 mb-2 flex items-center gap-2">' . $categoryLabel . '</h4>';
+                $html .= '<div class="space-y-2">';
+
+                foreach ($categoryTracks as $track) {
+                    $trackValue = Security::escape($track['s3_url']);
+                    $checked = ($value === $track['s3_url']) ? 'checked' : '';
+                    $duration = $track['duration_seconds'] ? gmdate('i:s', $track['duration_seconds']) : '';
+
+                    $html .= '<label class="music-option flex items-center gap-4 p-3 rounded-xl border-2 cursor-pointer transition-all ' . ($checked ? 'border-primary bg-primary/5' : 'border-slate-200 hover:border-primary/50') . '">';
+                    $html .= '<input type="radio" name="' . $name . '" value="' . $trackValue . '" class="hidden music-radio" ' . $checked . '>';
+
+                    // Play button
+                    $html .= '<button type="button" class="music-play-btn size-10 rounded-full bg-primary/10 hover:bg-primary/20 flex items-center justify-center shrink-0 transition-colors" data-url="' . $trackValue . '">';
+                    $html .= '<span class="material-symbols-outlined text-primary play-icon">play_arrow</span>';
+                    $html .= '<span class="material-symbols-outlined text-primary pause-icon hidden">pause</span>';
+                    $html .= '</button>';
+
+                    // Track info
+                    $html .= '<div class="flex-1 min-w-0">';
+                    $html .= '<p class="font-medium text-slate-800 truncate">' . Security::escape($track['name']) . '</p>';
+                    if ($duration) {
+                        $html .= '<p class="text-xs text-slate-500">' . $duration . '</p>';
+                    }
+                    $html .= '</div>';
+
+                    // Check icon
+                    $html .= '<span class="material-symbols-outlined text-primary ' . ($checked ? 'opacity-100' : 'opacity-0') . ' check-icon">check_circle</span>';
+                    $html .= '</label>';
+                }
+
                 $html .= '</div>';
-                $html .= '<button type="button" class="p-2 rounded-full bg-slate-100 hover:bg-primary hover:text-white transition-colors" onclick="playPreview(\'' . Security::escape($preset['file_url']) . '\')">';
-                $html .= '<span class="material-symbols-outlined text-xl">play_arrow</span>';
-                $html .= '</button>';
-                $html .= '</label>';
+                $html .= '</div>';
             }
         }
 
-        // Custom upload option with progress indicator
+        // Custom upload option
         $uploadId = $name . '_custom';
-        $html .= '<div class="mt-4 border-t border-slate-200 pt-4">';
-        $html .= '<p class="text-sm font-medium text-slate-600 mb-2">Or upload your own track:</p>';
+        $html .= '<div class="mt-4 pt-4 border-t border-slate-200">';
+        $html .= '<p class="text-sm font-bold text-slate-600 mb-3 flex items-center gap-2">';
+        $html .= '<span class="material-symbols-outlined text-lg">upload</span> Or upload your own track';
+        $html .= '</p>';
 
         // Dropzone
         $html .= '<div class="border-2 border-dashed border-slate-200 hover:border-primary rounded-xl p-4 text-center cursor-pointer transition-all" 
@@ -324,25 +388,23 @@ class DynamicFormRenderer
         $html .= '<div id="' . $uploadId . '_placeholder" class="flex flex-col items-center gap-2">';
         $html .= '<span class="material-symbols-outlined text-3xl text-slate-400">music_note</span>';
         $html .= '<p class="text-sm font-medium">Click to upload MP3</p>';
-        $html .= '<p class="text-xs text-slate-500">Max 20MB</p>';
+        $html .= '<p class="text-xs text-slate-500">Max 20MB • MP3 format only</p>';
         $html .= '</div>';
 
         // Selected file state
         $html .= '<div id="' . $uploadId . '_selected" class="hidden">';
-        $html .= '<div class="flex items-center justify-between gap-3">';
-        $html .= '<div class="flex items-center gap-3">';
+        $html .= '<div class="flex items-center justify-center gap-3">';
         $html .= '<span class="material-symbols-outlined text-2xl text-primary">audio_file</span>';
         $html .= '<div class="text-left">';
         $html .= '<p id="' . $uploadId . '_filename" class="text-sm font-medium text-slate-800 truncate max-w-[200px]"></p>';
         $html .= '<p id="' . $uploadId . '_size" class="text-xs text-slate-500"></p>';
         $html .= '</div>';
-        $html .= '</div>';
-        $html .= '<button type="button" class="p-2 rounded-full hover:bg-red-100 text-red-500 transition-colors" onclick="event.stopPropagation(); clearMusicFile(\'' . $uploadId . '\')">';
-        $html .= '<span class="material-symbols-outlined">close</span>';
+        $html .= '<button type="button" class="p-1.5 rounded-full hover:bg-red-100 text-red-500 transition-colors" onclick="event.stopPropagation(); clearMusicFile(\'' . $uploadId . '\')">';
+        $html .= '<span class="material-symbols-outlined text-lg">close</span>';
         $html .= '</button>';
         $html .= '</div>';
 
-        // Progress bar (shown during form submission)
+        // Progress bar
         $html .= '<div id="' . $uploadId . '_progress" class="hidden mt-3">';
         $html .= '<div class="flex items-center justify-between text-xs text-slate-600 mb-1">';
         $html .= '<span>Uploading...</span>';
@@ -356,11 +418,93 @@ class DynamicFormRenderer
         $html .= '</div>'; // End selected state
         $html .= '</div>'; // End dropzone
 
-        $html .= '<input type="file" id="' . $uploadId . '" name="' . $name . '_custom" accept="audio/mpeg,audio/mp3" class="hidden" onchange="handleMusicSelect(this, \'' . $uploadId . '\')">';
+        $html .= '<input type="file" id="' . $uploadId . '" name="' . $name . '" accept="audio/mpeg,audio/mp3" class="hidden" onchange="handleMusicSelect(this, \'' . $uploadId . '\')">';
         $html .= '</div>';
 
-        // Add JavaScript for music file handling
+        // Hidden audio element for previews
+        $html .= '<audio id="music-preview-player" class="hidden"></audio>';
+
+        // JavaScript for music selection and preview
         $html .= '<script>
+            (function() {
+                let currentlyPlaying = null;
+                const audioPlayer = document.getElementById("music-preview-player");
+                
+                // Handle radio button selection styling
+                document.querySelectorAll(".music-radio").forEach(function(radio) {
+                    radio.addEventListener("change", function() {
+                        // Remove active state from all options
+                        document.querySelectorAll(".music-option").forEach(function(opt) {
+                            opt.classList.remove("border-primary", "bg-primary/5");
+                            opt.classList.add("border-slate-200");
+                            const checkIcon = opt.querySelector(".check-icon");
+                            if (checkIcon) checkIcon.classList.add("opacity-0");
+                        });
+                        
+                        // Add active state to selected option
+                        const label = this.closest(".music-option");
+                        if (label) {
+                            label.classList.remove("border-slate-200");
+                            label.classList.add("border-primary", "bg-primary/5");
+                            const checkIcon = label.querySelector(".check-icon");
+                            if (checkIcon) checkIcon.classList.remove("opacity-0");
+                        }
+                        
+                        // Clear custom upload if selecting a preset
+                        const uploadId = "' . $uploadId . '";
+                        if (this.value && this.value !== "none" && this.value.startsWith("http")) {
+                            clearMusicFile(uploadId);
+                        }
+                    });
+                });
+                
+                // Handle play/pause buttons
+                document.querySelectorAll(".music-play-btn").forEach(function(btn) {
+                    btn.addEventListener("click", function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        const url = this.dataset.url;
+                        const playIcon = this.querySelector(".play-icon");
+                        const pauseIcon = this.querySelector(".pause-icon");
+                        
+                        if (currentlyPlaying === this) {
+                            // Pause current track
+                            audioPlayer.pause();
+                            playIcon.classList.remove("hidden");
+                            pauseIcon.classList.add("hidden");
+                            currentlyPlaying = null;
+                        } else {
+                            // Stop any currently playing track
+                            if (currentlyPlaying) {
+                                const prevPlayIcon = currentlyPlaying.querySelector(".play-icon");
+                                const prevPauseIcon = currentlyPlaying.querySelector(".pause-icon");
+                                prevPlayIcon.classList.remove("hidden");
+                                prevPauseIcon.classList.add("hidden");
+                            }
+                            
+                            // Play new track
+                            audioPlayer.src = url;
+                            audioPlayer.play();
+                            playIcon.classList.add("hidden");
+                            pauseIcon.classList.remove("hidden");
+                            currentlyPlaying = this;
+                        }
+                    });
+                });
+                
+                // Handle audio ended
+                audioPlayer.addEventListener("ended", function() {
+                    if (currentlyPlaying) {
+                        const playIcon = currentlyPlaying.querySelector(".play-icon");
+                        const pauseIcon = currentlyPlaying.querySelector(".pause-icon");
+                        playIcon.classList.remove("hidden");
+                        pauseIcon.classList.add("hidden");
+                        currentlyPlaying = null;
+                    }
+                });
+            })();
+            
             function handleMusicSelect(input, uploadId) {
                 const file = input.files[0];
                 if (!file) return;
@@ -372,33 +516,47 @@ class DynamicFormRenderer
                     return;
                 }
                 
+                // Deselect any preset music options
+                document.querySelectorAll(".music-radio").forEach(function(radio) {
+                    radio.checked = false;
+                });
+                document.querySelectorAll(".music-option").forEach(function(opt) {
+                    opt.classList.remove("border-primary", "bg-primary/5");
+                    opt.classList.add("border-slate-200");
+                    const checkIcon = opt.querySelector(".check-icon");
+                    if (checkIcon) checkIcon.classList.add("opacity-0");
+                });
+                
                 // Show selected file info
                 document.getElementById(uploadId + "_placeholder").classList.add("hidden");
                 document.getElementById(uploadId + "_selected").classList.remove("hidden");
                 document.getElementById(uploadId + "_filename").textContent = file.name;
                 document.getElementById(uploadId + "_size").textContent = (file.size / (1024 * 1024)).toFixed(2) + " MB";
                 document.getElementById(uploadId + "_dropzone").classList.add("border-primary", "bg-primary/5");
-                document.getElementById(uploadId + "_dropzone").onclick = null; // Disable click when file selected
             }
             
             function clearMusicFile(uploadId) {
-                document.getElementById(uploadId).value = "";
-                document.getElementById(uploadId + "_placeholder").classList.remove("hidden");
-                document.getElementById(uploadId + "_selected").classList.add("hidden");
-                document.getElementById(uploadId + "_progress").classList.add("hidden");
-                document.getElementById(uploadId + "_dropzone").classList.remove("border-primary", "bg-primary/5");
-                document.getElementById(uploadId + "_dropzone").onclick = function() {
-                    document.getElementById(uploadId).click();
-                };
+                const input = document.getElementById(uploadId);
+                if (input) input.value = "";
+                const placeholder = document.getElementById(uploadId + "_placeholder");
+                const selected = document.getElementById(uploadId + "_selected");
+                const progress = document.getElementById(uploadId + "_progress");
+                const dropzone = document.getElementById(uploadId + "_dropzone");
+                
+                if (placeholder) placeholder.classList.remove("hidden");
+                if (selected) selected.classList.add("hidden");
+                if (progress) progress.classList.add("hidden");
+                if (dropzone) {
+                    dropzone.classList.remove("border-primary", "bg-primary/5");
+                }
             }
             
-            // Hook into form submission to show upload progress
+            // Handle form submission with progress
             document.addEventListener("DOMContentLoaded", function() {
                 const form = document.getElementById("customize-form");
                 if (!form) return;
                 
                 form.addEventListener("submit", function(e) {
-                    // Check if there are any file inputs with files
                     const fileInputs = form.querySelectorAll("input[type=file]");
                     let hasFiles = false;
                     let totalSize = 0;
@@ -410,25 +568,21 @@ class DynamicFormRenderer
                         }
                     });
                     
-                    if (!hasFiles || totalSize < 1024 * 1024) return; // Only intercept for large files
+                    if (!hasFiles || totalSize < 1024 * 1024) return;
                     
                     e.preventDefault();
                     
-                    // Show progress bar for music uploads
                     const musicProgressDiv = document.querySelector("[id$=_custom_progress]");
                     if (musicProgressDiv) {
                         musicProgressDiv.classList.remove("hidden");
                     }
                     
-                    // Create FormData and use XHR for progress
                     const formData = new FormData(form);
                     const xhr = new XMLHttpRequest();
                     
                     xhr.upload.addEventListener("progress", function(evt) {
                         if (evt.lengthComputable) {
                             const percent = Math.round((evt.loaded / evt.total) * 100);
-                            
-                            // Update all progress bars
                             document.querySelectorAll("[id$=_custom_bar]").forEach(function(bar) {
                                 bar.style.width = percent + "%";
                             });
@@ -440,18 +594,13 @@ class DynamicFormRenderer
                     
                     xhr.addEventListener("load", function() {
                         if (xhr.status >= 200 && xhr.status < 400) {
-                            // Success - parse JSON response for redirect URL
                             try {
                                 var response = JSON.parse(xhr.responseText);
                                 if (response.success && response.redirect) {
                                     window.location.href = response.redirect;
                                     return;
                                 }
-                            } catch (e) {
-                                // Not JSON, might be a direct HTML response
-                                console.log("Response was not JSON, reloading page");
-                            }
-                            // Fallback: reload the page
+                            } catch (e) {}
                             window.location.reload();
                         } else {
                             alert("Upload failed. Please try again.");

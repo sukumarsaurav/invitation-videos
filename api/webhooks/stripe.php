@@ -14,6 +14,7 @@ ob_start();
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../src/Payment/StripeService.php';
 require_once __DIR__ . '/../../src/Services/AIGenerationService.php';
+require_once __DIR__ . '/../../src/Services/S3UploadService.php';
 
 use InvitationVideos\Services\AIGenerationService;
 
@@ -143,10 +144,30 @@ function handlePaymentSuccess(array $paymentIntent): void
         // Queue AI caricature generation if dress was selected
         queueAiGenerationIfNeeded($order['id']);
 
+        // Sync order uploads to S3 for Lambda access
+        syncOrderUploadsToS3($order['id']);
+
         // TODO: Send confirmation email to customer
         // TODO: Start video rendering process
     } else {
         error_log("Stripe Webhook: No order or draft found for payment intent: $paymentId");
+    }
+}
+
+/**
+ * Sync order uploads to S3 for Lambda renderer access
+ */
+function syncOrderUploadsToS3(int $orderId): void
+{
+    try {
+        $result = \InvitationVideos\Services\S3UploadService::syncOrderUploadsToS3($orderId);
+        if ($result['success']) {
+            error_log("Stripe Webhook: Synced {$result['synced']} files to S3 for order #{$orderId}");
+        } else {
+            error_log("Stripe Webhook: S3 sync failed for order #{$orderId}: " . ($result['error'] ?? 'Unknown error'));
+        }
+    } catch (Exception $e) {
+        error_log("Stripe Webhook: S3 sync exception for order #{$orderId}: " . $e->getMessage());
     }
 }
 

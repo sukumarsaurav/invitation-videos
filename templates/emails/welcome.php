@@ -1,96 +1,76 @@
 <?php
 /**
  * Welcome Email Template
- * Sent when a user registers
+ * Sent after user registration
  */
 ?>
-<!-- Welcome Header -->
-<div style="text-align: center; margin-bottom: 32px;">
-    <div
-        style="width: 80px; height: 80px; background: linear-gradient(135deg, #970747 0%, #c4195e 100%); border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
-        <span style="font-size: 40px;">🎉</span>
-    </div>
-    <h1 style="margin: 0 0 8px; font-size: 28px; font-weight: 700; color: #0f172a;">
+<!-- Elegant Header -->
+<div style="text-align: center; margin-bottom: 48px;">
+    <h1
+        style="margin: 0 0 12px; font-size: 36px; font-weight: 400; color: #1f2937; font-family: 'Playfair Display', Georgia, serif;">
         Welcome to
-        <?= $appName ?>!
+        <span style="font-style: italic; color: #970747;"><?= $appName ?></span>
     </h1>
-    <p style="margin: 0; font-size: 16px; color: #64748b;">
-        We're thrilled to have you on board.
+    <p style="margin: 0; font-size: 16px; color: #6b7280;">
+        Make your moments unforgettable
     </p>
 </div>
 
 <!-- Greeting -->
-<p style="margin: 0 0 20px; font-size: 16px; color: #334155; line-height: 1.6;">
-    Hi <strong>
-        <?= htmlspecialchars($name) ?>
-    </strong>,
+<p style="margin: 0 0 24px; font-size: 16px; color: #374151; line-height: 1.7;">
+    Hi <strong><?= htmlspecialchars($name) ?></strong>,
 </p>
 
-<p style="margin: 0 0 20px; font-size: 16px; color: #334155; line-height: 1.6;">
-    Thank you for creating an account with <strong>
-        <?= $appName ?>
-    </strong>! You're now ready to create stunning video invitations for your special occasions.
+<p style="margin: 0 0 24px; font-size: 16px; color: #374151; line-height: 1.7;">
+    Thank you for creating an account with us! We're excited to help you create beautiful video invitations for your
+    special occasions.
 </p>
 
 <!-- What You Can Do -->
-<div style="background-color: #f8fafc; border-radius: 12px; padding: 24px; margin: 24px 0;">
-    <h2 style="margin: 0 0 16px; font-size: 18px; font-weight: 600; color: #0f172a;">
+<div style="margin: 32px 0;">
+    <h2 style="margin: 0 0 20px; font-size: 18px; font-weight: 600; color: #1f2937;">
         Here's what you can do:
     </h2>
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
         <tr>
-            <td style="padding: 8px 0;">
-                <table role="presentation" cellspacing="0" cellpadding="0" border="0">
-                    <tr>
-                        <td style="padding-right: 12px; vertical-align: top;">✨</td>
-                        <td style="font-size: 15px; color: #475569;">Browse 100+ beautiful templates for weddings,
-                            birthdays, and more</td>
-                    </tr>
-                </table>
+            <td style="padding: 12px 0; border-bottom: 1px solid #f3f4f6;">
+                <span style="font-size: 15px; color: #374151;">
+                    🎬 Browse our collection of <strong>stunning video templates</strong>
+                </span>
             </td>
         </tr>
         <tr>
-            <td style="padding: 8px 0;">
-                <table role="presentation" cellspacing="0" cellpadding="0" border="0">
-                    <tr>
-                        <td style="padding-right: 12px; vertical-align: top;">🎨</td>
-                        <td style="font-size: 15px; color: #475569;">Customize with your photos, names, and event
-                            details</td>
-                    </tr>
-                </table>
+            <td style="padding: 12px 0; border-bottom: 1px solid #f3f4f6;">
+                <span style="font-size: 15px; color: #374151;">
+                    ✨ Customize with your <strong>photos, names, and details</strong>
+                </span>
             </td>
         </tr>
         <tr>
-            <td style="padding: 8px 0;">
-                <table role="presentation" cellspacing="0" cellpadding="0" border="0">
-                    <tr>
-                        <td style="padding-right: 12px; vertical-align: top;">📱</td>
-                        <td style="font-size: 15px; color: #475569;">Share your video on WhatsApp, Instagram, and more
-                        </td>
-                    </tr>
-                </table>
+            <td style="padding: 12px 0;">
+                <span style="font-size: 15px; color: #374151;">
+                    📤 Share instantly on <strong>WhatsApp, Instagram, and more</strong>
+                </span>
             </td>
         </tr>
     </table>
 </div>
 
 <!-- CTA Button -->
-<div style="text-align: center; margin: 32px 0;">
-    <a href="<?= $appUrl ?>/templates" class="button"
-        style="display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #970747 0%, #c4195e 100%); color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; border-radius: 12px; box-shadow: 0 4px 14px rgba(151, 7, 71, 0.4);">
-        Browse Templates
+<div style="text-align: center; margin: 40px 0;">
+    <a href="<?= $appUrl ?>/templates"
+        style="display: inline-block; padding: 16px 48px; background-color: #970747; color: #ffffff; font-size: 14px; font-weight: 600; text-decoration: none; border-radius: 4px; letter-spacing: 0.5px;">
+        EXPLORE TEMPLATES
     </a>
 </div>
 
-<p style="margin: 0; font-size: 16px; color: #334155; line-height: 1.6;">
-    If you have any questions, just reply to this email. We're always happy to help!
+<!-- Signature -->
+<p style="margin: 32px 0 0; font-size: 15px; color: #374151; line-height: 1.7;">
+    If you have any questions, feel free to reach out to our support team. We're here to help!
 </p>
-
-<p style="margin: 24px 0 0; font-size: 16px; color: #334155;">
-    Cheers,<br>
-    <strong>The
-        <?= $appName ?> Team
-    </strong>
+<p style="margin: 16px 0 0; font-size: 15px; color: #374151;">
+    Welcome aboard,<br>
+    <strong>The <?= $appName ?> Team</strong>
 </p>
 <?php
 // Content is captured by EmailService::render()
