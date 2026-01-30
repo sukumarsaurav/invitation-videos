@@ -187,11 +187,93 @@ $animationPresets = [
             color: var(--text-muted);
             display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 8px;
+            border-radius: 4px;
+            margin-bottom: 2px;
+        }
+
+        .layer-item:hover {
+            background: rgba(127, 19, 236, 0.1);
+        }
+
+        .layer-item.active {
+            background: rgba(127, 19, 236, 0.15);
+            color: var(--text-color);
         }
 
         .layer-item i {
             width: 16px;
+        }
+
+        .slide-actions,
+        .layer-actions {
+            display: flex;
+            gap: 2px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .slide-item:hover .slide-actions,
+        .slide-item.active .slide-actions,
+        .layer-item:hover .layer-actions {
+            opacity: 1;
+        }
+
+        .btn-icon {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 4px 6px;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 10px;
+            transition: all 0.2s;
+        }
+
+        .btn-icon:hover:not(:disabled) {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-icon:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .btn-icon-sm {
+            background: transparent;
+            border: none;
+            padding: 2px 4px;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 9px;
+            opacity: 0.6;
+            transition: all 0.2s;
+        }
+
+        .btn-icon-sm:hover:not(:disabled) {
+            color: var(--primary-color);
+            opacity: 1;
+        }
+
+        .btn-icon-sm:disabled {
+            opacity: 0.2;
+            cursor: not-allowed;
+        }
+
+        .slide-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .slide-name {
+            font-weight: 600;
+            font-size: 14px;
+            flex: 1;
         }
 
         .btn-add-slide {
@@ -395,9 +477,22 @@ $animationPresets = [
 
         <!-- Center: Preview Canvas -->
         <div class="editor-canvas">
-            <div class="preview-frame" id="previewFrame">
-                <!-- Preview content rendered here -->
+            <div class="preview-header"
+                style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: var(--sidebar-bg); border-bottom: 1px solid var(--border-color);">
+                <span style="font-size: 12px; font-weight: 600;">Preview</span>
+                <div style="display: flex; gap: 4px;">
+                    <button type="button" id="btnCssPreview" class="btn btn-sm btn-primary"
+                        onclick="setPreviewMode('css')">Simple</button>
+                    <button type="button" id="btnRemotionPreview" class="btn btn-sm btn-secondary"
+                        onclick="setPreviewMode('remotion')">Remotion</button>
+                </div>
             </div>
+            <div class="preview-frame" id="previewFrame">
+                <!-- CSS Preview content rendered here -->
+            </div>
+            <iframe id="remotionPreviewFrame" src=""
+                style="display: none; width: 100%; height: 100%; border: none; background: #1a1a2e;" allow="autoplay">
+            </iframe>
             <div class="timeline-bar" id="timelineBar">
                 <!-- Timeline segments -->
             </div>
@@ -461,12 +556,36 @@ $animationPresets = [
                     <div class="slide-header">
                         <span class="slide-name">${slide.name || 'Slide ' + (index + 1)}</span>
                         <span class="slide-duration">${(slide.durationFrames / 30).toFixed(1)}s</span>
+                        <div class="slide-actions" onclick="event.stopPropagation()">
+                            <button type="button" class="btn-icon" onclick="moveSlide(${index}, -1)" title="Move Up" ${index === 0 ? 'disabled' : ''}>
+                                <i class="fas fa-chevron-up"></i>
+                            </button>
+                            <button type="button" class="btn-icon" onclick="moveSlide(${index}, 1)" title="Move Down" ${index === templateDef.slides.length - 1 ? 'disabled' : ''}>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <button type="button" class="btn-icon" onclick="duplicateSlide(${index})" title="Duplicate">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="layer-list">
                         ${slide.layers.map((layer, li) => `
-                            <div class="layer-item" onclick="event.stopPropagation(); selectLayer(${index}, ${li})">
-                                <i class="fas fa-${layer.type === 'text' ? 'font' : 'image'}"></i>
-                                ${layer.fieldKey || layer.id}
+                            <div class="layer-item ${selectedSlideIndex === index && selectedLayerIndex === li ? 'active' : ''}" onclick="event.stopPropagation(); selectLayer(${index}, ${li})">
+                                <span>
+                                    <i class="fas fa-${layer.type === 'text' ? 'font' : 'image'}"></i>
+                                    ${layer.fieldKey || layer.id}
+                                </span>
+                                <div class="layer-actions" onclick="event.stopPropagation()">
+                                    <button type="button" class="btn-icon-sm" onclick="moveLayer(${index}, ${li}, -1)" title="Move Up" ${li === 0 ? 'disabled' : ''}>
+                                        <i class="fas fa-chevron-up"></i>
+                                    </button>
+                                    <button type="button" class="btn-icon-sm" onclick="moveLayer(${index}, ${li}, 1)" title="Move Down" ${li === slide.layers.length - 1 ? 'disabled' : ''}>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <button type="button" class="btn-icon-sm" onclick="duplicateLayer(${index}, ${li})" title="Duplicate">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
                             </div>
                         `).join('')}
                     </div>
@@ -677,6 +796,41 @@ $animationPresets = [
                             <option value="bold" ${layer.style?.fontWeight === 'bold' ? 'selected' : ''}>Bold (700)</option>
                         </select>
                     </div>
+                    <div class="property-group">
+                        <label>Text Align</label>
+                        <select onchange="updateLayerStyle('textAlign', this.value)">
+                            <option value="left" ${layer.style?.textAlign === 'left' ? 'selected' : ''}>Left</option>
+                            <option value="center" ${layer.style?.textAlign === 'center' || !layer.style?.textAlign ? 'selected' : ''}>Center</option>
+                            <option value="right" ${layer.style?.textAlign === 'right' ? 'selected' : ''}>Right</option>
+                        </select>
+                    </div>
+                    <div class="property-row">
+                        <div class="property-group">
+                            <label>Max Width (px)</label>
+                            <input type="number" value="${layer.style?.maxWidth || ''}" placeholder="Auto" 
+                                   onchange="updateLayerStyle('maxWidth', this.value ? parseInt(this.value) : null)">
+                        </div>
+                        <div class="property-group">
+                            <label>Line Height</label>
+                            <input type="number" step="0.1" value="${layer.style?.lineHeight || 1.2}" 
+                                   onchange="updateLayerStyle('lineHeight', parseFloat(this.value))">
+                        </div>
+                    </div>
+                    <div class="property-row">
+                        <div class="property-group">
+                            <label>Letter Spacing</label>
+                            <input type="number" value="${layer.style?.letterSpacing || 0}" 
+                                   onchange="updateLayerStyle('letterSpacing', parseInt(this.value))">
+                        </div>
+                    </div>
+                    <div class="property-group">
+                        <label>Text Shadow</label>
+                        <input type="text" value="${layer.style?.textShadow || ''}" placeholder="e.g. 2px 2px 4px rgba(0,0,0,0.5)"
+                               onchange="updateLayerStyle('textShadow', this.value)">
+                        <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+                            CSS text-shadow format: x y blur color
+                        </p>
+                    </div>
                 `;
             } else if (layer.type === 'image') {
                 typeSpecificHtml = `
@@ -693,6 +847,24 @@ $animationPresets = [
                     <div class="property-group">
                         <label>Border Radius</label>
                         <input type="number" value="${layer.style?.borderRadius || 0}" onchange="updateLayerStyle('borderRadius', parseInt(this.value))">
+                    </div>
+                    <div class="property-group">
+                        <label>Object Fit</label>
+                        <select onchange="updateLayerStyle('objectFit', this.value)">
+                            <option value="cover" ${layer.style?.objectFit === 'cover' || !layer.style?.objectFit ? 'selected' : ''}>Cover (fill area, crop if needed)</option>
+                            <option value="contain" ${layer.style?.objectFit === 'contain' ? 'selected' : ''}>Contain (fit inside, may have gaps)</option>
+                            <option value="fill" ${layer.style?.objectFit === 'fill' ? 'selected' : ''}>Fill (stretch to fit)</option>
+                        </select>
+                    </div>
+                    <div class="property-group">
+                        <label>Border</label>
+                        <input type="text" value="${layer.style?.border || ''}" placeholder="e.g. 3px solid #fff"
+                               onchange="updateLayerStyle('border', this.value)">
+                    </div>
+                    <div class="property-group">
+                        <label>Box Shadow</label>
+                        <input type="text" value="${layer.style?.boxShadow || ''}" placeholder="e.g. 0 4px 20px rgba(0,0,0,0.3)"
+                               onchange="updateLayerStyle('boxShadow', this.value)">
                     </div>
                 `;
             }
@@ -747,6 +919,30 @@ $animationPresets = [
                         <label>Delay (frames)</label>
                         <input type="number" value="${layer.animation?.enter?.delay || 0}" 
                                onchange="updateLayerAnimation('enter', 'delay', parseInt(this.value))">
+                    </div>
+                </div>
+                
+                <div class="property-group" style="margin-top: 15px;">
+                    <label>Exit Animation</label>
+                    <select onchange="updateLayerAnimation('exit', 'type', this.value)">
+                        <option value="" ${!layer.animation?.exit?.type ? 'selected' : ''}>None (stays visible)</option>
+                        ${Object.entries(animations).map(([key, label]) => `
+                            <option value="${key}" ${layer.animation?.exit?.type === key ? 'selected' : ''}>
+                                ${label}
+                            </option>
+                        `).join('')}
+                    </select>
+                </div>
+                <div class="property-row">
+                    <div class="property-group">
+                        <label>Exit Duration (frames)</label>
+                        <input type="number" value="${layer.animation?.exit?.durationFrames || 30}" 
+                               onchange="updateLayerAnimation('exit', 'durationFrames', parseInt(this.value))">
+                    </div>
+                    <div class="property-group">
+                        <label>Exit Delay (frames before end)</label>
+                        <input type="number" value="${layer.animation?.exit?.delay || 0}" 
+                               onchange="updateLayerAnimation('exit', 'delay', parseInt(this.value))">
                     </div>
                 </div>
                 
@@ -888,6 +1084,161 @@ $animationPresets = [
         function closeJsonModal() {
             document.getElementById('jsonModal').style.display = 'none';
         }
+
+        // ========== Phase 3: Ordering & Duplication ==========
+
+        function moveSlide(index, direction) {
+            event.stopPropagation();
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= templateDef.slides.length) return;
+
+            // Swap slides
+            const temp = templateDef.slides[index];
+            templateDef.slides[index] = templateDef.slides[newIndex];
+            templateDef.slides[newIndex] = temp;
+
+            // Recalculate startFrames
+            let currentFrame = 0;
+            templateDef.slides.forEach(slide => {
+                slide.startFrame = currentFrame;
+                currentFrame += slide.durationFrames;
+            });
+
+            // Update selection
+            selectedSlideIndex = newIndex;
+
+            renderSlideList();
+            renderTimeline();
+            renderSlideProperties();
+        }
+
+        function moveLayer(slideIndex, layerIndex, direction) {
+            event.stopPropagation();
+            const layers = templateDef.slides[slideIndex].layers;
+            const newIndex = layerIndex + direction;
+            if (newIndex < 0 || newIndex >= layers.length) return;
+
+            // Swap layers
+            const temp = layers[layerIndex];
+            layers[layerIndex] = layers[newIndex];
+            layers[newIndex] = temp;
+
+            // Update selection
+            selectedLayerIndex = newIndex;
+
+            renderSlideList();
+            renderPreview();
+        }
+
+        function duplicateSlide(index) {
+            event.stopPropagation();
+            const original = templateDef.slides[index];
+            const clone = JSON.parse(JSON.stringify(original));
+
+            // Generate new ID and update name
+            clone.id = 'slide_' + Date.now();
+            clone.name = (clone.name || 'Slide') + ' (copy)';
+
+            // Generate new IDs for layers
+            clone.layers.forEach(layer => {
+                layer.id = layer.type + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+            });
+
+            // Insert after current slide
+            templateDef.slides.splice(index + 1, 0, clone);
+
+            // Recalculate startFrames
+            let currentFrame = 0;
+            templateDef.slides.forEach(slide => {
+                slide.startFrame = currentFrame;
+                currentFrame += slide.durationFrames;
+            });
+
+            renderSlideList();
+            renderTimeline();
+            selectSlide(index + 1);
+        }
+
+        function duplicateLayer(slideIndex, layerIndex) {
+            event.stopPropagation();
+            const original = templateDef.slides[slideIndex].layers[layerIndex];
+            const clone = JSON.parse(JSON.stringify(original));
+
+            // Generate new ID
+            clone.id = clone.type + '_' + Date.now();
+
+            // Offset position slightly so it's visible
+            if (clone.position) {
+                clone.position.x = (clone.position.x || 540) + 20;
+                clone.position.y = (clone.position.y || 500) + 20;
+            }
+
+            // Insert after current layer
+            templateDef.slides[slideIndex].layers.splice(layerIndex + 1, 0, clone);
+
+            renderSlideList();
+            renderPreview();
+            selectLayer(slideIndex, layerIndex + 1);
+        }
+
+        // ========== Phase 4: Remotion Preview Mode ==========
+        
+        let previewMode = 'css'; // 'css' or 'remotion'
+        const REMOTION_STUDIO_URL = 'http://localhost:3000'; // Run `npm run dev` in aws-renderer
+        
+        function setPreviewMode(mode) {
+            previewMode = mode;
+            const cssPreviewEl = document.getElementById('previewFrame');
+            const remotionEl = document.getElementById('remotionPreviewFrame');
+            const btnCss = document.getElementById('btnCssPreview');
+            const btnRemotion = document.getElementById('btnRemotionPreview');
+            
+            if (mode === 'remotion') {
+                cssPreviewEl.style.display = 'none';
+                remotionEl.style.display = 'block';
+                btnCss.className = 'btn btn-sm btn-secondary';
+                btnRemotion.className = 'btn btn-sm btn-primary';
+                
+                // Load Remotion preview if not already loaded
+                if (!remotionEl.src || remotionEl.src === '' || remotionEl.src === 'about:blank') {
+                    // Encode template as URL parameter for the studio preview
+                    const previewUrl = REMOTION_STUDIO_URL + '/?composition=GenericTemplate';
+                    remotionEl.src = previewUrl;
+                }
+                
+                // Send template update to iframe
+                setTimeout(() => updateRemotionPreview(), 500);
+            } else {
+                cssPreviewEl.style.display = 'block';
+                remotionEl.style.display = 'none';
+                btnCss.className = 'btn btn-sm btn-primary';
+                btnRemotion.className = 'btn btn-sm btn-secondary';
+                renderPreview();
+            }
+        }
+        
+        function updateRemotionPreview() {
+            const remotionEl = document.getElementById('remotionPreviewFrame');
+            if (remotionEl && remotionEl.contentWindow && previewMode === 'remotion') {
+                remotionEl.contentWindow.postMessage({
+                    type: 'UPDATE_TEMPLATE',
+                    data: { template: templateDef }
+                }, '*');
+            }
+        }
+        
+        // Also sync template when it changes (call this from updateLayer, etc.)
+        const originalUpdateLayer = updateLayer;
+        updateLayer = function(key, value) {
+            originalUpdateLayer(key, value);
+            if (previewMode === 'remotion') updateRemotionPreview();
+        };
+        
+        const originalUpdateLayerStyle = updateLayerStyle;
+        updateLayerStyle = function(key, value) {
+            originalUpdateLayerStyle(key, value);
+            if (previewMode === 'remotion') updateRemotionPreview();
+        };
     </script>
 </body>
 

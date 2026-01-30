@@ -75,7 +75,60 @@ if (!empty($_SESSION['user_id'])) {
 $formRenderer = new DynamicFormRenderer();
 $groupedFields = $formRenderer->getFields($templateId);
 
-// Current step (0 = preview, 1-3 = customization steps)
+// ============================================
+// NEW: Slide-Based Visual Editor Support
+// ============================================
+
+// Parse template_definition to determine if we use slide-based editor
+$templateDefinition = json_decode($template['template_definition'] ?? 'null', true);
+$hasSlideEditor = !empty($templateDefinition['slides']) && is_array($templateDefinition['slides']);
+$slides = $hasSlideEditor ? $templateDefinition['slides'] : [];
+$totalSlides = count($slides);
+
+// Check for slide parameter (?slide=0, ?slide=1, etc.)
+$currentSlideIndex = isset($_GET['slide']) ? intval($_GET['slide']) : null;
+$isSlideEditorMode = $hasSlideEditor && $currentSlideIndex !== null;
+$isMusicStep = isset($_GET['music']);
+$isCheckoutMode = isset($_GET['checkout']);
+
+// Helper: Extract editable fields from a slide config
+function extractEditableFields(array $slideConfig): array
+{
+    $fields = [];
+    foreach ($slideConfig['layers'] ?? [] as $layer) {
+        if (!empty($layer['fieldKey'])) {
+            $fields[] = [
+                'fieldKey' => $layer['fieldKey'],
+                'layerId' => $layer['id'] ?? $layer['fieldKey'],
+                'type' => $layer['type'] ?? 'text',  // 'text' or 'image'
+                'label' => ucwords(str_replace(['_', '-'], ' ', $layer['fieldKey'])),
+                'defaultValue' => $layer['defaultValue'] ?? '',
+                'style' => $layer['style'] ?? [],
+                'position' => $layer['position'] ?? [],
+            ];
+        }
+    }
+    return $fields;
+}
+
+// If in slide editor mode, validate and get current slide
+$currentSlideConfig = null;
+$editableFields = [];
+if ($isSlideEditorMode) {
+    // Validate slide index
+    if ($currentSlideIndex < 0 || $currentSlideIndex >= $totalSlides) {
+        header('Location: /template/' . $templateSlug . '?slide=0');
+        exit;
+    }
+    $currentSlideConfig = $slides[$currentSlideIndex];
+    $editableFields = extractEditableFields($currentSlideConfig);
+}
+
+// ============================================
+// END: Slide-Based Visual Editor Support
+// ============================================
+
+// Current step (0 = preview, 1-3 = customization steps) - for legacy mode
 $step = intval($_GET['step'] ?? 0);
 
 // Step configuration
@@ -249,6 +302,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $isXhrRequest = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
             strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
 
+        // ============================================
+        // NEW: Handle Slide Editor Mode Submission
+        // ============================================
+        if ($isSlideEditorMode && isset($_POST['slide_index'])) {
+            $submittedSlideIndex = intval($_POST['slide_index']);
+            $action = $_POST['action'] ?? 'next';
+
+            // Log slide submission
+            error_log("customize.php: Slide editor POST - slide={$submittedSlideIndex}, action={$action}");
+
+            // Track completed slides
+            if (!isset($_SESSION['completed_slides'])) {
+                $_SESSION['completed_slides'] = [];
+            }
+            $_SESSION['completed_slides'][$submittedSlideIndex] = true;
+
+            if ($action === 'next') {
+                // Go to next slide
+                $nextSlideIndex = $submittedSlideIndex + 1;
+                if ($nextSlideIndex < $totalSlides) {
+                    $redirectUrl = '/template/' . $templateSlug . '?slide=' . $nextSlideIndex;
+                } else {
+                    // All slides completed - go to checkout or music
+                    // Check if template has music field
+                    $hasMusicField = !empty($templateDefinition['music']['fieldKey']);
+                    if ($hasMusicField && empty($_SESSION['customize_data']['musicUrl'])) {
+                        $redirectUrl = '/template/' . $templateSlug . '?music=1';
+                    } else {
+                        // Skip to checkout
+                        $redirectUrl = '/template/' . $templateSlug . '?checkout=1';
+                    }
+                }
+
+                if ($isXhrRequest) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => true, 'redirect' => $redirectUrl]);
+                    exit;
+                }
+
+                header('Location: ' . $redirectUrl);
+                exit;
+            }
+
+            if ($action === 'previous' && $submittedSlideIndex > 0) {
+                $redirectUrl = '/template/' . $templateSlug . '?slide=' . ($submittedSlideIndex - 1);
+
+                if ($isXhrRequest) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => true, 'redirect' => $redirectUrl]);
+                    exit;
+                }
+
+                header('Location: ' . $redirectUrl);
+                exit;
+            }
+
+            if ($action === 'checkout') {
+                // Proceed to checkout/draft creation
+                $redirectUrl = '/template/' . $templateSlug . '?checkout=1';
+
+                if ($isXhrRequest) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => true, 'redirect' => $redirectUrl]);
+                    exit;
+                }
+
+                header('Location: ' . $redirectUrl);
+                exit;
+            }
+        }
+
         // Handle dress step redirect - go to first regular step
         if ($isDressStep) {
             $redirectUrl = '/template/' . $templateSlug . '?step=' . ($availableSteps[0] ?? 1);
@@ -388,6 +512,99 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// ============================================
+// Checkout Mode Handler (for Slide Editor flow)
+// ============================================
+if ($isCheckoutMode && $hasSlideEditor) {
+    // Ensure user is logged in before creating draft
+    if (empty($_SESSION['user_id'])) {
+        $_SESSION['checkout_redirect'] = '/template/' . $templateSlug . '?checkout=1';
+        $_SESSION['pending_customization'] = true;
+        header('Location: /login?redirect=' . urlencode('/template/' . $templateSlug . '?checkout=1'));
+        exit;
+    }
+
+    $allData = $_SESSION['customize_data'] ?? [];
+
+    // Auto-detect country
+    if (!isset($_SESSION['user_country'])) {
+        $timezone = $_SESSION['user_timezone'] ?? '';
+        if (strpos($timezone, 'Asia/Kolkata') !== false || strpos($timezone, 'Asia/Calcutta') !== false) {
+            $_SESSION['user_country'] = 'IN';
+        } else {
+            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '';
+            if ($ip && $ip !== '127.0.0.1' && $ip !== '::1') {
+                $context = stream_context_create(['http' => ['timeout' => 2]]);
+                $geoData = @file_get_contents("https://ipapi.co/{$ip}/json/", false, $context);
+                if ($geoData) {
+                    $geo = json_decode($geoData, true);
+                    $_SESSION['user_country'] = $geo['country_code'] ?? 'US';
+                }
+            }
+        }
+        if (!isset($_SESSION['user_country'])) {
+            $_SESSION['user_country'] = 'US';
+        }
+    }
+
+    // Determine currency and amount
+    $userCountry = $_SESSION['user_country'] ?? 'US';
+    $currency = ($userCountry === 'IN') ? 'INR' : 'USD';
+    $amount = ($currency === 'INR') ? $template['price_inr'] : $template['price_usd'];
+
+    // Use discounted price if available
+    if ($currency === 'INR' && !empty($template['discounted_price_inr'])) {
+        $amount = $template['discounted_price_inr'];
+    } elseif ($currency === 'USD' && !empty($template['discounted_price_usd'])) {
+        $amount = $template['discounted_price_usd'];
+    }
+
+    // Create draft order
+    require_once __DIR__ . '/../../src/Services/DraftOrderService.php';
+    $draftService = new \InvitationVideos\Services\DraftOrderService();
+
+    if (!empty($_SESSION['customize_draft_dir'])) {
+        $allData['_files_directory'] = $_SESSION['customize_draft_dir'];
+    }
+
+    $draft = $draftService->createDraft(
+        $templateId,
+        $amount,
+        $currency,
+        $allData,
+        $_SESSION['user_id'] ?? null
+    );
+
+    $draftId = $draft['id'];
+    $draftToken = $draft['draft_token'];
+
+    // Add all uploads from session
+    $sessionUploads = $_SESSION['customize_uploads'] ?? [];
+    foreach ($sessionUploads as $fieldName => $uploadInfo) {
+        $fileInfo = [
+            'name' => $uploadInfo['original_filename'],
+            'type' => $uploadInfo['mime_type'],
+            'size' => $uploadInfo['file_size']
+        ];
+        $draftService->addUpload(
+            $draftId,
+            $fieldName,
+            $fileInfo,
+            $uploadInfo['file_path']
+        );
+    }
+
+    // Clear session data
+    unset($_SESSION['customize_data']);
+    unset($_SESSION['customize_template']);
+    unset($_SESSION['customize_uploads']);
+    unset($_SESSION['completed_slides']);
+
+    // Redirect to checkout with draft token
+    header('Location: /checkout/' . $draftToken);
+    exit;
+}
+
 // Get stored values for current step
 $storedValues = $_SESSION['customize_data'] ?? [];
 $storedUploads = $_SESSION['customize_uploads'] ?? [];
@@ -503,7 +720,13 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
 
                             <!-- CTA Button below image (hidden on mobile, shown on lg+) -->
                             <div class="hidden lg:block mt-4">
-                                <a href="/template/<?= Security::escape($templateSlug) ?>?step=<?= $availableSteps[0] ?? 1 ?>"
+                                <?php
+                                // Use slide editor for templates with template_definition, otherwise legacy steps
+                                $customizeUrl = $hasSlideEditor
+                                    ? '/template/' . Security::escape($templateSlug) . '?slide=0'
+                                    : '/template/' . Security::escape($templateSlug) . '?step=' . ($availableSteps[0] ?? 1);
+                                ?>
+                                <a href="<?= $customizeUrl ?>"
                                     class="w-full flex items-center justify-center gap-2 px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all text-lg">
                                     <span>Customize Now</span>
                                     <span class="material-symbols-outlined">arrow_forward</span>
@@ -687,10 +910,14 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                     </p>
                 </div>
                 <?php
-                // For AI templates, start with dress step; otherwise go to first form step
-                $customizeUrl = $hasDressStep
-                    ? '/template/' . Security::escape($templateSlug) . '?step=0&dress=1'
-                    : '/template/' . Security::escape($templateSlug) . '?step=' . ($availableSteps[0] ?? 1);
+                // For AI templates use dress step, for slide editor use ?slide=0, otherwise legacy steps
+                if ($hasDressStep) {
+                    $customizeUrl = '/template/' . Security::escape($templateSlug) . '?step=0&dress=1';
+                } elseif ($hasSlideEditor) {
+                    $customizeUrl = '/template/' . Security::escape($templateSlug) . '?slide=0';
+                } else {
+                    $customizeUrl = '/template/' . Security::escape($templateSlug) . '?step=' . ($availableSteps[0] ?? 1);
+                }
                 ?>
                 <a href="<?= $customizeUrl ?>"
                     class="flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all">
@@ -702,6 +929,156 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
 
         <!-- Spacer for fixed bottom bar on mobile -->
         <div class="h-24 lg:hidden"></div>
+
+    <?php elseif ($isSlideEditorMode): ?>
+        <!-- ==================== SLIDE-BASED VISUAL EDITOR ==================== -->
+        <link rel="stylesheet" href="/assets/css/slide-editor.css">
+
+        <div class="slide-editor">
+
+            <!-- Slide Navigation Header -->
+            <div class="slide-nav">
+                <a href="<?= $currentSlideIndex > 0 ? '/template/' . Security::escape($templateSlug) . '?slide=' . ($currentSlideIndex - 1) : '/template/' . Security::escape($templateSlug) ?>"
+                    class="slide-nav-back">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                    <?= $currentSlideIndex > 0 ? 'Previous Slide' : 'Back' ?>
+                </a>
+
+                <div class="slide-nav-indicator">
+                    <?php for ($i = 0; $i < $totalSlides; $i++): ?>
+                        <span
+                            class="slide-dot <?= $i === $currentSlideIndex ? 'active' : '' ?> <?= isset($_SESSION['completed_slides'][$i]) ? 'completed' : '' ?>"></span>
+                    <?php endfor; ?>
+                </div>
+
+                <span class="slide-nav-title">
+                    Slide <?= $currentSlideIndex + 1 ?> of <?= $totalSlides ?>
+                </span>
+            </div>
+
+            <!-- Slide Name -->
+            <h2 class="text-xl font-bold text-slate-900 mb-4 text-center">
+                <?= Security::escape($currentSlideConfig['name'] ?? 'Slide ' . ($currentSlideIndex + 1)) ?>
+            </h2>
+
+            <!-- Preview Canvas -->
+            <div class="bg-slate-900 rounded-2xl overflow-hidden shadow-2xl mb-6">
+                <div id="slide-preview-canvas" class="slide-preview-canvas" data-slide-preview="true"
+                    data-slide-config='<?= Security::escape(json_encode($currentSlideConfig)) ?>'
+                    data-user-values='<?= Security::escape(json_encode($storedValues)) ?>'>
+                    <!-- JavaScript renders preview here -->
+                </div>
+            </div>
+
+            <!-- Editor Form -->
+            <form id="slide-editor-form" method="POST" enctype="multipart/form-data" class="slide-editor-panel">
+                <?= Security::csrfField() ?>
+                <input type="hidden" name="slide_index" value="<?= $currentSlideIndex ?>">
+                <input type="hidden" name="user_timezone" id="user_timezone" value="">
+
+                <h3>Edit Content</h3>
+
+                <?php if (empty($editableFields)): ?>
+                    <p class="text-slate-500 italic">This slide has no editable fields.</p>
+                <?php else: ?>
+                    <?php foreach ($editableFields as $field): ?>
+                        <div class="editor-field">
+                            <label class="editor-field-label" for="field-<?= $field['fieldKey'] ?>">
+                                <?= Security::escape($field['label']) ?>
+                            </label>
+
+                            <?php if ($field['type'] === 'text'): ?>
+                                <input type="text" id="field-<?= $field['fieldKey'] ?>" name="<?= $field['fieldKey'] ?>"
+                                    value="<?= Security::escape($storedValues[$field['fieldKey']] ?? $field['defaultValue']) ?>"
+                                    placeholder="<?= Security::escape($field['defaultValue']) ?>" class="editor-field-input"
+                                    data-field-key="<?= $field['fieldKey'] ?>"
+                                    oninput="if(window.slidePreview) slidePreview.updateValue('<?= $field['fieldKey'] ?>', this.value)">
+
+                            <?php elseif ($field['type'] === 'image'): ?>
+                                <div class="editor-field-upload <?= !empty($storedUploads[$field['fieldKey']]) ? 'has-image' : '' ?>">
+                                    <input type="file" id="field-<?= $field['fieldKey'] ?>" name="<?= $field['fieldKey'] ?>"
+                                        accept="image/*" data-field-key="<?= $field['fieldKey'] ?>"
+                                        onchange="if(window.slidePreview) slidePreview.updateImageValue('<?= $field['fieldKey'] ?>', this.files[0])">
+
+                                    <?php if (!empty($storedUploads[$field['fieldKey']])): ?>
+                                        <img src="<?= Security::escape($storedUploads[$field['fieldKey']]['file_path']) ?>"
+                                            class="editor-field-upload-preview" alt="Uploaded image">
+                                    <?php else: ?>
+                                        <div class="editor-field-upload-icon">
+                                            <span class="material-symbols-outlined">add_photo_alternate</span>
+                                        </div>
+                                        <p class="editor-field-upload-text">Click to upload image</p>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+
+                <!-- Navigation Buttons (desktop) -->
+                <div class="slide-editor-nav">
+                    <?php if ($currentSlideIndex > 0): ?>
+                        <button type="submit" name="action" value="previous"
+                            class="slide-editor-btn slide-editor-btn-secondary">
+                            <span class="material-symbols-outlined">arrow_back</span>
+                            Previous
+                        </button>
+                    <?php endif; ?>
+
+                    <?php if ($currentSlideIndex < $totalSlides - 1): ?>
+                        <button type="submit" name="action" value="next" class="slide-editor-btn slide-editor-btn-primary">
+                            Next Slide
+                            <span class="material-symbols-outlined">arrow_forward</span>
+                        </button>
+                    <?php else: ?>
+                        <button type="submit" name="action" value="checkout" class="slide-editor-btn slide-editor-btn-primary">
+                            Continue to Checkout
+                            <span class="material-symbols-outlined">shopping_cart</span>
+                        </button>
+                    <?php endif; ?>
+                </div>
+            </form>
+
+            <!-- Fixed Bottom Bar for Mobile (slide editor) -->
+            <div class="slide-editor-mobile-nav">
+                <?php if ($currentSlideIndex < $totalSlides - 1): ?>
+                    <button type="submit" form="slide-editor-form" name="action" value="next"
+                        class="w-full flex items-center justify-center gap-2 px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/25">
+                        Next Slide
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                    </button>
+                <?php else: ?>
+                    <button type="submit" form="slide-editor-form" name="action" value="checkout"
+                        class="w-full flex items-center justify-center gap-2 px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/25">
+                        Continue to Checkout
+                        <span class="material-symbols-outlined">shopping_cart</span>
+                    </button>
+                <?php endif; ?>
+            </div>
+
+            <!-- Spacer for fixed bottom bar on mobile -->
+            <div class="h-24 md:hidden"></div>
+        </div>
+
+        <!-- Initialize Slide Preview -->
+        <script src="/assets/js/slide-preview.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Capture timezone
+                const tzField = document.getElementById('user_timezone');
+                if (tzField) {
+                    tzField.value = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                }
+
+                // Initialize slide preview
+                const canvas = document.getElementById('slide-preview-canvas');
+                if (canvas) {
+                    const slideConfig = JSON.parse(canvas.dataset.slideConfig || '{}');
+                    const userValues = JSON.parse(canvas.dataset.userValues || '{}');
+                    window.slidePreview = new SlidePreview('slide-preview-canvas', slideConfig, userValues);
+                }
+            });
+        </script>
 
     <?php else: ?>
         <!-- ==================== CUSTOMIZATION STEPS ==================== -->
