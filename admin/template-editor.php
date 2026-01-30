@@ -582,11 +582,24 @@ $animationPresets = [
     </div>
 
     <!-- Hidden data containers for safe JSON parsing -->
-    <script type="application/json"
-        id="templateDefData"><?= json_encode($templateDefinition, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?: '{}' ?></script>
-    <script type="application/json"
-        id="animationsData"><?= json_encode($animationPresets, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?: '{}' ?></script>
-    <script type="application/json" id="fieldPresetsData"><?= json_encode($fieldPresets, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?: '[]' ?></script>
+    <script type="application/json" id="templateDefData">
+<?php
+$jsonDef = json_encode($templateDefinition, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
+echo $jsonDef !== false ? $jsonDef : '{}';
+?>
+    </script>
+    <script type="application/json" id="animationsData">
+<?php
+$jsonAnim = json_encode($animationPresets, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+echo $jsonAnim !== false ? $jsonAnim : '{}';
+?>
+    </script>
+    <script type="application/json" id="fieldPresetsData">
+<?php
+$jsonPresets = json_encode($fieldPresets, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+echo $jsonPresets !== false ? $jsonPresets : '[]';
+?>
+    </script>
 
     <script>
         // Template definition state - with safe JSON parsing
