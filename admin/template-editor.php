@@ -90,7 +90,7 @@ $animationPresets = [
         <?= htmlspecialchars($template['title'] ?? 'New') ?>
     </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="/assets/css/admin.css">
+    <link rel="stylesheet" href="/assets/css/app.css">
     <style>
         .editor-container {
             display: grid;
@@ -1182,30 +1182,30 @@ $animationPresets = [
         }
 
         // ========== Phase 4: Remotion Preview Mode ==========
-        
+
         let previewMode = 'css'; // 'css' or 'remotion'
         const REMOTION_STUDIO_URL = 'http://localhost:3000'; // Run `npm run dev` in aws-renderer
-        
+
         function setPreviewMode(mode) {
             previewMode = mode;
             const cssPreviewEl = document.getElementById('previewFrame');
             const remotionEl = document.getElementById('remotionPreviewFrame');
             const btnCss = document.getElementById('btnCssPreview');
             const btnRemotion = document.getElementById('btnRemotionPreview');
-            
+
             if (mode === 'remotion') {
                 cssPreviewEl.style.display = 'none';
                 remotionEl.style.display = 'block';
                 btnCss.className = 'btn btn-sm btn-secondary';
                 btnRemotion.className = 'btn btn-sm btn-primary';
-                
+
                 // Load Remotion preview if not already loaded
                 if (!remotionEl.src || remotionEl.src === '' || remotionEl.src === 'about:blank') {
                     // Encode template as URL parameter for the studio preview
                     const previewUrl = REMOTION_STUDIO_URL + '/?composition=GenericTemplate';
                     remotionEl.src = previewUrl;
                 }
-                
+
                 // Send template update to iframe
                 setTimeout(() => updateRemotionPreview(), 500);
             } else {
@@ -1216,7 +1216,7 @@ $animationPresets = [
                 renderPreview();
             }
         }
-        
+
         function updateRemotionPreview() {
             const remotionEl = document.getElementById('remotionPreviewFrame');
             if (remotionEl && remotionEl.contentWindow && previewMode === 'remotion') {
@@ -1226,16 +1226,16 @@ $animationPresets = [
                 }, '*');
             }
         }
-        
+
         // Also sync template when it changes (call this from updateLayer, etc.)
         const originalUpdateLayer = updateLayer;
-        updateLayer = function(key, value) {
+        updateLayer = function (key, value) {
             originalUpdateLayer(key, value);
             if (previewMode === 'remotion') updateRemotionPreview();
         };
-        
+
         const originalUpdateLayerStyle = updateLayerStyle;
-        updateLayerStyle = function(key, value) {
+        updateLayerStyle = function (key, value) {
             originalUpdateLayerStyle(key, value);
             if (previewMode === 'remotion') updateRemotionPreview();
         };
