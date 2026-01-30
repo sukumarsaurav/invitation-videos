@@ -622,6 +622,42 @@ $animationPresets = [
                         <label>Default Text</label>
                         <input type="text" value="${layer.defaultValue || ''}" onchange="updateLayer('defaultValue', this.value)">
                     </div>
+                    <div class="property-group">
+                        <label>Font Family (Google Fonts)</label>
+                        <select onchange="updateLayerStyle('fontFamily', this.value)">
+                            <optgroup label="Sans-Serif">
+                                <option value="Inter" ${layer.style?.fontFamily === 'Inter' ? 'selected' : ''}>Inter</option>
+                                <option value="Poppins" ${layer.style?.fontFamily === 'Poppins' ? 'selected' : ''}>Poppins</option>
+                                <option value="Montserrat" ${layer.style?.fontFamily === 'Montserrat' ? 'selected' : ''}>Montserrat</option>
+                                <option value="Open Sans" ${layer.style?.fontFamily === 'Open Sans' ? 'selected' : ''}>Open Sans</option>
+                                <option value="Raleway" ${layer.style?.fontFamily === 'Raleway' ? 'selected' : ''}>Raleway</option>
+                                <option value="Outfit" ${layer.style?.fontFamily === 'Outfit' ? 'selected' : ''}>Outfit</option>
+                            </optgroup>
+                            <optgroup label="Serif">
+                                <option value="Playfair Display" ${layer.style?.fontFamily === 'Playfair Display' ? 'selected' : ''}>Playfair Display</option>
+                                <option value="Cormorant Garamond" ${layer.style?.fontFamily === 'Cormorant Garamond' ? 'selected' : ''}>Cormorant Garamond</option>
+                                <option value="Libre Baskerville" ${layer.style?.fontFamily === 'Libre Baskerville' ? 'selected' : ''}>Libre Baskerville</option>
+                                <option value="Merriweather" ${layer.style?.fontFamily === 'Merriweather' ? 'selected' : ''}>Merriweather</option>
+                                <option value="Lora" ${layer.style?.fontFamily === 'Lora' ? 'selected' : ''}>Lora</option>
+                            </optgroup>
+                            <optgroup label="Script/Decorative">
+                                <option value="Great Vibes" ${layer.style?.fontFamily === 'Great Vibes' ? 'selected' : ''}>Great Vibes (Script)</option>
+                                <option value="Dancing Script" ${layer.style?.fontFamily === 'Dancing Script' ? 'selected' : ''}>Dancing Script</option>
+                                <option value="Parisienne" ${layer.style?.fontFamily === 'Parisienne' ? 'selected' : ''}>Parisienne</option>
+                                <option value="Alex Brush" ${layer.style?.fontFamily === 'Alex Brush' ? 'selected' : ''}>Alex Brush</option>
+                                <option value="Allura" ${layer.style?.fontFamily === 'Allura' ? 'selected' : ''}>Allura</option>
+                                <option value="Tangerine" ${layer.style?.fontFamily === 'Tangerine' ? 'selected' : ''}>Tangerine</option>
+                            </optgroup>
+                            <optgroup label="Indian/Hindi Fonts">
+                                <option value="Hind" ${layer.style?.fontFamily === 'Hind' ? 'selected' : ''}>Hind (Devanagari)</option>
+                                <option value="Noto Sans Devanagari" ${layer.style?.fontFamily === 'Noto Sans Devanagari' ? 'selected' : ''}>Noto Sans Devanagari</option>
+                                <option value="Poppins" ${layer.style?.fontFamily === 'Poppins' ? 'selected' : ''}>Poppins (Hindi+English)</option>
+                            </optgroup>
+                        </select>
+                        <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+                            Only selected fonts are loaded during render (optimized)
+                        </p>
+                    </div>
                     <div class="property-row">
                         <div class="property-group">
                             <label>Font Size</label>
@@ -636,8 +672,9 @@ $animationPresets = [
                         <label>Font Weight</label>
                         <select onchange="updateLayerStyle('fontWeight', this.value)">
                             <option value="normal" ${layer.style?.fontWeight === 'normal' ? 'selected' : ''}>Normal</option>
-                            <option value="bold" ${layer.style?.fontWeight === 'bold' ? 'selected' : ''}>Bold</option>
-                            <option value="600" ${layer.style?.fontWeight == '600' ? 'selected' : ''}>Semi-Bold</option>
+                            <option value="500" ${layer.style?.fontWeight == '500' ? 'selected' : ''}>Medium (500)</option>
+                            <option value="600" ${layer.style?.fontWeight == '600' ? 'selected' : ''}>Semi-Bold (600)</option>
+                            <option value="bold" ${layer.style?.fontWeight === 'bold' ? 'selected' : ''}>Bold (700)</option>
                         </select>
                     </div>
                 `;
