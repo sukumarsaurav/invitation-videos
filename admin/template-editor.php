@@ -581,14 +581,22 @@ $animationPresets = [
         </div>
     </div>
 
+    <!-- Hidden data containers for safe JSON parsing -->
+    <script type="application/json"
+        id="templateDefData"><?= json_encode($templateDefinition, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?: '{}' ?></script>
+    <script type="application/json"
+        id="animationsData"><?= json_encode($animationPresets, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?: '{}' ?></script>
+    <script type="application/json" id="fieldPresetsData"><?= json_encode($fieldPresets, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?: '[]' ?></script>
+
     <script>
-        // Template definition state - with safe fallback
+        // Template definition state - with safe JSON parsing
         let templateDef;
         try {
-            templateDef = <?= json_encode($templateDefinition, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+            const rawData = document.getElementById('templateDefData').textContent;
+            templateDef = JSON.parse(rawData);
         } catch (e) {
             console.error('Failed to parse templateDef:', e);
-            templateDef = { version: '1.0', fps: 30, width: 1080, height: 1920, slides: [], music: { fieldKey: 'musicUrl', fallback: null } };
+            templateDef = null;
         }
         if (!templateDef || typeof templateDef !== 'object') {
             templateDef = { version: '1.0', fps: 30, width: 1080, height: 1920, slides: [], music: { fieldKey: 'musicUrl', fallback: null } };
@@ -600,11 +608,21 @@ $animationPresets = [
         let selectedSlideIndex = null;
         let selectedLayerIndex = null;
 
-        // Animation presets
-        const animations = <?= json_encode($animationPresets, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?> || {};
+        // Animation presets - safe parsing
+        let animations = {};
+        try {
+            animations = JSON.parse(document.getElementById('animationsData').textContent) || {};
+        } catch (e) {
+            console.error('Failed to parse animations:', e);
+        }
 
-        // Field presets for dropdown
-        const fieldPresets = <?= json_encode($fieldPresets, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?> || [];
+        // Field presets for dropdown - safe parsing
+        let fieldPresets = [];
+        try {
+            fieldPresets = JSON.parse(document.getElementById('fieldPresetsData').textContent) || [];
+        } catch (e) {
+            console.error('Failed to parse fieldPresets:', e);
+        }
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
