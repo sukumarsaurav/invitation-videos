@@ -95,22 +95,22 @@ $animationPresets = [
         .editor-container {
             display: grid;
             grid-template-columns: 280px 1fr 350px;
-            gap: 20px;
-            height: calc(100vh - 120px);
-            margin: -20px;
+            gap: 0;
+            height: calc(100vh - 64px);
         }
 
         .editor-sidebar {
-            background: var(--card-bg);
-            border-right: 1px solid var(--border-color);
+            background: white;
+            border-right: 1px solid #e2e8f0;
             padding: 16px;
             overflow-y: auto;
         }
 
         .editor-canvas {
-            background: #1a1a2e;
+            background: #f1f5f9;
             position: relative;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             overflow: hidden;
@@ -119,16 +119,16 @@ $animationPresets = [
         .preview-frame {
             width: 270px;
             height: 480px;
-            background: #2d2d44;
-            border-radius: 8px;
+            background: #1e293b;
+            border-radius: 12px;
             position: relative;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
             overflow: hidden;
         }
 
         .editor-properties {
-            background: var(--card-bg);
-            border-left: 1px solid var(--border-color);
+            background: white;
+            border-left: 1px solid #e2e8f0;
             padding: 16px;
             overflow-y: auto;
         }
@@ -140,8 +140,8 @@ $animationPresets = [
         }
 
         .slide-item {
-            background: var(--bg-color);
-            border: 1px solid var(--border-color);
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
             border-radius: 8px;
             padding: 12px;
             margin-bottom: 8px;
@@ -151,12 +151,12 @@ $animationPresets = [
 
         .slide-item:hover,
         .slide-item.active {
-            border-color: var(--primary-color);
-            background: rgba(127, 19, 236, 0.1);
+            border-color: #970747;
+            background: rgba(151, 7, 71, 0.05);
         }
 
         .slide-item.active {
-            box-shadow: 0 0 0 2px var(--primary-color);
+            box-shadow: 0 0 0 2px #970747;
         }
 
         .slide-header {
@@ -172,19 +172,19 @@ $animationPresets = [
 
         .slide-duration {
             font-size: 12px;
-            color: var(--text-muted);
+            color: #64748b;
         }
 
         .layer-list {
             margin-top: 10px;
             padding-left: 12px;
-            border-left: 2px solid var(--border-color);
+            border-left: 2px solid #e2e8f0;
         }
 
         .layer-item {
             padding: 6px 8px;
             font-size: 12px;
-            color: var(--text-muted);
+            color: #64748b;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -194,12 +194,12 @@ $animationPresets = [
         }
 
         .layer-item:hover {
-            background: rgba(127, 19, 236, 0.1);
+            background: rgba(151, 7, 71, 0.05);
         }
 
         .layer-item.active {
-            background: rgba(127, 19, 236, 0.15);
-            color: var(--text-color);
+            background: rgba(151, 7, 71, 0.1);
+            color: #1e293b;
         }
 
         .layer-item i {
@@ -221,19 +221,19 @@ $animationPresets = [
         }
 
         .btn-icon {
-            background: transparent;
-            border: 1px solid var(--border-color);
+            background: white;
+            border: 1px solid #e2e8f0;
             border-radius: 4px;
             padding: 4px 6px;
             cursor: pointer;
-            color: var(--text-muted);
+            color: #64748b;
             font-size: 10px;
             transition: all 0.2s;
         }
 
         .btn-icon:hover:not(:disabled) {
-            background: var(--primary-color);
-            border-color: var(--primary-color);
+            background: #970747;
+            border-color: #970747;
             color: white;
         }
 
@@ -247,14 +247,14 @@ $animationPresets = [
             border: none;
             padding: 2px 4px;
             cursor: pointer;
-            color: var(--text-muted);
+            color: #64748b;
             font-size: 9px;
             opacity: 0.6;
             transition: all 0.2s;
         }
 
         .btn-icon-sm:hover:not(:disabled) {
-            color: var(--primary-color);
+            color: #970747;
             opacity: 1;
         }
 
@@ -279,23 +279,23 @@ $animationPresets = [
         .btn-add-slide {
             width: 100%;
             padding: 12px;
-            background: rgba(127, 19, 236, 0.1);
-            border: 2px dashed var(--primary-color);
+            background: rgba(151, 7, 71, 0.05);
+            border: 2px dashed #970747;
             border-radius: 8px;
-            color: var(--primary-color);
+            color: #970747;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
         }
 
         .btn-add-slide:hover {
-            background: rgba(127, 19, 236, 0.2);
+            background: rgba(151, 7, 71, 0.1);
         }
 
         .section-title {
             font-size: 12px;
             text-transform: uppercase;
-            color: var(--text-muted);
+            color: #64748b;
             margin-bottom: 12px;
             font-weight: 600;
             letter-spacing: 0.5px;
@@ -309,7 +309,7 @@ $animationPresets = [
             display: block;
             font-size: 13px;
             margin-bottom: 6px;
-            color: var(--text-muted);
+            color: #64748b;
         }
 
         .property-group input,
@@ -317,10 +317,10 @@ $animationPresets = [
         .property-group textarea {
             width: 100%;
             padding: 8px 12px;
-            border: 1px solid var(--border-color);
+            border: 1px solid #e2e8f0;
             border-radius: 6px;
-            background: var(--bg-color);
-            color: var(--text-color);
+            background: #f8fafc;
+            color: #1e293b;
             font-size: 14px;
         }
 
@@ -353,7 +353,7 @@ $animationPresets = [
 
         .timeline-segment {
             height: 30px;
-            background: linear-gradient(135deg, #7f13ec, #5b0fb5);
+            background: linear-gradient(135deg, #970747, #7a053a);
             border-radius: 4px;
             flex-shrink: 0;
             cursor: pointer;
@@ -400,15 +400,15 @@ $animationPresets = [
         }
 
         .alert-success {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            color: #10b981;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
         }
 
         .alert-error {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #ef4444;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
         }
 
         .editor-header {
@@ -416,8 +416,9 @@ $animationPresets = [
             justify-content: space-between;
             align-items: center;
             padding: 16px 20px;
-            background: var(--card-bg);
-            border-bottom: 1px solid var(--border-color);
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            height: 64px;
         }
 
         .editor-header h1 {
@@ -426,15 +427,69 @@ $animationPresets = [
             display: flex;
             align-items: center;
             gap: 12px;
+            color: #1e293b;
         }
 
         .editor-header h1 a {
-            color: var(--text-muted);
+            color: #64748b;
+            transition: color 0.2s;
+        }
+
+        .editor-header h1 a:hover {
+            color: #970747;
+        }
+
+        /* Button styles */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #970747;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #7a053a;
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-sm {
+            padding: 4px 10px;
+            font-size: 12px;
+        }
+
+        .btn-outline-danger {
+            background: transparent;
+            border: 1px solid #ef4444;
+            color: #ef4444;
+        }
+
+        .btn-outline-danger:hover {
+            background: #fef2f2;
         }
     </style>
 </head>
 
-<body class="admin-body">
+<body class="bg-slate-100 text-slate-900" style="margin: 0; min-height: 100vh;">
     <div class="editor-header">
         <h1>
             <a href="/admin/templates.php"><i class="fas fa-arrow-left"></i></a>
@@ -478,7 +533,7 @@ $animationPresets = [
         <!-- Center: Preview Canvas -->
         <div class="editor-canvas">
             <div class="preview-header"
-                style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: var(--sidebar-bg); border-bottom: 1px solid var(--border-color);">
+                style="display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: white; border-bottom: 1px solid #e2e8f0; position: absolute; top: 0; left: 0; right: 0; z-index: 10;">
                 <span style="font-size: 12px; font-weight: 600;">Preview</span>
                 <div style="display: flex; gap: 4px;">
                     <button type="button" id="btnCssPreview" class="btn btn-sm btn-primary"
@@ -501,7 +556,7 @@ $animationPresets = [
         <!-- Right Sidebar: Properties -->
         <div class="editor-properties" id="propertiesPanel">
             <div class="section-title">Properties</div>
-            <p style="color: var(--text-muted); font-size: 13px;">
+            <p style="color: #64748b; font-size: 13px;">
                 Select a slide or layer to edit its properties.
             </p>
         </div>
@@ -527,16 +582,29 @@ $animationPresets = [
     </div>
 
     <script>
-        // Template definition state
-        let templateDef = <?= json_encode($templateDefinition) ?>;
+        // Template definition state - with safe fallback
+        let templateDef;
+        try {
+            templateDef = <?= json_encode($templateDefinition, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+        } catch (e) {
+            console.error('Failed to parse templateDef:', e);
+            templateDef = { version: '1.0', fps: 30, width: 1080, height: 1920, slides: [], music: { fieldKey: 'musicUrl', fallback: null } };
+        }
+        if (!templateDef || typeof templateDef !== 'object') {
+            templateDef = { version: '1.0', fps: 30, width: 1080, height: 1920, slides: [], music: { fieldKey: 'musicUrl', fallback: null } };
+        }
+        if (!Array.isArray(templateDef.slides)) {
+            templateDef.slides = [];
+        }
+
         let selectedSlideIndex = null;
         let selectedLayerIndex = null;
 
         // Animation presets
-        const animations = <?= json_encode($animationPresets) ?>;
+        const animations = <?= json_encode($animationPresets, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?> || {};
 
         // Field presets for dropdown
-        const fieldPresets = <?= json_encode($fieldPresets) ?>;
+        const fieldPresets = <?= json_encode($fieldPresets, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?> || [];
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
@@ -773,7 +841,7 @@ $animationPresets = [
                                 <option value="Poppins" ${layer.style?.fontFamily === 'Poppins' ? 'selected' : ''}>Poppins (Hindi+English)</option>
                             </optgroup>
                         </select>
-                        <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+                        <p style="font-size: 11px; color: #64748b; margin-top: 4px;">
                             Only selected fonts are loaded during render (optimized)
                         </p>
                     </div>
@@ -827,7 +895,7 @@ $animationPresets = [
                         <label>Text Shadow</label>
                         <input type="text" value="${layer.style?.textShadow || ''}" placeholder="e.g. 2px 2px 4px rgba(0,0,0,0.5)"
                                onchange="updateLayerStyle('textShadow', this.value)">
-                        <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+                        <p style="font-size: 11px; color: #64748b; margin-top: 4px;">
                             CSS text-shadow format: x y blur color
                         </p>
                     </div>
@@ -1057,7 +1125,7 @@ $animationPresets = [
             renderPreview();
             document.getElementById('propertiesPanel').innerHTML = `
                 <div class="section-title">Properties</div>
-                <p style="color: var(--text-muted); font-size: 13px;">Select a slide or layer to edit its properties.</p>
+                <p style="color: #64748b; font-size: 13px;">Select a slide or layer to edit its properties.</p>
             `;
         }
 
