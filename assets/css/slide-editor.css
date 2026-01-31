@@ -76,9 +76,24 @@
 .slide-preview-text.editable.editing {
     outline: 2px solid var(--slide-primary);
     outline-offset: 4px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.15);
     border-radius: 4px;
     padding: 4px 8px;
+    min-width: 50px;
+    cursor: text;
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+/* Mobile: contenteditable focus state */
+.slide-preview-text.editable[contenteditable="true"] {
+    outline: 2px solid var(--slide-primary);
+    outline-offset: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    padding: 8px 12px;
+    min-width: 80px;
+    min-height: 30px;
 }
 
 /* Edit icon that appears on hover */
@@ -185,6 +200,16 @@
 
 .animate-pop-in {
     animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Hide scrollbar but keep scroll functionality */
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
 }
 
 /* ============================================

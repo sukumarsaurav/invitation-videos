@@ -977,6 +977,36 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                 <span>Tap any element to edit</span>
             </div>
 
+            <!-- Slide Thumbnails Navigation Strip -->
+            <div class="flex gap-2 overflow-x-auto pb-4 px-1 -mx-1 scrollbar-hide">
+                <?php foreach ($slides as $index => $slide): ?>
+                    <?php 
+                    $isActive = $index === $currentSlideIndex;
+                    $isCompleted = isset($_SESSION['completed_slides'][$index]);
+                    $bgColor = $slide['background']['color'] ?? '#6b7280';
+                    $slideName = $slide['name'] ?? 'Slide ' . ($index + 1);
+                    ?>
+                    <a href="/template/<?= Security::escape($templateSlug) ?>?slide=<?= $index ?>"
+                        class="flex-shrink-0 relative group transition-all duration-200 <?= $isActive ? 'scale-105 z-10' : 'hover:scale-105' ?>">
+                        <!-- Thumbnail -->
+                        <div class="w-16 h-28 rounded-lg overflow-hidden shadow-md border-2 transition-all duration-200
+                            <?= $isActive ? 'border-primary shadow-lg shadow-primary/25' : ($isCompleted ? 'border-green-500' : 'border-transparent hover:border-slate-300') ?>"
+                            style="background: <?= Security::escape($bgColor) ?>;">
+                            <!-- Slide number -->
+                            <div class="absolute top-1 left-1 w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center
+                                <?= $isActive ? 'bg-primary text-white' : ($isCompleted ? 'bg-green-500 text-white' : 'bg-white/80 text-slate-700') ?>">
+                                <?= $isCompleted && !$isActive ? '✓' : ($index + 1) ?>
+                            </div>
+                        </div>
+                        <!-- Slide name tooltip on hover/active -->
+                        <span class="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] font-medium text-slate-600 whitespace-nowrap
+                            <?= $isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100' ?> transition-opacity">
+                            <?= Security::escape(strlen($slideName) > 10 ? substr($slideName, 0, 10) . '...' : $slideName) ?>
+                        </span>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+
             <!-- Hidden Form for Data Submission -->
             <form id="slide-editor-form" method="POST" enctype="multipart/form-data" class="hidden">
                 <?= Security::csrfField() ?>
@@ -1133,19 +1163,62 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                         const currentValue = hiddenInput ? hiddenInput.value : '';
 
                         if (isMobile) {
-                            // Open bottom sheet with Tailwind classes
-                            editSheetLabel.textContent = field.label;
-                            editSheetInput.value = currentValue;
-                            editSheetInput.placeholder = field.defaultValue || 'Enter ' + field.label.toLowerCase();
-                            // Show backdrop
-                            editSheetBackdrop.classList.remove('opacity-0', 'invisible');
-                            editSheetBackdrop.classList.add('opacity-100', 'visible');
-                            // Slide up sheet
-                            editSheet.classList.remove('translate-y-full');
-                            editSheet.classList.add('translate-y-0');
-                            setTimeout(() => editSheetInput.focus(), 300);
+                            // Mobile: Use contenteditable directly on the element
+                            // This is less disruptive than a bottom sheet with keyboard
+                            if (layer.contentEditable === 'true') {
+                                // Already in edit mode, let user continue editing
+                                return;
+                            }
+                            
+                            // Make the element editable
+                            layer.contentEditable = 'true';
+                            layer.classList.add('editing');
+                            
+                            // Store original value for cancel
+                            layer.dataset.originalValue = layer.textContent;
+                            
+                            // Select all text for easy replacement
+                            const range = document.createRange();
+                            range.selectNodeContents(layer);
+                            const sel = window.getSelection();
+                            sel.removeAllRanges();
+                            sel.addRange(range);
+                            
+                            // Handle blur to save
+                            const handleBlur = () => {
+                                const newValue = layer.textContent.trim();
+                                layer.contentEditable = 'false';
+                                layer.classList.remove('editing');
+                                
+                                if (newValue && newValue !== layer.dataset.originalValue) {
+                                    updateFieldValue(fieldKey, newValue);
+                                } else if (!newValue) {
+                                    // Restore original if empty
+                                    layer.textContent = layer.dataset.originalValue;
+                                }
+                                
+                                layer.removeEventListener('blur', handleBlur);
+                                layer.removeEventListener('keydown', handleKeydown);
+                            };
+                            
+                            // Handle Enter to save, Escape to cancel
+                            const handleKeydown = (e) => {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    layer.blur();
+                                } else if (e.key === 'Escape') {
+                                    layer.textContent = layer.dataset.originalValue;
+                                    layer.blur();
+                                }
+                            };
+                            
+                            layer.addEventListener('blur', handleBlur);
+                            layer.addEventListener('keydown', handleKeydown);
+                            
+                            // Focus the element (this will show keyboard)
+                            layer.focus();
                         } else {
-                            // Show inline input popup near the element
+                            // Desktop: Show inline input popup near the element
                             const rect = layer.getBoundingClientRect();
                             const canvasRect = canvas.getBoundingClientRect();
 
