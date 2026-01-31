@@ -6,6 +6,10 @@
  * Sensitive credentials should be stored in .env file (never commit to git!)
  */
 
+// Load Composer autoloader for all classes in src/ and vendor dependencies
+require_once __DIR__ . '/../vendor/autoload.php';
+
+
 // Load environment variables from .env file
 $envFile = __DIR__ . '/../.env';
 if (file_exists($envFile)) {
