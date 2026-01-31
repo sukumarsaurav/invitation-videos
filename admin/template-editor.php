@@ -94,9 +94,11 @@ $animationPresets = [
     <style>
         .editor-container {
             display: grid;
-            grid-template-columns: 280px 1fr 350px;
+            grid-template-columns: var(--sidebar-width, 280px) 1fr var(--properties-width, 350px);
             gap: 0;
             height: calc(100vh - 64px);
+            --sidebar-width: 280px;
+            --properties-width: 350px;
         }
 
         .editor-sidebar {
@@ -551,6 +553,118 @@ $animationPresets = [
             border-top: 8px solid #ef4444;
         }
 
+        /* Layer-level timeline tracks */
+        .timeline-layer-row {
+            height: 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-left: 8px;
+            border-left: 2px solid #334155;
+            margin-left: 4px;
+        }
+
+        .timeline-layer-label {
+            width: 70px;
+            min-width: 70px;
+            font-size: 10px;
+            color: #94a3b8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .timeline-layer-track {
+            flex: 1;
+            height: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .timeline-layer-segment {
+            position: absolute;
+            height: 100%;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: filter 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .timeline-layer-segment:hover {
+            filter: brightness(1.2);
+        }
+
+        .timeline-layer-segment.active {
+            outline: 2px solid #22c55e;
+            outline-offset: 1px;
+        }
+
+        .timeline-layer-segment.text {
+            background: linear-gradient(90deg, #3b82f6, #60a5fa);
+        }
+
+        .timeline-layer-segment.image {
+            background: linear-gradient(90deg, #22c55e, #4ade80);
+        }
+
+        /* Drag handles for resizing */
+        .timeline-resize-handle {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 8px;
+            cursor: ew-resize;
+            background: rgba(255, 255, 255, 0.4);
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 5;
+        }
+
+        .timeline-layer-segment:hover .timeline-resize-handle {
+            opacity: 1;
+        }
+
+        .timeline-resize-handle.left {
+            left: 0;
+            border-radius: 4px 0 0 4px;
+        }
+
+        .timeline-resize-handle.right {
+            right: 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .timeline-resize-handle:hover {
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Keyframe markers */
+        .timeline-keyframe {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #f59e0b;
+            transform: rotate(45deg);
+            top: 50%;
+            margin-top: -3px;
+            cursor: pointer;
+            z-index: 6;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .timeline-keyframe.enter {
+            background: #22c55e;
+        }
+
+        .timeline-keyframe.exit {
+            background: #ef4444;
+        }
+
         .preview-layer {
             position: absolute;
             display: flex;
@@ -716,6 +830,161 @@ $animationPresets = [
         .btn-outline-danger:hover {
             background: #fef2f2;
         }
+
+        /* ========== RESPONSIVE DESIGN ========== */
+
+        /* Tablet breakpoint */
+        @media (max-width: 1200px) {
+            .editor-container {
+                --sidebar-width: 240px;
+                --properties-width: 300px;
+            }
+
+            .preview-frame {
+                width: 240px;
+                height: 426px;
+            }
+        }
+
+        /* Mobile breakpoint - collapsible sidebars */
+        @media (max-width: 900px) {
+            .editor-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: 1fr;
+            }
+
+            .editor-sidebar,
+            .editor-properties {
+                position: fixed;
+                top: 64px;
+                bottom: 0;
+                z-index: 200;
+                box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            .editor-sidebar {
+                left: 0;
+                width: 280px;
+                transform: translateX(-100%);
+            }
+
+            .editor-sidebar.open {
+                transform: translateX(0);
+            }
+
+            .editor-properties {
+                right: 0;
+                width: 320px;
+                transform: translateX(100%);
+                border-left: none;
+            }
+
+            .editor-properties.open {
+                transform: translateX(0);
+            }
+
+            .mobile-toggle {
+                display: flex !important;
+            }
+
+            .sidebar-overlay {
+                display: block;
+            }
+
+            .sidebar-overlay.active {
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+            .preview-frame {
+                width: 200px;
+                height: 356px;
+            }
+
+            .timeline-container {
+                height: 100px;
+            }
+        }
+
+        /* Extra small screens */
+        @media (max-width: 480px) {
+            .editor-header h1 {
+                font-size: 14px;
+            }
+
+            .header-actions .btn span {
+                display: none;
+            }
+
+            .preview-frame {
+                width: 160px;
+                height: 284px;
+            }
+        }
+
+        /* Mobile toggle buttons */
+        .mobile-toggle {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            color: #64748b;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .mobile-toggle:hover {
+            background: #f1f5f9;
+            color: #970747;
+        }
+
+        .mobile-toggle.active {
+            background: #970747;
+            border-color: #970747;
+            color: white;
+        }
+
+        /* Overlay for mobile sidebars */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            top: 64px;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 150;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        /* Close button for mobile panels */
+        .mobile-close-btn {
+            display: none;
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: #f1f5f9;
+            color: #64748b;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        @media (max-width: 900px) {
+            .mobile-close-btn {
+                display: flex;
+            }
+        }
     </style>
 </head>
 
@@ -727,14 +996,25 @@ $animationPresets = [
             <?= htmlspecialchars($template['title'] ?? 'New Template') ?>
         </h1>
         <div class="header-actions">
+            <button type="button" class="mobile-toggle" id="toggleSlides" onclick="toggleMobileSidebar('slides')"
+                title="Toggle Slides Panel">
+                <i class="fas fa-layer-group"></i>
+            </button>
             <button type="button" class="btn btn-secondary" onclick="toggleJsonMode()">
-                <i class="fas fa-code"></i> JSON Mode
+                <i class="fas fa-code"></i> <span>JSON Mode</span>
             </button>
             <button type="button" class="btn btn-primary" onclick="saveTemplate()">
-                <i class="fas fa-save"></i> Save Template
+                <i class="fas fa-save"></i> <span>Save</span>
+            </button>
+            <button type="button" class="mobile-toggle" id="toggleProperties"
+                onclick="toggleMobileSidebar('properties')" title="Toggle Properties Panel">
+                <i class="fas fa-sliders-h"></i>
             </button>
         </div>
     </div>
+
+    <!-- Overlay for mobile sidebars -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeMobileSidebars()"></div>
 
     <?php if ($error): ?>
         <div class="alert alert-error">
@@ -748,9 +1028,12 @@ $animationPresets = [
         </div>
     <?php endif; ?>
 
-    <div class="editor-container">
+    <div class="editor-container" id="editorContainer">
         <!-- Left Sidebar: Slides -->
-        <div class="editor-sidebar">
+        <div class="editor-sidebar" id="slidesSidebar">
+            <button class="mobile-close-btn" onclick="closeMobileSidebars()">
+                <i class="fas fa-times"></i>
+            </button>
             <div class="section-title">Slides</div>
             <ul class="slide-list" id="slideList">
                 <!-- Populated by JavaScript -->
@@ -811,6 +1094,9 @@ $animationPresets = [
 
         <!-- Right Sidebar: Properties -->
         <div class="editor-properties" id="propertiesPanel">
+            <button class="mobile-close-btn" onclick="closeMobileSidebars()">
+                <i class="fas fa-times"></i>
+            </button>
             <div class="section-title">Properties</div>
             <p style="color: #64748b; font-size: 13px;">
                 Select a slide or layer to edit its properties.
@@ -875,6 +1161,194 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
         let fieldPresets = [];
         let previewMode = 'css';
         const REMOTION_STUDIO_URL = 'http://localhost:3000';
+
+        // ========== MOBILE SIDEBAR TOGGLE ==========
+        function toggleMobileSidebar(panel) {
+            const slidesSidebar = document.getElementById('slidesSidebar');
+            const propertiesPanel = document.getElementById('propertiesPanel');
+            const overlay = document.getElementById('sidebarOverlay');
+            const toggleSlides = document.getElementById('toggleSlides');
+            const toggleProperties = document.getElementById('toggleProperties');
+
+            if (panel === 'slides') {
+                const isOpen = slidesSidebar.classList.toggle('open');
+                propertiesPanel.classList.remove('open');
+                toggleSlides.classList.toggle('active', isOpen);
+                toggleProperties.classList.remove('active');
+                overlay.classList.toggle('active', isOpen);
+            } else if (panel === 'properties') {
+                const isOpen = propertiesPanel.classList.toggle('open');
+                slidesSidebar.classList.remove('open');
+                toggleProperties.classList.toggle('active', isOpen);
+                toggleSlides.classList.remove('active');
+                overlay.classList.toggle('active', isOpen);
+            }
+        }
+
+        function closeMobileSidebars() {
+            const slidesSidebar = document.getElementById('slidesSidebar');
+            const propertiesPanel = document.getElementById('propertiesPanel');
+            const overlay = document.getElementById('sidebarOverlay');
+            const toggleSlides = document.getElementById('toggleSlides');
+            const toggleProperties = document.getElementById('toggleProperties');
+
+            slidesSidebar?.classList.remove('open');
+            propertiesPanel?.classList.remove('open');
+            overlay?.classList.remove('active');
+            toggleSlides?.classList.remove('active');
+            toggleProperties?.classList.remove('active');
+        }
+
+        // Close sidebars on window resize to desktop
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 900) {
+                closeMobileSidebars();
+            }
+        });
+
+        // ========== UNDO/REDO SYSTEM ==========
+        const historyStack = [];
+        const redoStack = [];
+        const MAX_HISTORY = 50;
+
+        function saveState(action = 'edit') {
+            const state = JSON.stringify(templateDef);
+            historyStack.push({ action, state, slideIndex: selectedSlideIndex, layerIndex: selectedLayerIndex });
+            if (historyStack.length > MAX_HISTORY) {
+                historyStack.shift();
+            }
+            redoStack.length = 0; // Clear redo on new action
+            console.log(`State saved: ${action} (${historyStack.length} in history)`);
+        }
+
+        function undo() {
+            if (historyStack.length === 0) {
+                console.log('Nothing to undo');
+                return;
+            }
+            const current = JSON.stringify(templateDef);
+            redoStack.push({ action: 'undo', state: current, slideIndex: selectedSlideIndex, layerIndex: selectedLayerIndex });
+
+            const prev = historyStack.pop();
+            templateDef = JSON.parse(prev.state);
+            selectedSlideIndex = prev.slideIndex;
+            selectedLayerIndex = prev.layerIndex;
+
+            refreshAll();
+            console.log('Undo performed');
+        }
+
+        function redo() {
+            if (redoStack.length === 0) {
+                console.log('Nothing to redo');
+                return;
+            }
+            const current = JSON.stringify(templateDef);
+            historyStack.push({ action: 'redo', state: current, slideIndex: selectedSlideIndex, layerIndex: selectedLayerIndex });
+
+            const next = redoStack.pop();
+            templateDef = JSON.parse(next.state);
+            selectedSlideIndex = next.slideIndex;
+            selectedLayerIndex = next.layerIndex;
+
+            refreshAll();
+            console.log('Redo performed');
+        }
+
+        function refreshAll() {
+            renderSlideList();
+            renderTimeline();
+            renderPreview();
+            if (selectedLayerIndex !== null && selectedSlideIndex !== null) {
+                renderLayerProperties();
+            } else if (selectedSlideIndex !== null) {
+                renderSlideProperties();
+            } else {
+                document.getElementById('propertiesPanel').innerHTML = `
+                    <div class="section-title">Properties</div>
+                    <p style="color: #64748b; font-size: 13px;">Select a slide or layer to edit its properties.</p>
+                `;
+            }
+        }
+
+        // ========== KEYBOARD SHORTCUTS ==========
+        document.addEventListener('keydown', (e) => {
+            // Ignore if typing in input
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+
+            // Undo: Cmd/Ctrl + Z
+            if ((e.metaKey || e.ctrlKey) && e.key === 'z' && !e.shiftKey) {
+                e.preventDefault();
+                undo();
+                return;
+            }
+            // Redo: Cmd/Ctrl + Shift + Z or Cmd/Ctrl + Y
+            if ((e.metaKey || e.ctrlKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+                e.preventDefault();
+                redo();
+                return;
+            }
+            // Save: Cmd/Ctrl + S
+            if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+                e.preventDefault();
+                saveTemplate();
+                return;
+            }
+            // Delete: Backspace or Delete
+            if (e.key === 'Backspace' || e.key === 'Delete') {
+                if (selectedLayerIndex !== null) {
+                    e.preventDefault();
+                    deleteLayer();
+                }
+                return;
+            }
+            // Play/Pause: Space
+            if (e.key === ' ') {
+                e.preventDefault();
+                togglePlayback();
+                return;
+            }
+            // Arrow keys: Move layer position
+            if (selectedLayerIndex !== null && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                e.preventDefault();
+                saveState('nudge layer');
+                const delta = e.shiftKey ? 10 : 1;
+                const layer = templateDef.slides[selectedSlideIndex].layers[selectedLayerIndex];
+                if (!layer.position) layer.position = { x: 540, y: 500, anchor: 'center' };
+
+                switch (e.key) {
+                    case 'ArrowUp': layer.position.y -= delta; break;
+                    case 'ArrowDown': layer.position.y += delta; break;
+                    case 'ArrowLeft': layer.position.x -= delta; break;
+                    case 'ArrowRight': layer.position.x += delta; break;
+                }
+                renderPreview();
+                renderLayerProperties();
+            }
+            // Escape: Deselect
+            if (e.key === 'Escape') {
+                if (selectedLayerIndex !== null) {
+                    selectedLayerIndex = null;
+                    renderSlideList();
+                    renderPreview();
+                    if (selectedSlideIndex !== null) {
+                        renderSlideProperties();
+                    }
+                }
+            }
+        });
+
+        // ========== HELPER: FORMAT FIELD KEY FOR PREVIEW ==========
+        function formatFieldKeyForPreview(fieldKey) {
+            if (!fieldKey) return '{{Text}}';
+            // Convert camelCase/snake_case to Title Case
+            const formatted = fieldKey
+                .replace(/([A-Z])/g, ' $1') // camelCase to spaces
+                .replace(/_/g, ' ') // snake_case to spaces
+                .replace(/\b\w/g, l => l.toUpperCase()) // Capitalize first letter of each word
+                .trim();
+            return '{{' + formatted + '}}';
+        }
 
         // ========== GOOGLE FONTS LOADER ==========
         const loadedFonts = new Set();
@@ -942,6 +1416,9 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
                 }
                 updatePlayheadPosition();
                 updateCurrentFrameDisplay();
+
+                // Frame-accurate animation update
+                updatePreviewAtFrame(currentFrame);
 
                 // Auto-select slide based on current frame
                 const slideIndex = getSlideAtFrame(currentFrame);
@@ -1184,6 +1661,7 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
         // ========== CORE FUNCTIONS (defined first for onclick handlers) ==========
 
         function addSlide() {
+            saveState('add slide');
             const lastSlide = templateDef.slides[templateDef.slides.length - 1];
             const startFrame = lastSlide ? lastSlide.startFrame + lastSlide.durationFrames : 0;
 
@@ -1418,6 +1896,8 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
         function renderTimeline() {
             const totalFrames = templateDef.slides.reduce((sum, s) => Math.max(sum, s.startFrame + s.durationFrames), 0) || 90;
             const fps = templateDef.fps || 30;
+            const zoomLevel = parseInt(document.getElementById('timelineZoom')?.value || 100) / 100;
+            const trackWidth = totalFrames * zoomLevel;
 
             // Update duration display
             const durationDisplay = document.getElementById('totalDurationDisplay');
@@ -1428,57 +1908,161 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
             // Render ruler with time marks
             const ruler = document.getElementById('timelineRuler');
             if (ruler) {
-                const zoomLevel = parseInt(document.getElementById('timelineZoom')?.value || 100) / 100;
-                const rulerWidth = totalFrames * zoomLevel;
-                ruler.style.width = rulerWidth + 'px';
-
+                ruler.style.width = trackWidth + 'px';
                 let rulerHtml = '';
-                // Add marks every second
                 for (let sec = 0; sec <= totalFrames / fps; sec++) {
-                    const leftPos = (sec * fps / totalFrames) * rulerWidth;
+                    const leftPos = sec * fps * zoomLevel;
                     rulerHtml += `<span class="timeline-ruler-mark" style="left: ${leftPos}px;">${sec}s</span>`;
                 }
                 ruler.innerHTML = rulerHtml;
             }
 
-            // Render slide tracks with layer bars
+            // Render slide tracks with individual layer rows
             const slideArea = document.getElementById('timelineSlideArea');
             if (slideArea) {
-                const zoomLevel = parseInt(document.getElementById('timelineZoom')?.value || 100) / 100;
-                slideArea.style.width = (totalFrames * zoomLevel) + 'px';
+                slideArea.style.width = trackWidth + 'px';
 
-                slideArea.innerHTML = `
-                    <div class="timeline-slide-row">
-                        ${templateDef.slides.map((slide, index) => {
-                    const widthPx = slide.durationFrames * zoomLevel;
-                    const isActive = selectedSlideIndex === index;
+                let html = '';
+                templateDef.slides.forEach((slide, slideIdx) => {
+                    const slideLeft = slide.startFrame * zoomLevel;
+                    const slideWidth = slide.durationFrames * zoomLevel;
+                    const isSlideActive = selectedSlideIndex === slideIdx;
 
-                    // Generate layer timing bars
-                    const layerBars = slide.layers.map(layer => {
-                        const timing = layer.timing || { startFrame: 0, endFrame: slide.durationFrames };
-                        const startPercent = (timing.startFrame / slide.durationFrames) * 100;
-                        const widthPercent = ((timing.endFrame - timing.startFrame) / slide.durationFrames) * 100;
-                        return `<div class="timeline-layer-bar ${layer.type}" 
-                                             style="margin-left: ${startPercent}%; width: ${widthPercent}%;"
-                                             title="${layer.fieldKey || layer.id}"></div>`;
-                    }).join('');
+                    // Slide header row
+                    html += `
+                        <div class="timeline-slide-row" style="position: relative;">
+                            <div class="timeline-segment ${isSlideActive ? 'active' : ''}" 
+                                 style="margin-left: ${slideLeft}px; width: ${slideWidth}px; min-width: 40px;"
+                                 onclick="selectSlide(${slideIdx})"
+                                 title="${slide.name}: ${(slide.durationFrames / fps).toFixed(1)}s">
+                                <span class="slide-label">${slide.name || 'Slide ' + (slideIdx + 1)}</span>
+                            </div>
+                        </div>
+                    `;
 
-                    return `
-                                <div class="timeline-segment ${isActive ? 'active' : ''}" 
-                                     style="width: ${widthPx}px; min-width: 40px;"
-                                     onclick="selectSlide(${index})"
-                                     title="${slide.name}: ${(slide.durationFrames / fps).toFixed(1)}s">
-                                    <span class="slide-label">${slide.name || 'S' + (index + 1)}</span>
-                                    <div class="timeline-layer-bars">${layerBars}</div>
+                    // Layer rows (show for all slides, but highlight active)
+                    if (slide.layers && slide.layers.length > 0) {
+                        slide.layers.forEach((layer, layerIdx) => {
+                            const timing = layer.timing || { startFrame: 0, endFrame: slide.durationFrames };
+                            const layerLeft = (slide.startFrame + timing.startFrame) * zoomLevel;
+                            const layerWidth = (timing.endFrame - timing.startFrame) * zoomLevel;
+                            const isLayerActive = isSlideActive && selectedLayerIndex === layerIdx;
+
+                            // Animation keyframe positions
+                            const enterAnim = layer.animation?.enter;
+                            const exitAnim = layer.animation?.exit;
+                            let keyframesHtml = '';
+
+                            if (enterAnim && enterAnim.type !== 'none') {
+                                const enterEnd = (enterAnim.delay || 0) + (enterAnim.durationFrames || 30);
+                                const keyframeLeft = enterEnd * zoomLevel / (timing.endFrame - timing.startFrame) * layerWidth;
+                                keyframesHtml += `<div class="timeline-keyframe enter" style="left: ${Math.min(keyframeLeft, layerWidth - 6)}px;" title="Enter animation end"></div>`;
+                            }
+
+                            if (exitAnim && exitAnim.type && exitAnim.type !== 'none') {
+                                const exitStart = (timing.endFrame - timing.startFrame) - (exitAnim.durationFrames || 30) - (exitAnim.delay || 0);
+                                const keyframeLeft = exitStart * zoomLevel / (timing.endFrame - timing.startFrame) * layerWidth;
+                                keyframesHtml += `<div class="timeline-keyframe exit" style="left: ${Math.max(0, keyframeLeft)}px;" title="Exit animation start"></div>`;
+                            }
+
+                            html += `
+                                <div class="timeline-layer-row">
+                                    <span class="timeline-layer-label" title="${layer.fieldKey || layer.id}">
+                                        <i class="fas fa-${layer.type === 'text' ? 'font' : 'image'}" style="margin-right: 4px; font-size: 8px;"></i>
+                                        ${layer.fieldKey || layer.type}
+                                    </span>
+                                    <div class="timeline-layer-track" style="position: relative;">
+                                        <div class="timeline-layer-segment ${layer.type} ${isLayerActive ? 'active' : ''}"
+                                             style="left: ${layerLeft}px; width: ${Math.max(8, layerWidth)}px;"
+                                             data-slide="${slideIdx}" data-layer="${layerIdx}"
+                                             onclick="event.stopPropagation(); selectLayer(${slideIdx}, ${layerIdx})"
+                                             title="${layer.fieldKey}: ${(timing.startFrame / fps).toFixed(1)}s - ${(timing.endFrame / fps).toFixed(1)}s">
+                                            <div class="timeline-resize-handle left" data-handle="start"></div>
+                                            ${keyframesHtml}
+                                            <div class="timeline-resize-handle right" data-handle="end"></div>
+                                        </div>
+                                    </div>
                                 </div>
                             `;
-                }).join('')}
-                    </div>
-                `;
+                        });
+                    }
+                });
+
+                slideArea.innerHTML = html;
+                attachTimelineResizeHandlers();
             }
 
             // Attach playhead drag handler
             attachPlayheadDragHandler();
+        }
+
+        // ========== TIMELINE RESIZE HANDLERS ==========
+        let isResizingTimeline = false;
+        let resizeData = null;
+
+        function attachTimelineResizeHandlers() {
+            const handles = document.querySelectorAll('.timeline-resize-handle');
+            handles.forEach(handle => {
+                handle.addEventListener('mousedown', startTimelineResize);
+            });
+        }
+
+        function startTimelineResize(e) {
+            e.stopPropagation();
+            e.preventDefault();
+
+            const segment = e.target.closest('.timeline-layer-segment');
+            if (!segment) return;
+
+            const slideIdx = parseInt(segment.dataset.slide);
+            const layerIdx = parseInt(segment.dataset.layer);
+            const isStart = e.target.dataset.handle === 'start';
+            const zoomLevel = parseInt(document.getElementById('timelineZoom')?.value || 100) / 100;
+
+            isResizingTimeline = true;
+            resizeData = { slideIdx, layerIdx, isStart, startX: e.clientX, zoomLevel };
+
+            document.addEventListener('mousemove', handleTimelineResize);
+            document.addEventListener('mouseup', endTimelineResize);
+        }
+
+        function handleTimelineResize(e) {
+            if (!isResizingTimeline || !resizeData) return;
+
+            const deltaX = e.clientX - resizeData.startX;
+            const deltaFrames = Math.round(deltaX / resizeData.zoomLevel);
+
+            if (deltaFrames === 0) return;
+
+            const layer = templateDef.slides[resizeData.slideIdx].layers[resizeData.layerIdx];
+            const slide = templateDef.slides[resizeData.slideIdx];
+
+            if (!layer.timing) {
+                layer.timing = { startFrame: 0, endFrame: slide.durationFrames };
+            }
+
+            if (resizeData.isStart) {
+                const newStart = Math.max(0, Math.min(layer.timing.startFrame + deltaFrames, layer.timing.endFrame - 5));
+                layer.timing.startFrame = newStart;
+            } else {
+                const newEnd = Math.min(slide.durationFrames, Math.max(layer.timing.endFrame + deltaFrames, layer.timing.startFrame + 5));
+                layer.timing.endFrame = newEnd;
+            }
+
+            resizeData.startX = e.clientX;
+            renderTimeline();
+        }
+
+        function endTimelineResize() {
+            isResizingTimeline = false;
+            resizeData = null;
+            document.removeEventListener('mousemove', handleTimelineResize);
+            document.removeEventListener('mouseup', endTimelineResize);
+
+            // Update properties panel if a layer is selected
+            if (selectedLayerIndex !== null) {
+                renderLayerProperties();
+            }
         }
 
         function renderPreview() {
@@ -1526,6 +2110,9 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
                     // Load font if not already loaded
                     loadGoogleFont(fontFamily);
 
+                    // Format display text: use defaultValue if set, otherwise show formatted fieldKey
+                    const displayText = layer.defaultValue || formatFieldKeyForPreview(layer.fieldKey);
+
                     return `
                         <div class="preview-layer text ${selectedClass}" 
                              data-layer-index="${layerIdx}"
@@ -1542,7 +2129,7 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
                                 z-index: 1;
                             ">
                             <span class="layer-label">${layer.fieldKey || 'text'}</span>
-                            ${layer.defaultValue || layer.fieldKey || 'Text'}
+                            ${displayText}
                         </div>
                     `;
                 } else if (layer.type === 'image') {
@@ -1579,6 +2166,103 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
 
             // Attach event listeners for drag-and-drop
             attachPreviewEventListeners();
+        }
+
+        // ========== FRAME-ACCURATE PREVIEW ==========
+        function updatePreviewAtFrame(globalFrame) {
+            if (selectedSlideIndex === null) return;
+
+            const slide = templateDef.slides[selectedSlideIndex];
+            if (!slide) return;
+
+            slide.layers.forEach((layer, idx) => {
+                const layerEl = document.querySelector(`.preview-layer[data-layer-index="${idx}"]`);
+                if (!layerEl) return;
+
+                // Check layer visibility
+                const isVisible = getLayerVisibilityAtFrame(layer, slide, globalFrame);
+
+                if (!isVisible) {
+                    layerEl.style.opacity = '0';
+                    layerEl.style.pointerEvents = 'none';
+                    return;
+                }
+
+                layerEl.style.pointerEvents = '';
+
+                // Get animation state
+                const animState = getLayerAnimationState(layer, slide, globalFrame);
+                const styles = applyAnimationTransform(animState.type, animState.phase, animState.progress);
+
+                layerEl.style.opacity = styles.opacity ?? 1;
+                layerEl.style.transform = `translate(-50%, -50%) ${styles.transform || ''}`;
+            });
+        }
+
+        function getLayerVisibilityAtFrame(layer, slide, globalFrame) {
+            const slideStart = slide.startFrame;
+            const timing = layer.timing || { startFrame: 0, endFrame: slide.durationFrames };
+            const layerStart = slideStart + timing.startFrame;
+            const layerEnd = slideStart + timing.endFrame;
+
+            return globalFrame >= layerStart && globalFrame < layerEnd;
+        }
+
+        function getLayerAnimationState(layer, slide, globalFrame) {
+            const timing = layer.timing || { startFrame: 0, endFrame: slide.durationFrames };
+            const layerStart = slide.startFrame + timing.startFrame;
+            const localFrame = globalFrame - layerStart;
+            const localDuration = timing.endFrame - timing.startFrame;
+
+            // Enter animation
+            const enterAnim = layer.animation?.enter;
+            if (enterAnim && enterAnim.type !== 'none') {
+                const enterStart = enterAnim.delay || 0;
+                const enterEnd = enterStart + (enterAnim.durationFrames || 30);
+
+                if (localFrame >= enterStart && localFrame < enterEnd) {
+                    const progress = (localFrame - enterStart) / (enterEnd - enterStart);
+                    return { phase: 'enter', progress, type: enterAnim.type };
+                }
+            }
+
+            // Exit animation
+            const exitAnim = layer.animation?.exit;
+            if (exitAnim && exitAnim.type && exitAnim.type !== 'none') {
+                const exitDuration = exitAnim.durationFrames || 30;
+                const exitStart = localDuration - exitDuration - (exitAnim.delay || 0);
+
+                if (localFrame >= exitStart) {
+                    const progress = (localFrame - exitStart) / exitDuration;
+                    return { phase: 'exit', progress: Math.min(1, progress), type: exitAnim.type };
+                }
+            }
+
+            return { phase: 'idle', progress: 1, type: 'none' };
+        }
+
+        function applyAnimationTransform(type, phase, progress) {
+            const eased = easeOutQuad(phase === 'exit' ? 1 - progress : progress);
+
+            const transforms = {
+                'none': { opacity: 1, transform: '' },
+                'fade-in': { opacity: eased, transform: '' },
+                'fade-out': { opacity: 1 - eased, transform: '' },
+                'slide-up': { opacity: eased, transform: `translateY(${(1 - eased) * 30}px)` },
+                'slide-down': { opacity: eased, transform: `translateY(${(eased - 1) * 30}px)` },
+                'slide-left': { opacity: eased, transform: `translateX(${(1 - eased) * 30}px)` },
+                'slide-right': { opacity: eased, transform: `translateX(${(eased - 1) * 30}px)` },
+                'zoom-in': { opacity: eased, transform: `scale(${0.5 + eased * 0.5})` },
+                'zoom-out': { opacity: eased, transform: `scale(${1.5 - eased * 0.5})` },
+                'bounce': { opacity: eased, transform: `translateY(${-20 * (1 - eased)}px)` },
+                'rotate': { opacity: eased, transform: `rotate(${-180 * (1 - eased)}deg)` }
+            };
+
+            return transforms[type] || transforms['fade-in'];
+        }
+
+        function easeOutQuad(t) {
+            return 1 - (1 - t) * (1 - t);
         }
 
         // ========== DRAG-AND-DROP HANDLERS ==========
@@ -2013,6 +2697,7 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
 
 
         function addLayer(type) {
+            saveState('add layer');
             const slide = templateDef.slides[selectedSlideIndex];
             const newLayer = {
                 id: type + '_' + Date.now(),
@@ -2024,7 +2709,7 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
             };
 
             if (type === 'text') {
-                newLayer.defaultValue = 'Sample Text';
+                newLayer.defaultValue = ''; // Empty - preview will show fieldKey
                 newLayer.style = { fontSize: 48, color: '#FFFFFF', fontWeight: 'bold' };
             } else {
                 newLayer.size = { width: 400, height: 400 };
@@ -2110,6 +2795,7 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
 
         function deleteSlide() {
             if (!confirm('Delete this slide?')) return;
+            saveState('delete slide');
             templateDef.slides.splice(selectedSlideIndex, 1);
             selectedSlideIndex = null;
             selectedLayerIndex = null;
@@ -2124,6 +2810,7 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
 
         function deleteLayer() {
             if (!confirm('Delete this layer?')) return;
+            saveState('delete layer');
             templateDef.slides[selectedSlideIndex].layers.splice(selectedLayerIndex, 1);
             selectedLayerIndex = null;
             renderSlideList();
