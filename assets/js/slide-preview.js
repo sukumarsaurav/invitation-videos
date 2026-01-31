@@ -17,8 +17,18 @@ class SlidePreview {
             templateWidth: options.templateWidth || 1080,
             templateHeight: options.templateHeight || 1920,
             backgroundFallback: options.backgroundFallback || '#1a1a2e',
+            editable: options.editable || false,
+            editableFields: options.editableFields || [],
             ...options
         };
+
+        // Create field lookup map for editable fields
+        this.editableFieldMap = {};
+        if (this.options.editableFields) {
+            this.options.editableFields.forEach(f => {
+                this.editableFieldMap[f.fieldKey] = f;
+            });
+        }
 
         // Calculate scale based on canvas size
         this.updateScale();
@@ -143,11 +153,35 @@ class SlidePreview {
 
     renderTextLayer(layer) {
         const value = this.resolveLayerValue(layer);
-        if (!value) return;
+        const isEmpty = !value || value.startsWith('{{');
+        const displayValue = isEmpty ? (layer.defaultValue || 'Tap to edit') : value;
 
         const div = document.createElement('div');
         div.className = 'slide-preview-text';
-        div.textContent = value;
+
+        // Check if this layer is editable
+        const isEditable = this.options.editable && layer.fieldKey && this.editableFieldMap[layer.fieldKey];
+        if (isEditable) {
+            div.classList.add('editable');
+            div.setAttribute('data-field-key', layer.fieldKey);
+            div.setAttribute('tabindex', '0');
+            div.setAttribute('role', 'button');
+            div.setAttribute('aria-label', 'Edit ' + (this.editableFieldMap[layer.fieldKey]?.label || layer.fieldKey));
+
+            // Add edit icon
+            const editIcon = document.createElement('span');
+            editIcon.className = 'editable-icon';
+            editIcon.innerHTML = '<svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>';
+            div.appendChild(editIcon);
+        }
+
+        if (isEmpty) {
+            div.classList.add('slide-layer-empty');
+        }
+
+        // Create text node for the actual content
+        const textNode = document.createTextNode(displayValue);
+        div.insertBefore(textNode, div.firstChild);
 
         const pos = layer.position || { x: 540, y: 960 };
         const style = layer.style || {};
@@ -206,7 +240,7 @@ class SlidePreview {
 
     renderImageLayer(layer) {
         const src = this.resolveLayerValue(layer);
-        if (!src || src.startsWith('{{')) return;
+        const isEmpty = !src || src.startsWith('{{');
 
         const pos = layer.position || { x: 540, y: 960 };
         const size = layer.size || { width: 200, height: 200 };
@@ -215,6 +249,20 @@ class SlidePreview {
 
         const container = document.createElement('div');
         container.className = 'slide-preview-image';
+
+        // Check if this layer is editable
+        const isEditable = this.options.editable && layer.fieldKey && this.editableFieldMap[layer.fieldKey];
+        if (isEditable) {
+            container.classList.add('editable');
+            container.setAttribute('data-field-key', layer.fieldKey);
+            container.setAttribute('tabindex', '0');
+            container.setAttribute('role', 'button');
+            container.setAttribute('aria-label', 'Upload ' + (this.editableFieldMap[layer.fieldKey]?.label || 'image'));
+        }
+
+        if (isEmpty) {
+            container.classList.add('empty');
+        }
 
         // Calculate scaled values
         const x = pos.x * this.scale;
@@ -251,23 +299,45 @@ class SlidePreview {
 
         container.style.cssText = cssText;
 
-        // Create image element
-        const img = document.createElement('img');
-        img.src = src;
-        img.style.cssText = `
-            width: 100%;
-            height: 100%;
-            object-fit: ${style.objectFit || 'cover'};
-        `;
-        img.onerror = () => {
-            container.style.backgroundColor = '#3d3d5c';
-            container.innerHTML = '<span style="color: #888; font-size: 12px;">Image</span>';
-            container.style.display = 'flex';
-            container.style.alignItems = 'center';
-            container.style.justifyContent = 'center';
-        };
+        if (isEmpty) {
+            // Show upload placeholder
+            const iconContainer = document.createElement('div');
+            iconContainer.className = 'image-upload-icon';
+            iconContainer.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>';
+            container.appendChild(iconContainer);
 
-        container.appendChild(img);
+            const hint = document.createElement('span');
+            hint.className = 'image-upload-hint';
+            hint.textContent = 'Tap to add photo';
+            container.appendChild(hint);
+        } else {
+            // Create image element
+            const img = document.createElement('img');
+            img.src = src;
+            img.style.cssText = `
+                width: 100%;
+                height: 100%;
+                object-fit: ${style.objectFit || 'cover'};
+            `;
+            img.onerror = () => {
+                container.style.backgroundColor = '#3d3d5c';
+                container.innerHTML = '<span style="color: #888; font-size: 12px;">Image</span>';
+                container.style.display = 'flex';
+                container.style.alignItems = 'center';
+                container.style.justifyContent = 'center';
+            };
+
+            container.appendChild(img);
+
+            // Add edit icon for images with content
+            if (isEditable) {
+                const editIcon = document.createElement('span');
+                editIcon.className = 'editable-icon';
+                editIcon.innerHTML = '<svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>';
+                container.appendChild(editIcon);
+            }
+        }
+
         this.canvas.appendChild(container);
     }
 

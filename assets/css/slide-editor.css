@@ -1,20 +1,43 @@
 /**
- * Slide Editor Styles
- * Styles for the slide-based visual editor in customize page
+ * Slide Editor Styles - Inline Editing Mode
+ * Direct canvas editing with bottom sheet (mobile) and inline input (desktop)
  */
 
-/* Slide Editor Container */
+/* ============================================
+   CSS Variables - Use brand colors
+   ============================================ */
+:root {
+    --slide-primary: var(--color-primary, #970747);
+    --slide-primary-rgb: 151, 7, 71;
+    --slide-primary-light: rgba(151, 7, 71, 0.1);
+    --slide-primary-glow: rgba(151, 7, 71, 0.3);
+}
+
+/* ============================================
+   Slide Editor Container
+   ============================================ */
 .slide-editor {
     max-width: 48rem;
     margin: 0 auto;
 }
 
-/* Preview Canvas */
+/* Mobile: Full screen canvas */
+@media (max-width: 767px) {
+    .slide-editor {
+        max-width: 100%;
+        padding: 0;
+    }
+}
+
+/* ============================================
+   Preview Canvas
+   ============================================ */
 .slide-preview-canvas {
     position: relative;
     width: 100%;
     aspect-ratio: 9 / 16;
-    max-height: 55vh;
+    max-height: 70vh;
+    /* Increased from 55vh - more room without form panel */
     margin: 0 auto;
     background: linear-gradient(135deg, #2d2d44 0%, #1a1a2e 100%);
     border-radius: 1rem;
@@ -22,29 +45,388 @@
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
-/* Preview layer base styles */
-.slide-preview-text {
+@media (max-width: 767px) {
+    .slide-preview-canvas {
+        max-height: 65vh;
+        /* Much more room on mobile without form */
+        border-radius: 0;
+    }
+}
+
+/* ============================================
+   Editable Layers - Interactive Elements
+   ============================================ */
+
+/* Make editable layers clickable */
+.slide-preview-text.editable,
+.slide-preview-image.editable {
+    pointer-events: auto;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Hover/focus state for editable text */
+.slide-preview-text.editable:hover,
+.slide-preview-text.editable:focus {
+    outline: 2px dashed rgba(255, 255, 255, 0.5);
+    outline-offset: 4px;
+}
+
+/* Active/editing state */
+.slide-preview-text.editable.editing {
+    outline: 2px solid var(--slide-primary);
+    outline-offset: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    padding: 4px 8px;
+}
+
+/* Edit icon that appears on hover */
+.editable-icon {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    background: var(--slide-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 0.2s, transform 0.2s;
     pointer-events: none;
-    z-index: 10;
+    z-index: 20;
 }
 
-.slide-preview-image {
-    pointer-events: none;
-    z-index: 5;
+.editable-icon svg {
+    width: 14px;
+    height: 14px;
+    fill: white;
 }
 
-.slide-preview-bg {
-    z-index: 0;
+.slide-preview-text.editable:hover .editable-icon,
+.slide-preview-image.editable:hover .editable-icon {
+    opacity: 1;
+    transform: scale(1);
 }
 
-/* Slide Navigation */
+/* Empty image placeholder */
+.slide-preview-image.editable.empty {
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px dashed rgba(255, 255, 255, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.slide-preview-image.editable.empty:hover {
+    border-color: var(--slide-primary);
+    background: rgba(151, 7, 71, 0.1);
+}
+
+.image-upload-hint {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+    text-align: center;
+}
+
+.image-upload-icon {
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ============================================
+   First-time User Hint
+   ============================================ */
+.tap-hint {
+    text-align: center;
+    padding: 12px 16px;
+    color: #64748b;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.tap-hint-icon {
+    font-size: 20px;
+}
+
+/* ============================================
+   Bottom Sheet - Mobile Editing
+   ============================================ */
+.edit-sheet-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.edit-sheet-backdrop.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.edit-sheet {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 24px 24px 0 0;
+    padding: 16px 20px 32px;
+    z-index: 101;
+    transform: translateY(100%);
+    /* Spring physics animation */
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.15);
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.edit-sheet.open {
+    transform: translateY(0);
+}
+
+/* Handle indicator */
+.edit-sheet-handle {
+    width: 40px;
+    height: 4px;
+    background: #e2e8f0;
+    border-radius: 2px;
+    margin: 0 auto 20px;
+}
+
+/* Sheet label */
+.edit-sheet-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 12px;
+}
+
+/* Sheet input */
+.edit-sheet-input {
+    width: 100%;
+    padding: 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 18px;
+    background: #f8fafc;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.edit-sheet-input:focus {
+    outline: none;
+    border-color: var(--slide-primary);
+    box-shadow: 0 0 0 4px var(--slide-primary-light);
+    background: white;
+}
+
+/* Date input styling */
+.edit-sheet-input[type="date"],
+.edit-sheet-input[type="time"] {
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+/* Done button */
+.edit-sheet-done {
+    width: 100%;
+    margin-top: 16px;
+    padding: 16px;
+    background: var(--slide-primary);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.edit-sheet-done:hover {
+    background: #7a0639;
+}
+
+.edit-sheet-done:active {
+    transform: scale(0.98);
+}
+
+/* ============================================
+   Desktop Inline Input
+   ============================================ */
+@media (min-width: 768px) {
+    .inline-input-container {
+        position: absolute;
+        z-index: 50;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        padding: 16px;
+        min-width: 280px;
+        max-width: 400px;
+        /* Spring physics animation */
+        animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes popIn {
+        0% {
+            opacity: 0;
+            transform: scale(0.9) translateY(10px);
+        }
+
+        100% {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    .inline-input-container::before {
+        content: '';
+        position: absolute;
+        top: -8px;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 8px solid transparent;
+        border-bottom-color: white;
+    }
+
+    .inline-input-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .inline-input {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: border-color 0.2s;
+    }
+
+    .inline-input:focus {
+        outline: none;
+        border-color: var(--slide-primary);
+    }
+
+    .inline-input-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+    }
+
+    .inline-input-done {
+        flex: 1;
+        padding: 10px;
+        background: var(--slide-primary);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .inline-input-cancel {
+        padding: 10px 16px;
+        background: #f1f5f9;
+        color: #64748b;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+}
+
+/* ============================================
+   Image Upload Modal (Touch-Friendly)
+   ============================================ */
+.image-upload-sheet {
+    /* Applied together with .edit-sheet class, shares same base styles */
+    padding-top: 24px;
+}
+
+.image-upload-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.image-upload-option {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.image-upload-option:hover {
+    border-color: var(--slide-primary);
+    background: var(--slide-primary-light);
+}
+
+.image-upload-option-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--slide-primary-light);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--slide-primary);
+}
+
+.image-upload-option-text {
+    flex: 1;
+}
+
+.image-upload-option-text strong {
+    display: block;
+    color: #1e293b;
+    margin-bottom: 2px;
+}
+
+.image-upload-option-text span {
+    font-size: 13px;
+    color: #64748b;
+}
+
+/* ============================================
+   Slide Navigation (Simplified)
+   ============================================ */
 .slide-nav {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1rem 0;
-    border-bottom: 1px solid var(--border-color, #e2e8f0);
-    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
 }
 
 .slide-nav-back {
@@ -54,159 +436,51 @@
     color: #64748b;
     font-weight: 500;
     transition: color 0.2s;
+    text-decoration: none;
 }
 
 .slide-nav-back:hover {
-    color: var(--primary-color, #7f13ec);
+    color: var(--slide-primary);
 }
 
 .slide-nav-title {
     font-weight: 700;
     color: #1e293b;
-    font-size: 1rem;
+    font-size: 0.875rem;
 }
 
 .slide-nav-indicator {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 6px;
 }
 
 .slide-dot {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
-    background: #cbd5e1;
-    transition: all 0.2s;
+    background: #e2e8f0;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .slide-dot.active {
-    background: var(--primary-color, #7f13ec);
-    width: 24px;
-    border-radius: 4px;
+    background: var(--slide-primary);
+    width: 28px;
+    border-radius: 5px;
 }
 
 .slide-dot.completed {
     background: #22c55e;
 }
 
-/* Editor Panel */
-.slide-editor-panel {
-    background: white;
-    border-radius: 1rem;
-    padding: 1.5rem;
-    margin-top: 1.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e2e8f0;
-}
-
-.slide-editor-panel h3 {
-    font-size: 0.875rem;
-    font-weight: 700;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 1rem;
-}
-
-/* Editor Field */
-.editor-field {
-    background: #f8fafc;
-    border-radius: 0.75rem;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    border: 1px solid #e2e8f0;
-    transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.editor-field:focus-within {
-    border-color: var(--primary-color, #7f13ec);
-    box-shadow: 0 0 0 3px rgba(127, 19, 236, 0.1);
-}
-
-.editor-field:last-child {
-    margin-bottom: 0;
-}
-
-.editor-field-label {
-    display: block;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: #374151;
-    margin-bottom: 0.5rem;
-}
-
-.editor-field-input {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.5rem;
-    font-size: 1rem;
-    background: white;
-    transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.editor-field-input:focus {
-    outline: none;
-    border-color: var(--primary-color, #7f13ec);
-    box-shadow: 0 0 0 3px rgba(127, 19, 236, 0.1);
-}
-
-.editor-field-input::placeholder {
-    color: #9ca3af;
-}
-
-/* Image Upload Field */
-.editor-field-upload {
-    position: relative;
-    border: 2px dashed #cbd5e1;
-    border-radius: 0.75rem;
-    padding: 2rem;
-    text-align: center;
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
-}
-
-.editor-field-upload:hover {
-    border-color: var(--primary-color, #7f13ec);
-    background: rgba(127, 19, 236, 0.02);
-}
-
-.editor-field-upload.has-image {
-    padding: 0.5rem;
-    border-style: solid;
-}
-
-.editor-field-upload input[type="file"] {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    cursor: pointer;
-}
-
-.editor-field-upload-icon {
-    font-size: 2rem;
-    color: #94a3b8;
-    margin-bottom: 0.5rem;
-}
-
-.editor-field-upload-text {
-    font-size: 0.875rem;
-    color: #64748b;
-}
-
-.editor-field-upload-preview {
-    max-height: 120px;
-    border-radius: 0.5rem;
-    object-fit: cover;
-}
-
-/* Navigation Buttons */
+/* ============================================
+   Navigation Buttons (Bottom)
+   ============================================ */
 .slide-editor-nav {
     display: flex;
     gap: 1rem;
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
+    padding: 1rem;
+    background: white;
     border-top: 1px solid #e2e8f0;
 }
 
@@ -217,10 +491,11 @@
     justify-content: center;
     gap: 0.5rem;
     padding: 1rem 1.5rem;
-    border-radius: 0.75rem;
+    border-radius: 12px;
     font-weight: 700;
     font-size: 1rem;
     transition: all 0.2s;
+    text-decoration: none;
 }
 
 .slide-editor-btn-secondary {
@@ -234,16 +509,15 @@
 }
 
 .slide-editor-btn-primary {
-    background: var(--primary-color, #7f13ec);
+    background: var(--slide-primary);
     color: white;
     border: none;
-    box-shadow: 0 4px 14px rgba(127, 19, 236, 0.3);
+    box-shadow: 0 4px 14px var(--slide-primary-glow);
 }
 
 .slide-editor-btn-primary:hover {
-    background: #6b0fcc;
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(127, 19, 236, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px var(--slide-primary-glow);
 }
 
 /* Fixed Bottom Bar on Mobile */
@@ -255,82 +529,26 @@
     z-index: 40;
     background: white;
     border-top: 1px solid #e2e8f0;
-    padding: 1rem;
+    padding: 12px 16px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
-    display: none;
 }
 
-@media (max-width: 768px) {
+@media (min-width: 768px) {
+    .slide-editor-mobile-nav {
+        display: none;
+    }
+}
+
+@media (max-width: 767px) {
     .slide-editor-nav {
         display: none;
     }
-
-    .slide-editor-mobile-nav {
-        display: block;
-    }
-
-    .slide-preview-canvas {
-        max-height: 40vh;
-    }
 }
 
-/* Slide Thumbnail Strip */
-.slide-thumbnails {
-    display: flex;
-    gap: 0.5rem;
-    padding: 1rem 0;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-}
-
-.slide-thumbnail {
-    flex-shrink: 0;
-    width: 3.5rem;
-    aspect-ratio: 9 / 16;
-    border-radius: 0.5rem;
-    overflow: hidden;
-    border: 2px solid transparent;
-    cursor: pointer;
-    transition: border-color 0.2s, transform 0.2s;
-    background: #2d2d44;
-}
-
-.slide-thumbnail:hover {
-    border-color: rgba(127, 19, 236, 0.5);
-}
-
-.slide-thumbnail.active {
-    border-color: var(--primary-color, #7f13ec);
-    box-shadow: 0 0 0 2px rgba(127, 19, 236, 0.2);
-}
-
-.slide-thumbnail.completed {
-    position: relative;
-}
-
-.slide-thumbnail.completed::after {
-    content: '✓';
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    width: 14px;
-    height: 14px;
-    background: #22c55e;
-    color: white;
-    border-radius: 50%;
-    font-size: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Empty state for layer without value */
-.slide-layer-empty {
-    opacity: 0.4;
-    font-style: italic;
-}
-
-/* Loading state */
+/* ============================================
+   Loading & Empty States
+   ============================================ */
 .slide-preview-loading {
     position: absolute;
     inset: 0;
@@ -354,4 +572,27 @@
     to {
         transform: rotate(360deg);
     }
+}
+
+/* Empty state for layer without value */
+.slide-layer-empty {
+    opacity: 0.5;
+    font-style: italic;
+}
+
+/* ============================================
+   Preview layer base styles (kept for compatibility)
+   ============================================ */
+.slide-preview-text {
+    pointer-events: none;
+    z-index: 10;
+}
+
+.slide-preview-image {
+    pointer-events: none;
+    z-index: 5;
+}
+
+.slide-preview-bg {
+    z-index: 0;
 }

@@ -961,85 +961,65 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                 <?= Security::escape($currentSlideConfig['name'] ?? 'Slide ' . ($currentSlideIndex + 1)) ?>
             </h2>
 
-            <!-- Preview Canvas -->
-            <div class="bg-slate-900 rounded-2xl overflow-hidden shadow-2xl mb-6">
+            <!-- Preview Canvas - Now Interactive! -->
+            <div class="bg-slate-900 rounded-2xl overflow-hidden shadow-2xl mb-4">
                 <div id="slide-preview-canvas" class="slide-preview-canvas" data-slide-preview="true"
                     data-slide-config='<?= Security::escape(json_encode($currentSlideConfig)) ?>'
-                    data-user-values='<?= Security::escape(json_encode($storedValues)) ?>'>
-                    <!-- JavaScript renders preview here -->
+                    data-user-values='<?= Security::escape(json_encode($storedValues)) ?>'
+                    data-editable-fields='<?= Security::escape(json_encode($editableFields)) ?>'>
+                    <!-- JavaScript renders interactive preview here -->
                 </div>
             </div>
 
-            <!-- Editor Form -->
-            <form id="slide-editor-form" method="POST" enctype="multipart/form-data" class="slide-editor-panel">
+            <!-- Tap Hint (first-time user guidance) -->
+            <div class="tap-hint">
+                <span class="tap-hint-icon">👆</span>
+                <span>Tap any element to edit</span>
+            </div>
+
+            <!-- Hidden Form for Data Submission -->
+            <form id="slide-editor-form" method="POST" enctype="multipart/form-data" style="display:none;">
                 <?= Security::csrfField() ?>
                 <input type="hidden" name="slide_index" value="<?= $currentSlideIndex ?>">
                 <input type="hidden" name="user_timezone" id="user_timezone" value="">
 
-                <h3>Edit Content</h3>
-
-                <?php if (empty($editableFields)): ?>
-                    <p class="text-slate-500 italic">This slide has no editable fields.</p>
-                <?php else: ?>
-                    <?php foreach ($editableFields as $field): ?>
-                        <div class="editor-field">
-                            <label class="editor-field-label" for="field-<?= $field['fieldKey'] ?>">
-                                <?= Security::escape($field['label']) ?>
-                            </label>
-
-                            <?php if ($field['type'] === 'text'): ?>
-                                <input type="text" id="field-<?= $field['fieldKey'] ?>" name="<?= $field['fieldKey'] ?>"
-                                    value="<?= Security::escape($storedValues[$field['fieldKey']] ?? $field['defaultValue']) ?>"
-                                    placeholder="<?= Security::escape($field['defaultValue']) ?>" class="editor-field-input"
-                                    data-field-key="<?= $field['fieldKey'] ?>"
-                                    oninput="if(window.slidePreview) slidePreview.updateValue('<?= $field['fieldKey'] ?>', this.value)">
-
-                            <?php elseif ($field['type'] === 'image'): ?>
-                                <div class="editor-field-upload <?= !empty($storedUploads[$field['fieldKey']]) ? 'has-image' : '' ?>">
-                                    <input type="file" id="field-<?= $field['fieldKey'] ?>" name="<?= $field['fieldKey'] ?>"
-                                        accept="image/*" data-field-key="<?= $field['fieldKey'] ?>"
-                                        onchange="if(window.slidePreview) slidePreview.updateImageValue('<?= $field['fieldKey'] ?>', this.files[0])">
-
-                                    <?php if (!empty($storedUploads[$field['fieldKey']])): ?>
-                                        <img src="<?= Security::escape($storedUploads[$field['fieldKey']]['file_path']) ?>"
-                                            class="editor-field-upload-preview" alt="Uploaded image">
-                                    <?php else: ?>
-                                        <div class="editor-field-upload-icon">
-                                            <span class="material-symbols-outlined">add_photo_alternate</span>
-                                        </div>
-                                        <p class="editor-field-upload-text">Click to upload image</p>
-                                    <?php endif; ?>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-
-                <!-- Navigation Buttons (desktop) -->
-                <div class="slide-editor-nav">
-                    <?php if ($currentSlideIndex > 0): ?>
-                        <button type="submit" name="action" value="previous"
-                            class="slide-editor-btn slide-editor-btn-secondary">
-                            <span class="material-symbols-outlined">arrow_back</span>
-                            Previous
-                        </button>
+                <?php foreach ($editableFields as $field): ?>
+                    <?php if ($field['type'] === 'text'): ?>
+                        <input type="hidden" id="field-<?= $field['fieldKey'] ?>" name="<?= $field['fieldKey'] ?>"
+                            value="<?= Security::escape($storedValues[$field['fieldKey']] ?? $field['defaultValue']) ?>">
+                    <?php elseif ($field['type'] === 'image'): ?>
+                        <input type="file" id="field-<?= $field['fieldKey'] ?>" name="<?= $field['fieldKey'] ?>" accept="image/*"
+                            style="display:none;">
                     <?php endif; ?>
-
-                    <?php if ($currentSlideIndex < $totalSlides - 1): ?>
-                        <button type="submit" name="action" value="next" class="slide-editor-btn slide-editor-btn-primary">
-                            Next Slide
-                            <span class="material-symbols-outlined">arrow_forward</span>
-                        </button>
-                    <?php else: ?>
-                        <button type="submit" name="action" value="checkout" class="slide-editor-btn slide-editor-btn-primary">
-                            Continue to Checkout
-                            <span class="material-symbols-outlined">shopping_cart</span>
-                        </button>
-                    <?php endif; ?>
-                </div>
+                <?php endforeach; ?>
             </form>
 
-            <!-- Fixed Bottom Bar for Mobile (slide editor) -->
+            <!-- Navigation Buttons (Desktop) -->
+            <div class="slide-editor-nav hidden md:flex">
+                <?php if ($currentSlideIndex > 0): ?>
+                    <button type="submit" form="slide-editor-form" name="action" value="previous"
+                        class="slide-editor-btn slide-editor-btn-secondary">
+                        <span class="material-symbols-outlined">arrow_back</span>
+                        Previous
+                    </button>
+                <?php endif; ?>
+
+                <?php if ($currentSlideIndex < $totalSlides - 1): ?>
+                    <button type="submit" form="slide-editor-form" name="action" value="next"
+                        class="slide-editor-btn slide-editor-btn-primary">
+                        Next Slide
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                    </button>
+                <?php else: ?>
+                    <button type="submit" form="slide-editor-form" name="action" value="checkout"
+                        class="slide-editor-btn slide-editor-btn-primary">
+                        Continue to Checkout
+                        <span class="material-symbols-outlined">shopping_cart</span>
+                    </button>
+                <?php endif; ?>
+            </div>
+
+            <!-- Fixed Bottom Bar for Mobile -->
             <div class="slide-editor-mobile-nav">
                 <?php if ($currentSlideIndex < $totalSlides - 1): ?>
                     <button type="submit" form="slide-editor-form" name="action" value="next"
@@ -1060,7 +1040,28 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
             <div class="h-24 md:hidden"></div>
         </div>
 
-        <!-- Initialize Slide Preview -->
+        <!-- Bottom Sheet for Mobile Editing -->
+        <div id="edit-sheet-backdrop" class="edit-sheet-backdrop"></div>
+        <div id="edit-sheet" class="edit-sheet">
+            <div class="edit-sheet-handle"></div>
+            <label id="edit-sheet-label" class="edit-sheet-label">Field Name</label>
+            <input type="text" id="edit-sheet-input" class="edit-sheet-input" placeholder="Enter value...">
+            <input type="date" id="edit-sheet-date" class="edit-sheet-input hidden">
+            <input type="time" id="edit-sheet-time" class="edit-sheet-input hidden">
+            <button type="button" id="edit-sheet-done" class="edit-sheet-done">Done ✓</button>
+        </div>
+
+        <!-- Inline Input Container for Desktop (rendered dynamically) -->
+        <div id="inline-input-container" class="inline-input-container" style="display:none;">
+            <label id="inline-input-label" class="inline-input-label">Field Name</label>
+            <input type="text" id="inline-input" class="inline-input" placeholder="Enter value...">
+            <div class="inline-input-actions">
+                <button type="button" id="inline-input-done" class="inline-input-done">Done</button>
+                <button type="button" id="inline-input-cancel" class="inline-input-cancel">Cancel</button>
+            </div>
+        </div>
+
+        <!-- Initialize Slide Preview with Inline Editing -->
         <script src="/assets/js/slide-preview.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function () {
@@ -1075,9 +1076,183 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                 if (canvas) {
                     const slideConfig = JSON.parse(canvas.dataset.slideConfig || '{}');
                     const userValues = JSON.parse(canvas.dataset.userValues || '{}');
-                    window.slidePreview = new SlidePreview('slide-preview-canvas', slideConfig, userValues);
+                    const editableFields = JSON.parse(canvas.dataset.editableFields || '[]');
+
+                    window.slidePreview = new SlidePreview('slide-preview-canvas', slideConfig, userValues, {
+                        editable: true,
+                        editableFields: editableFields
+                    });
+
+                    // Setup inline editing
+                    setupInlineEditing(editableFields);
                 }
             });
+
+            function setupInlineEditing(editableFields) {
+                const isMobile = window.innerWidth < 768;
+                const canvas = document.getElementById('slide-preview-canvas');
+                const editSheet = document.getElementById('edit-sheet');
+                const editSheetBackdrop = document.getElementById('edit-sheet-backdrop');
+                const editSheetLabel = document.getElementById('edit-sheet-label');
+                const editSheetInput = document.getElementById('edit-sheet-input');
+                const editSheetDone = document.getElementById('edit-sheet-done');
+                const inlineContainer = document.getElementById('inline-input-container');
+                const inlineLabel = document.getElementById('inline-input-label');
+                const inlineInput = document.getElementById('inline-input');
+                const inlineDone = document.getElementById('inline-input-done');
+                const inlineCancel = document.getElementById('inline-input-cancel');
+
+                let currentFieldKey = null;
+                let currentFieldType = null;
+
+                // Create field lookup map
+                const fieldMap = {};
+                editableFields.forEach(f => { fieldMap[f.fieldKey] = f; });
+
+                // Make editable layers clickable - delegate from canvas
+                canvas.addEventListener('click', function (e) {
+                    const layer = e.target.closest('[data-field-key]');
+                    if (!layer) return;
+
+                    const fieldKey = layer.dataset.fieldKey;
+                    const field = fieldMap[fieldKey];
+                    if (!field) return;
+
+                    currentFieldKey = fieldKey;
+                    currentFieldType = field.type;
+
+                    if (field.type === 'image') {
+                        // Trigger file input
+                        const fileInput = document.getElementById('field-' + fieldKey);
+                        if (fileInput) {
+                            fileInput.click();
+                        }
+                    } else if (field.type === 'text') {
+                        // Get current value
+                        const hiddenInput = document.getElementById('field-' + fieldKey);
+                        const currentValue = hiddenInput ? hiddenInput.value : '';
+
+                        if (isMobile) {
+                            // Open bottom sheet
+                            editSheetLabel.textContent = field.label;
+                            editSheetInput.value = currentValue;
+                            editSheetInput.placeholder = field.defaultValue || 'Enter ' + field.label.toLowerCase();
+                            editSheet.classList.add('open');
+                            editSheetBackdrop.classList.add('open');
+                            setTimeout(() => editSheetInput.focus(), 300);
+                        } else {
+                            // Show inline input popup near the element
+                            const rect = layer.getBoundingClientRect();
+                            const canvasRect = canvas.getBoundingClientRect();
+
+                            inlineLabel.textContent = field.label;
+                            inlineInput.value = currentValue;
+                            inlineInput.placeholder = field.defaultValue || 'Enter ' + field.label.toLowerCase();
+
+                            // Position below the element
+                            inlineContainer.style.display = 'block';
+                            inlineContainer.style.left = (rect.left + rect.width / 2 - 160) + 'px';
+                            inlineContainer.style.top = (rect.bottom + 10) + 'px';
+
+                            // Ensure it's visible in viewport
+                            const containerRect = inlineContainer.getBoundingClientRect();
+                            if (containerRect.right > window.innerWidth) {
+                                inlineContainer.style.left = (window.innerWidth - containerRect.width - 20) + 'px';
+                            }
+                            if (containerRect.left < 0) {
+                                inlineContainer.style.left = '20px';
+                            }
+
+                            setTimeout(() => inlineInput.focus(), 100);
+                        }
+                    }
+                });
+
+                // Handle file input changes (for images)
+                editableFields.forEach(field => {
+                    if (field.type === 'image') {
+                        const fileInput = document.getElementById('field-' + field.fieldKey);
+                        if (fileInput) {
+                            fileInput.addEventListener('change', function (e) {
+                                const file = e.target.files[0];
+                                if (file && window.slidePreview) {
+                                    window.slidePreview.updateImageValue(field.fieldKey, file);
+                                }
+                            });
+                        }
+                    }
+                });
+
+                // Mobile: Handle bottom sheet done
+                editSheetDone.addEventListener('click', function () {
+                    if (currentFieldKey) {
+                        const value = editSheetInput.value;
+                        updateFieldValue(currentFieldKey, value);
+                    }
+                    closeEditSheet();
+                });
+
+                // Mobile: Close on backdrop click
+                editSheetBackdrop.addEventListener('click', closeEditSheet);
+
+                // Desktop: Handle inline input done
+                inlineDone.addEventListener('click', function () {
+                    if (currentFieldKey) {
+                        const value = inlineInput.value;
+                        updateFieldValue(currentFieldKey, value);
+                    }
+                    closeInlineInput();
+                });
+
+                // Desktop: Handle inline input cancel
+                inlineCancel.addEventListener('click', closeInlineInput);
+
+                // Handle Enter key
+                editSheetInput.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter') {
+                        editSheetDone.click();
+                    }
+                });
+                inlineInput.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter') {
+                        inlineDone.click();
+                    } else if (e.key === 'Escape') {
+                        closeInlineInput();
+                    }
+                });
+
+                // Close inline input when clicking outside
+                document.addEventListener('click', function (e) {
+                    if (inlineContainer.style.display !== 'none' &&
+                        !inlineContainer.contains(e.target) &&
+                        !canvas.contains(e.target)) {
+                        closeInlineInput();
+                    }
+                });
+
+                function updateFieldValue(fieldKey, value) {
+                    // Update hidden form field
+                    const hiddenInput = document.getElementById('field-' + fieldKey);
+                    if (hiddenInput) {
+                        hiddenInput.value = value;
+                    }
+                    // Update preview
+                    if (window.slidePreview) {
+                        window.slidePreview.updateValue(fieldKey, value);
+                    }
+                }
+
+                function closeEditSheet() {
+                    editSheet.classList.remove('open');
+                    editSheetBackdrop.classList.remove('open');
+                    currentFieldKey = null;
+                }
+
+                function closeInlineInput() {
+                    inlineContainer.style.display = 'none';
+                    currentFieldKey = null;
+                }
+            }
         </script>
 
     <?php else: ?>
