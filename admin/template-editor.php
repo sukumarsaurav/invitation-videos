@@ -1287,10 +1287,17 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
 
                     const response = await fetch('/api/admin/upload-asset.php', {
                         method: 'POST',
-                        body: formData
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
                     });
 
                     const result = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(result.error || `Server error: ${response.status}`);
+                    }
 
                     if (result.success) {
                         updateSlideBackground('src', result.url);
@@ -1301,7 +1308,11 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
                     }
                 } catch (error) {
                     console.error('Upload error:', error);
-                    alert('Upload failed: ' + error.message);
+                    if (error.message.includes('Unexpected token')) {
+                        alert('Upload failed: Server returned an invalid response. Please check if your session is still valid and try again.');
+                    } else {
+                        alert('Upload failed: ' + error.message);
+                    }
                 } finally {
                     isUploading = false;
                     uploadBtn.innerHTML = originalText;
