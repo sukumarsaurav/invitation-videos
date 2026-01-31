@@ -602,42 +602,123 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
     </script>
 
     <script>
-        // Template definition state - with safe JSON parsing
-        let templateDef;
-        try {
-            const rawData = document.getElementById('templateDefData').textContent;
-            templateDef = JSON.parse(rawData);
-        } catch (e) {
-            console.error('Failed to parse templateDef:', e);
-            templateDef = null;
-        }
-        if (!templateDef || typeof templateDef !== 'object') {
-            templateDef = { version: '1.0', fps: 30, width: 1080, height: 1920, slides: [], music: { fieldKey: 'musicUrl', fallback: null } };
-        }
-        if (!Array.isArray(templateDef.slides)) {
-            templateDef.slides = [];
-        }
-
+        // ========== GLOBAL STATE ==========
+        // Initialize these first so functions always have something to work with
+        let templateDef = { version: '1.0', fps: 30, width: 1080, height: 1920, slides: [], music: { fieldKey: 'musicUrl', fallback: null } };
         let selectedSlideIndex = null;
         let selectedLayerIndex = null;
-
-        // Animation presets - safe parsing
         let animations = {};
+        let fieldPresets = [];
+        let previewMode = 'css';
+        const REMOTION_STUDIO_URL = 'http://localhost:3000';
+
+        // ========== CORE FUNCTIONS (defined first for onclick handlers) ==========
+        
+        function addSlide() {
+            const lastSlide = templateDef.slides[templateDef.slides.length - 1];
+            const startFrame = lastSlide ? lastSlide.startFrame + lastSlide.durationFrames : 0;
+
+            templateDef.slides.push({
+                id: 'slide_' + Date.now(),
+                name: 'Slide ' + (templateDef.slides.length + 1),
+                startFrame: startFrame,
+                durationFrames: 90,
+                background: { type: 'color', src: '#1a1a2e' },
+                layers: []
+            });
+
+            renderSlideList();
+            renderTimeline();
+            selectSlide(templateDef.slides.length - 1);
+        }
+
+        function toggleJsonMode() {
+            const modal = document.getElementById('jsonModal');
+            document.getElementById('jsonEditor').value = JSON.stringify(templateDef, null, 2);
+            modal.style.display = 'block';
+        }
+
+        function closeJsonModal() {
+            document.getElementById('jsonModal').style.display = 'none';
+        }
+
+        function saveTemplate() {
+            document.getElementById('jsonEditor').value = JSON.stringify(templateDef, null, 2);
+            document.querySelector('#jsonModal form').submit();
+        }
+
+        function setPreviewMode(mode) {
+            previewMode = mode;
+            const cssPreviewEl = document.getElementById('previewFrame');
+            const remotionEl = document.getElementById('remotionPreviewFrame');
+            const btnCss = document.getElementById('btnCssPreview');
+            const btnRemotion = document.getElementById('btnRemotionPreview');
+
+            if (mode === 'remotion') {
+                cssPreviewEl.style.display = 'none';
+                remotionEl.style.display = 'block';
+                btnCss.className = 'btn btn-sm btn-secondary';
+                btnRemotion.className = 'btn btn-sm btn-primary';
+
+                if (!remotionEl.src || remotionEl.src === '' || remotionEl.src === 'about:blank') {
+                    const previewUrl = REMOTION_STUDIO_URL + '/?composition=GenericTemplate';
+                    remotionEl.src = previewUrl;
+                }
+                setTimeout(() => updateRemotionPreview(), 500);
+            } else {
+                cssPreviewEl.style.display = 'block';
+                remotionEl.style.display = 'none';
+                btnCss.className = 'btn btn-sm btn-primary';
+                btnRemotion.className = 'btn btn-sm btn-secondary';
+                renderPreview();
+            }
+        }
+
+        function updateRemotionPreview() {
+            const remotionEl = document.getElementById('remotionPreviewFrame');
+            if (remotionEl && remotionEl.contentWindow && previewMode === 'remotion') {
+                remotionEl.contentWindow.postMessage({
+                    type: 'UPDATE_TEMPLATE',
+                    data: { template: templateDef }
+                }, '*');
+            }
+        }
+
+        // ========== DATA INITIALIZATION (wrapped in try-catch) ==========
         try {
-            animations = JSON.parse(document.getElementById('animationsData').textContent) || {};
+            const rawData = document.getElementById('templateDefData');
+            if (rawData && rawData.textContent) {
+                const parsed = JSON.parse(rawData.textContent.trim());
+                if (parsed && typeof parsed === 'object') {
+                    templateDef = parsed;
+                    if (!Array.isArray(templateDef.slides)) {
+                        templateDef.slides = [];
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('Failed to parse templateDef:', e);
+        }
+
+        try {
+            const animData = document.getElementById('animationsData');
+            if (animData && animData.textContent) {
+                animations = JSON.parse(animData.textContent.trim()) || {};
+            }
         } catch (e) {
             console.error('Failed to parse animations:', e);
         }
 
-        // Field presets for dropdown - safe parsing
-        let fieldPresets = [];
         try {
-            fieldPresets = JSON.parse(document.getElementById('fieldPresetsData').textContent) || [];
+            const presetsData = document.getElementById('fieldPresetsData');
+            if (presetsData && presetsData.textContent) {
+                fieldPresets = JSON.parse(presetsData.textContent.trim()) || [];
+            }
         } catch (e) {
             console.error('Failed to parse fieldPresets:', e);
         }
 
-        // Initialize
+        // ========== INITIALIZATION ==========
         document.addEventListener('DOMContentLoaded', () => {
             renderSlideList();
             renderTimeline();
@@ -1056,23 +1137,7 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
             `;
         }
 
-        function addSlide() {
-            const lastSlide = templateDef.slides[templateDef.slides.length - 1];
-            const startFrame = lastSlide ? lastSlide.startFrame + lastSlide.durationFrames : 0;
 
-            templateDef.slides.push({
-                id: 'slide_' + Date.now(),
-                name: 'Slide ' + (templateDef.slides.length + 1),
-                startFrame: startFrame,
-                durationFrames: 90,
-                background: { type: 'color', src: '#1a1a2e' },
-                layers: []
-            });
-
-            renderSlideList();
-            renderTimeline();
-            selectSlide(templateDef.slides.length - 1);
-        }
 
         function addLayer(type) {
             const slide = templateDef.slides[selectedSlideIndex];
@@ -1169,20 +1234,7 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
             renderSlideProperties();
         }
 
-        function saveTemplate() {
-            document.getElementById('jsonEditor').value = JSON.stringify(templateDef, null, 2);
-            document.querySelector('#jsonModal form').submit();
-        }
 
-        function toggleJsonMode() {
-            const modal = document.getElementById('jsonModal');
-            document.getElementById('jsonEditor').value = JSON.stringify(templateDef, null, 2);
-            modal.style.display = 'block';
-        }
-
-        function closeJsonModal() {
-            document.getElementById('jsonModal').style.display = 'none';
-        }
 
         // ========== Phase 3: Ordering & Duplication ==========
 
@@ -1280,51 +1332,7 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
             selectLayer(slideIndex, layerIndex + 1);
         }
 
-        // ========== Phase 4: Remotion Preview Mode ==========
 
-        let previewMode = 'css'; // 'css' or 'remotion'
-        const REMOTION_STUDIO_URL = 'http://localhost:3000'; // Run `npm run dev` in aws-renderer
-
-        function setPreviewMode(mode) {
-            previewMode = mode;
-            const cssPreviewEl = document.getElementById('previewFrame');
-            const remotionEl = document.getElementById('remotionPreviewFrame');
-            const btnCss = document.getElementById('btnCssPreview');
-            const btnRemotion = document.getElementById('btnRemotionPreview');
-
-            if (mode === 'remotion') {
-                cssPreviewEl.style.display = 'none';
-                remotionEl.style.display = 'block';
-                btnCss.className = 'btn btn-sm btn-secondary';
-                btnRemotion.className = 'btn btn-sm btn-primary';
-
-                // Load Remotion preview if not already loaded
-                if (!remotionEl.src || remotionEl.src === '' || remotionEl.src === 'about:blank') {
-                    // Encode template as URL parameter for the studio preview
-                    const previewUrl = REMOTION_STUDIO_URL + '/?composition=GenericTemplate';
-                    remotionEl.src = previewUrl;
-                }
-
-                // Send template update to iframe
-                setTimeout(() => updateRemotionPreview(), 500);
-            } else {
-                cssPreviewEl.style.display = 'block';
-                remotionEl.style.display = 'none';
-                btnCss.className = 'btn btn-sm btn-primary';
-                btnRemotion.className = 'btn btn-sm btn-secondary';
-                renderPreview();
-            }
-        }
-
-        function updateRemotionPreview() {
-            const remotionEl = document.getElementById('remotionPreviewFrame');
-            if (remotionEl && remotionEl.contentWindow && previewMode === 'remotion') {
-                remotionEl.contentWindow.postMessage({
-                    type: 'UPDATE_TEMPLATE',
-                    data: { template: templateDef }
-                }, '*');
-            }
-        }
 
         // Also sync template when it changes (call this from updateLayer, etc.)
         const originalUpdateLayer = updateLayer;
