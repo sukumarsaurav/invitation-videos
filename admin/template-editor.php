@@ -562,6 +562,14 @@ $animationPresets = [
         </div>
     </div>
 
+    <!-- Hidden file input for asset uploads -->
+    <input type="file" id="assetFileInput" style="display: none;"
+        accept="video/mp4,video/webm,image/jpeg,image/png,image/webp">
+
+    <!-- Store CSRF token for JavaScript -->
+    <meta name="csrf-token" content="<?= Security::generateCSRFToken() ?>">
+
+
     <!-- JSON Editor Modal -->
     <div id="jsonModal"
         style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; padding: 40px;">
@@ -613,7 +621,7 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
         const REMOTION_STUDIO_URL = 'http://localhost:3000';
 
         // ========== CORE FUNCTIONS (defined first for onclick handlers) ==========
-        
+
         function addSlide() {
             const lastSlide = templateDef.slides[templateDef.slides.length - 1];
             const startFrame = lastSlide ? lastSlide.startFrame + lastSlide.durationFrames : 0;
@@ -683,6 +691,67 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
                 }, '*');
             }
         }
+
+        // ========== ASSET UPLOAD ==========
+        let isUploading = false;
+
+        function uploadBackgroundAsset(assetType) {
+            if (isUploading) return;
+
+            const input = document.getElementById('assetFileInput');
+            input.accept = assetType === 'video' ? 'video/mp4,video/webm' : 'image/jpeg,image/png,image/webp';
+
+            input.onchange = async function () {
+                if (!this.files || !this.files[0]) return;
+
+                const file = this.files[0];
+                const maxSize = assetType === 'video' ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+
+                if (file.size > maxSize) {
+                    alert(`File too large. Maximum size is ${maxSize / 1024 / 1024}MB`);
+                    return;
+                }
+
+                isUploading = true;
+                const uploadBtn = document.getElementById('uploadAssetBtn');
+                const originalText = uploadBtn.innerHTML;
+                uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+                uploadBtn.disabled = true;
+
+                try {
+                    const formData = new FormData();
+                    formData.append('asset_file', file);
+                    formData.append('asset_type', assetType);
+                    formData.append('csrf_token', document.querySelector('meta[name="csrf-token"]').content);
+
+                    const response = await fetch('/api/admin/upload-asset.php', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        updateSlideBackground('src', result.url);
+                        renderSlideProperties(); // Refresh to show new URL
+                        renderPreview();
+                    } else {
+                        alert('Upload failed: ' + (result.error || 'Unknown error'));
+                    }
+                } catch (error) {
+                    console.error('Upload error:', error);
+                    alert('Upload failed: ' + error.message);
+                } finally {
+                    isUploading = false;
+                    uploadBtn.innerHTML = originalText;
+                    uploadBtn.disabled = false;
+                    input.value = ''; // Reset for next upload
+                }
+            };
+
+            input.click();
+        }
+
 
         // ========== DATA INITIALIZATION (wrapped in try-catch) ==========
         try {
@@ -889,9 +958,26 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
                 </div>
                 <div class="property-group">
                     <label>Background Source</label>
+                    ${slide.background?.type !== 'color' ? `
+                        <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                            <button type="button" id="uploadAssetBtn" class="btn btn-secondary btn-sm" 
+                                    onclick="uploadBackgroundAsset('${slide.background?.type || 'video'}')" style="flex-shrink: 0;">
+                                <i class="fas fa-upload"></i> Upload ${slide.background?.type === 'image' ? 'Image' : 'Video'}
+                            </button>
+                            <span style="font-size: 11px; color: #64748b; display: flex; align-items: center;">
+                                Max: ${slide.background?.type === 'image' ? '10MB' : '50MB'}
+                            </span>
+                        </div>
+                    ` : ''}
                     <input type="text" value="${slide.background?.src || ''}" 
-                           placeholder="${slide.background?.type === 'color' ? '#1a1a2e' : 'URL or {{fieldKey}}'}"
-                           onchange="updateSlideBackground('src', this.value)">
+                           placeholder="${slide.background?.type === 'color' ? '#1a1a2e' : 'S3 URL or {{fieldKey}}'}"
+                           onchange="updateSlideBackground('src', this.value)"
+                           style="${slide.background?.src && slide.background?.type !== 'color' ? 'font-size: 11px;' : ''}">
+                    ${slide.background?.src && slide.background?.type !== 'color' ? `
+                        <p style="font-size: 11px; color: #16a34a; margin-top: 4px;">
+                            <i class="fas fa-check-circle"></i> Asset uploaded
+                        </p>
+                    ` : ''}
                 </div>
                 
                 <div class="section-title" style="margin-top: 24px;">Layers</div>
