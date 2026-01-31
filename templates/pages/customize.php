@@ -978,7 +978,7 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
             </div>
 
             <!-- Hidden Form for Data Submission -->
-            <form id="slide-editor-form" method="POST" enctype="multipart/form-data" style="display:none;">
+            <form id="slide-editor-form" method="POST" enctype="multipart/form-data" class="hidden">
                 <?= Security::csrfField() ?>
                 <input type="hidden" name="slide_index" value="<?= $currentSlideIndex ?>">
                 <input type="hidden" name="user_timezone" id="user_timezone" value="">
@@ -989,7 +989,7 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                             value="<?= Security::escape($storedValues[$field['fieldKey']] ?? $field['defaultValue']) ?>">
                     <?php elseif ($field['type'] === 'image'): ?>
                         <input type="file" id="field-<?= $field['fieldKey'] ?>" name="<?= $field['fieldKey'] ?>" accept="image/*"
-                            style="display:none;">
+                            class="hidden">
                     <?php endif; ?>
                 <?php endforeach; ?>
             </form>
@@ -1041,23 +1041,23 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
         </div>
 
         <!-- Bottom Sheet for Mobile Editing -->
-        <div id="edit-sheet-backdrop" class="edit-sheet-backdrop"></div>
-        <div id="edit-sheet" class="edit-sheet">
-            <div class="edit-sheet-handle"></div>
-            <label id="edit-sheet-label" class="edit-sheet-label">Field Name</label>
-            <input type="text" id="edit-sheet-input" class="edit-sheet-input" placeholder="Enter value...">
-            <input type="date" id="edit-sheet-date" class="edit-sheet-input hidden">
-            <input type="time" id="edit-sheet-time" class="edit-sheet-input hidden">
-            <button type="button" id="edit-sheet-done" class="edit-sheet-done">Done ✓</button>
+        <div id="edit-sheet-backdrop" class="fixed inset-0 bg-black/50 z-[100] opacity-0 invisible transition-all duration-300"></div>
+        <div id="edit-sheet" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl p-5 pb-8 z-[101] translate-y-full transition-transform duration-500 shadow-[0_-10px_40px_rgba(0,0,0,0.15)] max-h-[80vh] overflow-y-auto" style="transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);">
+            <div class="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5"></div>
+            <label id="edit-sheet-label" class="block text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">Field Name</label>
+            <input type="text" id="edit-sheet-input" class="w-full p-4 border-2 border-slate-200 rounded-xl text-lg bg-slate-50 transition-all focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white" placeholder="Enter value...">
+            <input type="date" id="edit-sheet-date" class="hidden w-full p-4 border-2 border-slate-200 rounded-xl text-lg bg-slate-50">
+            <input type="time" id="edit-sheet-time" class="hidden w-full p-4 border-2 border-slate-200 rounded-xl text-lg bg-slate-50">
+            <button type="button" id="edit-sheet-done" class="w-full mt-4 p-4 bg-primary text-white border-none rounded-xl text-base font-bold cursor-pointer transition-all hover:bg-primary/90 active:scale-[0.98]">Done ✓</button>
         </div>
 
-        <!-- Inline Input Container for Desktop (rendered dynamically) -->
-        <div id="inline-input-container" class="inline-input-container" style="display:none;">
-            <label id="inline-input-label" class="inline-input-label">Field Name</label>
-            <input type="text" id="inline-input" class="inline-input" placeholder="Enter value...">
-            <div class="inline-input-actions">
-                <button type="button" id="inline-input-done" class="inline-input-done">Done</button>
-                <button type="button" id="inline-input-cancel" class="inline-input-cancel">Cancel</button>
+        <!-- Inline Input Container for Desktop -->
+        <div id="inline-input-container" class="hidden fixed z-50 bg-white rounded-xl shadow-2xl p-4 min-w-[280px] max-w-[400px] animate-pop-in">
+            <label id="inline-input-label" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Field Name</label>
+            <input type="text" id="inline-input" class="w-full p-3 border-2 border-slate-200 rounded-lg text-base transition-all focus:outline-none focus:border-primary" placeholder="Enter value...">
+            <div class="flex gap-2 mt-3">
+                <button type="button" id="inline-input-done" class="flex-1 p-2.5 bg-primary text-white border-none rounded-lg font-semibold cursor-pointer">Done</button>
+                <button type="button" id="inline-input-cancel" class="px-4 py-2.5 bg-slate-100 text-slate-500 border-none rounded-lg font-semibold cursor-pointer">Cancel</button>
             </div>
         </div>
 
@@ -1133,12 +1133,16 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                         const currentValue = hiddenInput ? hiddenInput.value : '';
 
                         if (isMobile) {
-                            // Open bottom sheet
+                            // Open bottom sheet with Tailwind classes
                             editSheetLabel.textContent = field.label;
                             editSheetInput.value = currentValue;
                             editSheetInput.placeholder = field.defaultValue || 'Enter ' + field.label.toLowerCase();
-                            editSheet.classList.add('open');
-                            editSheetBackdrop.classList.add('open');
+                            // Show backdrop
+                            editSheetBackdrop.classList.remove('opacity-0', 'invisible');
+                            editSheetBackdrop.classList.add('opacity-100', 'visible');
+                            // Slide up sheet
+                            editSheet.classList.remove('translate-y-full');
+                            editSheet.classList.add('translate-y-0');
                             setTimeout(() => editSheetInput.focus(), 300);
                         } else {
                             // Show inline input popup near the element
@@ -1149,8 +1153,8 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                             inlineInput.value = currentValue;
                             inlineInput.placeholder = field.defaultValue || 'Enter ' + field.label.toLowerCase();
 
-                            // Position below the element
-                            inlineContainer.style.display = 'block';
+                            // Show inline input popup
+                            inlineContainer.classList.remove('hidden');
                             inlineContainer.style.left = (rect.left + rect.width / 2 - 160) + 'px';
                             inlineContainer.style.top = (rect.bottom + 10) + 'px';
 
@@ -1223,7 +1227,7 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
 
                 // Close inline input when clicking outside
                 document.addEventListener('click', function (e) {
-                    if (inlineContainer.style.display !== 'none' &&
+                    if (!inlineContainer.classList.contains('hidden') &&
                         !inlineContainer.contains(e.target) &&
                         !canvas.contains(e.target)) {
                         closeInlineInput();
@@ -1243,13 +1247,17 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                 }
 
                 function closeEditSheet() {
-                    editSheet.classList.remove('open');
-                    editSheetBackdrop.classList.remove('open');
+                    // Hide backdrop
+                    editSheetBackdrop.classList.add('opacity-0', 'invisible');
+                    editSheetBackdrop.classList.remove('opacity-100', 'visible');
+                    // Slide down sheet
+                    editSheet.classList.add('translate-y-full');
+                    editSheet.classList.remove('translate-y-0');
                     currentFieldKey = null;
                 }
 
                 function closeInlineInput() {
-                    inlineContainer.style.display = 'none';
+                    inlineContainer.classList.add('hidden');
                     currentFieldKey = null;
                 }
             }

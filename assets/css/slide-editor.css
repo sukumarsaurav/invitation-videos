@@ -163,201 +163,28 @@
 }
 
 /* ============================================
-   Bottom Sheet - Mobile Editing
+   Bottom Sheet & Inline Input
+   ============================================ 
+   NOTE: These components now use Tailwind classes 
+   in customize.php for styling and animation.
+   See the edit-sheet and inline-input-container elements.
    ============================================ */
-.edit-sheet-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 100;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-}
 
-.edit-sheet-backdrop.open {
-    opacity: 1;
-    visibility: visible;
-}
-
-.edit-sheet {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: white;
-    border-radius: 24px 24px 0 0;
-    padding: 16px 20px 32px;
-    z-index: 101;
-    transform: translateY(100%);
-    /* Spring physics animation */
-    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.15);
-    max-height: 80vh;
-    overflow-y: auto;
-}
-
-.edit-sheet.open {
-    transform: translateY(0);
-}
-
-/* Handle indicator */
-.edit-sheet-handle {
-    width: 40px;
-    height: 4px;
-    background: #e2e8f0;
-    border-radius: 2px;
-    margin: 0 auto 20px;
-}
-
-/* Sheet label */
-.edit-sheet-label {
-    display: block;
-    font-size: 14px;
-    font-weight: 600;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 12px;
-}
-
-/* Sheet input */
-.edit-sheet-input {
-    width: 100%;
-    padding: 16px;
-    border: 2px solid #e2e8f0;
-    border-radius: 12px;
-    font-size: 18px;
-    background: #f8fafc;
-    transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.edit-sheet-input:focus {
-    outline: none;
-    border-color: var(--slide-primary);
-    box-shadow: 0 0 0 4px var(--slide-primary-light);
-    background: white;
-}
-
-/* Date input styling */
-.edit-sheet-input[type="date"],
-.edit-sheet-input[type="time"] {
-    -webkit-appearance: none;
-    appearance: none;
-}
-
-/* Done button */
-.edit-sheet-done {
-    width: 100%;
-    margin-top: 16px;
-    padding: 16px;
-    background: var(--slide-primary);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
-}
-
-.edit-sheet-done:hover {
-    background: #7a0639;
-}
-
-.edit-sheet-done:active {
-    transform: scale(0.98);
-}
-
-/* ============================================
-   Desktop Inline Input
-   ============================================ */
-@media (min-width: 768px) {
-    .inline-input-container {
-        position: absolute;
-        z-index: 50;
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-        padding: 16px;
-        min-width: 280px;
-        max-width: 400px;
-        /* Spring physics animation */
-        animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+/* Animation keyframes for inline input popup */
+@keyframes popIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.9) translateY(10px);
     }
 
-    @keyframes popIn {
-        0% {
-            opacity: 0;
-            transform: scale(0.9) translateY(10px);
-        }
-
-        100% {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-        }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
     }
+}
 
-    .inline-input-container::before {
-        content: '';
-        position: absolute;
-        top: -8px;
-        left: 50%;
-        transform: translateX(-50%);
-        border: 8px solid transparent;
-        border-bottom-color: white;
-    }
-
-    .inline-input-label {
-        font-size: 12px;
-        font-weight: 600;
-        color: #64748b;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-bottom: 8px;
-        display: block;
-    }
-
-    .inline-input {
-        width: 100%;
-        padding: 12px;
-        border: 2px solid #e2e8f0;
-        border-radius: 8px;
-        font-size: 16px;
-        transition: border-color 0.2s;
-    }
-
-    .inline-input:focus {
-        outline: none;
-        border-color: var(--slide-primary);
-    }
-
-    .inline-input-actions {
-        display: flex;
-        gap: 8px;
-        margin-top: 12px;
-    }
-
-    .inline-input-done {
-        flex: 1;
-        padding: 10px;
-        background: var(--slide-primary);
-        color: white;
-        border: none;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-    }
-
-    .inline-input-cancel {
-        padding: 10px 16px;
-        background: #f1f5f9;
-        color: #64748b;
-        border: none;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-    }
+.animate-pop-in {
+    animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* ============================================
