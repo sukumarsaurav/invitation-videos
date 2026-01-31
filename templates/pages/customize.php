@@ -626,7 +626,7 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
 
 <div class="max-w-7xl mx-auto px-4 md:px-8 py-6 sm:py-8">
 
-    <?php if ($step === 0): ?>
+    <?php if ($step === 0 && !$isSlideEditorMode): ?>
         <!-- ==================== PREVIEW PAGE ==================== -->
 
         <!-- Breadcrumb (hidden on mobile, header shows back arrow) -->
