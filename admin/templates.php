@@ -559,6 +559,45 @@ if ($templateId) {
     );
 }
 
+// Extract fields from Visual Editor (template_definition JSON)
+$visualEditorFields = [];
+$hasVisualEditor = false;
+if (!empty($template['template_definition'])) {
+    $def = json_decode($template['template_definition'], true);
+    if (!empty($def['slides']) && is_array($def['slides'])) {
+        $hasVisualEditor = true;
+        foreach ($def['slides'] as $slideIndex => $slide) {
+            foreach ($slide['layers'] ?? [] as $layer) {
+                if (!empty($layer['fieldKey'])) {
+                    // Check if this fieldKey already exists to avoid duplicates
+                    $existingIndex = array_search($layer['fieldKey'], array_column($visualEditorFields, 'fieldKey'));
+                    if ($existingIndex === false) {
+                        $visualEditorFields[] = [
+                            'fieldKey' => $layer['fieldKey'],
+                            'type' => $layer['type'] ?? 'text',
+                            'slideIndex' => $slideIndex,
+                            'slideName' => $slide['name'] ?? 'Slide ' . ($slideIndex + 1),
+                            'defaultValue' => $layer['defaultValue'] ?? '',
+                            'matchedPreset' => null
+                        ];
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Match visual editor fields with existing presets
+foreach ($visualEditorFields as &$vef) {
+    foreach ($allFieldPresets as $preset) {
+        if ($preset['field_name'] === $vef['fieldKey']) {
+            $vef['matchedPreset'] = $preset;
+            break;
+        }
+    }
+}
+unset($vef); // break reference
+
 // Helper function to save category mappings
 function saveCategoryMappings($templateId, $tableName, $columnName, $values)
 {
@@ -1066,7 +1105,7 @@ function getYouTubeEmbedUrl($url)
                         <p class="text-xs text-slate-500">Select from Music Library or enter custom URL</p>
                     </label>
                     <script>
-                        document.querySelector('select[name="default_music_url"]').addEventListener('change', function () {
+                        document.querySelector('select[name="default_music_url"]').addEve                         ntListener('change', function () {
                             const customInput = document.getElementById('music_custom_url');
                             if (this.value === 'custom') {
                                 customInput.classList.remove('hidden');
@@ -1258,100 +1297,193 @@ function getYouTubeEmbedUrl($url)
 
             <!-- Required Fields for Checkout -->
             <?php if ($action === 'edit' && $templateId): ?>
-                <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <h3 class="text-lg font-bold">Required Fields</h3>
-                            <p class="text-sm text-slate-500">Select which fields customers must fill during checkout</p>
-                        </div>
-                        <button type="button" onclick="openFieldSelector()"
-                            class="flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-white text-sm font-bold py-2 px-4 rounded-lg transition-colors">
-                            <span class="material-symbols-outlined text-lg">add</span>
-                            Add Field
-                        </button>
-                    </div>
 
-                    <!-- Steps Tabs -->
-                    <div class="border-b border-slate-200 mb-4">
-                        <div class="flex gap-1 -mb-px" id="step-tabs">
-                            <button type="button" data-step="1" onclick="switchStep(1)"
-                                class="step-tab px-4 py-2.5 text-sm font-medium border-b-2 border-primary text-primary transition-colors">
-                                Step 1: Event Details
-                            </button>
-                            <button type="button" data-step="2" onclick="switchStep(2)"
-                                class="step-tab px-4 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-primary transition-colors">
-                                Step 2: Personal Info
-                            </button>
-                            <button type="button" data-step="3" onclick="switchStep(3)"
-                                class="step-tab px-4 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-primary transition-colors">
-                                Step 3: Media & Extras
-                            </button>
+                <?php if ($hasVisualEditor && !empty($visualEditorFields)): ?>
+                    <!-- Visual Editor Fields (Read-Only Display) -->
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="text-lg font-bold flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-purple-600">layers</span>
+                                    Fields from Visual Editor
+                                </h3>
+                                <p class="text-sm text-slate-500">These fields are defined in the template's slide layers</p>
+                            </div>
+                            <a href="/admin/template-editor.php?id=<?= $templateId ?>"
+                                class="flex items-center gap-1.5 text-sm text-purple-600 hover:text-purple-700 font-medium">
+                                <span class="material-symbols-outlined text-lg">movie_edit</span>
+                                Edit in Visual Editor
+                            </a>
                         </div>
-                    </div>
 
-                    <!-- Fields Container for Each Step -->
-                    <div id="fields-container">
-                        <?php for ($step = 1; $step <= 3; $step++): ?>
-                            <div class="step-panel <?= $step > 1 ? 'hidden' : '' ?>" data-step="<?= $step ?>">
-                                <div class="space-y-2 sortable-fields" data-step="<?= $step ?>">
-                                    <?php
-                                    $stepFields = array_filter($templateFields, fn($f) => ($f['step_number'] ?? 1) == $step);
-                                    if (empty($stepFields)):
-                                        ?>
-                                        <div class="no-fields-msg text-center py-8 text-slate-400">
-                                            <span class="material-symbols-outlined text-3xl">input</span>
-                                            <p class="text-sm mt-2">No fields in Step <?= $step ?></p>
-                                            <p class="text-xs">Click "Add Field" to add customization fields</p>
-                                        </div>
-                                    <?php else:
-                                        foreach ($stepFields as $field):
-                                            ?>
-                                            <div class="field-item flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200 cursor-move"
-                                                data-preset-id="<?= $field['preset_id'] ?>" data-step="<?= $step ?>"
-                                                data-required="<?= $field['is_required'] ?>">
-                                                <span class="material-symbols-outlined text-slate-400 drag-handle">drag_indicator</span>
-                                                <span
-                                                    class="material-symbols-outlined text-primary"><?= Security::escape($field['icon'] ?? 'text_fields') ?></span>
-                                                <div class="flex-1">
-                                                    <p class="font-medium text-sm"><?= Security::escape($field['name']) ?></p>
-                                                    <p class="text-xs text-slate-500"><?= $field['field_type'] ?> •
-                                                        <?= Security::escape($field['field_name']) ?>
-                                                    </p>
-                                                </div>
-                                                <label class="flex items-center gap-1.5 text-xs">
-                                                    <input type="checkbox" class="field-required rounded text-primary"
-                                                        <?= $field['is_required'] ? 'checked' : '' ?>>
-                                                    <span class="text-slate-500">Required</span>
-                                                </label>
-                                                <select class="field-step text-xs border-0 bg-transparent text-slate-500 cursor-pointer"
-                                                    onchange="moveFieldToStep(this)">
-                                                    <option value="1" <?= $step == 1 ? 'selected' : '' ?>>Step 1</option>
-                                                    <option value="2" <?= $step == 2 ? 'selected' : '' ?>>Step 2</option>
-                                                    <option value="3" <?= $step == 3 ? 'selected' : '' ?>>Step 3</option>
-                                                </select>
-                                                <button type="button" onclick="removeField(this)"
-                                                    class="p-1.5 hover:bg-red-50 rounded text-slate-400 hover:text-red-500 transition-colors">
-                                                    <span class="material-symbols-outlined text-lg">close</span>
-                                                </button>
-                                            </div>
-                                            <?php
-                                        endforeach;
-                                    endif;
-                                    ?>
+                        <!-- Info banner -->
+                        <div class="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-4">
+                            <div class="flex items-start gap-2 text-purple-700">
+                                <span class="material-symbols-outlined text-lg shrink-0 mt-0.5">info</span>
+                                <div class="text-sm">
+                                    <p class="font-medium">This template uses the Visual Editor for field definitions.</p>
+                                    <p class="text-purple-600 mt-0.5">Customer fields are defined as layers in each slide. Users
+                                        will fill these during the customization flow.</p>
                                 </div>
                             </div>
-                        <?php endfor; ?>
-                    </div>
+                        </div>
 
-                    <!-- Save Fields Button -->
-                    <div class="mt-4 pt-4 border-t border-slate-200">
-                        <button type="button" onclick="saveTemplateFields()"
-                            class="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-5 rounded-lg transition-colors">
-                            <span class="material-symbols-outlined text-lg">save</span>
-                            Save Fields
-                        </button>
+                        <!-- Fields List -->
+                        <div class="divide-y divide-slate-100 border border-slate-200 rounded-lg overflow-hidden">
+                            <?php foreach ($visualEditorFields as $vef): ?>
+                                <div class="py-3 px-4 flex items-center gap-3 bg-white hover:bg-slate-50 transition-colors">
+                                    <span
+                                        class="material-symbols-outlined text-lg <?= $vef['type'] === 'image' ? 'text-green-600' : 'text-blue-600' ?>">
+                                        <?= $vef['type'] === 'image' ? 'image' : 'text_fields' ?>
+                                    </span>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="font-medium text-sm truncate">
+                                            <?= Security::escape(ucwords(str_replace(['_', '-'], ' ', $vef['fieldKey']))) ?>
+                                        </p>
+                                        <p class="text-xs text-slate-500">
+                                            <code
+                                                class="bg-slate-100 px-1.5 py-0.5 rounded text-xs"><?= Security::escape($vef['fieldKey']) ?></code>
+                                            <span class="mx-1">•</span>
+                                            <span class="capitalize"><?= $vef['type'] ?></span>
+                                            <span class="mx-1">•</span>
+                                            <?= Security::escape($vef['slideName']) ?>
+                                        </p>
+                                    </div>
+                                    <?php if (!empty($vef['matchedPreset']) && is_array($vef['matchedPreset'])): ?>
+                                        <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full whitespace-nowrap">
+                                            ✓ Preset: <?= Security::escape($vef['matchedPreset']['name'] ?? 'Unknown') ?>
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full whitespace-nowrap">
+                                            Custom Field
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+
+                        <p class="text-xs text-slate-400 mt-3">
+                            <?php
+                            $defForCount = json_decode($template['template_definition'] ?? '{}', true);
+                            $slideCount = is_array($defForCount) && isset($defForCount['slides']) ? count($defForCount['slides']) : 0;
+                            ?>
+                            <?= count($visualEditorFields) ?> field<?= count($visualEditorFields) !== 1 ? 's' : '' ?> defined across
+                            <?= $slideCount ?> slide<?= $slideCount !== 1 ? 's' : '' ?>
+                        </p>
                     </div>
-                </div>
+                <?php elseif ($hasVisualEditor && empty($visualEditorFields)): ?>
+                    <!-- Visual Editor but no fields yet -->
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+                        <div class="text-center py-6">
+                            <span class="material-symbols-outlined text-4xl text-slate-300">layers</span>
+                            <h3 class="text-lg font-bold mt-2">No Fields Defined Yet</h3>
+                            <p class="text-sm text-slate-500 mt-1">Add layers with field keys in the Visual Editor to create
+                                customization fields.</p>
+                            <a href="/admin/template-editor.php?id=<?= $templateId ?>"
+                                class="inline-flex items-center gap-2 mt-4 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors">
+                                <span class="material-symbols-outlined text-lg">movie_edit</span>
+                                Open Visual Editor
+                            </a>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <!-- Legacy Required Fields Editor (for templates without Visual Editor) -->
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="text-lg font-bold">Required Fields</h3>
+                                <p class="text-sm text-slate-500">Select which fields customers must fill during checkout</p>
+                            </div>
+                            <button type="button" onclick="openFieldSelector()"
+                                class="flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-white text-sm font-bold py-2 px-4 rounded-lg transition-colors">
+                                <span class="material-symbols-outlined text-lg">add</span>
+                                Add Field
+                            </button>
+                        </div>
+
+                        <!-- Steps Tabs -->
+                        <div class="border-b border-slate-200 mb-4">
+                            <div class="flex gap-1 -mb-px" id="step-tabs">
+                                <button type="button" data-step="1" onclick="switchStep(1)"
+                                    class="step-tab px-4 py-2.5 text-sm font-medium border-b-2 border-primary text-primary transition-colors">
+                                    Step 1: Event Details
+                                </button>
+                                <button type="button" data-step="2" onclick="switchStep(2)"
+                                    class="step-tab px-4 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-primary transition-colors">
+                                    Step 2: Personal Info
+                                </button>
+                                <button type="button" data-step="3" onclick="switchStep(3)"
+                                    class="step-tab px-4 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-primary transition-colors">
+                                    Step 3: Media & Extras
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Fields Container for Each Step -->
+                        <div id="fields-container">
+                            <?php for ($step = 1; $step <= 3; $step++): ?>
+                                <div class="step-panel <?= $step > 1 ? 'hidden' : '' ?>" data-step="<?= $step ?>">
+                                    <div class="space-y-2 sortable-fields" data-step="<?= $step ?>">
+                                        <?php
+                                        $stepFields = array_filter($templateFields, fn($f) => ($f['step_number'] ?? 1) == $step);
+                                        if (empty($stepFields)):
+                                            ?>
+                                            <div class="no-fields-msg text-center py-8 text-slate-400">
+                                                <span class="material-symbols-outlined text-3xl">input</span>
+                                                <p class="text-sm mt-2">No fields in Step <?= $step ?></p>
+                                                <p class="text-xs">Click "Add Field" to add customization fields</p>
+                                            </div>
+                                        <?php else:
+                                            foreach ($stepFields as $field):
+                                                ?>
+                                                <div class="field-item flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200 cursor-move"
+                                                    data-preset-id="<?= $field['preset_id'] ?>" data-step="<?= $step ?>"
+                                                    data-required="<?= $field['is_required'] ?>">
+                                                    <span class="material-symbols-outlined text-slate-400 drag-handle">drag_indicator</span>
+                                                    <span
+                                                        class="material-symbols-outlined text-primary"><?= Security::escape($field['icon'] ?? 'text_fields') ?></span>
+                                                    <div class="flex-1">
+                                                        <p class="font-medium text-sm"><?= Security::escape($field['name']) ?></p>
+                                                        <p class="text-xs text-slate-500"><?= $field['field_type'] ?> •
+                                                            <?= Security::escape($field['field_name']) ?>
+                                                        </p>
+                                                    </div>
+                                                    <label class="flex items-center gap-1.5 text-xs">
+                                                        <input type="checkbox" class="field-required rounded text-primary"
+                                                            <?= $field['is_required'] ? 'checked' : '' ?>>
+                                                        <span class="text-slate-500">Required</span>
+                                                    </label>
+                                                    <select class="field-step text-xs border-0 bg-transparent text-slate-500 cursor-pointer"
+                                                        onchange="moveFieldToStep(this)">
+                                                        <option value="1" <?= $step == 1 ? 'selected' : '' ?>>Step 1</option>
+                                                        <option value="2" <?= $step == 2 ? 'selected' : '' ?>>Step 2</option>
+                                                        <option value="3" <?= $step == 3 ? 'selected' : '' ?>>Step 3</option>
+                                                    </select>
+                                                    <button type="button" onclick="removeField(this)"
+                                                        class="p-1.5 hover:bg-red-50 rounded text-slate-400 hover:text-red-500 transition-colors">
+                                                        <span class="material-symbols-outlined text-lg">close</span>
+                                                    </button>
+                                                </div>
+                                                <?php
+                                            endforeach;
+                                        endif;
+                                        ?>
+                                    </div>
+                                </div>
+                            <?php endfor; ?>
+                        </div>
+
+                        <!-- Save Fields Button -->
+                        <div class="mt-4 pt-4 border-t border-slate-200">
+                            <button type="button" onclick="saveTemplateFields()"
+                                class="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-5 rounded-lg transition-colors">
+                                <span class="material-symbols-outlined text-lg">save</span>
+                                Save Fields
+                            </button>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
             <?php endif; ?>
 
         </div>
