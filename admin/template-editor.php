@@ -338,35 +338,217 @@ $animationPresets = [
             resize: vertical;
         }
 
-        .timeline-bar {
+        /* Enhanced Timeline Container */
+        .timeline-container {
             position: absolute;
             bottom: 0;
             left: 0;
             right: 0;
-            height: 60px;
-            background: rgba(0, 0, 0, 0.8);
+            height: 140px;
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+            border-top: 1px solid #334155;
             display: flex;
-            align-items: center;
-            padding: 0 20px;
-            gap: 4px;
+            flex-direction: column;
         }
 
-        .timeline-segment {
-            height: 30px;
-            background: linear-gradient(135deg, #970747, #7a053a);
-            border-radius: 4px;
-            flex-shrink: 0;
+        .timeline-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid #334155;
+        }
+
+        .timeline-controls .btn-playback {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: #970747;
+            color: white;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .timeline-controls .btn-playback:hover {
+            background: #b80856;
+            transform: scale(1.05);
+        }
+
+        .timeline-controls .btn-playback.active {
+            background: #22c55e;
+        }
+
+        .timeline-info {
+            font-size: 12px;
+            color: #94a3b8;
+            display: flex;
+            gap: 16px;
+        }
+
+        .timeline-info span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .timeline-info .current-frame {
+            color: #f1f5f9;
+            font-weight: 600;
+            min-width: 80px;
+        }
+
+        .timeline-zoom {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .timeline-zoom input[type="range"] {
+            width: 80px;
+            accent-color: #970747;
+        }
+
+        /* Timeline Track Area */
+        .timeline-tracks {
+            flex: 1;
+            position: relative;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 8px 16px;
+        }
+
+        .timeline-ruler {
+            height: 20px;
+            position: relative;
+            border-bottom: 1px solid #334155;
+            margin-bottom: 8px;
+        }
+
+        .timeline-ruler-mark {
+            position: absolute;
+            color: #64748b;
+            font-size: 9px;
+            transform: translateX(-50%);
+        }
+
+        .timeline-ruler-mark::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 12px;
+            width: 1px;
+            height: 6px;
+            background: #475569;
+        }
+
+        .timeline-slide-tracks {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            position: relative;
+        }
+
+        .timeline-slide-row {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            height: 28px;
+        }
+
+        .timeline-segment {
+            height: 24px;
+            background: linear-gradient(135deg, #970747, #7a053a);
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
             font-size: 10px;
             color: white;
-            transition: opacity 0.2s;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
         }
 
         .timeline-segment:hover {
-            opacity: 0.8;
+            filter: brightness(1.1);
+        }
+
+        .timeline-segment.active {
+            outline: 2px solid #22c55e;
+            outline-offset: 1px;
+        }
+
+        .timeline-segment .slide-label {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1;
+        }
+
+        /* Layer timing bars inside slide */
+        .timeline-layer-bars {
+            position: absolute;
+            bottom: 2px;
+            left: 4px;
+            right: 4px;
+            height: 6px;
+            display: flex;
+            gap: 1px;
+        }
+
+        .timeline-layer-bar {
+            height: 100%;
+            border-radius: 2px;
+            opacity: 0.7;
+        }
+
+        .timeline-layer-bar.text {
+            background: #3b82f6;
+        }
+
+        .timeline-layer-bar.image {
+            background: #22c55e;
+        }
+
+        /* Playhead */
+        .timeline-playhead {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #ef4444;
+            z-index: 10;
+            cursor: ew-resize;
+            transition: left 0.05s linear;
+        }
+
+        .timeline-playhead::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -5px;
+            width: 12px;
+            height: 12px;
+            background: #ef4444;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .timeline-playhead::after {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: -5px;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 8px solid #ef4444;
         }
 
         .preview-layer {
@@ -596,8 +778,34 @@ $animationPresets = [
             <iframe id="remotionPreviewFrame" src=""
                 style="display: none; width: 100%; height: 100%; border: none; background: #1a1a2e;" allow="autoplay">
             </iframe>
-            <div class="timeline-bar" id="timelineBar">
-                <!-- Timeline segments -->
+            <!-- Enhanced Timeline Container -->
+            <div class="timeline-container" id="timelineContainer">
+                <div class="timeline-controls">
+                    <button type="button" class="btn-playback" id="btnPlayPause" onclick="togglePlayback()"
+                        title="Play/Pause">
+                        <i class="fas fa-play" id="playIcon"></i>
+                    </button>
+                    <button type="button" class="btn-playback" onclick="resetPlayhead()" title="Reset">
+                        <i class="fas fa-undo"></i>
+                    </button>
+                    <div class="timeline-info">
+                        <span class="current-frame" id="currentFrameDisplay">Frame: 0</span>
+                        <span id="totalDurationDisplay">Total: 0s</span>
+                    </div>
+                    <div class="timeline-zoom">
+                        <i class="fas fa-search-minus" style="color: #64748b; font-size: 10px;"></i>
+                        <input type="range" id="timelineZoom" min="50" max="200" value="100"
+                            onchange="updateTimelineZoom(this.value)">
+                        <i class="fas fa-search-plus" style="color: #64748b; font-size: 10px;"></i>
+                    </div>
+                </div>
+                <div class="timeline-tracks" id="timelineTracks">
+                    <div class="timeline-ruler" id="timelineRuler"></div>
+                    <div class="timeline-slide-tracks" id="timelineSlideArea">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                    <div class="timeline-playhead" id="timelinePlayhead" style="left: 0;"></div>
+                </div>
             </div>
         </div>
 
@@ -703,6 +911,275 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
         let dragLayerStartX = 0;
         let dragLayerStartY = 0;
         const PREVIEW_SCALE = 0.25;
+
+        // ========== TIMELINE PLAYBACK STATE ==========
+        let isPlaying = false;
+        let currentFrame = 0;
+        let playbackInterval = null;
+        let timelineZoom = 1;
+        let isPlayheadDragging = false;
+
+        // ========== TIMELINE PLAYBACK FUNCTIONS ==========
+        function togglePlayback() {
+            if (isPlaying) {
+                pausePlayback();
+            } else {
+                startPlayback();
+            }
+        }
+
+        function startPlayback() {
+            const fps = templateDef.fps || 30;
+            const totalFrames = templateDef.slides.reduce((sum, s) => Math.max(sum, s.startFrame + s.durationFrames), 0) || 90;
+
+            isPlaying = true;
+            updatePlayButtonState();
+
+            playbackInterval = setInterval(() => {
+                currentFrame++;
+                if (currentFrame >= totalFrames) {
+                    currentFrame = 0; // Loop
+                }
+                updatePlayheadPosition();
+                updateCurrentFrameDisplay();
+
+                // Auto-select slide based on current frame
+                const slideIndex = getSlideAtFrame(currentFrame);
+                if (slideIndex !== selectedSlideIndex) {
+                    selectSlide(slideIndex);
+                }
+            }, 1000 / fps);
+        }
+
+        function pausePlayback() {
+            isPlaying = false;
+            if (playbackInterval) {
+                clearInterval(playbackInterval);
+                playbackInterval = null;
+            }
+            updatePlayButtonState();
+        }
+
+        function resetPlayhead() {
+            pausePlayback();
+            currentFrame = 0;
+            updatePlayheadPosition();
+            updateCurrentFrameDisplay();
+            if (templateDef.slides.length > 0) {
+                selectSlide(0);
+            }
+        }
+
+        function updatePlayButtonState() {
+            const btn = document.getElementById('btnPlayPause');
+            const icon = document.getElementById('playIcon');
+            if (btn && icon) {
+                if (isPlaying) {
+                    btn.classList.add('active');
+                    icon.className = 'fas fa-pause';
+                } else {
+                    btn.classList.remove('active');
+                    icon.className = 'fas fa-play';
+                }
+            }
+        }
+
+        function updateTimelineZoom(value) {
+            timelineZoom = parseInt(value) / 100;
+            renderTimeline();
+        }
+
+        function updatePlayheadPosition() {
+            const playhead = document.getElementById('timelinePlayhead');
+            const totalFrames = templateDef.slides.reduce((sum, s) => Math.max(sum, s.startFrame + s.durationFrames), 0) || 90;
+
+            if (playhead) {
+                const position = currentFrame * timelineZoom;
+                playhead.style.left = position + 'px';
+            }
+        }
+
+        function updateCurrentFrameDisplay() {
+            const display = document.getElementById('currentFrameDisplay');
+            const fps = templateDef.fps || 30;
+            if (display) {
+                const seconds = (currentFrame / fps).toFixed(1);
+                display.textContent = `Frame: ${currentFrame} (${seconds}s)`;
+            }
+        }
+
+        function getSlideAtFrame(frame) {
+            for (let i = 0; i < templateDef.slides.length; i++) {
+                const slide = templateDef.slides[i];
+                if (frame >= slide.startFrame && frame < slide.startFrame + slide.durationFrames) {
+                    return i;
+                }
+            }
+            return 0;
+        }
+
+        function attachPlayheadDragHandler() {
+            const playhead = document.getElementById('timelinePlayhead');
+            const tracksArea = document.getElementById('timelineTracks');
+
+            if (!playhead || !tracksArea) return;
+
+            playhead.addEventListener('mousedown', (e) => {
+                isPlayheadDragging = true;
+                pausePlayback();
+                e.preventDefault();
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isPlayheadDragging) return;
+
+                const tracksRect = tracksArea.getBoundingClientRect();
+                const x = e.clientX - tracksRect.left - 16; // Account for padding
+                const totalFrames = templateDef.slides.reduce((sum, s) => Math.max(sum, s.startFrame + s.durationFrames), 0) || 90;
+
+                currentFrame = Math.max(0, Math.min(totalFrames - 1, Math.round(x / timelineZoom)));
+                updatePlayheadPosition();
+                updateCurrentFrameDisplay();
+
+                // Update selected slide
+                const slideIndex = getSlideAtFrame(currentFrame);
+                if (slideIndex !== selectedSlideIndex) {
+                    selectSlide(slideIndex);
+                }
+            });
+
+            document.addEventListener('mouseup', () => {
+                isPlayheadDragging = false;
+            });
+        }
+
+        // ========== ANIMATION PREVIEW FUNCTIONS ==========
+        let animationPreviewTimeout = null;
+
+        function playLayerAnimation(layerIndex, phase = 'enter') {
+            if (selectedSlideIndex === null) return;
+
+            const layer = templateDef.slides[selectedSlideIndex].layers[layerIndex];
+            if (!layer) return;
+
+            const animConfig = layer.animation?.[phase];
+            if (!animConfig || animConfig.type === 'none') return;
+
+            const layerEl = document.querySelector(`.preview-layer[data-layer-index="${layerIndex}"]`);
+            if (!layerEl) return;
+
+            // Clear any existing animation
+            stopLayerAnimation(layerIndex);
+
+            // Get animation keyframes
+            const keyframes = getAnimationKeyframes(animConfig.type, phase);
+            const duration = (animConfig.durationFrames || 30) / (templateDef.fps || 30) * 1000;
+
+            // Apply animation
+            layerEl.style.animation = `${animConfig.type}-${phase} ${duration}ms ease-out forwards`;
+
+            // Create dynamic keyframes if not exists
+            createDynamicKeyframes(animConfig.type, phase);
+
+            // Clear animation after completion
+            animationPreviewTimeout = setTimeout(() => {
+                layerEl.style.animation = '';
+            }, duration + 100);
+        }
+
+        function stopLayerAnimation(layerIndex) {
+            if (animationPreviewTimeout) {
+                clearTimeout(animationPreviewTimeout);
+                animationPreviewTimeout = null;
+            }
+
+            const layerEl = document.querySelector(`.preview-layer[data-layer-index="${layerIndex}"]`);
+            if (layerEl) {
+                layerEl.style.animation = '';
+            }
+        }
+
+        function getAnimationKeyframes(type, phase) {
+            const keyframeMap = {
+                'fade-in': { from: { opacity: 0 }, to: { opacity: 1 } },
+                'fade-out': { from: { opacity: 1 }, to: { opacity: 0 } },
+                'slide-up': { from: { transform: 'translateY(50px)', opacity: 0 }, to: { transform: 'translateY(0)', opacity: 1 } },
+                'slide-down': { from: { transform: 'translateY(-50px)', opacity: 0 }, to: { transform: 'translateY(0)', opacity: 1 } },
+                'slide-left': { from: { transform: 'translateX(50px)', opacity: 0 }, to: { transform: 'translateX(0)', opacity: 1 } },
+                'slide-right': { from: { transform: 'translateX(-50px)', opacity: 0 }, to: { transform: 'translateX(0)', opacity: 1 } },
+                'zoom-in': { from: { transform: 'scale(0.5)', opacity: 0 }, to: { transform: 'scale(1)', opacity: 1 } },
+                'zoom-out': { from: { transform: 'scale(1.5)', opacity: 0 }, to: { transform: 'scale(1)', opacity: 1 } },
+                'bounce': { from: { transform: 'translateY(-30px)', opacity: 0 }, to: { transform: 'translateY(0)', opacity: 1 } },
+                'rotate': { from: { transform: 'rotate(-180deg)', opacity: 0 }, to: { transform: 'rotate(0)', opacity: 1 } }
+            };
+            return keyframeMap[type] || keyframeMap['fade-in'];
+        }
+
+        function createDynamicKeyframes(type, phase) {
+            const styleId = `anim-${type}-${phase}`;
+            if (document.getElementById(styleId)) return;
+
+            const keyframes = getAnimationKeyframes(type, phase);
+            const fromStyle = Object.entries(keyframes.from).map(([k, v]) => `${k.replace(/([A-Z])/g, '-$1').toLowerCase()}: ${v}`).join('; ');
+            const toStyle = Object.entries(keyframes.to).map(([k, v]) => `${k.replace(/([A-Z])/g, '-$1').toLowerCase()}: ${v}`).join('; ');
+
+            const style = document.createElement('style');
+            style.id = styleId;
+            style.textContent = `
+                @keyframes ${type}-${phase} {
+                    from { ${fromStyle}; }
+                    to { ${toStyle}; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // ========== VIDEO DURATION DETECTION ==========
+        function detectVideoDuration(videoEl) {
+            if (!videoEl || !videoEl.duration) return;
+
+            const durationSeconds = videoEl.duration;
+            const fps = templateDef.fps || 30;
+            const durationFrames = Math.ceil(durationSeconds * fps);
+
+            // Store duration in background object
+            if (selectedSlideIndex !== null) {
+                const slide = templateDef.slides[selectedSlideIndex];
+                if (slide.background) {
+                    slide.background.duration = durationSeconds;
+                    slide.background.durationFrames = durationFrames;
+                }
+
+                // Show duration notification
+                console.log(`Video duration detected: ${durationSeconds.toFixed(1)}s (${durationFrames} frames)`);
+
+                // Update properties panel if visible
+                renderSlideProperties();
+            }
+        }
+
+        function matchSlideDurationToVideo() {
+            if (selectedSlideIndex === null) return;
+
+            const slide = templateDef.slides[selectedSlideIndex];
+            if (!slide.background?.durationFrames) {
+                alert('No video duration available. Please wait for video to load.');
+                return;
+            }
+
+            slide.durationFrames = slide.background.durationFrames;
+
+            // Recalculate slide startFrames
+            let currentFrame = 0;
+            templateDef.slides.forEach(s => {
+                s.startFrame = currentFrame;
+                currentFrame += s.durationFrames;
+            });
+
+            renderSlideList();
+            renderTimeline();
+            renderSlideProperties();
+        }
 
         // ========== CORE FUNCTIONS (defined first for onclick handlers) ==========
 
@@ -928,19 +1405,69 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
         }
 
         function renderTimeline() {
-            const bar = document.getElementById('timelineBar');
-            const totalFrames = templateDef.slides.reduce((sum, s) => Math.max(sum, s.startFrame + s.durationFrames), 0);
+            const totalFrames = templateDef.slides.reduce((sum, s) => Math.max(sum, s.startFrame + s.durationFrames), 0) || 90;
+            const fps = templateDef.fps || 30;
 
-            bar.innerHTML = templateDef.slides.map((slide, index) => {
-                const widthPercent = (slide.durationFrames / totalFrames) * 100;
-                return `
-                    <div class="timeline-segment" 
-                         style="width: ${widthPercent}%"
-                         onclick="selectSlide(${index})">
-                        ${slide.name || 'S' + (index + 1)}
+            // Update duration display
+            const durationDisplay = document.getElementById('totalDurationDisplay');
+            if (durationDisplay) {
+                durationDisplay.textContent = `Total: ${(totalFrames / fps).toFixed(1)}s (${totalFrames} frames)`;
+            }
+
+            // Render ruler with time marks
+            const ruler = document.getElementById('timelineRuler');
+            if (ruler) {
+                const zoomLevel = parseInt(document.getElementById('timelineZoom')?.value || 100) / 100;
+                const rulerWidth = totalFrames * zoomLevel;
+                ruler.style.width = rulerWidth + 'px';
+
+                let rulerHtml = '';
+                // Add marks every second
+                for (let sec = 0; sec <= totalFrames / fps; sec++) {
+                    const leftPos = (sec * fps / totalFrames) * rulerWidth;
+                    rulerHtml += `<span class="timeline-ruler-mark" style="left: ${leftPos}px;">${sec}s</span>`;
+                }
+                ruler.innerHTML = rulerHtml;
+            }
+
+            // Render slide tracks with layer bars
+            const slideArea = document.getElementById('timelineSlideArea');
+            if (slideArea) {
+                const zoomLevel = parseInt(document.getElementById('timelineZoom')?.value || 100) / 100;
+                slideArea.style.width = (totalFrames * zoomLevel) + 'px';
+
+                slideArea.innerHTML = `
+                    <div class="timeline-slide-row">
+                        ${templateDef.slides.map((slide, index) => {
+                    const widthPx = slide.durationFrames * zoomLevel;
+                    const isActive = selectedSlideIndex === index;
+
+                    // Generate layer timing bars
+                    const layerBars = slide.layers.map(layer => {
+                        const timing = layer.timing || { startFrame: 0, endFrame: slide.durationFrames };
+                        const startPercent = (timing.startFrame / slide.durationFrames) * 100;
+                        const widthPercent = ((timing.endFrame - timing.startFrame) / slide.durationFrames) * 100;
+                        return `<div class="timeline-layer-bar ${layer.type}" 
+                                             style="margin-left: ${startPercent}%; width: ${widthPercent}%;"
+                                             title="${layer.fieldKey || layer.id}"></div>`;
+                    }).join('');
+
+                    return `
+                                <div class="timeline-segment ${isActive ? 'active' : ''}" 
+                                     style="width: ${widthPx}px; min-width: 40px;"
+                                     onclick="selectSlide(${index})"
+                                     title="${slide.name}: ${(slide.durationFrames / fps).toFixed(1)}s">
+                                    <span class="slide-label">${slide.name || 'S' + (index + 1)}</span>
+                                    <div class="timeline-layer-bars">${layerBars}</div>
+                                </div>
+                            `;
+                }).join('')}
                     </div>
                 `;
-            }).join('');
+            }
+
+            // Attach playhead drag handler
+            attachPlayheadDragHandler();
         }
 
         function renderPreview() {
@@ -953,10 +1480,27 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
             const slide = templateDef.slides[selectedSlideIndex];
             const bgColor = slide.background?.type === 'color' ? slide.background.src : '#2d2d44';
             let bgStyle = `background: ${bgColor};`;
+            let bgMediaHtml = '';
 
-            // Show background image/video placeholder
-            if (slide.background?.type === 'image' && slide.background.src && !slide.background.src.includes('{{')) {
-                bgStyle = `background: url('${slide.background.src}') center/cover no-repeat;`;
+            // Handle video/image backgrounds
+            if (slide.background?.src && !slide.background.src.includes('{{')) {
+                if (slide.background?.type === 'video') {
+                    bgMediaHtml = `
+                        <video id="bgVideo" autoplay loop muted playsinline
+                               style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;"
+                               onloadedmetadata="detectVideoDuration(this)">
+                            <source src="${slide.background.src}" type="video/mp4">
+                        </video>
+                    `;
+                    bgStyle = 'background: #000;';
+                } else if (slide.background?.type === 'image') {
+                    bgMediaHtml = `
+                        <img src="${slide.background.src}" 
+                             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;"
+                             alt="Background" />
+                    `;
+                    bgStyle = 'background: #000;';
+                }
             }
 
             let layersHtml = slide.layers.map((layer, layerIdx) => {
@@ -984,6 +1528,7 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
                                 font-weight: ${layer.style?.fontWeight || 'normal'};
                                 letter-spacing: ${(layer.style?.letterSpacing || 0) * PREVIEW_SCALE}px;
                                 text-shadow: ${layer.style?.textShadow || 'none'};
+                                z-index: 1;
                             ">
                             <span class="layer-label">${layer.fieldKey || 'text'}</span>
                             ${layer.defaultValue || layer.fieldKey || 'Text'}
@@ -1004,6 +1549,7 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
                                 width: ${w}px;
                                 height: ${h}px;
                                 border-radius: ${borderRadius};
+                                z-index: 1;
                             ">
                             <span class="layer-label">${layer.fieldKey || 'image'}</span>
                             <i class="fas fa-image" style="font-size: ${Math.min(w, h) * 0.4}px; color: rgba(255,255,255,0.5);"></i>
@@ -1015,6 +1561,7 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
 
             frame.innerHTML = `
                 <div class="preview-canvas-container" style="${bgStyle}" id="previewCanvas">
+                    ${bgMediaHtml}
                     ${layersHtml}
                 </div>
             `;
@@ -1162,6 +1709,17 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
                         <p style="font-size: 11px; color: #16a34a; margin-top: 4px;">
                             <i class="fas fa-check-circle"></i> Asset uploaded
                         </p>
+                    ` : ''}
+                    ${slide.background?.type === 'video' && slide.background?.duration ? `
+                        <div style="margin-top: 8px; padding: 8px; background: #f1f5f9; border-radius: 6px;">
+                            <p style="font-size: 12px; color: #475569; margin: 0 0 6px 0;">
+                                <i class="fas fa-clock"></i> Video Duration: <strong>${slide.background.duration.toFixed(1)}s</strong> 
+                                (${slide.background.durationFrames} frames)
+                            </p>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="matchSlideDurationToVideo()">
+                                <i class="fas fa-sync"></i> Match Slide Duration to Video
+                            </button>
+                        </div>
                     ` : ''}
                 </div>
                 
@@ -1348,17 +1906,44 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
                     </div>
                 </div>
                 
+                <div class="section-title" style="margin-top: 16px; font-size: 11px;">Layer Timing (within slide)</div>
+                <div class="property-row">
+                    <div class="property-group">
+                        <label>Start Frame</label>
+                        <input type="number" value="${layer.timing?.startFrame || 0}" 
+                               min="0" max="${templateDef.slides[selectedSlideIndex].durationFrames}"
+                               onchange="updateLayerTiming('startFrame', parseInt(this.value))">
+                    </div>
+                    <div class="property-group">
+                        <label>End Frame</label>
+                        <input type="number" value="${layer.timing?.endFrame || templateDef.slides[selectedSlideIndex].durationFrames}" 
+                               min="0" max="${templateDef.slides[selectedSlideIndex].durationFrames}"
+                               onchange="updateLayerTiming('endFrame', parseInt(this.value))">
+                    </div>
+                </div>
+                <p style="font-size: 10px; color: #64748b; margin-top: 4px;">
+                    Layer visible from frame ${layer.timing?.startFrame || 0} to ${layer.timing?.endFrame || templateDef.slides[selectedSlideIndex].durationFrames} 
+                    (${(((layer.timing?.endFrame || templateDef.slides[selectedSlideIndex].durationFrames) - (layer.timing?.startFrame || 0)) / (templateDef.fps || 30)).toFixed(1)}s)
+                </p>
+                
                 ${typeSpecificHtml}
                 
+                <div class="section-title" style="margin-top: 16px; font-size: 11px;">Animations</div>
                 <div class="property-group">
                     <label>Enter Animation</label>
-                    <select onchange="updateLayerAnimation('enter', 'type', this.value)">
-                        ${Object.entries(animations).map(([key, label]) => `
-                            <option value="${key}" ${layer.animation?.enter?.type === key ? 'selected' : ''}>
-                                ${label}
-                            </option>
-                        `).join('')}
-                    </select>
+                    <div style="display: flex; gap: 8px;">
+                        <select style="flex: 1;" onchange="updateLayerAnimation('enter', 'type', this.value)">
+                            ${Object.entries(animations).map(([key, label]) => `
+                                <option value="${key}" ${layer.animation?.enter?.type === key ? 'selected' : ''}>
+                                    ${label}
+                                </option>
+                            `).join('')}
+                        </select>
+                        <button type="button" class="btn btn-sm btn-secondary" onclick="playLayerAnimation(${selectedLayerIndex}, 'enter')" 
+                                title="Preview Enter Animation" ${layer.animation?.enter?.type === 'none' ? 'disabled' : ''}>
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="property-row">
                     <div class="property-group">
@@ -1375,14 +1960,20 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
                 
                 <div class="property-group" style="margin-top: 15px;">
                     <label>Exit Animation</label>
-                    <select onchange="updateLayerAnimation('exit', 'type', this.value)">
-                        <option value="" ${!layer.animation?.exit?.type ? 'selected' : ''}>None (stays visible)</option>
-                        ${Object.entries(animations).map(([key, label]) => `
-                            <option value="${key}" ${layer.animation?.exit?.type === key ? 'selected' : ''}>
-                                ${label}
-                            </option>
-                        `).join('')}
-                    </select>
+                    <div style="display: flex; gap: 8px;">
+                        <select style="flex: 1;" onchange="updateLayerAnimation('exit', 'type', this.value)">
+                            <option value="" ${!layer.animation?.exit?.type ? 'selected' : ''}>None (stays visible)</option>
+                            ${Object.entries(animations).map(([key, label]) => `
+                                <option value="${key}" ${layer.animation?.exit?.type === key ? 'selected' : ''}>
+                                    ${label}
+                                </option>
+                            `).join('')}
+                        </select>
+                        <button type="button" class="btn btn-sm btn-secondary" onclick="playLayerAnimation(${selectedLayerIndex}, 'exit')" 
+                                title="Preview Exit Animation" ${!layer.animation?.exit?.type || layer.animation?.exit?.type === 'none' ? 'disabled' : ''}>
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="property-row">
                     <div class="property-group">
@@ -1417,6 +2008,7 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
                 type: type,
                 fieldKey: type === 'text' ? 'title' : 'couplePhoto',
                 position: { x: 540, y: 500, anchor: 'center' },
+                timing: { startFrame: 0, endFrame: slide.durationFrames },
                 animation: { enter: { type: 'fade-in', durationFrames: 30 } }
             };
 
@@ -1473,6 +2065,29 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
             if (!layer.size) layer.size = { width: 400, height: 400 };
             layer.size[key] = value;
             renderPreview();
+        }
+
+        function updateLayerTiming(key, value) {
+            const layer = templateDef.slides[selectedSlideIndex].layers[selectedLayerIndex];
+            const slide = templateDef.slides[selectedSlideIndex];
+
+            if (!layer.timing) {
+                layer.timing = { startFrame: 0, endFrame: slide.durationFrames };
+            }
+
+            layer.timing[key] = Math.max(0, Math.min(value, slide.durationFrames));
+
+            // Ensure startFrame <= endFrame
+            if (layer.timing.startFrame > layer.timing.endFrame) {
+                if (key === 'startFrame') {
+                    layer.timing.endFrame = layer.timing.startFrame;
+                } else {
+                    layer.timing.startFrame = layer.timing.endFrame;
+                }
+            }
+
+            renderTimeline();
+            renderLayerProperties();
         }
 
         function updateLayerAnimation(phase, key, value) {
