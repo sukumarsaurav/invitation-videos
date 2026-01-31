@@ -374,17 +374,65 @@ $animationPresets = [
             display: flex;
             align-items: center;
             justify-content: center;
+            cursor: grab;
+            transition: box-shadow 0.15s ease, outline 0.15s ease;
+            user-select: none;
+        }
+
+        .preview-layer:hover {
+            outline: 2px dashed rgba(151, 7, 71, 0.6);
+            outline-offset: 4px;
+        }
+
+        .preview-layer.selected {
+            outline: 2px solid #970747;
+            outline-offset: 4px;
+            box-shadow: 0 0 0 1px rgba(151, 7, 71, 0.3);
+        }
+
+        .preview-layer.dragging {
+            cursor: grabbing;
+            opacity: 0.9;
+            outline: 2px solid #22c55e;
+            outline-offset: 4px;
         }
 
         .preview-layer.text {
             color: white;
-            font-family: 'Inter', sans-serif;
+            text-align: center;
+            white-space: nowrap;
         }
 
         .preview-layer.image {
-            border-radius: 50%;
             background: rgba(255, 255, 255, 0.2);
             border: 2px dashed rgba(255, 255, 255, 0.5);
+        }
+
+        .layer-label {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 9px;
+            background: #970747;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.15s;
+        }
+
+        .preview-layer:hover .layer-label,
+        .preview-layer.selected .layer-label {
+            opacity: 1;
+        }
+
+        .preview-canvas-container {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
         }
 
         .header-actions {
@@ -620,6 +668,42 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
         let previewMode = 'css';
         const REMOTION_STUDIO_URL = 'http://localhost:3000';
 
+        // ========== GOOGLE FONTS LOADER ==========
+        const loadedFonts = new Set();
+
+        function loadGoogleFont(fontFamily) {
+            if (!fontFamily || loadedFonts.has(fontFamily)) return;
+
+            loadedFonts.add(fontFamily);
+            const formattedName = fontFamily.replace(/\s+/g, '+');
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = `https://fonts.googleapis.com/css2?family=${formattedName}:wght@400;500;600;700&display=swap`;
+            document.head.appendChild(link);
+            console.log('Loaded font:', fontFamily);
+        }
+
+        // Load all fonts from template on init
+        function loadAllTemplateFonts() {
+            if (!templateDef.slides) return;
+            templateDef.slides.forEach(slide => {
+                slide.layers?.forEach(layer => {
+                    if (layer.type === 'text' && layer.style?.fontFamily) {
+                        loadGoogleFont(layer.style.fontFamily);
+                    }
+                });
+            });
+        }
+
+        // ========== DRAG-AND-DROP STATE ==========
+        let isDragging = false;
+        let dragLayerIndex = null;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let dragLayerStartX = 0;
+        let dragLayerStartY = 0;
+        const PREVIEW_SCALE = 0.25;
+
         // ========== CORE FUNCTIONS (defined first for onclick handlers) ==========
 
         function addSlide() {
@@ -789,6 +873,7 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
 
         // ========== INITIALIZATION ==========
         document.addEventListener('DOMContentLoaded', () => {
+            loadAllTemplateFonts(); // Pre-load all fonts from template
             renderSlideList();
             renderTimeline();
             if (templateDef.slides.length > 0) {
@@ -867,38 +952,61 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
 
             const slide = templateDef.slides[selectedSlideIndex];
             const bgColor = slide.background?.type === 'color' ? slide.background.src : '#2d2d44';
+            let bgStyle = `background: ${bgColor};`;
 
-            let layersHtml = slide.layers.map(layer => {
-                const scale = 0.25; // Preview scale
-                const x = (layer.position?.x || 540) * scale;
-                const y = (layer.position?.y || 500) * scale;
+            // Show background image/video placeholder
+            if (slide.background?.type === 'image' && slide.background.src && !slide.background.src.includes('{{')) {
+                bgStyle = `background: url('${slide.background.src}') center/cover no-repeat;`;
+            }
+
+            let layersHtml = slide.layers.map((layer, layerIdx) => {
+                const x = (layer.position?.x || 540) * PREVIEW_SCALE;
+                const y = (layer.position?.y || 500) * PREVIEW_SCALE;
+                const isSelected = selectedLayerIndex === layerIdx;
+                const selectedClass = isSelected ? 'selected' : '';
 
                 if (layer.type === 'text') {
-                    const fontSize = (layer.style?.fontSize || 48) * scale;
+                    const fontSize = (layer.style?.fontSize || 48) * PREVIEW_SCALE;
+                    const fontFamily = layer.style?.fontFamily || 'Inter';
+                    // Load font if not already loaded
+                    loadGoogleFont(fontFamily);
+
                     return `
-                        <div class="preview-layer text" style="
-                            left: ${x}px;
-                            top: ${y}px;
-                            transform: translate(-50%, -50%);
-                            font-size: ${fontSize}px;
-                            color: ${layer.style?.color || '#FFFFFF'};
-                            font-weight: ${layer.style?.fontWeight || 'normal'};
-                        ">
-                            ${layer.defaultValue || layer.fieldKey}
+                        <div class="preview-layer text ${selectedClass}" 
+                             data-layer-index="${layerIdx}"
+                             style="
+                                left: ${x}px;
+                                top: ${y}px;
+                                transform: translate(-50%, -50%);
+                                font-size: ${fontSize}px;
+                                font-family: '${fontFamily}', sans-serif;
+                                color: ${layer.style?.color || '#FFFFFF'};
+                                font-weight: ${layer.style?.fontWeight || 'normal'};
+                                letter-spacing: ${(layer.style?.letterSpacing || 0) * PREVIEW_SCALE}px;
+                                text-shadow: ${layer.style?.textShadow || 'none'};
+                            ">
+                            <span class="layer-label">${layer.fieldKey || 'text'}</span>
+                            ${layer.defaultValue || layer.fieldKey || 'Text'}
                         </div>
                     `;
                 } else if (layer.type === 'image') {
-                    const w = (layer.size?.width || 200) * scale;
-                    const h = (layer.size?.height || 200) * scale;
+                    const w = (layer.size?.width || 200) * PREVIEW_SCALE;
+                    const h = (layer.size?.height || 200) * PREVIEW_SCALE;
+                    const borderRadius = layer.style?.borderRadius ? (layer.style.borderRadius * PREVIEW_SCALE) + 'px' : '50%';
+
                     return `
-                        <div class="preview-layer image" style="
-                            left: ${x}px;
-                            top: ${y}px;
-                            transform: translate(-50%, -50%);
-                            width: ${w}px;
-                            height: ${h}px;
-                        ">
-                            <i class="fas fa-image"></i>
+                        <div class="preview-layer image ${selectedClass}" 
+                             data-layer-index="${layerIdx}"
+                             style="
+                                left: ${x}px;
+                                top: ${y}px;
+                                transform: translate(-50%, -50%);
+                                width: ${w}px;
+                                height: ${h}px;
+                                border-radius: ${borderRadius};
+                            ">
+                            <span class="layer-label">${layer.fieldKey || 'image'}</span>
+                            <i class="fas fa-image" style="font-size: ${Math.min(w, h) * 0.4}px; color: rgba(255,255,255,0.5);"></i>
                         </div>
                     `;
                 }
@@ -906,10 +1014,87 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
             }).join('');
 
             frame.innerHTML = `
-                <div style="position: absolute; inset: 0; background: ${bgColor};">
+                <div class="preview-canvas-container" style="${bgStyle}" id="previewCanvas">
                     ${layersHtml}
                 </div>
             `;
+
+            // Attach event listeners for drag-and-drop
+            attachPreviewEventListeners();
+        }
+
+        // ========== DRAG-AND-DROP HANDLERS ==========
+        function attachPreviewEventListeners() {
+            const canvas = document.getElementById('previewCanvas');
+            if (!canvas) return;
+
+            // Click to select layer
+            canvas.addEventListener('click', (e) => {
+                const layerEl = e.target.closest('.preview-layer');
+                if (layerEl && !isDragging) {
+                    const layerIdx = parseInt(layerEl.dataset.layerIndex);
+                    selectLayer(selectedSlideIndex, layerIdx);
+                }
+            });
+
+            // Mouse down to start drag
+            canvas.addEventListener('mousedown', (e) => {
+                const layerEl = e.target.closest('.preview-layer');
+                if (!layerEl) return;
+
+                const layerIdx = parseInt(layerEl.dataset.layerIndex);
+                const layer = templateDef.slides[selectedSlideIndex].layers[layerIdx];
+
+                isDragging = true;
+                dragLayerIndex = layerIdx;
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+                dragLayerStartX = layer.position?.x || 540;
+                dragLayerStartY = layer.position?.y || 500;
+
+                layerEl.classList.add('dragging');
+                e.preventDefault();
+            });
+
+            // Mouse move to drag
+            document.addEventListener('mousemove', handleDragMove);
+            document.addEventListener('mouseup', handleDragEnd);
+        }
+
+        function handleDragMove(e) {
+            if (!isDragging || dragLayerIndex === null) return;
+
+            const deltaX = (e.clientX - dragStartX) / PREVIEW_SCALE;
+            const deltaY = (e.clientY - dragStartY) / PREVIEW_SCALE;
+
+            const layer = templateDef.slides[selectedSlideIndex].layers[dragLayerIndex];
+            layer.position = layer.position || { x: 540, y: 500, anchor: 'center' };
+            layer.position.x = Math.round(dragLayerStartX + deltaX);
+            layer.position.y = Math.round(dragLayerStartY + deltaY);
+
+            // Update preview position visually without full re-render
+            const layerEl = document.querySelector(`.preview-layer[data-layer-index="${dragLayerIndex}"]`);
+            if (layerEl) {
+                layerEl.style.left = (layer.position.x * PREVIEW_SCALE) + 'px';
+                layerEl.style.top = (layer.position.y * PREVIEW_SCALE) + 'px';
+            }
+        }
+
+        function handleDragEnd(e) {
+            if (!isDragging) return;
+
+            const layerEl = document.querySelector(`.preview-layer[data-layer-index="${dragLayerIndex}"]`);
+            if (layerEl) {
+                layerEl.classList.remove('dragging');
+            }
+
+            // Select the dragged layer and update properties panel
+            if (dragLayerIndex !== null) {
+                selectLayer(selectedSlideIndex, dragLayerIndex);
+            }
+
+            isDragging = false;
+            dragLayerIndex = null;
         }
 
         function selectSlide(index) {
