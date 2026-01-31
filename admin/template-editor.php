@@ -204,6 +204,28 @@ $animationPresets = [
             color: #1e293b;
         }
 
+        .layer-item.hidden-layer {
+            opacity: 0.5;
+        }
+
+        .layer-item.locked-layer {
+            background: #fef3c7;
+        }
+
+        .btn-icon-sm.inactive,
+        .btn-icon-sm.inactive i {
+            color: #94a3b8;
+        }
+
+        .btn-icon-sm.active {
+            color: #970747;
+        }
+
+        .btn-playback.active {
+            background: rgba(151, 7, 71, 0.2);
+            color: #970747;
+        }
+
         .layer-item i {
             width: 16px;
         }
@@ -1048,11 +1070,20 @@ $animationPresets = [
             <div class="preview-header"
                 style="display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: white; border-bottom: 1px solid #e2e8f0; position: absolute; top: 0; left: 0; right: 0; z-index: 10;">
                 <span style="font-size: 12px; font-weight: 600;">Preview</span>
-                <div style="display: flex; gap: 4px;">
-                    <button type="button" id="btnCssPreview" class="btn btn-sm btn-primary"
-                        onclick="setPreviewMode('css')">Simple</button>
-                    <button type="button" id="btnRemotionPreview" class="btn btn-sm btn-secondary"
-                        onclick="setPreviewMode('remotion')">Remotion</button>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <div style="display: flex; gap: 4px; align-items: center;" title="Preview Zoom">
+                        <i class="fas fa-search-minus" style="font-size: 10px; color: #64748b;"></i>
+                        <input type="range" id="previewZoom" min="50" max="150" value="100"
+                            onchange="updatePreviewZoom(this.value)" style="width: 60px; height: 4px;">
+                        <span id="previewZoomLabel"
+                            style="font-size: 10px; color: #64748b; min-width: 32px;">100%</span>
+                    </div>
+                    <div style="display: flex; gap: 4px;">
+                        <button type="button" id="btnCssPreview" class="btn btn-sm btn-primary"
+                            onclick="setPreviewMode('css')" title="Simple CSS Preview">Simple</button>
+                        <button type="button" id="btnRemotionPreview" class="btn btn-sm btn-secondary"
+                            onclick="setPreviewMode('remotion')" title="Remotion Studio Preview">Remotion</button>
+                    </div>
                 </div>
             </div>
             <div class="preview-frame" id="previewFrame">
@@ -1065,11 +1096,17 @@ $animationPresets = [
             <div class="timeline-container" id="timelineContainer">
                 <div class="timeline-controls">
                     <button type="button" class="btn-playback" id="btnPlayPause" onclick="togglePlayback()"
-                        title="Play/Pause">
+                        title="Play/Pause (Space)">
                         <i class="fas fa-play" id="playIcon"></i>
                     </button>
                     <button type="button" class="btn-playback" onclick="resetPlayhead()" title="Reset">
                         <i class="fas fa-undo"></i>
+                    </button>
+                    <button type="button" class="btn-playback" onclick="stepFrame(-1)" title="Previous Frame (←)">
+                        <i class="fas fa-step-backward"></i>
+                    </button>
+                    <button type="button" class="btn-playback" onclick="stepFrame(1)" title="Next Frame (→)">
+                        <i class="fas fa-step-forward"></i>
                     </button>
                     <div class="timeline-info">
                         <span class="current-frame" id="currentFrameDisplay">Frame: 0</span>
@@ -1078,9 +1115,15 @@ $animationPresets = [
                     <div class="timeline-zoom">
                         <i class="fas fa-search-minus" style="color: #64748b; font-size: 10px;"></i>
                         <input type="range" id="timelineZoom" min="50" max="200" value="100"
-                            onchange="updateTimelineZoom(this.value)">
+                            onchange="updateTimelineZoom(this.value)" title="Timeline Zoom">
                         <i class="fas fa-search-plus" style="color: #64748b; font-size: 10px;"></i>
+                        <span id="timelineZoomIndicator"
+                            style="font-size: 10px; color: #64748b; min-width: 32px;">100%</span>
                     </div>
+                    <button type="button" id="btnSnapGrid" class="btn-playback" onclick="toggleSnapToGrid()"
+                        title="Snap to Grid (G)" style="margin-left: 8px;">
+                        <i class="fas fa-th"></i>
+                    </button>
                 </div>
                 <div class="timeline-tracks" id="timelineTracks">
                     <div class="timeline-ruler" id="timelineRuler"></div>
@@ -1335,6 +1378,36 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
                         renderSlideProperties();
                     }
                 }
+            }
+            // Copy: Cmd/Ctrl + C
+            if ((e.metaKey || e.ctrlKey) && e.key === 'c') {
+                if (selectedLayerIndex !== null) {
+                    e.preventDefault();
+                    copyLayer();
+                }
+                return;
+            }
+            // Paste: Cmd/Ctrl + V
+            if ((e.metaKey || e.ctrlKey) && e.key === 'v') {
+                if (clipboardLayer) {
+                    e.preventDefault();
+                    pasteLayer();
+                }
+                return;
+            }
+            // Duplicate: Cmd/Ctrl + D
+            if ((e.metaKey || e.ctrlKey) && e.key === 'd') {
+                if (selectedLayerIndex !== null) {
+                    e.preventDefault();
+                    duplicateLayer();
+                }
+                return;
+            }
+            // Toggle Grid: G
+            if (e.key === 'g' || e.key === 'G') {
+                e.preventDefault();
+                toggleSnapToGrid();
+                return;
             }
         });
 
@@ -1635,6 +1708,158 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
             }
         }
 
+        // ========== PROPERTIES VIDEO PREVIEW CONTROLS ==========
+        function togglePropertiesVideoPlayback() {
+            const video = document.getElementById('propertiesVideoPreview');
+            const icon = document.getElementById('propertiesVideoPlayIcon');
+            if (!video) return;
+
+            if (video.paused) {
+                video.play();
+                if (icon) icon.className = 'fas fa-pause';
+            } else {
+                video.pause();
+                if (icon) icon.className = 'fas fa-play';
+            }
+        }
+
+        // ========== STEP FRAME CONTROLS ==========
+        function stepFrame(direction) {
+            const totalFrames = templateDef.slides.reduce((sum, s) => Math.max(sum, s.startFrame + s.durationFrames), 0) || 90;
+            currentFrame = Math.max(0, Math.min(totalFrames - 1, currentFrame + direction));
+            updatePlayheadPosition();
+            updateCurrentFrameDisplay();
+            updatePreviewAtFrame(currentFrame);
+
+            // Update slide selection if needed
+            const slideIndex = getSlideAtFrame(currentFrame);
+            if (slideIndex !== selectedSlideIndex) {
+                selectSlide(slideIndex);
+            }
+        }
+
+        // ========== PREVIEW ZOOM CONTROLS ==========
+        let previewZoomLevel = 100;
+
+        function updatePreviewZoom(value) {
+            previewZoomLevel = parseInt(value);
+            const previewFrame = document.getElementById('previewFrame');
+            const label = document.getElementById('previewZoomLabel');
+
+            if (previewFrame) {
+                previewFrame.style.transform = `scale(${previewZoomLevel / 100})`;
+                previewFrame.style.transformOrigin = 'center center';
+            }
+            if (label) {
+                label.textContent = `${previewZoomLevel}%`;
+            }
+        }
+
+        // ========== LAYER VISIBILITY TOGGLE ==========
+        function toggleLayerVisibility(slideIdx, layerIdx) {
+            const layer = templateDef.slides[slideIdx].layers[layerIdx];
+            layer.visible = !(layer.visible !== false); // Default to visible
+            renderSlideList();
+            renderPreview();
+            renderTimeline();
+        }
+
+        function toggleLayerLock(slideIdx, layerIdx) {
+            const layer = templateDef.slides[slideIdx].layers[layerIdx];
+            layer.locked = !layer.locked;
+            renderSlideList();
+            renderPreview();
+        }
+
+        // ========== SNAP TO GRID ==========
+        let snapToGrid = false;
+        const GRID_SIZE = 20;
+
+        function toggleSnapToGrid() {
+            snapToGrid = !snapToGrid;
+            const btn = document.getElementById('btnSnapGrid');
+            if (btn) {
+                btn.classList.toggle('active', snapToGrid);
+            }
+            console.log('Snap to grid:', snapToGrid);
+        }
+
+        function snapPosition(value) {
+            if (!snapToGrid) return value;
+            return Math.round(value / GRID_SIZE) * GRID_SIZE;
+        }
+
+        // ========== COPY/PASTE LAYERS ==========
+        let clipboardLayer = null;
+
+        function copyLayer() {
+            if (selectedSlideIndex === null || selectedLayerIndex === null) return;
+            clipboardLayer = JSON.parse(JSON.stringify(templateDef.slides[selectedSlideIndex].layers[selectedLayerIndex]));
+            clipboardLayer.id = null; // Will be regenerated on paste
+            console.log('Layer copied to clipboard');
+        }
+
+        function pasteLayer() {
+            if (!clipboardLayer || selectedSlideIndex === null) return;
+            saveState('paste layer');
+
+            const newLayer = JSON.parse(JSON.stringify(clipboardLayer));
+            newLayer.id = newLayer.type + '_' + Date.now();
+            // Offset position slightly to show paste
+            if (newLayer.position) {
+                newLayer.position.x += 20;
+                newLayer.position.y += 20;
+            }
+
+            templateDef.slides[selectedSlideIndex].layers.push(newLayer);
+            renderSlideList();
+            renderPreview();
+            renderTimeline();
+            selectLayer(selectedSlideIndex, templateDef.slides[selectedSlideIndex].layers.length - 1);
+        }
+
+        function duplicateLayer() {
+            if (selectedSlideIndex === null || selectedLayerIndex === null) return;
+            copyLayer();
+            pasteLayer();
+        }
+
+        // ========== TIMELINE SCRUBBING WITH ANIMATION ==========
+        function scrubToFrame(frame) {
+            const totalFrames = templateDef.slides.reduce((sum, s) => Math.max(sum, s.startFrame + s.durationFrames), 0) || 90;
+            currentFrame = Math.max(0, Math.min(totalFrames - 1, frame));
+            updatePlayheadPosition();
+            updateCurrentFrameDisplay();
+            updatePreviewAtFrame(currentFrame);
+
+            // Sync video background if present
+            syncVideoToFrame(currentFrame);
+
+            const slideIndex = getSlideAtFrame(currentFrame);
+            if (slideIndex !== selectedSlideIndex) {
+                selectSlide(slideIndex);
+            }
+        }
+
+        function syncVideoToFrame(frame) {
+            const video = document.getElementById('bgVideo');
+            if (!video || !templateDef.slides[selectedSlideIndex]) return;
+
+            const slide = templateDef.slides[selectedSlideIndex];
+            const localFrame = frame - slide.startFrame;
+            const fps = templateDef.fps || 30;
+            video.currentTime = localFrame / fps;
+        }
+
+        // ========== TIMELINE ZOOM INDICATOR ==========
+        function updateTimelineZoom(value) {
+            const indicator = document.getElementById('timelineZoomIndicator');
+            if (indicator) {
+                indicator.textContent = `${value}%`;
+            }
+            renderTimeline();
+        }
+
         function matchSlideDurationToVideo() {
             if (selectedSlideIndex === null) return;
 
@@ -1845,6 +2070,37 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
             if (templateDef.slides.length > 0) {
                 selectSlide(0);
             }
+
+            // Add timeline click-to-scrub
+            const timelineTracks = document.getElementById('timelineTracks');
+            if (timelineTracks) {
+                let isScrubbing = false;
+
+                const handleScrub = (e) => {
+                    const rect = timelineTracks.getBoundingClientRect();
+                    const x = e.clientX - rect.left + timelineTracks.scrollLeft;
+                    const zoomLevel = parseInt(document.getElementById('timelineZoom')?.value || 100) / 100;
+                    const frame = Math.round(x / zoomLevel);
+                    scrubToFrame(frame);
+                };
+
+                timelineTracks.addEventListener('mousedown', (e) => {
+                    // Only scrub if clicking on empty space or ruler
+                    if (e.target.closest('.timeline-layer-segment') || e.target.closest('.timeline-slide-bar')) return;
+                    isScrubbing = true;
+                    handleScrub(e);
+                });
+
+                document.addEventListener('mousemove', (e) => {
+                    if (isScrubbing) {
+                        handleScrub(e);
+                    }
+                });
+
+                document.addEventListener('mouseup', () => {
+                    isScrubbing = false;
+                });
+            }
         });
 
         function renderSlideList() {
@@ -1870,20 +2126,28 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
                     </div>
                     <div class="layer-list">
                         ${slide.layers.map((layer, li) => `
-                            <div class="layer-item ${selectedSlideIndex === index && selectedLayerIndex === li ? 'active' : ''}" onclick="event.stopPropagation(); selectLayer(${index}, ${li})">
+                            <div class="layer-item ${selectedSlideIndex === index && selectedLayerIndex === li ? 'active' : ''} ${layer.visible === false ? 'hidden-layer' : ''} ${layer.locked ? 'locked-layer' : ''}" 
+                                 onclick="event.stopPropagation(); selectLayer(${index}, ${li})">
                                 <span>
                                     <i class="fas fa-${layer.type === 'text' ? 'font' : 'image'}"></i>
                                     ${layer.fieldKey || layer.id}
                                 </span>
                                 <div class="layer-actions" onclick="event.stopPropagation()">
+                                    <button type="button" class="btn-icon-sm ${layer.visible === false ? 'inactive' : ''}" 
+                                            onclick="toggleLayerVisibility(${index}, ${li})" 
+                                            title="${layer.visible === false ? 'Show Layer' : 'Hide Layer'}">
+                                        <i class="fas fa-${layer.visible === false ? 'eye-slash' : 'eye'}"></i>
+                                    </button>
+                                    <button type="button" class="btn-icon-sm ${layer.locked ? 'active' : ''}" 
+                                            onclick="toggleLayerLock(${index}, ${li})" 
+                                            title="${layer.locked ? 'Unlock Layer' : 'Lock Layer'}">
+                                        <i class="fas fa-${layer.locked ? 'lock' : 'lock-open'}"></i>
+                                    </button>
                                     <button type="button" class="btn-icon-sm" onclick="moveLayer(${index}, ${li}, -1)" title="Move Up" ${li === 0 ? 'disabled' : ''}>
                                         <i class="fas fa-chevron-up"></i>
                                     </button>
                                     <button type="button" class="btn-icon-sm" onclick="moveLayer(${index}, ${li}, 1)" title="Move Down" ${li === slide.layers.length - 1 ? 'disabled' : ''}>
                                         <i class="fas fa-chevron-down"></i>
-                                    </button>
-                                    <button type="button" class="btn-icon-sm" onclick="duplicateLayer(${index}, ${li})" title="Duplicate">
-                                        <i class="fas fa-copy"></i>
                                     </button>
                                 </div>
                             </div>
@@ -2385,7 +2649,28 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
                 </div>
                 <div class="property-group">
                     <label>Background Source</label>
-                    ${slide.background?.type !== 'color' ? `
+                    ${slide.background?.type === 'color' ? `
+                        <!-- COLOR BACKGROUND: Native color picker + text input -->
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <input type="color" 
+                                   value="${slide.background?.src?.startsWith('#') ? slide.background.src : '#1a1a2e'}" 
+                                   onchange="updateSlideBackground('src', this.value)"
+                                   style="width: 50px; height: 36px; padding: 2px; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer;">
+                            <input type="text" value="${slide.background?.src || '#1a1a2e'}" 
+                                   placeholder="#1a1a2e"
+                                   onchange="updateSlideBackground('src', this.value)"
+                                   style="flex: 1;">
+                        </div>
+                        <div style="display: flex; gap: 4px; margin-top: 8px; flex-wrap: wrap;">
+                            ${['#1a1a2e', '#0f172a', '#1e293b', '#2d2d44', '#1f2937', '#111827', '#000000', '#ffffff'].map(c => `
+                                <button type="button" 
+                                        onclick="updateSlideBackground('src', '${c}')" 
+                                        style="width: 24px; height: 24px; background: ${c}; border: 2px solid ${slide.background?.src === c ? '#970747' : '#e2e8f0'}; border-radius: 4px; cursor: pointer;"
+                                        title="${c}"></button>
+                            `).join('')}
+                        </div>
+                    ` : `
+                        <!-- VIDEO/IMAGE BACKGROUND: Upload + URL input -->
                         <div style="display: flex; gap: 8px; margin-bottom: 8px;">
                             <button type="button" id="uploadAssetBtn" class="btn btn-secondary btn-sm" 
                                     onclick="uploadBackgroundAsset('${slide.background?.type || 'video'}')" style="flex-shrink: 0;">
@@ -2395,16 +2680,50 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
                                 Max: ${slide.background?.type === 'image' ? '10MB' : '50MB'}
                             </span>
                         </div>
-                    ` : ''}
-                    <input type="text" value="${slide.background?.src || ''}" 
-                           placeholder="${slide.background?.type === 'color' ? '#1a1a2e' : 'S3 URL or {{fieldKey}}'}"
-                           onchange="updateSlideBackground('src', this.value)"
-                           style="${slide.background?.src && slide.background?.type !== 'color' ? 'font-size: 11px;' : ''}">
-                    ${slide.background?.src && slide.background?.type !== 'color' ? `
-                        <p style="font-size: 11px; color: #16a34a; margin-top: 4px;">
-                            <i class="fas fa-check-circle"></i> Asset uploaded
-                        </p>
-                    ` : ''}
+                        <input type="text" value="${slide.background?.src || ''}" 
+                               placeholder="S3 URL or {{fieldKey}}"
+                               onchange="updateSlideBackground('src', this.value)"
+                               style="${slide.background?.src ? 'font-size: 11px;' : ''}">
+                        
+                        ${slide.background?.src && !slide.background.src.includes('{{') ? `
+                            <!-- MEDIA PREVIEW -->
+                            <div style="margin-top: 8px; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; position: relative;">
+                                ${slide.background?.type === 'video' ? `
+                                    <video id="propertiesVideoPreview" 
+                                           style="width: 100%; height: 100px; object-fit: cover; background: #000;"
+                                           onloadeddata="this.parentElement.querySelector('.loading-spinner')?.remove()"
+                                           onerror="this.parentElement.innerHTML='<p style=\\'color: #ef4444; padding: 12px; font-size: 12px;\\'><i class=\\'fas fa-exclamation-triangle\\'></i> Failed to load video</p>'">
+                                        <source src="${slide.background.src}" type="video/mp4">
+                                    </video>
+                                    <div class="loading-spinner" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5);">
+                                        <i class="fas fa-spinner fa-spin" style="color: white; font-size: 20px;"></i>
+                                    </div>
+                                    <div style="position: absolute; bottom: 4px; right: 4px; display: flex; gap: 4px;">
+                                        <button type="button" onclick="togglePropertiesVideoPlayback()" 
+                                                style="background: rgba(0,0,0,0.7); color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 11px;">
+                                            <i class="fas fa-play" id="propertiesVideoPlayIcon"></i>
+                                        </button>
+                                    </div>
+                                ` : `
+                                    <img src="${slide.background.src}" 
+                                         style="width: 100%; height: 100px; object-fit: cover;"
+                                         onload="this.parentElement.querySelector('.loading-spinner')?.remove()"
+                                         onerror="this.parentElement.innerHTML='<p style=\\'color: #ef4444; padding: 12px; font-size: 12px;\\'><i class=\\'fas fa-exclamation-triangle\\'></i> Failed to load image</p>'">
+                                    <div class="loading-spinner" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.8);">
+                                        <i class="fas fa-spinner fa-spin" style="color: #64748b; font-size: 20px;"></i>
+                                    </div>
+                                `}
+                            </div>
+                            <div style="display: flex; gap: 8px; margin-top: 8px; align-items: center;">
+                                <span style="font-size: 11px; color: #16a34a;"><i class="fas fa-check-circle"></i> Asset loaded</span>
+                                <button type="button" class="btn btn-outline-danger btn-sm" 
+                                        onclick="updateSlideBackground('src', ''); renderSlideProperties();"
+                                        style="margin-left: auto; font-size: 10px; padding: 2px 6px;">
+                                    <i class="fas fa-times"></i> Clear
+                                </button>
+                            </div>
+                        ` : ''}
+                    `}
                     ${slide.background?.type === 'video' && slide.background?.duration ? `
                         <div style="margin-top: 8px; padding: 8px; background: #f1f5f9; border-radius: 6px;">
                             <p style="font-size: 12px; color: #475569; margin: 0 0 6px 0;">
