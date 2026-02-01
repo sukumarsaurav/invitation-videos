@@ -687,6 +687,84 @@ $animationPresets = [
             background: #ef4444;
         }
 
+        /* Video Timeline Track */
+        .timeline-video-track {
+            display: none;
+            background: linear-gradient(90deg, #1e3a5f 0%, #2563eb 50%, #1e3a5f 100%);
+            height: 32px;
+            border-radius: 6px;
+            margin: 8px 16px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .timeline-video-track.visible {
+            display: block;
+        }
+
+        .timeline-video-progress {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background: rgba(34, 197, 94, 0.6);
+            pointer-events: none;
+            transition: width 0.1s linear;
+        }
+
+        .timeline-video-playhead {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: #ef4444;
+            pointer-events: none;
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+        }
+
+        .timeline-video-duration {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 11px;
+            color: #f1f5f9;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .timeline-video-label {
+            position: absolute;
+            left: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 11px;
+            color: #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .timeline-video-label i {
+            font-size: 14px;
+        }
+
+        .timeline-video-track.duration-mismatch {
+            border: 2px solid #f59e0b;
+        }
+
+        .timeline-video-track.duration-mismatch::after {
+            content: '⚠ Duration mismatch';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 10px;
+            color: #f59e0b;
+            font-weight: 600;
+        }
+
         .preview-layer {
             position: absolute;
             display: flex;
@@ -1125,6 +1203,16 @@ $animationPresets = [
                         <i class="fas fa-th"></i>
                     </button>
                 </div>
+                <!-- Video Background Timeline Track -->
+                <div class="timeline-video-track" id="videoTimelineTrack">
+                    <span class="timeline-video-label">
+                        <i class="fas fa-film"></i>
+                        <span id="videoTrackName">Video</span>
+                    </span>
+                    <div class="timeline-video-progress" id="videoProgress"></div>
+                    <div class="timeline-video-playhead" id="videoPlayhead"></div>
+                    <span class="timeline-video-duration" id="videoTrackDuration">0:00 / 0:00</span>
+                </div>
                 <div class="timeline-tracks" id="timelineTracks">
                     <div class="timeline-ruler" id="timelineRuler"></div>
                     <div class="timeline-slide-tracks" id="timelineSlideArea">
@@ -1482,10 +1570,18 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
             isPlaying = true;
             updatePlayButtonState();
 
+            // Start video playback if present
+            const video = document.getElementById('bgVideo');
+            if (video) {
+                video.play().catch(() => { }); // Ignore autoplay policy errors
+            }
+
             playbackInterval = setInterval(() => {
                 currentFrame++;
                 if (currentFrame >= totalFrames) {
                     currentFrame = 0; // Loop
+                    // Reset video to beginning
+                    if (video) video.currentTime = 0;
                 }
                 updatePlayheadPosition();
                 updateCurrentFrameDisplay();
@@ -1508,6 +1604,12 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
                 playbackInterval = null;
             }
             updatePlayButtonState();
+
+            // Pause video if present
+            const video = document.getElementById('bgVideo');
+            if (video) {
+                video.pause();
+            }
         }
 
         function resetPlayhead() {
@@ -1849,6 +1951,108 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
             const localFrame = frame - slide.startFrame;
             const fps = templateDef.fps || 30;
             video.currentTime = localFrame / fps;
+
+            // Update video timeline UI
+            if (video.duration) {
+                updateVideoTimelinePosition(video.currentTime, video.duration);
+            }
+        }
+
+        // ========== VIDEO TIMELINE CONTROL ==========
+        let videoTimelineActive = false;
+
+        function updateVideoTimelineVisibility() {
+            const track = document.getElementById('videoTimelineTrack');
+            if (!track) return;
+
+            const slide = selectedSlideIndex !== null ? templateDef.slides[selectedSlideIndex] : null;
+            const hasVideoBackground = slide?.background?.type === 'video' && slide?.background?.src;
+
+            if (hasVideoBackground) {
+                track.classList.add('visible');
+                videoTimelineActive = true;
+                updateVideoTrackInfo(slide);
+            } else {
+                track.classList.remove('visible');
+                videoTimelineActive = false;
+            }
+        }
+
+        function updateVideoTrackInfo(slide) {
+            const nameEl = document.getElementById('videoTrackName');
+            const durationEl = document.getElementById('videoTrackDuration');
+            const track = document.getElementById('videoTimelineTrack');
+
+            if (!slide?.background?.duration) {
+                if (nameEl) nameEl.textContent = 'Loading...';
+                if (durationEl) durationEl.textContent = '--:-- / --:--';
+                return;
+            }
+
+            const videoDuration = slide.background.duration;
+            const slideDuration = slide.durationFrames / (templateDef.fps || 30);
+
+            if (nameEl) nameEl.textContent = 'Video BG';
+            if (durationEl) durationEl.textContent = `${formatVideoTime(0)} / ${formatVideoTime(videoDuration)}`;
+
+            // Check for duration mismatch
+            if (track) {
+                const mismatch = Math.abs(videoDuration - slideDuration) > 0.5;
+                track.classList.toggle('duration-mismatch', mismatch);
+            }
+        }
+
+        function formatVideoTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function updateVideoTimelinePosition(currentTime, duration) {
+            const progress = document.getElementById('videoProgress');
+            const playhead = document.getElementById('videoPlayhead');
+            const durationEl = document.getElementById('videoTrackDuration');
+
+            if (!duration) return;
+
+            const percentage = (currentTime / duration) * 100;
+
+            if (progress) progress.style.width = percentage + '%';
+            if (playhead) playhead.style.left = percentage + '%';
+            if (durationEl) durationEl.textContent = `${formatVideoTime(currentTime)} / ${formatVideoTime(duration)}`;
+        }
+
+        function attachVideoTimelineHandlers() {
+            const track = document.getElementById('videoTimelineTrack');
+            if (!track) return;
+
+            let isScrubbing = false;
+
+            const handleScrub = (e) => {
+                const rect = track.getBoundingClientRect();
+                const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+                const percentage = x / rect.width;
+
+                const video = document.getElementById('bgVideo');
+                if (video && video.duration) {
+                    video.currentTime = percentage * video.duration;
+                    updateVideoTimelinePosition(video.currentTime, video.duration);
+                }
+            };
+
+            track.addEventListener('mousedown', (e) => {
+                isScrubbing = true;
+                pausePlayback(); // Pause timeline when manually scrubbing video
+                handleScrub(e);
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (isScrubbing) handleScrub(e);
+            });
+
+            document.addEventListener('mouseup', () => {
+                isScrubbing = false;
+            });
         }
 
         // ========== TIMELINE ZOOM INDICATOR ==========
@@ -2070,6 +2274,10 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
             if (templateDef.slides.length > 0) {
                 selectSlide(0);
             }
+
+            // Initialize video timeline handlers
+            attachVideoTimelineHandlers();
+            updateVideoTimelineVisibility();
 
             // Add timeline click-to-scrub
             const timelineTracks = document.getElementById('timelineTracks');
@@ -2345,9 +2553,10 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
             if (slide.background?.src && !slide.background.src.includes('{{')) {
                 if (slide.background?.type === 'video') {
                     bgMediaHtml = `
-                        <video id="bgVideo" autoplay loop muted playsinline
+                        <video id="bgVideo" muted playsinline
                                style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;"
-                               onloadedmetadata="detectVideoDuration(this)">
+                               onloadedmetadata="detectVideoDuration(this); updateVideoTimelineVisibility();"
+                               ontimeupdate="updateVideoTimelinePosition(this.currentTime, this.duration)">
                             <source src="${slide.background.src}" type="video/mp4">
                         </video>
                     `;
@@ -2609,6 +2818,7 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
             renderSlideList();
             renderPreview();
             renderSlideProperties();
+            updateVideoTimelineVisibility();
         }
 
         function selectLayer(slideIndex, layerIndex) {
