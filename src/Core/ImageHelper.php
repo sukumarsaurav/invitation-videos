@@ -527,10 +527,25 @@ class ImageHelper
         bool $priority = false,
         string $class = ''
     ): string {
+        // Handle empty or null thumbnail URL - return a placeholder
+        if (empty($thumbnailUrl)) {
+            $loading = $eager ? 'eager' : 'lazy';
+            $placeholder = self::placeholder(300, 375, '#e2e8f0');
+            $alt = htmlspecialchars($alt, ENT_QUOTES, 'UTF-8');
+            $class = htmlspecialchars($class, ENT_QUOTES, 'UTF-8');
+            return sprintf(
+                '<img src="%s" alt="%s" class="%s" width="300" height="375" loading="%s" decoding="async">',
+                $placeholder,
+                $alt,
+                $class,
+                $loading
+            );
+        }
+
         // Get base path and filename
         $pathInfo = pathinfo($thumbnailUrl);
-        $dir = $pathInfo['dirname'];
-        $filename = $pathInfo['filename'];
+        $dir = $pathInfo['dirname'] ?? '';
+        $filename = $pathInfo['filename'] ?? '';
         $basePath = rtrim($dir, '/') . '/' . $filename;
 
         // Check for responsive variants
