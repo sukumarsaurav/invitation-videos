@@ -936,31 +936,6 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
 
         <div class="slide-editor">
 
-            <!-- Slide Navigation Header -->
-            <div class="slide-nav">
-                <a href="<?= $currentSlideIndex > 0 ? '/template/' . Security::escape($templateSlug) . '?slide=' . ($currentSlideIndex - 1) : '/template/' . Security::escape($templateSlug) ?>"
-                    class="slide-nav-back">
-                    <span class="material-symbols-outlined">arrow_back</span>
-                    <?= $currentSlideIndex > 0 ? 'Previous Slide' : 'Back' ?>
-                </a>
-
-                <div class="slide-nav-indicator">
-                    <?php for ($i = 0; $i < $totalSlides; $i++): ?>
-                        <span
-                            class="slide-dot <?= $i === $currentSlideIndex ? 'active' : '' ?> <?= isset($_SESSION['completed_slides'][$i]) ? 'completed' : '' ?>"></span>
-                    <?php endfor; ?>
-                </div>
-
-                <span class="slide-nav-title">
-                    Slide <?= $currentSlideIndex + 1 ?> of <?= $totalSlides ?>
-                </span>
-            </div>
-
-            <!-- Slide Name -->
-            <h2 class="text-xl font-bold text-slate-900 mb-4 text-center">
-                <?= Security::escape($currentSlideConfig['name'] ?? 'Slide ' . ($currentSlideIndex + 1)) ?>
-            </h2>
-
             <!-- Preview Canvas - Now Interactive! -->
             <div class="bg-slate-900 rounded-2xl overflow-hidden shadow-2xl mb-4">
                 <div id="slide-preview-canvas" class="slide-preview-canvas" data-slide-preview="true"
@@ -969,12 +944,6 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                     data-editable-fields='<?= Security::escape(json_encode($editableFields)) ?>'>
                     <!-- JavaScript renders interactive preview here -->
                 </div>
-            </div>
-
-            <!-- Tap Hint (first-time user guidance) -->
-            <div class="tap-hint">
-                <span class="tap-hint-icon">👆</span>
-                <span>Tap any element to edit</span>
             </div>
 
             <!-- Slide Thumbnails Navigation Strip -->
