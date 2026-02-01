@@ -94,6 +94,26 @@
     padding: 8px 12px;
     min-width: 80px;
     min-height: 30px;
+
+    /* Prevent rich text editing - plain text only */
+    -webkit-user-modify: read-write-plaintext-only;
+
+    /* Force font style inheritance from data attributes */
+    font-size: inherit !important;
+    font-family: inherit !important;
+    font-weight: inherit !important;
+    color: inherit !important;
+    text-align: inherit !important;
+    line-height: inherit !important;
+    letter-spacing: inherit !important;
+}
+
+/* Ensure pasted content maintains styling */
+.slide-preview-text.editable[contenteditable="true"] * {
+    font-size: inherit !important;
+    font-family: inherit !important;
+    font-weight: inherit !important;
+    color: inherit !important;
 }
 
 /* Edit icon that appears on hover */

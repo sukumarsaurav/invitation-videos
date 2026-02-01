@@ -159,6 +159,23 @@ class SlidePreview {
         const div = document.createElement('div');
         div.className = 'slide-preview-text';
 
+        const pos = layer.position || { x: 540, y: 960 };
+        const style = layer.style || {};
+        const anchor = pos.anchor || 'center';
+
+        // Resolve the actual color - use template color, not white fallback
+        // Only fallback to white if no color is defined at all
+        const resolvedColor = this.resolveColor(style.color);
+        const textColor = resolvedColor || style.color || '#FFFFFF';
+
+        // Calculate scaled values
+        const scaledFontSize = (style.fontSize || 24) * this.scale;
+        const fontFamily = style.fontFamily || 'Inter, sans-serif';
+        const fontWeight = style.fontWeight || 'normal';
+        const textAlign = style.textAlign || 'center';
+        const lineHeight = style.lineHeight || 1.2;
+        const letterSpacing = style.letterSpacing || 0;
+
         // Check if this layer is editable
         const isEditable = this.options.editable && layer.fieldKey && this.editableFieldMap[layer.fieldKey];
         if (isEditable) {
@@ -167,6 +184,15 @@ class SlidePreview {
             div.setAttribute('tabindex', '0');
             div.setAttribute('role', 'button');
             div.setAttribute('aria-label', 'Edit ' + (this.editableFieldMap[layer.fieldKey]?.label || layer.fieldKey));
+
+            // Store original styles for editing mode preservation
+            div.setAttribute('data-font-size', scaledFontSize + 'px');
+            div.setAttribute('data-font-family', fontFamily);
+            div.setAttribute('data-font-weight', fontWeight);
+            div.setAttribute('data-color', textColor);
+            div.setAttribute('data-text-align', textAlign);
+            div.setAttribute('data-line-height', lineHeight);
+            div.setAttribute('data-letter-spacing', letterSpacing + 'px');
 
             // Add edit icon
             const editIcon = document.createElement('span');
@@ -183,24 +209,21 @@ class SlidePreview {
         const textNode = document.createTextNode(displayValue);
         div.insertBefore(textNode, div.firstChild);
 
-        const pos = layer.position || { x: 540, y: 960 };
-        const style = layer.style || {};
-        const anchor = pos.anchor || 'center';
-
         // Calculate scaled position
         const x = pos.x * this.scale;
         const y = pos.y * this.scale;
 
-        // Base styles
+        // Base styles - matching Remotion TextLayer.tsx for consistency
         let cssText = `
             position: absolute;
-            font-size: ${(style.fontSize || 24) * this.scale}px;
-            font-family: ${style.fontFamily || 'Inter, sans-serif'};
-            color: ${this.resolveColor(style.color) || '#FFFFFF'};
-            font-weight: ${style.fontWeight || 'normal'};
-            text-align: ${style.textAlign || 'center'};
-            white-space: ${style.maxWidth ? 'normal' : 'nowrap'};
-            line-height: 1.3;
+            font-size: ${scaledFontSize}px;
+            font-family: ${fontFamily};
+            color: ${textColor};
+            font-weight: ${fontWeight};
+            text-align: ${textAlign};
+            white-space: ${style.maxWidth ? 'pre-wrap' : 'nowrap'};
+            line-height: ${lineHeight};
+            letter-spacing: ${letterSpacing * this.scale}px;
         `;
 
         // Add text shadow if specified
@@ -213,7 +236,7 @@ class SlidePreview {
             cssText += `max-width: ${style.maxWidth * this.scale}px;`;
         }
 
-        // Position based on anchor
+        // Position based on anchor - matching Remotion TextLayer positioning
         switch (anchor) {
             case 'center':
                 cssText += `left: ${x}px; top: ${y}px; transform: translate(-50%, -50%);`;

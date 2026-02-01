@@ -371,6 +371,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 header('Location: ' . $redirectUrl);
                 exit;
             }
+
+            // NEW: Handle 'save' action - saves data without redirecting
+            // Used by AJAX when clicking slide thumbnails
+            if ($action === 'save') {
+                // Data is already saved to session at the top of POST handler
+                // Just respond with success
+                if ($isXhrRequest) {
+                    header('Content-Type: application/json');
+                    echo json_encode([
+                        'success' => true,
+                        'saved' => true,
+                        'message' => 'Slide data saved'
+                    ]);
+                    exit;
+                }
+                // For non-AJAX, just stay on current page
+                header('Location: /template/' . $templateSlug . '?slide=' . $submittedSlideIndex);
+                exit;
+            }
         }
 
         // Handle dress step redirect - go to first regular step
@@ -949,20 +968,21 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
             <!-- Slide Thumbnails Navigation Strip -->
             <div class="flex gap-2 overflow-x-auto pb-4 px-1 -mx-1 scrollbar-hide">
                 <?php foreach ($slides as $index => $slide): ?>
-                    <?php 
+                    <?php
                     $isActive = $index === $currentSlideIndex;
                     $isCompleted = isset($_SESSION['completed_slides'][$index]);
                     $bgColor = $slide['background']['color'] ?? '#6b7280';
                     $slideName = $slide['name'] ?? 'Slide ' . ($index + 1);
                     ?>
-                    <a href="/template/<?= Security::escape($templateSlug) ?>?slide=<?= $index ?>"
+                    <button type="button" onclick="saveAndNavigate(<?= $index ?>)"
                         class="flex-shrink-0 relative group transition-all duration-200 <?= $isActive ? 'scale-105 z-10' : 'hover:scale-105' ?>">
                         <!-- Thumbnail -->
                         <div class="w-16 h-28 rounded-lg overflow-hidden shadow-md border-2 transition-all duration-200
                             <?= $isActive ? 'border-primary shadow-lg shadow-primary/25' : ($isCompleted ? 'border-green-500' : 'border-transparent hover:border-slate-300') ?>"
                             style="background: <?= Security::escape($bgColor) ?>;">
                             <!-- Slide number -->
-                            <div class="absolute top-1 left-1 w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center
+                            <div
+                                class="absolute top-1 left-1 w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center
                                 <?= $isActive ? 'bg-primary text-white' : ($isCompleted ? 'bg-green-500 text-white' : 'bg-white/80 text-slate-700') ?>">
                                 <?= $isCompleted && !$isActive ? '✓' : ($index + 1) ?>
                             </div>
@@ -972,7 +992,7 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                             <?= $isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100' ?> transition-opacity">
                             <?= Security::escape(strlen($slideName) > 10 ? substr($slideName, 0, 10) . '...' : $slideName) ?>
                         </span>
-                    </a>
+                    </button>
                 <?php endforeach; ?>
             </div>
 
@@ -1040,23 +1060,39 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
         </div>
 
         <!-- Bottom Sheet for Mobile Editing -->
-        <div id="edit-sheet-backdrop" class="fixed inset-0 bg-black/50 z-[100] opacity-0 invisible transition-all duration-300"></div>
-        <div id="edit-sheet" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl p-5 pb-8 z-[101] translate-y-full transition-transform duration-500 shadow-[0_-10px_40px_rgba(0,0,0,0.15)] max-h-[80vh] overflow-y-auto" style="transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);">
+        <div id="edit-sheet-backdrop"
+            class="fixed inset-0 bg-black/50 z-[100] opacity-0 invisible transition-all duration-300"></div>
+        <div id="edit-sheet"
+            class="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl p-5 pb-8 z-[101] translate-y-full transition-transform duration-500 shadow-[0_-10px_40px_rgba(0,0,0,0.15)] max-h-[80vh] overflow-y-auto"
+            style="transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);">
             <div class="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5"></div>
-            <label id="edit-sheet-label" class="block text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">Field Name</label>
-            <input type="text" id="edit-sheet-input" class="w-full p-4 border-2 border-slate-200 rounded-xl text-lg bg-slate-50 transition-all focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white" placeholder="Enter value...">
-            <input type="date" id="edit-sheet-date" class="hidden w-full p-4 border-2 border-slate-200 rounded-xl text-lg bg-slate-50">
-            <input type="time" id="edit-sheet-time" class="hidden w-full p-4 border-2 border-slate-200 rounded-xl text-lg bg-slate-50">
-            <button type="button" id="edit-sheet-done" class="w-full mt-4 p-4 bg-primary text-white border-none rounded-xl text-base font-bold cursor-pointer transition-all hover:bg-primary/90 active:scale-[0.98]">Done ✓</button>
+            <label id="edit-sheet-label"
+                class="block text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">Field Name</label>
+            <input type="text" id="edit-sheet-input"
+                class="w-full p-4 border-2 border-slate-200 rounded-xl text-lg bg-slate-50 transition-all focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white"
+                placeholder="Enter value...">
+            <input type="date" id="edit-sheet-date"
+                class="hidden w-full p-4 border-2 border-slate-200 rounded-xl text-lg bg-slate-50">
+            <input type="time" id="edit-sheet-time"
+                class="hidden w-full p-4 border-2 border-slate-200 rounded-xl text-lg bg-slate-50">
+            <button type="button" id="edit-sheet-done"
+                class="w-full mt-4 p-4 bg-primary text-white border-none rounded-xl text-base font-bold cursor-pointer transition-all hover:bg-primary/90 active:scale-[0.98]">Done
+                ✓</button>
         </div>
 
         <!-- Inline Input Container for Desktop -->
-        <div id="inline-input-container" class="hidden fixed z-50 bg-white rounded-xl shadow-2xl p-4 min-w-[280px] max-w-[400px] animate-pop-in">
-            <label id="inline-input-label" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Field Name</label>
-            <input type="text" id="inline-input" class="w-full p-3 border-2 border-slate-200 rounded-lg text-base transition-all focus:outline-none focus:border-primary" placeholder="Enter value...">
+        <div id="inline-input-container"
+            class="hidden fixed z-50 bg-white rounded-xl shadow-2xl p-4 min-w-[280px] max-w-[400px] animate-pop-in">
+            <label id="inline-input-label"
+                class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Field Name</label>
+            <input type="text" id="inline-input"
+                class="w-full p-3 border-2 border-slate-200 rounded-lg text-base transition-all focus:outline-none focus:border-primary"
+                placeholder="Enter value...">
             <div class="flex gap-2 mt-3">
-                <button type="button" id="inline-input-done" class="flex-1 p-2.5 bg-primary text-white border-none rounded-lg font-semibold cursor-pointer">Done</button>
-                <button type="button" id="inline-input-cancel" class="px-4 py-2.5 bg-slate-100 text-slate-500 border-none rounded-lg font-semibold cursor-pointer">Cancel</button>
+                <button type="button" id="inline-input-done"
+                    class="flex-1 p-2.5 bg-primary text-white border-none rounded-lg font-semibold cursor-pointer">Done</button>
+                <button type="button" id="inline-input-cancel"
+                    class="px-4 py-2.5 bg-slate-100 text-slate-500 border-none rounded-lg font-semibold cursor-pointer">Cancel</button>
             </div>
         </div>
 
@@ -1138,38 +1174,38 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                                 // Already in edit mode, let user continue editing
                                 return;
                             }
-                            
+
                             // Make the element editable
                             layer.contentEditable = 'true';
                             layer.classList.add('editing');
-                            
+
                             // Store original value for cancel
                             layer.dataset.originalValue = layer.textContent;
-                            
+
                             // Select all text for easy replacement
                             const range = document.createRange();
                             range.selectNodeContents(layer);
                             const sel = window.getSelection();
                             sel.removeAllRanges();
                             sel.addRange(range);
-                            
+
                             // Handle blur to save
                             const handleBlur = () => {
                                 const newValue = layer.textContent.trim();
                                 layer.contentEditable = 'false';
                                 layer.classList.remove('editing');
-                                
+
                                 if (newValue && newValue !== layer.dataset.originalValue) {
                                     updateFieldValue(fieldKey, newValue);
                                 } else if (!newValue) {
                                     // Restore original if empty
                                     layer.textContent = layer.dataset.originalValue;
                                 }
-                                
+
                                 layer.removeEventListener('blur', handleBlur);
                                 layer.removeEventListener('keydown', handleKeydown);
                             };
-                            
+
                             // Handle Enter to save, Escape to cancel
                             const handleKeydown = (e) => {
                                 if (e.key === 'Enter') {
@@ -1180,10 +1216,10 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                                     layer.blur();
                                 }
                             };
-                            
+
                             layer.addEventListener('blur', handleBlur);
                             layer.addEventListener('keydown', handleKeydown);
-                            
+
                             // Focus the element (this will show keyboard)
                             layer.focus();
                         } else {
@@ -1301,6 +1337,64 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                 function closeInlineInput() {
                     inlineContainer.classList.add('hidden');
                     currentFieldKey = null;
+                }
+            }
+
+            // Page context for AJAX navigation
+            const slideEditorConfig = {
+                templateSlug: '<?= Security::escape($templateSlug) ?>',
+                currentSlideIndex: <?= $currentSlideIndex ?>
+            };
+
+            /**
+             * Save current slide data and navigate to target slide
+             * Used by slide thumbnail navigation to preserve edits
+             */
+            async function saveAndNavigate(targetSlideIndex) {
+                // If clicking the current slide, do nothing
+                if (targetSlideIndex === slideEditorConfig.currentSlideIndex) {
+                    return;
+                }
+
+                // Collect current form data
+                const form = document.getElementById('slide-editor-form');
+                if (!form) {
+                    // No form, just navigate directly
+                    window.location.href = '/template/' + slideEditorConfig.templateSlug + '?slide=' + targetSlideIndex;
+                    return;
+                }
+
+                // Create form data with 'save' action
+                const formData = new FormData(form);
+                formData.set('action', 'save');
+
+                // Show saving indicator (optional visual feedback)
+                const buttons = document.querySelectorAll('.slide-editor button');
+                buttons.forEach(btn => btn.disabled = true);
+
+                try {
+                    const response = await fetch(window.location.href, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        // Data saved, now navigate
+                        window.location.href = '/template/' + slideEditorConfig.templateSlug + '?slide=' + targetSlideIndex;
+                    } else {
+                        console.error('Save failed:', result);
+                        // Still navigate even if save failed
+                        window.location.href = '/template/' + slideEditorConfig.templateSlug + '?slide=' + targetSlideIndex;
+                    }
+                } catch (error) {
+                    console.error('Error saving slide data:', error);
+                    // Navigate anyway on error
+                    window.location.href = '/template/' + slideEditorConfig.templateSlug + '?slide=' + targetSlideIndex;
                 }
             }
         </script>
