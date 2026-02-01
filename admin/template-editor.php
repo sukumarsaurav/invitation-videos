@@ -765,6 +765,73 @@ $animationPresets = [
             font-weight: 600;
         }
 
+        /* Video Trim Range Slider */
+        .video-trim-container {
+            margin-top: 12px;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .video-trim-slider {
+            position: relative;
+            height: 40px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin: 8px 0;
+            cursor: pointer;
+        }
+
+        .video-trim-track {
+            position: absolute;
+            height: 100%;
+            background: linear-gradient(90deg, #2563eb, #3b82f6);
+            border-radius: 4px;
+            pointer-events: none;
+        }
+
+        .video-trim-handle {
+            position: absolute;
+            top: -4px;
+            width: 12px;
+            height: 48px;
+            background: #970747;
+            border-radius: 4px;
+            cursor: ew-resize;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-trim-handle::after {
+            content: '||';
+            font-size: 8px;
+            color: white;
+            letter-spacing: -1px;
+        }
+
+        .video-trim-times {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        .video-trim-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .video-trim-inputs input {
+            font-size: 12px;
+            padding: 4px 8px;
+        }
+
         .preview-layer {
             position: absolute;
             display: flex;
@@ -2055,6 +2122,170 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
             });
         }
 
+        // ========== VIDEO TRIM CONTROLS ==========
+        let trimDragHandle = null;
+
+        function updateVideoTrim(property, value) {
+            if (selectedSlideIndex === null) return;
+            const slide = templateDef.slides[selectedSlideIndex];
+            if (!slide.background) return;
+
+            const duration = slide.background.duration || 0;
+            value = Math.max(0, Math.min(duration, value));
+
+            slide.background[property] = value;
+
+            // Ensure startTime < endTime with minimum 0.5s gap
+            if (property === 'startTime') {
+                const endTime = slide.background.endTime || duration;
+                if (value >= endTime - 0.5) {
+                    slide.background.startTime = Math.max(0, endTime - 0.5);
+                }
+            }
+            if (property === 'endTime') {
+                const startTime = slide.background.startTime || 0;
+                if (value <= startTime + 0.5) {
+                    slide.background.endTime = Math.min(duration, startTime + 0.5);
+                }
+            }
+
+            renderSlideProperties();
+            updateTrimSliderVisual();
+            seekVideoToTrimStart();
+        }
+
+        function updateTrimSliderVisual() {
+            const slider = document.getElementById('videoTrimSlider');
+            const track = document.getElementById('videoTrimTrack');
+            const handleStart = document.getElementById('trimHandleStart');
+            const handleEnd = document.getElementById('trimHandleEnd');
+
+            if (!slider || !track || !handleStart || !handleEnd) return;
+
+            const duration = parseFloat(slider.dataset.duration) || 1;
+            const slide = templateDef.slides[selectedSlideIndex];
+            if (!slide?.background) return;
+
+            const startTime = slide.background.startTime || 0;
+            const endTime = slide.background.endTime || duration;
+
+            const startPercent = (startTime / duration) * 100;
+            const endPercent = (endTime / duration) * 100;
+
+            track.style.left = startPercent + '%';
+            track.style.width = (endPercent - startPercent) + '%';
+            handleStart.style.left = `calc(${startPercent}% - 6px)`;
+            handleEnd.style.left = `calc(${endPercent}% - 6px)`;
+        }
+
+        function matchSlideDurationToTrim() {
+            if (selectedSlideIndex === null) return;
+            const slide = templateDef.slides[selectedSlideIndex];
+            if (!slide.background) return;
+
+            const startTime = slide.background.startTime || 0;
+            const endTime = slide.background.endTime || slide.background.duration;
+            const trimDuration = endTime - startTime;
+            const fps = templateDef.fps || 30;
+
+            slide.durationFrames = Math.ceil(trimDuration * fps);
+
+            // Recalculate slide startFrames
+            let frame = 0;
+            templateDef.slides.forEach(s => {
+                s.startFrame = frame;
+                frame += s.durationFrames;
+            });
+
+            renderSlideList();
+            renderTimeline();
+            renderSlideProperties();
+        }
+
+        function resetVideoTrim() {
+            if (selectedSlideIndex === null) return;
+            const slide = templateDef.slides[selectedSlideIndex];
+            if (!slide.background) return;
+
+            slide.background.startTime = 0;
+            slide.background.endTime = slide.background.duration;
+            renderSlideProperties();
+            seekVideoToTrimStart();
+        }
+
+        function previewTrimRange() {
+            const video = document.getElementById('bgVideo');
+            if (!video) return;
+
+            const slide = templateDef.slides[selectedSlideIndex];
+            if (!slide?.background) return;
+
+            const startTime = slide.background.startTime || 0;
+            video.currentTime = startTime;
+            video.play().catch(() => { });
+        }
+
+        function seekVideoToTrimStart() {
+            const video = document.getElementById('bgVideo');
+            if (!video) return;
+
+            const slide = templateDef.slides[selectedSlideIndex];
+            if (!slide?.background) return;
+
+            video.currentTime = slide.background.startTime || 0;
+        }
+
+        function checkVideoTrimBounds(video) {
+            if (!video || selectedSlideIndex === null) return;
+
+            const slide = templateDef.slides[selectedSlideIndex];
+            if (!slide?.background) return;
+
+            const startTime = slide.background.startTime || 0;
+            const endTime = slide.background.endTime || slide.background.duration || video.duration;
+
+            // Loop back to start if reached end of trim range
+            if (video.currentTime >= endTime) {
+                video.currentTime = startTime;
+            }
+            // Jump to start if before trim range
+            if (video.currentTime < startTime - 0.1) {
+                video.currentTime = startTime;
+            }
+        }
+
+        function attachTrimSliderHandlers() {
+            const slider = document.getElementById('videoTrimSlider');
+            if (!slider) return;
+
+            slider.addEventListener('mousedown', (e) => {
+                const handle = e.target.closest('.video-trim-handle');
+                if (handle) {
+                    trimDragHandle = handle.dataset.handle;
+                    e.preventDefault();
+                }
+            });
+        }
+
+        // Global mouse handlers for trim slider (added once)
+        document.addEventListener('mousemove', (e) => {
+            if (!trimDragHandle) return;
+
+            const slider = document.getElementById('videoTrimSlider');
+            if (!slider) return;
+
+            const rect = slider.getBoundingClientRect();
+            const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+            const duration = parseFloat(slider.dataset.duration) || 1;
+            const time = (x / rect.width) * duration;
+
+            updateVideoTrim(trimDragHandle === 'start' ? 'startTime' : 'endTime', Math.round(time * 10) / 10);
+        });
+
+        document.addEventListener('mouseup', () => {
+            trimDragHandle = null;
+        });
+
         // ========== TIMELINE ZOOM INDICATOR ==========
         function updateTimelineZoom(value) {
             const indicator = document.getElementById('timelineZoomIndicator');
@@ -2556,7 +2787,7 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
                         <video id="bgVideo" muted playsinline
                                style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;"
                                onloadedmetadata="detectVideoDuration(this); updateVideoTimelineVisibility();"
-                               ontimeupdate="updateVideoTimelinePosition(this.currentTime, this.duration)">
+                               ontimeupdate="checkVideoTrimBounds(this); updateVideoTimelinePosition(this.currentTime, this.duration)">
                             <source src="${slide.background.src}" type="video/mp4">
                         </video>
                     `;
@@ -2935,14 +3166,55 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
                         ` : ''}
                     `}
                     ${slide.background?.type === 'video' && slide.background?.duration ? `
-                        <div style="margin-top: 8px; padding: 8px; background: #f1f5f9; border-radius: 6px;">
-                            <p style="font-size: 12px; color: #475569; margin: 0 0 6px 0;">
-                                <i class="fas fa-clock"></i> Video Duration: <strong>${slide.background.duration.toFixed(1)}s</strong> 
-                                (${slide.background.durationFrames} frames)
-                            </p>
-                            <button type="button" class="btn btn-primary btn-sm" onclick="matchSlideDurationToVideo()">
-                                <i class="fas fa-sync"></i> Match Slide Duration to Video
-                            </button>
+                        <div class="video-trim-container">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <span style="font-size: 12px; font-weight: 600; color: #334155;">
+                                    <i class="fas fa-cut"></i> Video Trim
+                                </span>
+                                <span style="font-size: 11px; color: #64748b;">
+                                    Full: ${slide.background.duration.toFixed(1)}s
+                                </span>
+                            </div>
+                            <div class="video-trim-slider" id="videoTrimSlider" 
+                                 data-duration="${slide.background.duration}"
+                                 data-start="${slide.background.startTime || 0}"
+                                 data-end="${slide.background.endTime || slide.background.duration}">
+                                <div class="video-trim-track" id="videoTrimTrack"></div>
+                                <div class="video-trim-handle" id="trimHandleStart" data-handle="start"></div>
+                                <div class="video-trim-handle" id="trimHandleEnd" data-handle="end"></div>
+                            </div>
+                            <div class="video-trim-times">
+                                <span>0:00</span>
+                                <span id="trimRangeDisplay" style="color: #2563eb; font-weight: 600;">
+                                    Using: ${formatVideoTime(slide.background.startTime || 0)} - ${formatVideoTime(slide.background.endTime || slide.background.duration)}
+                                </span>
+                                <span>${formatVideoTime(slide.background.duration)}</span>
+                            </div>
+                            <div class="video-trim-inputs">
+                                <div class="property-group" style="margin: 0;">
+                                    <label style="font-size: 10px;">Start (sec)</label>
+                                    <input type="number" step="0.1" min="0" max="${slide.background.duration}" 
+                                           value="${slide.background.startTime || 0}" 
+                                           onchange="updateVideoTrim('startTime', parseFloat(this.value))">
+                                </div>
+                                <div class="property-group" style="margin: 0;">
+                                    <label style="font-size: 10px;">End (sec)</label>
+                                    <input type="number" step="0.1" min="0" max="${slide.background.duration}" 
+                                           value="${slide.background.endTime || slide.background.duration}" 
+                                           onchange="updateVideoTrim('endTime', parseFloat(this.value))">
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;">
+                                <button type="button" class="btn btn-primary btn-sm" onclick="matchSlideDurationToTrim()">
+                                    <i class="fas fa-sync"></i> Match Slide to Trim
+                                </button>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="resetVideoTrim()">
+                                    <i class="fas fa-undo"></i> Reset
+                                </button>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="previewTrimRange()">
+                                    <i class="fas fa-play"></i> Preview
+                                </button>
+                            </div>
                         </div>
                     ` : ''}
                 </div>
@@ -2961,6 +3233,12 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
                     </button>
                 </div>
             `;
+
+            // Initialize trim slider after DOM is rendered
+            setTimeout(() => {
+                updateTrimSliderVisual();
+                attachTrimSliderHandlers();
+            }, 10);
         }
 
         function renderLayerProperties() {
