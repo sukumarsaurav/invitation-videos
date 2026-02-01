@@ -2785,7 +2785,7 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
                 if (slide.background?.type === 'video') {
                     bgMediaHtml = `
                         <video id="bgVideo" muted playsinline
-                               style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;"
+                               style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none;"
                                onloadedmetadata="detectVideoDuration(this); updateVideoTimelineVisibility();"
                                ontimeupdate="checkVideoTrimBounds(this); updateVideoTimelinePosition(this.currentTime, this.duration)">
                             <source src="${slide.background.src}" type="video/mp4">
@@ -2795,7 +2795,7 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
                 } else if (slide.background?.type === 'image') {
                     bgMediaHtml = `
                         <img src="${slide.background.src}" 
-                             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;"
+                             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none;"
                              alt="Background" />
                     `;
                     bgStyle = 'background: #000;';
@@ -3060,6 +3060,66 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
             renderLayerProperties();
         }
 
+        // Helper function to generate Video Trim HTML for slides with video backgrounds
+        function getVideoTrimHtml(slide) {
+            if (slide?.background?.type !== 'video' || !slide?.background?.duration) {
+                return '';
+            }
+
+            return `
+                <div class="video-trim-container" style="margin-top: 20px; padding-top: 16px; border-top: 1px solid #e2e8f0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 12px; font-weight: 600; color: #334155;">
+                            <i class="fas fa-cut"></i> Video Trim
+                        </span>
+                        <span style="font-size: 11px; color: #64748b;">
+                            Full: ${slide.background.duration.toFixed(1)}s
+                        </span>
+                    </div>
+                    <div class="video-trim-slider" id="videoTrimSlider" 
+                         data-duration="${slide.background.duration}"
+                         data-start="${slide.background.startTime || 0}"
+                         data-end="${slide.background.endTime || slide.background.duration}">
+                        <div class="video-trim-track" id="videoTrimTrack"></div>
+                        <div class="video-trim-handle" id="trimHandleStart" data-handle="start"></div>
+                        <div class="video-trim-handle" id="trimHandleEnd" data-handle="end"></div>
+                    </div>
+                    <div class="video-trim-times">
+                        <span>0:00</span>
+                        <span id="trimRangeDisplay" style="color: #2563eb; font-weight: 600;">
+                            Using: ${formatVideoTime(slide.background.startTime || 0)} - ${formatVideoTime(slide.background.endTime || slide.background.duration)}
+                        </span>
+                        <span>${formatVideoTime(slide.background.duration)}</span>
+                    </div>
+                    <div class="video-trim-inputs">
+                        <div class="property-group" style="margin: 0;">
+                            <label style="font-size: 10px;">Start (sec)</label>
+                            <input type="number" step="0.1" min="0" max="${slide.background.duration}" 
+                                   value="${slide.background.startTime || 0}" 
+                                   onchange="updateVideoTrim('startTime', parseFloat(this.value))">
+                        </div>
+                        <div class="property-group" style="margin: 0;">
+                            <label style="font-size: 10px;">End (sec)</label>
+                            <input type="number" step="0.1" min="0" max="${slide.background.duration}" 
+                                   value="${slide.background.endTime || slide.background.duration}" 
+                                   onchange="updateVideoTrim('endTime', parseFloat(this.value))">
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;">
+                        <button type="button" class="btn btn-primary btn-sm" onclick="matchSlideDurationToTrim()">
+                            <i class="fas fa-sync"></i> Match Slide to Trim
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="resetVideoTrim()">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="previewTrimRange()">
+                            <i class="fas fa-play"></i> Preview
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
         function renderSlideProperties() {
             const panel = document.getElementById('propertiesPanel');
             const slide = templateDef.slides[selectedSlideIndex];
@@ -3165,58 +3225,7 @@ echo $jsonPresets !== false ? $jsonPresets : '[]';
                             </div>
                         ` : ''}
                     `}
-                    ${slide.background?.type === 'video' && slide.background?.duration ? `
-                        <div class="video-trim-container">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                <span style="font-size: 12px; font-weight: 600; color: #334155;">
-                                    <i class="fas fa-cut"></i> Video Trim
-                                </span>
-                                <span style="font-size: 11px; color: #64748b;">
-                                    Full: ${slide.background.duration.toFixed(1)}s
-                                </span>
-                            </div>
-                            <div class="video-trim-slider" id="videoTrimSlider" 
-                                 data-duration="${slide.background.duration}"
-                                 data-start="${slide.background.startTime || 0}"
-                                 data-end="${slide.background.endTime || slide.background.duration}">
-                                <div class="video-trim-track" id="videoTrimTrack"></div>
-                                <div class="video-trim-handle" id="trimHandleStart" data-handle="start"></div>
-                                <div class="video-trim-handle" id="trimHandleEnd" data-handle="end"></div>
-                            </div>
-                            <div class="video-trim-times">
-                                <span>0:00</span>
-                                <span id="trimRangeDisplay" style="color: #2563eb; font-weight: 600;">
-                                    Using: ${formatVideoTime(slide.background.startTime || 0)} - ${formatVideoTime(slide.background.endTime || slide.background.duration)}
-                                </span>
-                                <span>${formatVideoTime(slide.background.duration)}</span>
-                            </div>
-                            <div class="video-trim-inputs">
-                                <div class="property-group" style="margin: 0;">
-                                    <label style="font-size: 10px;">Start (sec)</label>
-                                    <input type="number" step="0.1" min="0" max="${slide.background.duration}" 
-                                           value="${slide.background.startTime || 0}" 
-                                           onchange="updateVideoTrim('startTime', parseFloat(this.value))">
-                                </div>
-                                <div class="property-group" style="margin: 0;">
-                                    <label style="font-size: 10px;">End (sec)</label>
-                                    <input type="number" step="0.1" min="0" max="${slide.background.duration}" 
-                                           value="${slide.background.endTime || slide.background.duration}" 
-                                           onchange="updateVideoTrim('endTime', parseFloat(this.value))">
-                                </div>
-                            </div>
-                            <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;">
-                                <button type="button" class="btn btn-primary btn-sm" onclick="matchSlideDurationToTrim()">
-                                    <i class="fas fa-sync"></i> Match Slide to Trim
-                                </button>
-                                <button type="button" class="btn btn-secondary btn-sm" onclick="resetVideoTrim()">
-                                    <i class="fas fa-undo"></i> Reset
-                                </button>
-                                <button type="button" class="btn btn-secondary btn-sm" onclick="previewTrimRange()">
-                                    <i class="fas fa-play"></i> Preview
-                                </button>
-                            </div>
-                        </div>
-                    ` : ''}
+                    ${getVideoTrimHtml(slide)}
                 </div>
                 
                 <div class="section-title" style="margin-top: 24px;">Layers</div>
