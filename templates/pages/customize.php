@@ -628,6 +628,13 @@ if ($isCheckoutMode && $hasSlideEditor) {
 $storedValues = $_SESSION['customize_data'] ?? [];
 $storedUploads = $_SESSION['customize_uploads'] ?? [];
 
+// Merge uploaded file paths into stored values so JS can show previously uploaded images
+foreach ($storedUploads as $fieldName => $uploadInfo) {
+    if (!empty($uploadInfo['file_path'])) {
+        $storedValues[$fieldName] = $uploadInfo['file_path'];
+    }
+}
+
 // Calculate progress
 $progressPercent = $totalSteps > 0 ? round((($currentStepIndex + 1) / $totalSteps) * 100) : 0;
 
