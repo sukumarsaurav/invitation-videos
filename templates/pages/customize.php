@@ -204,11 +204,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors['general'] = 'Invalid security token. Please try again.';
     } else {
         // Store current step data in session
+        // Filter out internal routing keys that shouldn't be in customization_data
+        $internalKeys = [CSRF_TOKEN_NAME, 'user_timezone', 'slide_index', 'action'];
         foreach ($_POST as $key => $value) {
-            if ($key !== CSRF_TOKEN_NAME && $key !== 'user_timezone') {
+            if (!in_array($key, $internalKeys)) {
                 $_SESSION['customize_data'][$key] = $value;
             }
         }
+
+        // Debug: Log what's being saved to session for this slide
+        error_log("customize.php: Session data after POST: " . json_encode(array_keys($_SESSION['customize_data'] ?? [])));
 
         // Handle dress/color selection for AI templates
         if ($isDressStep && isset($_POST['dress_id'])) {
@@ -436,6 +441,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $allData = $_SESSION['customize_data'];
 
+            // Debug: Log customization data at legacy checkout
+            error_log("customize.php: LEGACY CHECKOUT - customization_data keys: " . json_encode(array_keys($allData)));
+            error_log("customize.php: LEGACY CHECKOUT - customization_data values: " . json_encode($allData));
+
             // Auto-detect country
             if (!isset($_SESSION['user_country'])) {
                 $timezone = $_SESSION['user_timezone'] ?? '';
@@ -544,6 +553,16 @@ if ($isCheckoutMode && $hasSlideEditor) {
     }
 
     $allData = $_SESSION['customize_data'] ?? [];
+
+    // Debug: Log all customization data that will be saved to the draft
+    error_log("customize.php: CHECKOUT - customization_data keys: " . json_encode(array_keys($allData)));
+    error_log("customize.php: CHECKOUT - customization_data values: " . json_encode($allData));
+    error_log("customize.php: CHECKOUT - uploads in session: " . json_encode(array_keys($_SESSION['customize_uploads'] ?? [])));
+
+    // Verify we actually have user data (not just empty defaults)
+    if (empty($allData)) {
+        error_log("customize.php: WARNING - customization_data is EMPTY at checkout! Session may have been lost.");
+    }
 
     // Auto-detect country
     if (!isset($_SESSION['user_country'])) {

@@ -114,6 +114,10 @@ try {
                 'height' => (int) $order['render_height']
             ]
         ];
+
+        // Debug: Log customization data for this order
+        error_log("pending-orders.php: Order #{$order['order_number']} - customization keys: " . json_encode(array_keys($customization)));
+        error_log("pending-orders.php: Order #{$order['order_number']} - template_definition present: " . (!empty($templateDefinition) ? 'YES (' . count($templateDefinition['slides'] ?? []) . ' slides)' : 'NO'));
     }
 
     echo json_encode([
