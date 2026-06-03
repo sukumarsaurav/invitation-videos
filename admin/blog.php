@@ -715,10 +715,12 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
 
             const formData = new FormData();
             formData.append('image', file);
+            formData.append('<?= CSRF_TOKEN_NAME ?>', '<?= Security::generateCSRFToken() ?>');
 
             try {
                 const response = await fetch('/api/upload-blog-image.php', {
                     method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
                     body: formData
                 });
 
@@ -830,10 +832,12 @@ $pageTitle = ($action === 'new' || $action === 'edit') ? ($post ? 'Edit Post' : 
 
             const formData = new FormData();
             formData.append('image', file);
+            formData.append('<?= CSRF_TOKEN_NAME ?>', '<?= Security::generateCSRFToken() ?>');
 
             try {
                 const response = await fetch('/api/upload-blog-image.php', {
                     method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
                     body: formData
                 });
 

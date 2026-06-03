@@ -59,7 +59,8 @@ try {
 } catch (Exception $e) {
     error_log("Payment API Error: " . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['error' => $e->getMessage()]);
+    // Never expose internal exception details (DB, gateway, stack info) to the client.
+    echo json_encode(['error' => 'A payment processing error occurred. Please try again.']);
 }
 
 /**

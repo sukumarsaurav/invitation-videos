@@ -125,6 +125,18 @@ define('SESSION_NAME', env('SESSION_NAME', 'invitationvideos_session'));
 define('SESSION_LIFETIME', (int) env('SESSION_LIFETIME', 8 * 60 * 60)); // 8 hours
 define('PASSWORD_COST', 12); // bcrypt cost factor
 
+// Harden session cookies (must run before any session_start()).
+// HttpOnly: block JS access (XSS cookie theft). SameSite=Lax: CSRF mitigation.
+// Secure: HTTPS-only cookie in production. strict_mode: reject attacker-fixed IDs.
+$cookieSecure = (APP_ENV === 'production')
+    || (($_SERVER['HTTPS'] ?? '') === 'on')
+    || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
+ini_set('session.use_strict_mode', '1');
+ini_set('session.cookie_httponly', '1');
+ini_set('session.cookie_secure', $cookieSecure ? '1' : '0');
+ini_set('session.cookie_samesite', 'Lax');
+ini_set('session.gc_maxlifetime', (string) SESSION_LIFETIME);
+
 // =============================================================================
 // Email Configuration
 // =============================================================================
@@ -167,7 +179,7 @@ define('REMOTION_REGION', env('REMOTION_REGION', AWS_DEFAULT_REGION));
 // Backend auth token for orchestrator API calls
 define('BACKEND_AUTH_TOKEN', env('BACKEND_AUTH_TOKEN', ''));
 // Lambda function name for orchestrator (polls orders and triggers renders)
-define('LAMBDA_ORCHESTRATOR_FUNCTION', env('LAMBDA_ORCHESTRATOR_FUNCTION', 'video-orchestrator'));
+define('LAMBDA_ORCHESTRATOR_FUNCTION', env('LAMBDA_ORCHESTRATOR_FUNCTION', 'remotion-orchestrator'));
 
 // =============================================================================
 // Error Handling

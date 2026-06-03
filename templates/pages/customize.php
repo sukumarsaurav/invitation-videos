@@ -1831,7 +1831,6 @@ $pageTitle = ($step === 0 ? '' : 'Customize - ') . $template['title'];
                 })
                 .catch(err => {
                     // Silently fail - keep existing thumbnails
-                    console.log('No language-specific thumbnails found');
                 });
         }
 
