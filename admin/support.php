@@ -3,6 +3,7 @@
  * Admin - Support Ticket Management
  */
 
+require_once __DIR__ . '/auth.php'; // Enforces admin authentication (calls requireAdminAuth())
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../src/Core/Security.php';
 

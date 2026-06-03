@@ -68,6 +68,8 @@ class AuthController
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_email'] = $user['email'];
             $_SESSION['user_name'] = $user['name'];
+            $_SESSION['user_role'] = $user['role'] ?? 'customer';
+            $_SESSION['user_avatar'] = $user['avatar_url'] ?? '';
             $_SESSION['user_logged_in_at'] = time();
 
             // Update last login
@@ -149,6 +151,8 @@ class AuthController
         $_SESSION['user_id'] = $userId;
         $_SESSION['user_email'] = $email;
         $_SESSION['user_name'] = $name;
+        $_SESSION['user_role'] = 'customer';
+        $_SESSION['user_avatar'] = '';
         $_SESSION['user_logged_in_at'] = time();
 
         $_SESSION['success'] = 'Account created successfully!';
@@ -176,6 +180,8 @@ class AuthController
         unset($_SESSION['user_id']);
         unset($_SESSION['user_email']);
         unset($_SESSION['user_name']);
+        unset($_SESSION['user_role']);
+        unset($_SESSION['user_avatar']);
         unset($_SESSION['user_logged_in_at']);
 
         session_regenerate_id(true);

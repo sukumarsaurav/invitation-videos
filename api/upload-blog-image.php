@@ -8,28 +8,24 @@
 
 header('Content-Type: application/json');
 
-require_once __DIR__ . '/../config/config.php';
+// admin/auth.php enforces an authenticated admin session (calls requireAdminAuth()).
+// For AJAX requests it returns JSON 401/403 instead of redirecting.
+require_once __DIR__ . '/../admin/auth.php';
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../src/Core/Security.php';
 require_once __DIR__ . '/../src/Core/ImageHelper.php';
-
-// Start session with same name as admin pages
-if (session_status() === PHP_SESSION_NONE) {
-    session_name(SESSION_NAME);
-    session_start();
-}
-
-// Check if user is logged in (must be admin)
-if (!isset($_SESSION['user_id'])) {
-    http_response_code(401);
-    echo json_encode(['success' => false, 'error' => 'Unauthorized']);
-    exit;
-}
 
 // Only accept POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode(['success' => false, 'error' => 'Method not allowed']);
+    exit;
+}
+
+// Validate CSRF token (sent as a form field alongside the image)
+if (!Security::validateCSRFToken($_POST[CSRF_TOKEN_NAME] ?? '')) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'error' => 'Invalid security token']);
     exit;
 }
 

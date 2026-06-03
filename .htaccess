@@ -58,6 +58,11 @@ RewriteRule ^ index.php [L]
     Deny from all
 </FilesMatch>
 
+# Defense in depth: never serve debug/diagnostic scripts in production
+<FilesMatch "(^|[-_/])debug.*\.php$|^server_check\.php$|^verify_status\.php$|fix-env\.php$">
+    Require all denied
+</FilesMatch>
+
 # Deny access to PHP files in certain directories (security)
 <FilesMatch "\.php$">
     <If "%{REQUEST_URI} =~ m#^/(config|src|database)/.*\.php$#">

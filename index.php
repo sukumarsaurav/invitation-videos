@@ -397,21 +397,6 @@ $router->post('/support', function () {
         }
     }
 
-    // Generate ticket number (ST-YYYYMMDD-XXXX)
-    $today = date('Ymd');
-    $lastTicket = Database::fetchOne(
-        "SELECT ticket_number FROM support_tickets WHERE ticket_number LIKE ? ORDER BY id DESC LIMIT 1",
-        ["ST-{$today}-%"]
-    );
-
-    if ($lastTicket) {
-        $lastNumber = intval(substr($lastTicket['ticket_number'], -4));
-        $newNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
-    } else {
-        $newNumber = '0001';
-    }
-    $ticketNumber = "ST-{$today}-{$newNumber}";
-
     // Map subject to proper label
     $subjectLabels = [
         'order' => 'Order Issue',
@@ -423,12 +408,47 @@ $router->post('/support', function () {
     ];
     $subjectLabel = $subjectLabels[$subject] ?? $subject;
 
-    // Create support ticket
-    Database::query(
-        "INSERT INTO support_tickets (ticket_number, user_id, order_id, subject, message, priority, status) 
-         VALUES (?, ?, ?, ?, ?, 'medium', 'open')",
-        [$ticketNumber, $userId, $orderId, $subjectLabel, $message]
-    );
+    // Generate ticket number (ST-YYYYMMDD-XXXX) and insert.
+    // The ticket_number column has a UNIQUE constraint, so concurrent submissions
+    // can collide. Retry on duplicate-key (SQLSTATE 23000) with a freshly computed
+    // sequence number instead of crashing and losing the ticket.
+    $today = date('Ymd');
+    $ticketNumber = null;
+    $maxAttempts = 5;
+
+    for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
+        $lastTicket = Database::fetchOne(
+            "SELECT ticket_number FROM support_tickets WHERE ticket_number LIKE ? ORDER BY id DESC LIMIT 1",
+            ["ST-{$today}-%"]
+        );
+
+        if ($lastTicket) {
+            $lastNumber = intval(substr($lastTicket['ticket_number'], -4));
+            $newNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
+        } else {
+            $newNumber = '0001';
+        }
+        $candidate = "ST-{$today}-{$newNumber}";
+
+        try {
+            Database::query(
+                "INSERT INTO support_tickets (ticket_number, user_id, order_id, subject, message, priority, status)
+                 VALUES (?, ?, ?, ?, ?, 'medium', 'open')",
+                [$candidate, $userId, $orderId, $subjectLabel, $message]
+            );
+            $ticketNumber = $candidate;
+            break;
+        } catch (PDOException $e) {
+            // 23000 = integrity constraint violation (duplicate ticket_number). Retry.
+            if ($e->getCode() === '23000' && $attempt < $maxAttempts) {
+                continue;
+            }
+            error_log("Support ticket creation failed: " . $e->getMessage());
+            $_SESSION['error'] = 'Sorry, we could not create your ticket right now. Please try again.';
+            header('Location: /support');
+            exit;
+        }
+    }
 
     $_SESSION['success'] = "Thank you! Your ticket #{$ticketNumber} has been created. We'll get back to you within 24 hours.";
     header('Location: /support');
